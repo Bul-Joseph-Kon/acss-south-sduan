@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Agent Payment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .payment-method { border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 0.75rem 1rem; transition: all 0.2s ease; cursor: pointer; text-align: center; }
+        .payment-method:hover { border-color: #1e3a5f; background: #e8f0fe; }
+        .payment-method.selected { border-color: #1e3a5f; background: #e8f0fe; }
+        .payment-method .method-icon { font-size: 1.5rem; color: #1e3a5f; }
+        .payment-summary { background: #f8fafc; border-radius: 0.75rem; padding: 1.25rem; border: 1px solid #e5e7eb; }
+        .payment-summary .pay-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb; }
+        .payment-summary .pay-row:last-child { border-bottom: none; }
+        .payment-summary .pay-total { font-size: 1.1rem; font-weight: 700; color: #1e3a5f; padding-top: 0.5rem; border-top: 2px solid #1e3a5f; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-pending-payment { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; font-size: 0.8rem; font-weight: 500; color: #374151; margin-bottom: 0.2rem; }
+        .input-group input { width: 100%; padding: 0.4rem 0.6rem; border-radius: 0.4rem; border: 1px solid #d1d5db; font-size: 0.85rem; transition: border-color 0.2s; }
+        .input-group input:focus { outline: none; border-color: #1e3a5f; box-shadow: 0 0 0 3px rgba(30,58,95,0.1); }
+        .currency-ssp { font-weight: 700; color: #1e3a5f; }
+        .ssp-input-group { position: relative; }
+        .ssp-input-group .ssp-prefix { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); font-weight: 600; color: #1e3a5f; font-size: 0.85rem; }
+        .ssp-input-group input { padding-left: 2.5rem; }
+        .payment-summary .pay-row .ssp-amount { font-weight: 600; font-size: 0.85rem; color: #1e3a5f; }
+        .payment-summary .pay-total .ssp-total { font-size: 1.1rem; font-weight: 700; color: #1e3a5f; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
+                        <div class="text-center mb-5">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
+                                <i class="ri-user-line text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">Clearing Agent</h3>
+                            <p class="text-gray-500 text-sm">Licensed Agent</p>
+                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
+                        </div>
+                        <nav class="space-y-1 mb-4">
+                            <a href="../../dashboard-agent.html" class="sidebar-link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+                            <a href="create-declaration.html" class="sidebar-link"><i class="ri-file-invoice-line"></i><span>CVET</span></a>
+                            <a href="payment.html" class="sidebar-link active"><i class="ri-bank-card-line"></i><span>Payment</span></a>
+                            <a href="../../applications/submitted.html" class="sidebar-link"><i class="ri-file-copy-line"></i><span>My Applications</span></a>
+                            <a href="../../notifications/submitted.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">5</span></a>
+                        </nav>
+                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                            <i class="ri-logout-box-line"></i> Sign Out
+                        </button>
+                    </div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">💳 Step 7: Payment Processing</h2>
+                            <p class="opacity-90 text-sm">Duty payment and receipt generation</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+                            <span>Step 7 of 8</span>
+                            <span>87% Complete</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width:87%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Payment Input -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Payment Details</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="payment-summary" id="paymentSummary">
+                                    <div class="pay-row">
+                                        <span class="text-gray-600">Declaration Reference</span>
+                                        <span class="font-semibold" id="declarationRef">CV-2026-0042</span>
+                                    </div>
+                                    <div class="pay-row">
+                                        <span class="text-gray-600">Total Payable (SSP)</span>
+                                        <span class="ssp-amount" id="totalPayable">SSP 9,834,000.00</span>
+                                    </div>
+                                    <div class="pay-row">
+                                        <span class="text-gray-600">Payment Status</span>
+                                        <span class="status-badge status-pending-payment" id="paymentStatus">Pending</span>
+                                    </div>
+                                    <div class="pay-row pay-total">
+                                        <span>Amount Due (SSP)</span>
+                                        <span class="ssp-total" id="amountDue">SSP 9,834,000.00</span>
+                                    </div>
+                                </div>
+
+                                <!-- Dynamic Input for Amount -->
+                                <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                    <div class="input-group ssp-input-group">
+                                        <label>Adjust Payment Amount (SSP)</label>
+                                        <span class="ssp-prefix">SSP</span>
+                                        <input type="number" id="paymentAmount" value="9834000" class="form-input" oninput="updatePayment()" />
+                                    </div>
+                                    <button class="mt-2 text-blue-600 text-sm hover:underline" onclick="resetAmount()">Reset to Total</button>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-sm mb-3">Select Payment Method</h4>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="payment-method selected" onclick="selectPayment(this)">
+                                        <i class="ri-smartphone-line method-icon"></i>
+                                        <p class="text-sm font-medium mt-1">Mobile Money</p>
+                                    </div>
+                                    <div class="payment-method" onclick="selectPayment(this)">
+                                        <i class="ri-bank-line method-icon"></i>
+                                        <p class="text-sm font-medium mt-1">Bank Transfer</p>
+                                    </div>
+                                    <div class="payment-method" onclick="selectPayment(this)">
+                                        <i class="ri-wallet-3-line method-icon"></i>
+                                        <p class="text-sm font-medium mt-1">Online Banking</p>
+                                    </div>
+                                    <div class="payment-method" onclick="selectPayment(this)">
+                                        <i class="ri-cash-line method-icon"></i>
+                                        <p class="text-sm font-medium mt-1">Cash Payment</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                    <p class="text-sm text-blue-700">📱 Mobile Money: *182# or pay via approved mobile money providers</p>
+                                    <p class="text-xs text-blue-600 mt-1">💳 All payments are processed in SSP (South Sudanese Pound)</p>
+                                </div>
+                                <button onclick="processPayment()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
+                                    <i class="ri-check-line"></i> Pay Now (SSP)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment History -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h4 class="font-semibold text-sm mb-3 flex items-center">
+                            <i class="ri-history-line text-blue-600 mr-2"></i>
+                            Payment History
+                        </h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center border-b pb-2 text-sm">
+                                <span>CV-2026-0035 - Coffee Beans</span>
+                                <span class="font-semibold text-green-600">SSP 4,500,000.00</span>
+                                <span class="text-xs text-gray-400">Paid</span>
+                            </div>
+                            <div class="flex justify-between items-center border-b pb-2 text-sm">
+                                <span>CV-2026-0030 - Textiles</span>
+                                <span class="font-semibold text-green-600">SSP 2,880,000.00</span>
+                                <span class="text-xs text-gray-400">Paid</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm">
+                                <span>CV-2026-0028 - Handicrafts</span>
+                                <span class="font-semibold text-green-600">SSP 1,800,000.00</span>
+                                <span class="text-xs text-gray-400">Paid</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
+                        <a href="duty-assessment.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <i class="ri-arrow-left-line"></i> Previous
+                        </a>
+                        <a href="certificate.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            Continue to Certificate <i class="ri-arrow-right-line"></i>
+                        </a>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get total from localStorage or default
+        var totalAmount = 9834000; // Default SSP amount
+
+        function selectPayment(el) {
+            document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function updatePayment() {
+            var amount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+            var formatted = 'SSP ' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            document.getElementById('amountDue').textContent = formatted;
+            document.getElementById('totalPayable').textContent = formatted;
+            
+            // Update status based on amount
+            var status = document.getElementById('paymentStatus');
+            if (amount > 0) {
+                status.textContent = 'Pending';
+                status.className = 'status-badge status-pending-payment';
+            } else {
+                status.textContent = 'No Payment';
+                status.className = 'status-badge bg-gray-200 text-gray-600';
+            }
+        }
+
+        function resetAmount() {
+            document.getElementById('paymentAmount').value = totalAmount;
+            updatePayment();
+        }
+
+        function processPayment() {
+            var amount = parseFloat(document.getElementById('paymentAmount').value) || 0;
+            if (amount <= 0) {
+                alert('❌ Please enter a valid payment amount');
+                return;
+            }
+
+            var method = document.querySelector('.payment-method.selected .text-sm.font-medium')?.textContent || 'Unknown';
+            
+            var btn = document.querySelector('.bg-emerald-600');
+            btn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-2"></i> Processing...';
+            btn.disabled = true;
+
+            setTimeout(function() {
+                var status = document.getElementById('paymentStatus');
+                status.textContent = '✓ Paid';
+                status.className = 'status-badge status-approved';
+                
+                var formatted = 'SSP ' + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                alert('✅ Payment of ' + formatted + ' via ' + method + ' processed successfully!\n\nReceipt will be generated.');
+                
+                btn.innerHTML = '<i class="ri-check-line mr-2"></i> Payment Complete';
+                btn.className = 'mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2';
+                btn.disabled = true;
+            }, 2000);
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if total was passed from duty assessment
+            var storedTotal = localStorage.getItem('dutyTotalSSP');
+            if (storedTotal) {
+                totalAmount = parseFloat(storedTotal) || 9834000;
+                document.getElementById('paymentAmount').value = totalAmount;
+                updatePayment();
+                localStorage.removeItem('dutyTotalSSP');
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

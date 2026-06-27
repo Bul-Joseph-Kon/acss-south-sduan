@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · License Renewal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: #374151; margin-bottom: 0.2rem; }
+        .form-group .form-input { width: 100%; padding: 0.4rem 0.6rem; border-radius: 0.4rem; border: 1px solid #d1d5db; font-size: 0.85rem; transition: border-color 0.2s; }
+        .form-group .form-input:focus { outline: none; border-color: #1e3a5f; box-shadow: 0 0 0 3px rgba(30,58,95,0.1); }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
+                        <div class="text-center mb-5">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
+                                <i class="ri-user-line text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">Clearing Agent</h3>
+                            <p class="text-gray-500 text-sm">Licensed Agent</p>
+                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
+                        </div>
+                        <nav class="space-y-1 mb-4">
+                            <a href="../../dashboard-agent.html" class="sidebar-link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+                            <a href="dashboard.html" class="sidebar-link"><i class="ri-id-card-line"></i><span>Agent License</span></a>
+                            <a href="new-license.html" class="sidebar-link"><i class="ri-add-line"></i><span>New License</span></a>
+                            <a href="renewal.html" class="sidebar-link active"><i class="ri-loop-right-line"></i><span>Renewal</span></a>
+                            <a href="upgrade.html" class="sidebar-link"><i class="ri-arrow-up-line"></i><span>Upgrade</span></a>
+                            <a href="replacement.html" class="sidebar-link"><i class="ri-refresh-line"></i><span>Replacement</span></a>
+                            <a href="../../applications/submitted.html" class="sidebar-link"><i class="ri-file-copy-line"></i><span>My Applications</span></a>
+                            <a href="../../notifications/submitted.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">5</span></a>
+                        </nav>
+                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                            <i class="ri-logout-box-line"></i> Sign Out
+                        </button>
+                    </div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🔄 License Renewal</h2>
+                            <p class="opacity-90 text-sm">Renew your clearing agent license</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="font-bold text-lg mb-4">License Details</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between border-b pb-2"><span class="text-gray-600">License Number</span><span class="font-semibold">LIC-2026-0008</span></div>
+                                    <div class="flex justify-between border-b pb-2"><span class="text-gray-600">License Type</span><span class="font-semibold">Clearing Agent</span></div>
+                                    <div class="flex justify-between border-b pb-2"><span class="text-gray-600">Category</span><span class="font-semibold">Class A</span></div>
+                                    <div class="flex justify-between border-b pb-2"><span class="text-gray-600">Expiry Date</span><span class="font-semibold text-red-600">June 30, 2026</span></div>
+                                    <div class="flex justify-between border-b pb-2"><span class="text-gray-600">Status</span><span class="status-badge status-approved">Active</span></div>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg mb-4">Renewal Information</h3>
+                                <div class="form-group">
+                                    <label>Renewal Period <span class="text-red-500">*</span></label>
+                                    <select class="form-input">
+                                        <option>1 Year</option>
+                                        <option selected>2 Years</option>
+                                        <option>3 Years</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Renewal Fee</label>
+                                    <input type="text" class="form-input" value="$500.00" disabled />
+                                </div>
+                                <div class="form-group">
+                                    <label>Additional Comments</label>
+                                    <textarea class="form-input" rows="3" placeholder="Any additional information..."></textarea>
+                                </div>
+                                <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                                    <p class="text-sm text-yellow-800"><i class="ri-information-line mr-2"></i>Renewal deadline: June 30, 2026. Late renewal fees may apply.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
+                            <a href="dashboard.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                <i class="ri-arrow-left-line"></i> Back
+                            </a>
+                            <a href="payment.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                Proceed to Payment <i class="ri-arrow-right-line"></i>
+                            </a>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

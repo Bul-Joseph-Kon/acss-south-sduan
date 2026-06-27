@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Redirect - SSRA Customs</title>
+    <script>
+        var params = new URLSearchParams(window.location.search);
+        var redirect = params.get('redirect') || '';
+        var origin = window.location.origin;
+        window.location.href = origin + '/auth/login.html' + (redirect ? '?redirect=' + encodeURIComponent(redirect) : '');
+    </script>
+</head>
+<body>
+    <p>Redirecting to login...</p>
+</body>
+</html>

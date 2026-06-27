@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Approved Applications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
+                        <div class="text-center mb-5">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
+                                <i class="ri-user-line text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">John Trader</h3>
+                            <p class="text-gray-500 text-sm">Importer</p>
+                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
+                        </div>
+                        <nav class="space-y-1 mb-4">
+                            <a href="../dashboard-trader.html" class="sidebar-link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+                            <a href="draft.html" class="sidebar-link"><i class="ri-pen-line"></i><span>Drafts</span></a>
+                            <a href="submitted.html" class="sidebar-link"><i class="ri-paper-plane-line"></i><span>Submitted</span></a>
+                            <a href="under-review.html" class="sidebar-link"><i class="ri-search-line"></i><span>Under Review</span></a>
+                            <a href="approved.html" class="sidebar-link active"><i class="ri-check-circle-line"></i><span>Approved</span></a>
+                            <a href="rejected.html" class="sidebar-link"><i class="ri-close-circle-line"></i><span>Rejected</span></a>
+                            <a href="completed.html" class="sidebar-link"><i class="ri-flag-checkered-line"></i><span>Completed</span></a>
+                            <a href="../notifications/application-updates.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">3</span></a>
+                        </nav>
+                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                            <i class="ri-logout-box-line"></i> Sign Out
+                        </button>
+                    </div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">✅ Approved Applications</h2>
+                            <p class="opacity-90 text-sm">Applications that have been approved</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500">3 approved applications</span>
+                            <span class="text-sm text-emerald-600">✓ All cleared</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bg-white rounded-xl border border-green-200 p-5 shadow-sm">
+                            <div class="flex flex-wrap justify-between items-start gap-2">
+                                <div>
+                                    <h4 class="font-bold text-emerald-600">CV-2026-0035</h4>
+                                    <p class="text-sm text-gray-500">CVET Declaration · Coffee Beans · $12,500</p>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <span class="status-badge status-approved">✓ Approved</span>
+                                        <span class="text-xs text-gray-400">Approved: Jun 19, 2026</span>
+                                        <span class="text-xs text-gray-400">Approved By: Officer Peter</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a href="../services/cvet/certificate.html" class="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">Certificate</a>
+                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Downloading approval letter')">Download Letter</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-green-200 p-5 shadow-sm">
+                            <div class="flex flex-wrap justify-between items-start gap-2">
+                                <div>
+                                    <h4 class="font-bold text-blue-600">DA-2026-0015</h4>
+                                    <p class="text-sm text-gray-500">Direct Assessment · Textiles · $8,000</p>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <span class="status-badge status-approved">✓ Approved</span>
+                                        <span class="text-xs text-gray-400">Approved: Jun 17, 2026</span>
+                                        <span class="text-xs text-gray-400">Approved By: Officer Sarah</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a href="../services/direct-assessment/cargo-release.html" class="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">View</a>
+                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Downloading approval letter')">Download Letter</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-green-200 p-5 shadow-sm">
+                            <div class="flex flex-wrap justify-between items-start gap-2">
+                                <div>
+                                    <h4 class="font-bold text-purple-600">VQ-2026-0012</h4>
+                                    <p class="text-sm text-gray-500">Vehicle Query · Toyota Hilux</p>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <span class="status-badge status-approved">✓ Verified</span>
+                                        <span class="text-xs text-gray-400">Verified: Jun 16, 2026</span>
+                                        <span class="text-xs text-gray-400">Verified By: Officer Michael</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a href="../services/vehicle-query/verification-result.html" class="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">View</a>
+                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Downloading verification report')">Download Report</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>

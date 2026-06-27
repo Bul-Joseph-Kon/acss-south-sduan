@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .stat-card { transition: all 0.3s ease; cursor: pointer; background: white; border-radius: 0.75rem; padding: 1rem; border: 1px solid #e5e7eb; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+        .stat-number { font-size: 1.5rem; font-weight: 700; }
+        .stat-label { font-size: 0.75rem; color: #6b7280; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+        .quick-action-btn { transition: all 0.2s ease; cursor: pointer; padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; background: white; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+        .quick-action-btn:hover { border-color: #1e3a5f; background: #e8f0fe; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
+                        <div class="text-center mb-5">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
+                                <i class="ri-user-line text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">Administrator</h3>
+                            <p class="text-gray-500 text-sm">System Admin</p>
+                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
+                        </div>
+                        <nav class="space-y-1 mb-4">
+                            <a href="dashboard-admin.html" class="sidebar-link active"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+                            <a href="user-management.html" class="sidebar-link"><i class="ri-user-line"></i><span>User Management</span></a>
+                            <a href="role-management.html" class="sidebar-link"><i class="ri-shield-line"></i><span>Role Management</span></a>
+                            <a href="service-management.html" class="sidebar-link"><i class="ri-service-line"></i><span>Service Management</span></a>
+                            <a href="application-management.html" class="sidebar-link"><i class="ri-file-copy-line"></i><span>Application Management</span></a>
+                            <a href="notification-management.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notification Management</span></a>
+                            <a href="document-management.html" class="sidebar-link"><i class="ri-file-pdf-line"></i><span>Document Management</span></a>
+                            <a href="payment-management.html" class="sidebar-link"><i class="ri-bank-card-line"></i><span>Payment Management</span></a>
+                            <a href="reports-analytics.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Reports & Analytics</span></a>
+                            <a href="audit-logs.html" class="sidebar-link"><i class="ri-history-line"></i><span>Audit Logs</span></a>
+                            <a href="ai-configuration.html" class="sidebar-link"><i class="ri-robot-line"></i><span>AI Configuration</span></a>
+                            <a href="system-settings.html" class="sidebar-link"><i class="ri-settings-3-line"></i><span>System Settings</span></a>
+                        </nav>
+                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                            <i class="ri-logout-box-line"></i> Sign Out
+                        </button>
+                    </div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">👋 Welcome, Administrator</h2>
+                            <p class="opacity-90 text-sm">Manage system settings and configurations</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Admin</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="stat-card"><div class="stat-number text-blue-600">28</div><div class="stat-label">Total Users</div></div>
+                        <div class="stat-card"><div class="stat-number text-green-600">6</div><div class="stat-label">Active Services</div></div>
+                        <div class="stat-card"><div class="stat-number text-yellow-600">156</div><div class="stat-label">Total Applications</div></div>
+                        <div class="stat-card"><div class="stat-number text-purple-600">12</div><div class="stat-label">System Alerts</div></div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-flashlight-line text-blue-500 mr-2"></i>Quick Actions</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="user-management.html" class="quick-action-btn"><i class="ri-user-line text-blue-500"></i> Manage Users</a>
+                            <a href="role-management.html" class="quick-action-btn"><i class="ri-shield-line text-blue-500"></i> Manage Roles</a>
+                            <a href="service-management.html" class="quick-action-btn"><i class="ri-service-line text-blue-500"></i> Manage Services</a>
+                            <a href="ai-configuration.html" class="quick-action-btn"><i class="ri-robot-line text-blue-500"></i> AI Configuration</a>
+                            <a href="audit-logs.html" class="quick-action-btn"><i class="ri-history-line text-blue-500"></i> View Audit Logs</a>
+                        </div>
+                    </div>
+
+                    <div class="grid lg:grid-cols-2 gap-4">
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-user-line text-blue-500 mr-2"></i>User Statistics</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Traders</span><span class="font-bold text-blue-600">12</span></div>
+                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Agents</span><span class="font-bold text-emerald-600">8</span></div>
+                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Officers</span><span class="font-bold text-purple-600">4</span></div>
+                                <div class="flex justify-between items-center"><span class="text-sm">Admins</span><span class="font-bold text-red-600">2</span></div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-notification-3-line text-blue-500 mr-2"></i>Recent System Alerts</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center border-b pb-2 text-sm"><span>System update successful</span><span class="text-gray-400">2 hours ago</span></div>
+                                <div class="flex justify-between items-center border-b pb-2 text-sm"><span>New user registered</span><span class="text-gray-400">4 hours ago</span></div>
+                                <div class="flex justify-between items-center text-sm"><span>AI model updated</span><span class="text-gray-400">1 day ago</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+    <script src="../../src/js/auth.js"></script>
+    <script>requireLogin('admin');</script>
+</body>
+</html>

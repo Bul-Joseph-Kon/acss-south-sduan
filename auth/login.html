@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - SSRA Customs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .ssra-logo-text { background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%); }
+        .auth-card { background: white; border-radius: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
+        
+        /* Forgot Password Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlide 0.3s ease;
+        }
+        @keyframes modalSlide {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-box h3 { font-size: 1.2rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem; }
+        .modal-box p { font-size: 0.85rem; color: #6b7280; margin-bottom: 1.25rem; }
+        .modal-box .input-group { margin-bottom: 1rem; }
+        .modal-box .input-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem; }
+        .modal-box .input-group input { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; font-size: 0.9rem; transition: 0.2s; }
+        .modal-box .input-group input:focus { outline: none; border-color: #1a365d; ring: 2px solid rgba(26,54,93,0.1); }
+        .modal-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
+        .modal-actions button { flex: 1; padding: 0.6rem; border-radius: 0.5rem; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: #1a365d; color: white; }
+        .btn-primary:hover { background: #15294a; }
+        .btn-secondary { background: #e5e7eb; color: #374151; }
+        .btn-secondary:hover { background: #d1d5db; }
+        .btn-emerald { background: #059669; color: white; }
+        .btn-emerald:hover { background: #047857; }
+        .btn-danger { background: #dc2626; color: white; }
+        .btn-danger:hover { background: #b91c1c; }
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+            animation: toastIn 0.3s ease;
+            max-width: 360px;
+        }
+        .toast.success { background: #059669; }
+        .toast.error { background: #dc2626; }
+        .toast.info { background: #2563eb; }
+        @keyframes toastIn {
+            from { transform: translateX(30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="text-center mb-4">
+                <div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-3">
+                    <i class="ri-key-2-line text-2xl text-blue-900"></i>
+                </div>
+                <h3>Reset Password</h3>
+                <p>Enter your email or ID number and we'll send you a reset link.</p>
+            </div>
+            
+            <div class="input-group">
+                <label>Email or ID Number</label>
+                <input type="text" id="resetIdentifier" placeholder="Enter your email or ID">
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeForgotModal()">Cancel</button>
+                <button class="btn-primary" onclick="handleForgotPassword()">Send Reset Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Login Card -->
+    <div class="auth-card max-w-md w-full p-8">
+        <!-- Sign Out Banner (visible when logged in) -->
+        <div id="signedInBanner" class="hidden bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4 flex items-center justify-between">
+            <div class="flex items-center gap-2 text-emerald-700 text-sm">
+                <i class="ri-checkbox-circle-fill"></i>
+                <span>Signed in as <strong id="signedInUser">User</strong></span>
+            </div>
+            <button onclick="handleSignOut()" class="text-sm text-red-600 hover:text-red-800 font-semibold flex items-center gap-1">
+                <i class="ri-logout-box-r-line"></i> Sign Out
+            </button>
+        </div>
+
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 rounded-2xl ssra-logo-text flex items-center justify-center text-white shadow-lg mx-auto mb-4">
+                <div class="text-center"><i class="ri-government-line text-3xl block"></i><span class="text-[10px] font-bold tracking-wider">SSRA</span></div>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Welcome Back</h2>
+            <p class="text-gray-500 text-sm mt-1">Sign in to your customs account</p>
+        </div>
+
+        <form onsubmit="event.preventDefault(); handleSignIn()">
+            <div class="mb-4">
+                <label class="block text-gray-700 font-semibold text-sm mb-2">Email / ID Number</label>
+                <input type="text" id="loginIdentifier" placeholder="Enter your email or ID" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-400 outline-none" required>
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold text-sm mb-2">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-400 outline-none" required>
+            </div>
+            
+            <!-- Forgot Password Link -->
+            <div class="text-right mb-4">
+                <a href="#" onclick="event.preventDefault(); openForgotModal()" class="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                    Forgot Password?
+                </a>
+            </div>
+            
+            <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">Sign In</button>
+        </form>
+
+        <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+            <p class="text-xs text-gray-600 text-center font-bold mb-1">Demo Accounts:</p>
+            <div class="grid grid-cols-2 gap-1 text-xs text-gray-500">
+                <span>Agent: AGT-003 / pass123</span>
+                <span>Trader: TIN-TRD-001 / pass123</span>
+                <span>Admin: ADMIN-007 / admin123</span>
+                <span>Officer: OFF-004 / pass123</span>
+                <span>Supervisor: SUP-005 / pass123</span>
+                <span>Inspector: INS-008 / pass123</span>
+                <span>Revenue: REV-009 / pass123</span>
+            </div>
+        </div>
+
+        <p class="text-center text-gray-500 mt-4 text-sm">Don't have an account? <a href="register.html" class="text-emerald-600 hover:underline font-semibold">Register</a></p>
+        <p class="text-center text-gray-400 mt-2 text-xs"><a href="../index.html" class="hover:text-gray-600">← Back to Home</a></p>
+    </div>
+
+    <script>
+        // ============ DEMO USERS ============
+        var demoUsers = [
+            { id: 1, name: "John Importer", email: "john@importer.com", identifier: "TIN-TRD-001", password: "pass123", role: "trader", traderType: "importer", status: "active" },
+            { id: 2, name: "Sarah Exporter", email: "sarah@exporter.com", identifier: "TIN-TRD-002", password: "pass123", role: "trader", traderType: "exporter", status: "active" },
+            { id: 3, name: "Mike Agent", email: "mike@agent.com", identifier: "AGT-003", password: "pass123", role: "agent", traderType: null, status: "active" },
+            { id: 4, name: "David Officer", email: "david@ssra.gov", identifier: "OFF-004", password: "pass123", role: "officer", traderType: null, status: "active" },
+            { id: 5, name: "Grace Supervisor", email: "grace@ssra.gov", identifier: "SUP-005", password: "pass123", role: "supervisor", traderType: null, status: "active" },
+            { id: 6, name: "Admin User", email: "admin@ssra.gov", identifier: "ADMIN-007", password: "admin123", role: "admin", traderType: null, status: "active" },
+            { id: 7, name: "Alice Inspector", email: "alice@ssra.gov", identifier: "INS-008", password: "pass123", role: "inspector", traderType: null, status: "active" },
+            { id: 8, name: "James Revenue", email: "james@ssra.gov", identifier: "REV-009", password: "pass123", role: "revenue", traderType: null, status: "active" },
+            { id: 9, name: "Tessa MultiRole", email: "tessa@customs.gov", identifier: "MULTI-010", password: "pass123", role: "trader", roles: ["trader", "agent"], traderType: "importer", status: "active" }
+        ];
+        
+        function getStoredUsers(key) {
+            var raw = localStorage.getItem(key);
+            if (!raw) return [];
+            try {
+                var parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.warn('Invalid JSON in localStorage for ' + key + ', resetting.', e);
+                localStorage.removeItem(key);
+                return [];
+            }
+        }
+
+        function initDatabase() {
+            var stored = getStoredUsers('sso_users');
+            if (!stored.length) {
+                localStorage.setItem('sso_users', JSON.stringify(demoUsers));
+            }
+        }
+        initDatabase();
+
+        function getAllUsers() {
+            var ssoUsers = getStoredUsers('sso_users');
+            var portalUsers = getStoredUsers('portal_users');
+            var merged = [].concat(ssoUsers || []);
+            portalUsers.forEach(function(portalUser) {
+                var exists = merged.some(function(user) {
+                    return user.identifier === portalUser.identifier || user.email === portalUser.email;
+                });
+                if (!exists) merged.push(portalUser);
+            });
+            return merged;
+        }
+
+        function normalizeLoginValue(value) {
+            return value ? value.trim().toLowerCase() : '';
+        }
+
+        // ============ FORGOT PASSWORD ============
+        function openForgotModal() {
+            document.getElementById('forgotModal').classList.add('show');
+            document.getElementById('resetIdentifier').value = '';
+            document.getElementById('resetIdentifier').focus();
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').classList.remove('show');
+        }
+
+        function handleForgotPassword() {
+            var identifier = document.getElementById('resetIdentifier').value.trim();
+            if (!identifier) {
+                showToast('Please enter your email or ID number', 'error');
+                return;
+            }
+
+            var users = JSON.parse(localStorage.getItem('sso_users') || '[]');
+            var user = users.find(u => u.email === identifier || u.identifier === identifier);
+            
+            if (user) {
+                // In a real system, this would send an email with a reset link.
+                // For demo, we'll show a message and allow manual reset.
+                showToast('✅ Reset link sent to ' + user.email + ' (Demo: check your console)', 'success');
+                console.log('🔐 Password reset requested for:', user.email);
+                console.log('💡 Demo reset link: /reset-password?token=' + btoa(user.email + '|' + Date.now()));
+                
+                // For demo purposes, let's also offer to reset via alert
+                if (confirm('🔐 Demo Mode\n\nA reset link has been sent to ' + user.email + '\n\nWould you like to reset your password now? (Demo only)')) {
+                    var newPassword = prompt('Enter new password for ' + user.name + ' (min 8 characters):');
+                    if (newPassword && newPassword.length >= 8) {
+                        user.password = newPassword;
+                        localStorage.setItem('sso_users', JSON.stringify(users));
+                        
+                        // Also update portal_users if exists
+                        try {
+                            var pUsers = JSON.parse(localStorage.getItem('portal_users') || '[]');
+                            var pUser = pUsers.find(p => p.email === user.email || p.identifier === user.identifier);
+                            if (pUser) {
+                                pUser.password = newPassword;
+                                localStorage.setItem('portal_users', JSON.stringify(pUsers));
+                            }
+                        } catch (e) {}
+                        
+                        showToast('✅ Password reset successfully! You can now sign in.', 'success');
+                        closeForgotModal();
+                    } else {
+                        showToast('❌ Password reset cancelled or invalid. Must be at least 8 characters.', 'error');
+                    }
+                } else {
+                    closeForgotModal();
+                }
+            } else {
+                showToast('❌ No account found with that email or ID. Please check and try again.', 'error');
+            }
+        }
+
+        // Close modal on overlay click
+        document.getElementById('forgotModal').addEventListener('click', function(e) {
+            if (e.target === this) closeForgotModal();
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeForgotModal();
+            if (e.key === 'Enter' && document.getElementById('forgotModal').classList.contains('show')) {
+                handleForgotPassword();
+            }
+        });
+
+        // ============ TOAST NOTIFICATION ============
+        function showToast(message, type) {
+            var toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + (type || 'info');
+            toast.style.display = 'block';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(function() {
+                toast.style.display = 'none';
+            }, 5000);
+        }
+
+        // ============ SIGN OUT ============
+        function handleSignOut() {
+            // Clear all session data
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userIdentifier');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userRoles');
+            localStorage.removeItem('traderType');
+            localStorage.removeItem('portal_session');
+            
+            showToast('👋 You have been signed out successfully.', 'info');
+            
+            // Update UI
+            document.getElementById('signedInBanner').classList.add('hidden');
+            document.getElementById('loginIdentifier').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginIdentifier').focus();
+        }
+
+        // ============ SIGN IN ============
+        function getQueryParam(name) {
+            return new URLSearchParams(window.location.search).get(name);
+        }
+
+        function getDashboardUrl(role) {
+            var dashboardMap = {
+                'admin': '../pages/admin/dashboard-admin.html',
+                'agent': '../pages/agent/dashboard-agent.html',
+                'trader': '../pages/trader/dashboard-trader.html',
+                'officer': '../pages/officer/dashboard-officer.html',
+                'inspector': '../pages/inspector/dashboard-inspector.html',
+                'revenue': '../pages/revenue/dashboard-revenue.html',
+                'supervisor': '../pages/supervisor/dashboard-supervisor.html'
+            };
+            return dashboardMap[role] || '../pages/trader/dashboard-trader.html';
+        }
+
+        function getRedirectDestination(role) {
+            var redirect = getQueryParam('redirect');
+            if (redirect) {
+                try {
+                    var decoded = decodeURIComponent(redirect);
+                    if (!decoded.includes('://')) {
+                        return decoded;
+                    }
+                } catch (e) {
+                    console.warn('Invalid redirect URL', redirect);
+                }
+            }
+            return getDashboardUrl(role);
+        }
+
+        function handleSignIn() {
+            var identifier = document.getElementById('loginIdentifier').value;
+            var password = document.getElementById('loginPassword').value;
+            var normalizedIdentifier = normalizeLoginValue(identifier);
+            var normalizedPassword = password ? password.trim() : '';
+
+            if (!normalizedIdentifier || !normalizedPassword) {
+                showToast('❌ Please enter both email/ID and password.', 'error');
+                return;
+            }
+
+            var users = getAllUsers();
+            var user = null;
+
+            for (var i = 0; i < users.length; i++) {
+                var currentUser = users[i];
+                var currentEmail = normalizeLoginValue(currentUser.email);
+                var currentIdentifier = normalizeLoginValue(currentUser.identifier);
+                var currentUsername = normalizeLoginValue(currentUser.username);
+                var currentPassword = currentUser.password ? currentUser.password.trim() : '';
+
+                if ((normalizedIdentifier === currentIdentifier || normalizedIdentifier === currentEmail || normalizedIdentifier === currentUsername) && normalizedPassword === currentPassword) {
+                    user = currentUser;
+                    break;
+                }
+            }
+
+            if (user) {
+                var roles = (user.roles && Array.isArray(user.roles) && user.roles.length > 0) ? user.roles : [user.role];
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userName', user.name);
+                localStorage.setItem('userIdentifier', user.identifier || user.email || '');
+                localStorage.setItem('userRoles', JSON.stringify(roles));
+                localStorage.setItem('userRole', user.role || roles[0]);
+                if (user.traderType) localStorage.setItem('traderType', user.traderType);
+
+                // Sync with portal_users/session
+                try {
+                    var pUsers = getStoredUsers('portal_users');
+                    var p = pUsers.find(function(u) { return normalizeLoginValue(u.identifier) === normalizeLoginValue(user.identifier) || normalizeLoginValue(u.email) === normalizeLoginValue(user.email); });
+                    if (!p) {
+                        var portalUser = {
+                            id: (pUsers.length ? pUsers[pUsers.length-1].id + 1 : 1),
+                            name: user.name,
+                            username: user.email ? user.email.split('@')[0] : (user.identifier || 'user' + Date.now()),
+                            email: user.email,
+                            identifier: user.identifier,
+                            password: user.password,
+                            role: user.role,
+                            status: user.status || 'active',
+                            created: user.created || new Date().toISOString()
+                        };
+                        pUsers.push(portalUser);
+                        localStorage.setItem('portal_users', JSON.stringify(pUsers));
+                        localStorage.setItem('portal_session', JSON.stringify(portalUser));
+                    } else {
+                        localStorage.setItem('portal_session', JSON.stringify(p));
+                    }
+                } catch (e) { console.warn('portal session sync failed', e); }
+
+                showToast('✅ Welcome back, ' + user.name + '! Redirecting...', 'success');
+
+                setTimeout(function() {
+                    window.location.href = getRedirectDestination(user.role || roles[0]);
+                }, 500);
+            } else {
+                showToast('❌ Invalid credentials. Please check your email/ID and password.', 'error');
+            }
+        }
+
+        // ============ CHECK SESSION ON LOAD ============
+        function checkSession() {
+            var isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            var userName = localStorage.getItem('userName');
+            
+            if (isLoggedIn && userName) {
+                document.getElementById('signedInBanner').classList.remove('hidden');
+                document.getElementById('signedInUser').textContent = userName;
+                // Show a subtle toast
+                setTimeout(function() {
+                    showToast('👋 You are already signed in as ' + userName, 'info');
+                }, 300);
+            }
+        }
+
+        // Allow Enter key to trigger login
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('forgotModal').classList.contains('show')) {
+                var active = document.activeElement;
+                if (active && (active.id === 'loginIdentifier' || active.id === 'loginPassword')) {
+                    handleSignIn();
+                }
+            }
+        });
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSession();
+        });
+    </script>
+</body>
+</html>

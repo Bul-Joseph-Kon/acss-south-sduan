@@ -1,0 +1,342 @@
+/* ============================================================ */
+/* AUTHENTICATION & ACCESS CONTROL - MAIN STYLES
+/* ============================================================ */
+
+/* ============================================================ */
+/* HEADER & NAVIGATION
+/* ============================================================ */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+}
+
+.live-banner {
+    position: sticky;
+    top: 0;
+    z-index: 99;
+}
+
+.live-dot {
+    animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+/* ============================================================ */
+/* GRADIENTS
+/* ============================================================ */
+.gradient-hero {
+    background: linear-gradient(135deg, #0a1628 0%, #1a365d 40%, #1e4d7a 100%);
+}
+
+.gradient-ssra {
+    background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%);
+}
+
+.gradient-bg {
+    background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%);
+}
+
+.hero-pattern {
+    background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+}
+
+/* ============================================================ */
+/* SSRA LOGO PLACEHOLDERS
+/* ============================================================ */
+.ssra-logo-placeholder {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.ssra-logo-placeholder-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+/* ============================================================ */
+/* NEWS TICKER
+/* ============================================================ */
+.news-ticker {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.news-ticker span {
+    display: inline-block;
+    animation: ticker-scroll 25s linear infinite;
+}
+
+@keyframes ticker-scroll {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+/* ============================================================ */
+/* SERVICE CARDS
+/* ============================================================ */
+.service-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid #e5e7eb;
+}
+
+.service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    border-color: #2563eb;
+}
+
+/* ============================================================ */
+/* MODALS
+/* ============================================================ */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: white;
+    border-radius: 1.5rem;
+    max-width: 500px;
+    width: 92%;
+    padding: 2rem;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: modalSlide 0.3s ease;
+}
+
+.modal-content-lg {
+    max-width: 700px;
+}
+
+@keyframes modalSlide {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* ============================================================ */
+/* STEP INDICATOR
+/* ============================================================ */
+.step-indicator {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.step {
+    background: #f3f4f6;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    color: #4b5563;
+}
+
+.step.active {
+    background: #2563eb;
+    color: white;
+}
+
+.step.completed {
+    background: #059669;
+    color: white;
+}
+
+/* ============================================================ */
+/* ROLE CARDS
+/* ============================================================ */
+.role-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.role-card:hover {
+    border-color: #2563eb;
+    transform: translateY(-4px);
+}
+
+.role-card.selected {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+/* ============================================================ */
+/* OTP INPUT
+/* ============================================================ */
+.otp-input {
+    width: 48px;
+    height: 56px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border: 2px solid #d1d5db;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.otp-input:focus {
+    border-color: #2563eb;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
+
+/* ============================================================ */
+/* FILE UPLOAD
+/* ============================================================ */
+.file-upload-area {
+    border: 2px dashed #cbd5e1;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.file-upload-area:hover {
+    border-color: #2563eb;
+    background-color: #f0f7ff;
+}
+
+/* ============================================================ */
+/* STATUS BADGES
+/* ============================================================ */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* ============================================================ */
+/* VERIFICATION STEPS
+/* ============================================================ */
+.verification-step .step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.verification-step .step-icon.active {
+    background: #2563eb;
+    color: white;
+}
+
+.verification-step .step-icon.completed {
+    background: #059669;
+    color: white;
+}
+
+.verification-step .step-icon.pending {
+    background: #e5e7eb;
+    color: #6b7280;
+}
+
+.verification-line {
+    height: 2px;
+    flex: 1;
+    background: #e5e7eb;
+}
+
+.verification-line.completed {
+    background: #059669;
+}
+
+/* ============================================================ */
+/* AI SCORE
+/* ============================================================ */
+.ai-score {
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.ai-score.high {
+    color: #059669;
+}
+
+.ai-score.medium {
+    color: #d97706;
+}
+
+.ai-score.low {
+    color: #dc2626;
+}
+
+/* ============================================================ */
+/* RESPONSIVE ADJUSTMENTS
+/* ============================================================ */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .modal-content-lg {
+        max-width: 95%;
+    }
+    
+    .step-indicator {
+        gap: 0.25rem;
+    }
+    
+    .step {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+    }
+    
+    .otp-input {
+        width: 40px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+    
+    .ssra-logo-placeholder {
+        width: 48px;
+        height: 48px;
+        font-size: 14px;
+    }
+}

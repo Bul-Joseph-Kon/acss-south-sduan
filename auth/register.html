@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - SSRA Customs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .ssra-logo-text { background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%); }
+        .auth-card { background: white; border-radius: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
+        .step-circle { width: 2.5rem; height: 2.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem; border: 2px solid #e5e7eb; color: #9ca3af; transition: all 0.3s ease; flex-shrink: 0; }
+        .step-circle.active { background: #1a365d; color: white; border-color: #1a365d; }
+        .step-circle.completed { background: #059669; color: white; border-color: #059669; }
+        .step-line { flex: 1; height: 2px; background: #e5e7eb; margin: 0 0.5rem; }
+        .step-line.active { background: #1a365d; }
+        .step-line.completed { background: #059669; }
+        .form-step { display: none; }
+        .form-step.active { display: block; }
+        
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem; }
+        .input-group input, .input-group select { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; font-size: 0.9rem; transition: 0.2s; background: white; }
+        .input-group input:focus, .input-group select:focus { outline: none; border-color: #1a365d; ring: 2px solid rgba(26,54,93,0.1); }
+        .input-group .helper { font-size: 0.7rem; color: #6b7280; margin-top: 0.2rem; }
+        .validate-btn { background: #f3f4f6; color: #374151; padding: 0.4rem 1rem; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; border: 1px solid #e5e7eb; }
+        .validate-btn:hover { background: #e5e7eb; }
+        .validate-btn.validated { background: #059669; color: white; border-color: #059669; }
+        .hidden-account { display: none !important; }
+        
+        .role-preview { 
+            background: #f8fafc; 
+            border-radius: 0.75rem; 
+            padding: 0.75rem 1rem; 
+            border: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .role-preview .role-badge { 
+            padding: 0.2rem 0.8rem; 
+            border-radius: 9999px; 
+            font-size: 0.7rem; 
+            font-weight: 600; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .role-badge-admin { background: #fee2e2; color: #991b1b; }
+        .role-badge-agent { background: #fef3c7; color: #92400e; }
+        .role-badge-trader { background: #d1fae5; color: #065f46; }
+        .role-badge-officer { background: #dbeafe; color: #1e40af; }
+        .role-badge-inspector { background: #ccfbf1; color: #0f766e; }
+        .role-badge-supervisor { background: #d1fae5; color: #065f46; }
+        .role-badge-revenue { background: #ede9fe; color: #6d28d9; }
+
+        .select-wrapper { position: relative; }
+        .select-wrapper select { appearance: none; -webkit-appearance: none; -moz-appearance: none; width: 100%; padding: 0.6rem 2.5rem 0.6rem 0.8rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; font-size: 0.9rem; background: white; cursor: pointer; transition: 0.2s; }
+        .select-wrapper select:focus { outline: none; border-color: #1a365d; ring: 2px solid rgba(26,54,93,0.1); }
+        .select-wrapper .select-arrow { position: absolute; right: 0.8rem; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; font-size: 1.2rem; }
+
+        .role-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
+        .role-option { 
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+            padding: 0.6rem 1rem; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 0.5rem; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            background: white; 
+        }
+        .role-option:hover { border-color: #1a365d; background: #f8fafc; }
+        .role-option.selected { border-color: #1a365d; background: #eff6ff; box-shadow: 0 0 0 3px rgba(26,54,93,0.1); }
+        .role-option input[type="radio"] { accent-color: #1a365d; width: 1rem; height: 1rem; cursor: pointer; flex-shrink: 0; }
+        .role-option .role-label { font-weight: 500; color: #1f2937; font-size: 0.9rem; }
+        .role-option .role-tag { 
+            font-size: 0.6rem; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+            letter-spacing: 0.3px; 
+            padding: 0.1rem 0.6rem; 
+            border-radius: 9999px; 
+            background: #e5e7eb; 
+            color: #6b7280; 
+        }
+        .role-option.selected .role-tag { background: #dbeafe; color: #1a365d; }
+        .role-option .role-check { display: none; color: #1a365d; font-size: 1.1rem; margin-left: auto; }
+        .role-option.selected .role-check { display: inline-block; }
+        .role-section-header { 
+            font-size: 0.7rem; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px; 
+            color: #6b7280; 
+            padding: 0.5rem 0 0.3rem; 
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .role-section-header i { color: #1a365d; }
+        .role-option.admin-option { border-color: #fca5a5; }
+        .role-option.admin-option:hover { border-color: #dc2626; background: #fef2f2; }
+        .role-option.admin-option.selected { border-color: #dc2626; background: #fef2f2; box-shadow: 0 0 0 3px rgba(220,38,38,0.1); }
+        .role-option.admin-option .role-label { color: #991b1b; }
+        .role-option.admin-option.selected .role-label { color: #7f1d1d; }
+        .role-option.admin-option .role-tag { background: #fee2e2; color: #991b1b; }
+        .role-option.admin-option.selected .role-tag { background: #fecaca; color: #7f1d1d; }
+        .role-option.admin-option .role-check { color: #dc2626; }
+        .error-msg { color: #dc2626; font-size: 0.75rem; margin-top: 0.2rem; display: none; }
+        .input-group.error input { border-color: #dc2626; background: #fef2f2; }
+        .input-group.success input { border-color: #059669; background: #f0fdf4; }
+        .required-star { color: #dc2626; margin-left: 2px; }
+        .validation-summary { 
+            background: #fef2f2; 
+            border: 1px solid #fca5a5; 
+            color: #991b1b; 
+            padding: 0.75rem 1rem; 
+            border-radius: 0.5rem; 
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .validation-summary i { margin-right: 0.5rem; }
+        .validation-summary.show { display: block; }
+        
+        /* Admin lock styles */
+        .admin-lock-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .admin-lock-overlay.show {
+            display: flex;
+        }
+        .admin-lock-modal {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .admin-lock-modal .lock-icon {
+            width: 72px;
+            height: 72px;
+            background: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2.5rem;
+            color: #dc2626;
+        }
+        .admin-lock-modal h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+        .admin-lock-modal p {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        .admin-lock-modal .admin-input-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .admin-lock-modal .admin-input-group input {
+            padding: 0.6rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            width: 200px;
+        }
+        .admin-lock-modal .admin-input-group input:focus {
+            outline: none;
+            border-color: #1a365d;
+        }
+        .admin-lock-modal .btn-unlock {
+            background: #1a365d;
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .admin-lock-modal .btn-unlock:hover { background: #0f2440; }
+        .admin-lock-modal .btn-unlock:disabled { opacity: 0.5; cursor: not-allowed; }
+        .admin-lock-modal .lock-error {
+            color: #dc2626;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        .admin-lock-modal .lock-error.show { display: block; }
+        .admin-badge-header {
+            display: inline-block;
+            background: #1a365d;
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-left: 0.5rem;
+        }
+        .role-list.locked {
+            opacity: 1;
+        }
+        .role-list.locked .role-option:not([onclick*="importer"]):not([onclick*="exporter"]) {
+            opacity: 0.6;
+            border-style: dashed;
+        }
+        .role-list.unlocked {
+            opacity: 1;
+        }
+        .registration-content {
+            display: none;
+        }
+        .registration-content.unlocked {
+            display: block;
+        }
+        .admin-unlock-hint {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: #065f46;
+            display: none;
+        }
+        .admin-unlock-hint.show { display: block; }
+        .admin-unlock-hint i { margin-right: 0.5rem; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="auth-card max-w-2xl w-full p-8">
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 rounded-2xl ssra-logo-text flex items-center justify-center text-white shadow-lg mx-auto mb-3">
+                <div class="text-center"><i class="ri-government-line text-2xl block"></i><span class="text-[9px] font-bold tracking-wider">SSRA</span></div>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800">Create Account</h2>
+            <p class="text-gray-500 text-sm mt-1">Register to access customs services</p>
+        </div>
+
+        <!-- Step 1: Account Type Selection -->
+        <div id="accountTypeStep">
+            <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="ri-user-line text-blue-900"></i>
+                Select Account Type
+            </h3>
+            
+            <div class="input-group">
+                <label>Account Type <span class="required-star">*</span></label>
+                <div class="select-wrapper">
+                    <select id="accountTypeSelect" onchange="selectAccountType(this.value)">
+                        <option value="citizen">Citizen (South Sudanese)</option>
+                        <option value="visitor">Foreigner / Visitor</option>
+                    </select>
+                    <span class="select-arrow"><i class="ri-arrow-down-s-line"></i></span>
+                </div>
+                <div class="helper">Select your account type</div>
+            </div>
+
+            <button type="button" class="w-full bg-blue-900 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-800 transition mt-2" onclick="proceedToRoleSelection()">
+                Continue <i class="ri-arrow-right-line"></i>
+            </button>
+        </div>
+
+        <!-- Step 2: Role Selection (Admin Only) -->
+        <div id="roleSelectionStep" class="hidden">
+            <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="ri-user-settings-line text-blue-900"></i>
+                Select Your Role
+                <span class="admin-badge-header">Admin Only</span>
+            </h3>
+
+            <div class="admin-unlock-hint" id="adminUnlockHint">
+                <i class="ri-lock-fill"></i>
+                Role selection is locked. Only administrators can select roles.
+                <button type="button" class="text-blue-600 hover:underline font-semibold ml-2" onclick="showAdminLockModal()">
+                    Unlock Now
+                </button>
+            </div>
+            
+            <div class="role-list locked" id="roleList">
+                <!-- Importer -->
+                <label class="role-option selected" onclick="selectRole('importer')">
+                    <input type="radio" name="role" value="importer" checked>
+                    <span class="role-label">Importer</span>
+                    <span class="role-tag">Trader</span>
+                    <span class="role-check">✓</span>
+                </label>
+
+                <!-- Exporter -->
+                <label class="role-option" onclick="selectRole('exporter')">
+                    <input type="radio" name="role" value="exporter">
+                    <span class="role-label">Exporter</span>
+                    <span class="role-tag">Trader</span>
+                    <span class="role-check">✓</span>
+                </label>
+
+                <!-- Clearing Agent -->
+                <label class="role-option" onclick="selectRole('agent')">
+                    <input type="radio" name="role" value="agent">
+                    <span class="role-label">Clearing Agent</span>
+                    <span class="role-tag">Agent</span>
+                    <span class="role-check">✓</span>
+                </label>
+
+                <!-- Customs Administration Section -->
+                <div class="role-section-header">
+                    <i class="ri-government-line"></i> Customs Administration
+                </div>
+
+                <!-- Customs Officer -->
+                <label class="role-option" onclick="selectRole('officer')">
+                    <input type="radio" name="role" value="officer">
+                    <span class="role-label">Customs Officer</span>
+                    <span class="role-tag">Officer</span>
+                    <span class="role-check">✓</span>
+                </label>
+
+                <!-- Inspector -->
+                <label class="role-option" onclick="selectRole('inspector')">
+                    <input type="radio" name="role" value="inspector">
+                    <span class="role-label">Inspector</span>
+                    <span class="role-tag">Inspector</span>
+                    <span class="role-check">✓</span>
+                </label>
+
+                <!-- Revenue Officer -->
+                <label class="role-option" onclick="selectRole('revenue')">
+                    <input type="radio" name="role" value="revenue">
+                    <span class="role-label">Revenue Officer</span>
+                    <span class="role-tag">Revenue</span>
+                    <span class="role-check">✓</span>
+                </label>
+
+                <!-- Supervisor -->
+                <label class="role-option" onclick="selectRole('supervisor')">
+                    <input type="radio" name="role" value="supervisor">
+                    <span class="role-label">Supervisor</span>
+                    <span class="role-tag">Supervisor</span>
+                    <span class="role-check">✓</span>
+                </label>
+
+                <!-- Administrator -->
+                <label class="role-option admin-option" onclick="selectRole('admin')">
+                    <input type="radio" name="role" value="admin">
+                    <span class="role-label">Administrator</span>
+                    <span class="role-tag">Admin</span>
+                    <span class="role-check">✓</span>
+                </label>
+            </div>
+
+            <button type="button" class="w-full bg-blue-900 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-800 transition mt-4" onclick="proceedFromRoleSelection()">
+                Continue <i class="ri-arrow-right-line"></i>
+            </button>
+        </div>
+
+        <!-- Admin Lock Modal -->
+        <div class="admin-lock-overlay" id="adminLockModal">
+            <div class="admin-lock-modal">
+                <div class="lock-icon">
+                    <i class="ri-lock-fill"></i>
+                </div>
+                <h3>Administrator Access Required</h3>
+                <p>Enter the admin password to unlock role selection and create accounts with specific roles.</p>
+                <div class="admin-input-group">
+                    <input type="password" id="adminPasswordInput" placeholder="Enter admin password" onkeydown="if(event.key==='Enter') unlockAdmin()">
+                    <button class="btn-unlock" id="unlockBtn" onclick="unlockAdmin()">
+                        <i class="ri-key-line"></i> Unlock
+                    </button>
+                </div>
+                <div class="lock-error" id="adminLockError">❌ Invalid admin password. Please try again.</div>
+                <p class="text-xs text-gray-400 mt-3">Default admin password: <strong>admin123</strong></p>
+            </div>
+        </div>
+
+        <!-- Role Preview -->
+        <div id="rolePreview" class="role-preview mb-6 hidden">
+            <i class="ri-user-settings-line text-gray-400"></i>
+            <span class="text-sm text-gray-600">Creating account as:</span>
+            <span class="role-badge role-badge-trader" id="roleBadge">Importer</span>
+            <span class="text-xs text-gray-400 ml-auto" id="roleDescription">Trader importing goods</span>
+        </div>
+
+        <!-- Progress Steps -->
+        <div id="progressSteps" class="flex items-center mb-8 hidden">
+            <div class="step-circle active" id="step1">1</div>
+            <div class="step-line active" id="line1"></div>
+            <div class="step-circle" id="step2">2</div>
+            <div class="step-line" id="line2"></div>
+            <div class="step-circle" id="step3">3</div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-500 -mt-6 mb-6 px-1">
+            <span>Details</span>
+            <span>Contact</span>
+            <span>Password</span>
+        </div>
+
+        <!-- Registration Content -->
+        <div class="registration-content" id="registrationContent">
+            <!-- Form Steps -->
+            <form onsubmit="event.preventDefault(); registerUser()">
+                <!-- Step 1: Details -->
+                <div class="form-step active" id="step1Content">
+                    <h3 class="font-bold text-gray-800 mb-4">Personal Details <span class="text-red-500 text-sm font-normal">* All fields are required</span></h3>
+                    
+                    <div class="validation-summary" id="step1ValidationSummary">
+                        <i class="ri-error-warning-line"></i>
+                        <span id="step1ValidationMessage">Please fill all required fields in Personal Details</span>
+                    </div>
+
+                    <!-- Citizen Fields -->
+                    <div id="citizenFields">
+                        <div class="input-group" id="idGroup">
+                            <label>National ID Number <span class="required-star">*</span></label>
+                            <div class="flex gap-2">
+                                <input type="text" id="nationalId" placeholder="Enter your National ID Number" class="flex-1">
+                                <button type="button" class="validate-btn" onclick="validateId()">Validate</button>
+                            </div>
+                            <div class="helper">Enter your South Sudan National ID Number</div>
+                            <div class="error-msg" id="idError">Please enter a valid National ID (minimum 6 characters)</div>
+                        </div>
+                    </div>
+
+                    <!-- Visitor Fields -->
+                    <div id="visitorFields" class="hidden-account">
+                        <div class="input-group" id="passportGroup">
+                            <label>Passport Number <span class="required-star">*</span></label>
+                            <input type="text" id="passportNumber" placeholder="Enter your Passport Number">
+                            <div class="helper">Enter your valid passport number</div>
+                            <div class="error-msg" id="passportError">Please enter a valid Passport Number</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="input-group" id="firstNameGroup">
+                            <label>First Name <span class="required-star">*</span></label>
+                            <input type="text" id="firstName" placeholder="First Name">
+                            <div class="error-msg" id="firstNameError">First name is required</div>
+                        </div>
+                        <div class="input-group" id="lastNameGroup">
+                            <label>Last Name (Family Name) <span class="required-star">*</span></label>
+                            <input type="text" id="lastName" placeholder="Last Name">
+                            <div class="error-msg" id="lastNameError">Last name is required</div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Other Names</label>
+                        <input type="text" id="otherNames" placeholder="Other Names (optional)">
+                        <div class="helper">If you have any other names, enter them here</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label>Date of Birth</label>
+                            <input type="date" id="dob">
+                        </div>
+                        <div class="input-group">
+                            <label>Place of Birth</label>
+                            <input type="text" id="pob" placeholder="Place of birth">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="input-group">
+                            <label>Gender</label>
+                            <div class="select-wrapper">
+                                <select id="gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <span class="select-arrow"><i class="ri-arrow-down-s-line"></i></span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Nationality <span class="required-star">*</span></label>
+                            <input type="text" id="nationality" placeholder="Enter your nationality" value="South Sudan">
+                            <div class="helper">Enter your country of nationality</div>
+                            <div class="error-msg" id="nationalityError">Nationality is required</div>
+                        </div>
+                    </div>
+
+                    <div class="input-group mt-2">
+                        <label>Selected Role <span class="required-star">*</span></label>
+                        <a href="#" onclick="event.preventDefault(); resetToRoleSelection();" class="text-blue-600 hover:underline text-sm font-semibold">← Change Role</a>
+                        <div class="text-sm text-gray-600 mt-1" id="selectedRoleDisplay">Importer</div>
+                        <div class="helper">You can change your role by clicking the link above</div>
+                    </div>
+
+                    <button type="button" class="w-full bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 transition mt-2" onclick="goToStep(2)">Continue →</button>
+                </div>
+
+                <!-- Step 2: Contact -->
+                <div class="form-step" id="step2Content">
+                    <h3 class="font-bold text-gray-800 mb-4">Contact Information <span class="text-red-500 text-sm font-normal">* All fields are required</span></h3>
+                    
+                    <div class="validation-summary" id="step2ValidationSummary">
+                        <i class="ri-error-warning-line"></i>
+                        <span id="step2ValidationMessage">Please fill all required fields in Contact Information</span>
+                    </div>
+
+                    <div class="input-group" id="emailGroup">
+                        <label>Email Address <span class="required-star">*</span></label>
+                        <input type="email" id="regEmail" placeholder="Enter your email address">
+                        <div class="helper">We'll send confirmation and notifications to this email</div>
+                        <div class="error-msg" id="emailError">Valid email is required</div>
+                    </div>
+
+                    <div class="input-group" id="phoneGroup">
+                        <label>Phone Number <span class="required-star">*</span></label>
+                        <input type="tel" id="phone" placeholder="Enter your phone number">
+                        <div class="helper">Include country code (e.g., +211 XXX XXX XXX)</div>
+                        <div class="error-msg" id="phoneError">Phone number is required</div>
+                    </div>
+
+                    <div class="input-group" id="addressGroup">
+                        <label>Physical Address <span class="required-star">*</span></label>
+                        <input type="text" id="address" placeholder="Enter your physical address">
+                        <div class="helper">City, State, and detailed location</div>
+                        <div class="error-msg" id="addressError">Address is required</div>
+                    </div>
+
+                    <div class="flex gap-3 mt-4">
+                        <button type="button" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition" onclick="goToStep(1)">← Back</button>
+                        <button type="button" class="flex-1 bg-blue-900 text-white py-2 rounded-lg font-semibold hover:bg-blue-800 transition" onclick="goToStep(3)">Continue →</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Password -->
+                <div class="form-step" id="step3Content">
+                    <h3 class="font-bold text-gray-800 mb-4">Set Password <span class="text-red-500 text-sm font-normal">* All fields are required</span></h3>
+
+                    <div class="validation-summary" id="step3ValidationSummary">
+                        <i class="ri-error-warning-line"></i>
+                        <span id="step3ValidationMessage">Please fix password issues</span>
+                    </div>
+
+                    <div class="input-group" id="passwordGroup">
+                        <label>Create Password <span class="required-star">*</span></label>
+                        <input type="password" id="regPassword" placeholder="Create a strong password">
+                        <div class="helper">Minimum 8 characters with at least one uppercase, lowercase, number, and special character</div>
+                        <div class="error-msg" id="passwordError">Password must be at least 8 characters with uppercase, lowercase, number & special</div>
+                    </div>
+
+                    <div class="input-group" id="confirmGroup">
+                        <label>Confirm Password <span class="required-star">*</span></label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm your password">
+                        <div class="error-msg" id="confirmError">Passwords do not match</div>
+                    </div>
+
+                    <div class="bg-blue-50 p-3 rounded-lg text-sm text-blue-700 mb-4">
+                        <i class="ri-information-line mr-1"></i> 
+                        Your password will be used to access all SSRA eServices.
+                    </div>
+
+                    <div class="flex gap-3 mt-4">
+                        <button type="button" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition" onclick="goToStep(2)">← Back</button>
+                        <button type="submit" class="flex-1 bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 transition">Create Account →</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <p class="text-center text-gray-500 mt-6 text-sm">Already have an account? <a href="login.html" class="text-emerald-600 hover:underline font-semibold">Sign In</a></p>
+        <p class="text-center text-gray-400 mt-2 text-xs"><a href="../index.html" class="hover:text-gray-600">← Back to Home</a></p>
+    </div>
+
+    <script>
+        var currentStep = 1;
+        var totalSteps = 3;
+        var accountType = 'citizen';
+        var selectedRole = 'importer';
+        var selectedRoleName = 'Importer';
+        var adminUnlocked = false;
+        var isAdmin = false;
+        var pendingRole = null;
+
+        // Role badge mapping
+        var roleBadgeMap = {
+            'admin': { class: 'role-badge-admin', label: 'Administrator', desc: 'Full system access & management' },
+            'agent': { class: 'role-badge-agent', label: 'Clearing Agent', desc: 'Customs clearing agent' },
+            'importer': { class: 'role-badge-trader', label: 'Importer', desc: 'Trader importing goods' },
+            'exporter': { class: 'role-badge-trader', label: 'Exporter', desc: 'Trader exporting goods' },
+            'officer': { class: 'role-badge-officer', label: 'Customs Officer', desc: 'Customs declaration review' },
+            'inspector': { class: 'role-badge-inspector', label: 'Inspector', desc: 'Physical inspection & verification' },
+            'revenue': { class: 'role-badge-revenue', label: 'Revenue Officer', desc: 'Manage duties, taxes, and revenue' },
+            'supervisor': { class: 'role-badge-supervisor', label: 'Supervisor', desc: 'Team oversight & escalations' }
+        };
+
+        var roleDisplayNames = {
+            'importer': 'Importer',
+            'exporter': 'Exporter',
+            'agent': 'Clearing Agent',
+            'officer': 'Customs Officer',
+            'inspector': 'Inspector',
+            'revenue': 'Revenue Officer',
+            'supervisor': 'Supervisor',
+            'admin': 'Administrator'
+        };
+
+        function selectAccountType(type) {
+            accountType = type;
+            
+            if (type === 'citizen') {
+                document.getElementById('citizenFields').classList.remove('hidden-account');
+                document.getElementById('visitorFields').classList.add('hidden-account');
+            } else {
+                document.getElementById('citizenFields').classList.add('hidden-account');
+                document.getElementById('visitorFields').classList.remove('hidden-account');
+            }
+            
+            var btn = document.querySelector('.validate-btn');
+            if (btn) {
+                btn.classList.remove('validated');
+                btn.textContent = 'Validate';
+            }
+        }
+
+        function proceedToRoleSelection() {
+            document.getElementById('accountTypeStep').style.display = 'none';
+            document.getElementById('roleSelectionStep').style.display = 'block';
+            // Show unlock hint
+            document.getElementById('adminUnlockHint').classList.add('show');
+        }
+
+        function showAdminLockModal() {
+            document.getElementById('adminLockModal').classList.add('show');
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminPasswordInput').focus();
+            document.getElementById('adminLockError').classList.remove('show');
+        }
+
+        function unlockAdmin() {
+            var password = document.getElementById('adminPasswordInput').value;
+            // Default admin password - in production this would be verified against a secure backend
+            if (password === 'admin123') {
+                isAdmin = true;
+                adminUnlocked = true;
+                document.getElementById('adminLockModal').classList.remove('show');
+                document.getElementById('adminUnlockHint').classList.remove('show');
+                document.getElementById('roleList').classList.remove('locked');
+                document.getElementById('roleList').classList.add('unlocked');
+                
+                // Select the pending role if there was one
+                if (pendingRole) {
+                    selectRole(pendingRole);
+                    pendingRole = null;
+                }
+                
+                alert('✅ Admin access granted! You can now select any role and create accounts.');
+            } else {
+                document.getElementById('adminLockError').classList.add('show');
+                document.getElementById('adminPasswordInput').value = '';
+                document.getElementById('adminPasswordInput').focus();
+            }
+        }
+
+        function selectRole(role) {
+            // Check if trying to select admin-only role without admin access
+            var adminOnlyRoles = ['agent', 'officer', 'inspector', 'revenue', 'supervisor', 'admin'];
+            if (adminOnlyRoles.includes(role) && !isAdmin) {
+                alert('⚠️ This role requires administrator access. Please unlock admin access first.');
+                showAdminLockModal();
+                pendingRole = role;
+                return;
+            }
+            
+            selectedRole = role;
+            selectedRoleName = roleDisplayNames[role] || role;
+            
+            // Update radio button
+            document.querySelectorAll('input[name="role"]').forEach(el => {
+                el.checked = el.value === role;
+            });
+            
+            // Update label selection
+            document.querySelectorAll('.role-option').forEach(el => {
+                el.classList.remove('selected');
+                if (el.querySelector('input[value="' + role + '"]')) {
+                    el.classList.add('selected');
+                }
+            });
+            
+            // Update role preview
+            var roleData = roleBadgeMap[role] || roleBadgeMap['importer'];
+            var preview = document.getElementById('rolePreview');
+            var badge = document.getElementById('roleBadge');
+            var desc = document.getElementById('roleDescription');
+            
+            badge.className = 'role-badge ' + roleData.class;
+            badge.textContent = roleData.label;
+            desc.textContent = roleData.desc;
+            
+            // Show preview for selected role
+            preview.classList.remove('hidden');
+            
+            // Update selected role display in form
+            document.getElementById('selectedRoleDisplay').textContent = roleData.label;
+        }
+
+        function proceedFromRoleSelection() {
+            if (!selectedRole) {
+                alert('❌ Please select a role to continue');
+                return;
+            }
+            
+            // Check if trying to proceed with admin-only role without admin access
+            var adminOnlyRoles = ['agent', 'officer', 'inspector', 'revenue', 'supervisor', 'admin'];
+            if (adminOnlyRoles.includes(selectedRole) && !isAdmin) {
+                alert('⚠️ This role requires administrator access. Please unlock admin access first.');
+                showAdminLockModal();
+                return;
+            }
+            
+            document.getElementById('roleSelectionStep').style.display = 'none';
+            document.getElementById('progressSteps').classList.remove('hidden');
+            document.getElementById('registrationContent').classList.add('unlocked');
+            
+            // Show form steps
+            document.querySelectorAll('.form-step').forEach(el => el.classList.remove('hidden'));
+            document.getElementById('step1Content').classList.add('active');
+            
+            var preview = document.getElementById('rolePreview');
+            preview.classList.remove('hidden');
+
+            currentStep = 1;
+            updateStepIndicators();
+        }
+
+        function resetToRoleSelection() {
+            selectedRole = null;
+            document.getElementById('roleSelectionStep').style.display = 'block';
+            document.getElementById('accountTypeStep').style.display = 'none';
+            document.getElementById('progressSteps').classList.add('hidden');
+            document.querySelectorAll('.form-step').forEach(el => el.classList.add('hidden'));
+            document.getElementById('rolePreview').classList.add('hidden');
+            document.getElementById('registrationContent').classList.remove('unlocked');
+        }
+
+        function validateId() {
+            var idInput = document.getElementById('nationalId');
+            var btn = document.querySelector('.validate-btn');
+            if (idInput.value && idInput.value.length >= 6) {
+                btn.classList.add('validated');
+                btn.textContent = '✓ Validated';
+                document.getElementById('idGroup').classList.remove('error');
+                document.getElementById('idGroup').classList.add('success');
+                document.getElementById('idError').style.display = 'none';
+            } else {
+                document.getElementById('idGroup').classList.add('error');
+                document.getElementById('idGroup').classList.remove('success');
+                document.getElementById('idError').style.display = 'block';
+            }
+        }
+
+        function showValidationSummary(step, message) {
+            var summary = document.getElementById('step' + step + 'ValidationSummary');
+            var msgEl = document.getElementById('step' + step + 'ValidationMessage');
+            if (!summary) return;
+            if (message) {
+                if (msgEl) msgEl.textContent = message;
+                summary.classList.add('show');
+            } else {
+                summary.classList.remove('show');
+            }
+        }
+
+        function updateStepIndicators() {
+            for (var i = 1; i <= totalSteps; i++) {
+                var circle = document.getElementById('step' + i);
+                circle.classList.remove('active', 'completed');
+                if (i < currentStep) circle.classList.add('completed');
+                else if (i === currentStep) circle.classList.add('active');
+                
+                if (i < totalSteps) {
+                    var line = document.getElementById('line' + i);
+                    line.classList.remove('active', 'completed');
+                    if (i < currentStep) line.classList.add('completed');
+                    else if (i === currentStep) line.classList.add('active');
+                }
+            }
+        }
+
+        function validateStep1() {
+            var valid = true;
+            var firstName = document.getElementById('firstName').value.trim();
+            var lastName = document.getElementById('lastName').value.trim();
+            var nationalId = document.getElementById('nationalId').value.trim();
+            var passport = document.getElementById('passportNumber').value.trim();
+            var nationality = document.getElementById('nationality').value.trim();
+            var missingFields = [];
+            
+            if (!firstName) { 
+                valid = false; 
+                document.getElementById('firstNameGroup').classList.add('error'); 
+                document.getElementById('firstNameError').style.display = 'block';
+                missingFields.push('First Name');
+            } else { 
+                document.getElementById('firstNameGroup').classList.remove('error'); 
+                document.getElementById('firstNameError').style.display = 'none'; 
+            }
+            
+            if (!lastName) { 
+                valid = false; 
+                document.getElementById('lastNameGroup').classList.add('error'); 
+                document.getElementById('lastNameError').style.display = 'block';
+                missingFields.push('Last Name');
+            } else { 
+                document.getElementById('lastNameGroup').classList.remove('error'); 
+                document.getElementById('lastNameError').style.display = 'none'; 
+            }
+            
+            if (accountType === 'citizen') {
+                if (nationalId.length < 6) { 
+                    valid = false; 
+                    document.getElementById('idGroup').classList.add('error'); 
+                    document.getElementById('idError').style.display = 'block';
+                    missingFields.push('National ID');
+                } else { 
+                    document.getElementById('idGroup').classList.remove('error'); 
+                    document.getElementById('idError').style.display = 'none'; 
+                }
+            } else {
+                if (passport.length < 4) { 
+                    valid = false; 
+                    document.getElementById('passportGroup').classList.add('error'); 
+                    document.getElementById('passportError').style.display = 'block';
+                    missingFields.push('Passport Number');
+                } else { 
+                    document.getElementById('passportGroup').classList.remove('error'); 
+                    document.getElementById('passportError').style.display = 'none'; 
+                }
+            }
+            
+            if (!nationality) { 
+                valid = false; 
+                document.getElementById('nationality').classList.add('error'); 
+                document.getElementById('nationalityError').style.display = 'block';
+                missingFields.push('Nationality');
+            } else { 
+                document.getElementById('nationality').classList.remove('error'); 
+                document.getElementById('nationalityError').style.display = 'none'; 
+            }
+            
+            if (!valid) {
+                var msg = 'Please fill all required fields in Personal Details';
+                if (missingFields.length > 0) {
+                    msg = 'Please fill all required fields in Personal Details: ' + missingFields.join(', ');
+                }
+                showValidationSummary(1, msg);
+            } else {
+                showValidationSummary(1, null);
+            }
+            
+            return valid;
+        }
+
+        function validateStep2() {
+            var valid = true;
+            var email = document.getElementById('regEmail').value.trim();
+            var phone = document.getElementById('phone').value.trim();
+            var address = document.getElementById('address').value.trim();
+            var missingFields = [];
+            
+            if (!email || !email.includes('@')) { 
+                valid = false; 
+                document.getElementById('emailGroup').classList.add('error'); 
+                document.getElementById('emailError').style.display = 'block';
+                missingFields.push('Email');
+            } else { 
+                document.getElementById('emailGroup').classList.remove('error'); 
+                document.getElementById('emailError').style.display = 'none'; 
+            }
+            
+            if (!phone) { 
+                valid = false; 
+                document.getElementById('phoneGroup').classList.add('error'); 
+                document.getElementById('phoneError').style.display = 'block';
+                missingFields.push('Phone Number');
+            } else { 
+                document.getElementById('phoneGroup').classList.remove('error'); 
+                document.getElementById('phoneError').style.display = 'none'; 
+            }
+            
+            if (!address) { 
+                valid = false; 
+                document.getElementById('addressGroup').classList.add('error'); 
+                document.getElementById('addressError').style.display = 'block';
+                missingFields.push('Address');
+            } else { 
+                document.getElementById('addressGroup').classList.remove('error'); 
+                document.getElementById('addressError').style.display = 'none'; 
+            }
+            
+            if (!valid) {
+                var msg = 'Please fill all required fields in Contact Information';
+                if (missingFields.length > 0) {
+                    msg = 'Please fill all required fields in Contact Information: ' + missingFields.join(', ');
+                }
+                showValidationSummary(2, msg);
+            } else {
+                showValidationSummary(2, null);
+            }
+            
+            return valid;
+        }
+
+        function validateStep3() {
+            var valid = true;
+            var password = document.getElementById('regPassword').value;
+            var confirm = document.getElementById('confirmPassword').value;
+            var strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            
+            if (!strong.test(password)) { 
+                valid = false; 
+                document.getElementById('passwordGroup').classList.add('error'); 
+                document.getElementById('passwordError').style.display = 'block'; 
+            } else { 
+                document.getElementById('passwordGroup').classList.remove('error'); 
+                document.getElementById('passwordError').style.display = 'none'; 
+            }
+            
+            if (password !== confirm || password === '') { 
+                valid = false; 
+                document.getElementById('confirmGroup').classList.add('error'); 
+                document.getElementById('confirmError').style.display = 'block'; 
+            } else { 
+                document.getElementById('confirmGroup').classList.remove('error'); 
+                document.getElementById('confirmError').style.display = 'none'; 
+            }
+            
+            if (!valid) {
+                showValidationSummary(3, 'Please fix password issues');
+            } else {
+                showValidationSummary(3, null);
+            }
+            
+            return valid;
+        }
+
+        function goToStep(step) {
+            if (step < 1 || step > totalSteps) return;
+            
+            if (step === 2 && !validateStep1()) return;
+            if (step === 3 && !validateStep2()) return;
+            
+            currentStep = step;
+            updateStepIndicators();
+
+            for (var j = 1; j <= totalSteps; j++) {
+                var form = document.getElementById('step' + j + 'Content');
+                form.classList.remove('active');
+                if (j === currentStep) form.classList.add('active');
+            }
+
+            // Hide validation summaries
+            for (var k = 1; k <= totalSteps; k++) {
+                var summary = document.getElementById('step' + k + 'ValidationSummary');
+                if (summary) summary.classList.remove('show');
+            }
+
+            document.querySelector('.form-step.active')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function registerUser() {
+            if (!selectedRole) {
+                alert('❌ Please select a role');
+                return;
+            }
+            
+            // Check if admin access is required for this role
+            var adminOnlyRoles = ['agent', 'officer', 'inspector', 'revenue', 'supervisor', 'admin'];
+            if (adminOnlyRoles.includes(selectedRole) && !isAdmin) {
+                alert('⚠️ This role requires administrator access. Please unlock admin access first.');
+                showAdminLockModal();
+                return;
+            }
+            
+            if (!validateStep1() || !validateStep2() || !validateStep3()) {
+                if (!validateStep1()) {
+                    goToStep(1);
+                } else if (!validateStep2()) {
+                    goToStep(2);
+                } else if (!validateStep3()) {
+                    goToStep(3);
+                }
+                return;
+            }
+
+            var firstName = document.getElementById('firstName').value.trim();
+            var lastName = document.getElementById('lastName').value.trim();
+            var email = document.getElementById('regEmail').value.trim();
+            var password = document.getElementById('regPassword').value;
+            var role = selectedRole;
+            var traderType = null;
+            
+            var identifier = accountType === 'citizen' ? 
+                document.getElementById('nationalId').value.trim() : 
+                document.getElementById('passportNumber').value.trim();
+
+            var users = JSON.parse(localStorage.getItem('sso_users') || '[]');
+            if (users.find(u => u.email === email || u.identifier === identifier)) {
+                alert('❌ User with this email or ID already exists');
+                return;
+            }
+
+            // Map trader subtypes to main role
+            var mainRole = role;
+            if (role === 'importer' || role === 'exporter') {
+                mainRole = 'trader';
+                traderType = role;
+            }
+
+            var roleData = roleBadgeMap[role] || roleBadgeMap['importer'];
+            var newUser = {
+                id: users.length + 1,
+                name: firstName + ' ' + lastName,
+                email: email,
+                identifier: identifier,
+                password: password,
+                role: mainRole,
+                traderType: traderType,
+                status: 'active',
+                accountType: accountType,
+                firstName: firstName,
+                lastName: lastName,
+                otherNames: document.getElementById('otherNames').value || '',
+                dob: document.getElementById('dob').value || '',
+                pob: document.getElementById('pob').value || '',
+                gender: document.getElementById('gender').value || '',
+                nationality: document.getElementById('nationality').value || '',
+                phone: document.getElementById('phone').value || '',
+                address: document.getElementById('address').value || '',
+                roleLabel: roleData.label,
+                roleDescription: roleData.desc,
+                created: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('sso_users', JSON.stringify(users));
+
+            // Also add to portal_users
+            try {
+                var pUsers = JSON.parse(localStorage.getItem('portal_users') || '[]');
+                var portalUser = {
+                    id: (pUsers.length ? pUsers[pUsers.length-1].id + 1 : 1),
+                    name: newUser.name,
+                    username: newUser.email.split('@')[0],
+                    email: newUser.email,
+                    identifier: newUser.identifier,
+                    password: newUser.password,
+                    role: newUser.role,
+                    status: newUser.status,
+                    created: newUser.created
+                };
+                pUsers.push(portalUser);
+                localStorage.setItem('portal_users', JSON.stringify(pUsers));
+            } catch (e) {
+                console.warn('Could not sync to portal_users', e);
+            }
+
+            var roleName = roleData.label;
+            alert('✅ Account created successfully!\n\n' +
+                  'Role: ' + roleName + '\n' +
+                  'Name: ' + newUser.name + '\n' +
+                  'Email: ' + newUser.email + '\n\n' +
+                  'Please login manually using your credentials.');
+
+            window.location.href = 'login.html';
+        }
+
+        var demoUsers = [
+            { id: 1, name: "John Importer", email: "john@importer.com", identifier: "TIN-TRD-001", password: "pass123", role: "trader", traderType: "importer", status: "active" },
+            { id: 2, name: "Sarah Exporter", email: "sarah@exporter.com", identifier: "TIN-TRD-002", password: "pass123", role: "trader", traderType: "exporter", status: "active" },
+            { id: 3, name: "Mike Agent", email: "mike@agent.com", identifier: "AGT-003", password: "pass123", role: "agent", traderType: null, status: "active" },
+            { id: 4, name: "David Officer", email: "david@ssra.gov", identifier: "OFF-004", password: "pass123", role: "officer", traderType: null, status: "active" },
+            { id: 5, name: "Grace Supervisor", email: "grace@ssra.gov", identifier: "SUP-005", password: "pass123", role: "supervisor", traderType: null, status: "active" },
+            { id: 6, name: "Admin User", email: "admin@ssra.gov", identifier: "ADMIN-007", password: "admin123", role: "admin", traderType: null, status: "active" },
+            { id: 7, name: "Alice Inspector", email: "alice@ssra.gov", identifier: "INS-008", password: "pass123", role: "inspector", traderType: null, status: "active" },
+            { id: 8, name: "James Revenue", email: "james@ssra.gov", identifier: "REV-009", password: "pass123", role: "revenue", traderType: null, status: "active" },
+            { id: 9, name: "Tessa MultiRole", email: "tessa@customs.gov", identifier: "MULTI-010", password: "pass123", role: "trader", roles: ["trader", "agent"], traderType: "importer", status: "active" }
+        ];
+
+        function initDatabase() {
+            var storedSSO = localStorage.getItem('sso_users');
+            if (!storedSSO || JSON.parse(storedSSO).length === 0) {
+                localStorage.setItem('sso_users', JSON.stringify(demoUsers));
+            }
+            var storedPortal = localStorage.getItem('portal_users');
+            if (!storedPortal || JSON.parse(storedPortal).length === 0) {
+                var portalUsers = demoUsers.map(function(u) {
+                    return {
+                        id: u.id,
+                        name: u.name,
+                        username: u.email.split('@')[0],
+                        email: u.email,
+                        identifier: u.identifier,
+                        password: u.password,
+                        role: u.role,
+                        status: u.status || 'active',
+                        created: new Date().toISOString()
+                    };
+                });
+                localStorage.setItem('portal_users', JSON.stringify(portalUsers));
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initDatabase();
+            document.getElementById('accountTypeSelect').value = 'citizen';
+            selectAccountType('citizen');
+            selectRole('importer');
+            // Lock role selection by default
+            document.getElementById('roleList').classList.add('locked');
+            document.getElementById('registrationContent').classList.remove('unlocked');
+            document.getElementById('rolePreview').classList.add('hidden');
+            document.getElementById('progressSteps').classList.add('hidden');
+            document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
+        });
+
+        // Enter key navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                var activeStep = document.querySelector('.form-step.active');
+                if (activeStep) {
+                    var stepId = activeStep.id.replace('Content', '');
+                    var stepNum = parseInt(stepId.replace('step', ''));
+                    if (stepNum < totalSteps) {
+                        goToStep(stepNum + 1);
+                    }
+                }
+            }
+        });
+
+        // Close modal on overlay click
+        document.getElementById('adminLockModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

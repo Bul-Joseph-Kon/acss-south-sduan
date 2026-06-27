@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Trader Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .stat-card { transition: all 0.3s ease; cursor: pointer; background: white; border-radius: 0.75rem; padding: 1rem; border: 1px solid #e5e7eb; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+        .stat-number { font-size: 1.5rem; font-weight: 700; }
+        .stat-label { font-size: 0.75rem; color: #6b7280; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-review { background: #dbeafe; color: #1e40af; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .status-draft { background: #f3f4f6; color: #4b5563; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-inspection { background: #fef3c7; color: #92400e; }
+        .quick-action-btn { transition: all 0.2s ease; cursor: pointer; padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; background: white; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
+        .quick-action-btn:hover { border-color: #0a4d3e; background: #ecfdf5; transform: translateY(-2px); }
+        .notification-item { padding: 0.5rem 0.75rem; border-radius: 0.5rem; border-left: 3px solid #0a4d3e; background: white; margin-bottom: 0.5rem; }
+        .notification-item.unread { background: #ecfdf5; }
+        .notification-item .notif-time { font-size: 0.65rem; color: #6b7280; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+        /* Sidebar category toggle styles */
+        .category-toggle { cursor: pointer; }
+        .category-toggle .arrow { transition: transform 0.3s ease; }
+        .category-toggle .arrow.open { transform: rotate(180deg); }
+        .category-submenu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding-left: 1.5rem; }
+        .category-submenu.open { max-height: 1000px; }
+        .category-submenu .sidebar-link { font-size: 0.8rem; padding: 0.4rem 1rem; }
+        .category-submenu .sidebar-link i { font-size: 1rem; width: 1.2rem; }
+        .flow-badge { font-size: 0.55rem; padding: 0.1rem 0.4rem; border-radius: 9999px; font-weight: 600; }
+        .flow-badge-ai { background: #dbeafe; color: #1e40af; }
+        .flow-badge-officer { background: #fef3c7; color: #92400e; }
+        .flow-badge-inspector { background: #fee2e2; color: #991b1b; }
+        .flow-badge-revenue { background: #d1fae5; color: #065f46; }
+        .flow-badge-supervisor { background: #f3e8ff; color: #6b21a8; }
+        .flow-badge-completed { background: #d1fae5; color: #065f46; }
+        .agent-auth-card { background: #f0fdf4; border: 1px solid #86efac; border-radius: 0.75rem; padding: 1rem; }
+        .agent-auth-card .auth-status { color: #065f46; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Sidebar -->
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
+                        <div class="text-center mb-5">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
+                                <i class="ri-user-line text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">John Trader</h3>
+                            <p class="text-gray-500 text-sm">Importer</p>
+                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
+                            <div class="mt-1 text-xs text-gray-400">TIN: TIN-TRD-001</div>
+                        </div>
+
+                        <nav class="space-y-1">
+                            <!-- Dashboard -->
+                            <a href="dashboard-trader.html" class="sidebar-link active"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+
+                            <!-- Services Category -->
+                            <div class="category-toggle" onclick="toggleCategory('services')">
+                                <div class="sidebar-link">
+                                    <i class="ri-service-line"></i>
+                                    <span>Services</span>
+                                    <span class="ml-auto arrow" id="servicesArrow"><i class="ri-arrow-down-s-line"></i></span>
+                                </div>
+                            </div>
+                            <div class="category-submenu" id="servicesSubmenu">
+                                <a href="services/cvet/dashboard.html" class="sidebar-link"><i class="ri-file-invoice-line"></i><span>CVET</span></a>
+                                <a href="services/direct-assessment/dashboard.html" class="sidebar-link"><i class="ri-file-search-line"></i><span>Direct Assessment</span></a>
+                                <a href="services/vehicle-query/search-vehicle.html" class="sidebar-link"><i class="ri-car-line"></i><span>Vehicle Query</span></a>
+                            </div>
+
+                            <!-- Applications Category -->
+                            <div class="category-toggle" onclick="toggleCategory('applications')">
+                                <div class="sidebar-link">
+                                    <i class="ri-file-copy-line"></i>
+                                    <span>Applications</span>
+                                    <span class="ml-auto arrow" id="applicationsArrow"><i class="ri-arrow-down-s-line"></i></span>
+                                </div>
+                            </div>
+                            <div class="category-submenu" id="applicationsSubmenu">
+                                <a href="applications/draft.html" class="sidebar-link"><i class="ri-pen-line"></i><span>Drafts</span></a>
+                                <a href="applications/submitted.html" class="sidebar-link"><i class="ri-paper-plane-line"></i><span>Submitted</span></a>
+                                <a href="applications/under-review.html" class="sidebar-link"><i class="ri-search-line"></i><span>Under Review</span></a>
+                                <a href="applications/approved.html" class="sidebar-link"><i class="ri-check-circle-line"></i><span>Approved</span></a>
+                                <a href="applications/rejected.html" class="sidebar-link"><i class="ri-close-circle-line"></i><span>Rejected</span></a>
+                                <a href="applications/completed.html" class="sidebar-link"><i class="ri-flag-checkered-line"></i><span>Completed</span></a>
+                            </div>
+
+                            <!-- Notifications Category -->
+                            <div class="category-toggle" onclick="toggleCategory('notifications')">
+                                <div class="sidebar-link">
+                                    <i class="ri-notification-3-line"></i>
+                                    <span>Notifications</span>
+                                    <span class="ml-auto arrow" id="notificationsArrow"><i class="ri-arrow-down-s-line"></i></span>
+                                    <span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">3</span>
+                                </div>
+                            </div>
+                            <div class="category-submenu" id="notificationsSubmenu">
+                                <a href="notifications/application-updates.html" class="sidebar-link"><i class="ri-sync-alt-line"></i><span>Application Updates</span></a>
+                                <a href="notifications/payment-alerts.html" class="sidebar-link"><i class="ri-credit-card-line"></i><span>Payment Alerts</span></a>
+                                <a href="notifications/approval-alerts.html" class="sidebar-link"><i class="ri-check-double-line"></i><span>Approval Alerts</span></a>
+                                <a href="notifications/system-alerts.html" class="sidebar-link"><i class="ri-server-line"></i><span>System Alerts</span></a>
+                            </div>
+                        </nav>
+
+                        <button onclick="window.location.href='../auth/logout.html'" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                            <i class="ri-logout-box-line"></i> Sign Out (SSO)
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="flex-1 space-y-5">
+                    <!-- Welcome Banner -->
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">Welcome back, John! 👋</h2>
+                            <p class="opacity-90 text-sm">Manage your customs declarations and track applications</p>
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                <span class="flow-badge flow-badge-ai">🤖 AI Verified</span>
+                                <span class="flow-badge flow-badge-officer">👤 Officer Review</span>
+                                <span class="flow-badge flow-badge-inspector">🔍 Inspection</span>
+                                <span class="flow-badge flow-badge-revenue">💰 Revenue</span>
+                                <span class="flow-badge flow-badge-supervisor">⭐ Supervisor</span>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <a href="#"><i class="ri-file-copy-line"></i> My Documents</a>
+                                <div class="divider"></div>
+                                <a href="../auth/logout.html" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agent Authorization Status -->
+                    <div class="agent-auth-card">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div class="flex items-center gap-3">
+                                <i class="ri-check-circle-fill text-emerald-600 text-xl"></i>
+                                <div>
+                                    <p class="font-semibold text-sm auth-status">✓ Clearing Agent Authorized</p>
+                                    <p class="text-xs text-gray-500">Agent: SSRA Customs Agency Ltd · License: LIC-2026-0008</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="text-emerald-600 text-sm hover:underline" onclick="alert('📋 Viewing agent details')">View Agent</button>
+                                <button class="text-emerald-600 text-sm hover:underline" onclick="alert('🔄 Changing agent authorization')">Change Agent</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div class="stat-card"><div class="stat-number text-emerald-600">12</div><div class="stat-label">Total Applications</div></div>
+                        <div class="stat-card"><div class="stat-number text-yellow-600">3</div><div class="stat-label">Pending Review</div></div>
+                        <div class="stat-card"><div class="stat-number text-blue-600">2</div><div class="stat-label">Under Inspection</div></div>
+                        <div class="stat-card"><div class="stat-number text-green-600">8</div><div class="stat-label">Approved</div></div>
+                        <div class="stat-card"><div class="stat-number text-red-600">1</div><div class="stat-label">Rejected</div></div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-flashlight-line text-emerald-500 mr-2"></i>Quick Actions</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="services/cvet/create-declaration.html" class="quick-action-btn"><i class="ri-file-add-line text-emerald-500"></i> New CVET</a>
+                            <a href="services/direct-assessment/create-assessment.html" class="quick-action-btn"><i class="ri-file-search-line text-emerald-500"></i> Direct Assessment</a>
+                            <a href="services/vehicle-query/search-vehicle.html" class="quick-action-btn"><i class="ri-search-line text-emerald-500"></i> Vehicle Query</a>
+                            <a href="applications/draft.html" class="quick-action-btn"><i class="ri-pen-line text-emerald-500"></i> Drafts</a>
+                            <a href="notifications/application-updates.html" class="quick-action-btn"><i class="ri-notification-3-line text-emerald-500"></i> Notifications</a>
+                            <a href="#" class="quick-action-btn" onclick="alert('📋 Authorizing a clearing agent')"><i class="ri-user-add-line text-emerald-500"></i> Authorize Agent</a>
+                        </div>
+                    </div>
+
+                    <!-- Business Flow Status -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-flow-chart text-emerald-500 mr-2"></i>Application Flow Status</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="text-center p-2 border rounded-lg">
+                                <div class="text-2xl">📋</div>
+                                <div class="text-xs font-semibold text-emerald-600">5</div>
+                                <div class="text-xs text-gray-500">Submitted</div>
+                            </div>
+                            <div class="text-center p-2 border rounded-lg">
+                                <div class="text-2xl">🤖</div>
+                                <div class="text-xs font-semibold text-blue-600">3</div>
+                                <div class="text-xs text-gray-500">AI Validated</div>
+                            </div>
+                            <div class="text-center p-2 border rounded-lg">
+                                <div class="text-2xl">👤</div>
+                                <div class="text-xs font-semibold text-yellow-600">2</div>
+                                <div class="text-xs text-gray-500">Officer Review</div>
+                            </div>
+                            <div class="text-center p-2 border rounded-lg">
+                                <div class="text-2xl">✅</div>
+                                <div class="text-xs font-semibold text-green-600">8</div>
+                                <div class="text-xs text-gray-500">Completed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Applications & Notifications -->
+                    <div class="grid lg:grid-cols-2 gap-4">
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-file-copy-line text-emerald-500 mr-2"></i>Recent Applications</h3>
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center border-b pb-2">
+                                    <span class="text-sm font-medium">CV-2026-0042</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="status-badge status-review">Review</span>
+                                        <span class="flow-badge flow-badge-officer text-[0.5rem]">Officer</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center border-b pb-2">
+                                    <span class="text-sm font-medium">DA-2026-0018</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="status-badge status-inspection">Inspection</span>
+                                        <span class="flow-badge flow-badge-inspector text-[0.5rem]">Inspector</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center border-b pb-2">
+                                    <span class="text-sm font-medium">CV-2026-0035</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="status-badge status-approved">Approved</span>
+                                        <span class="flow-badge flow-badge-supervisor text-[0.5rem]">Supervisor</span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-medium">VQ-2026-0012</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="status-badge status-completed">Completed</span>
+                                        <span class="flow-badge flow-badge-completed text-[0.5rem]">✓ Done</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="applications/submitted.html" class="mt-3 text-sm text-emerald-600 hover:underline inline-block">View All →</a>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-notification-3-line text-emerald-500 mr-2"></i>Recent Notifications</h3>
+                            <div class="space-y-2">
+                                <div class="notification-item unread p-2">
+                                    <div>
+                                        <span class="font-semibold text-sm">Application Submitted</span>
+                                        <p class="text-xs text-gray-600">CV-2026-0042 submitted for review</p>
+                                        <span class="notif-time">2 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="notification-item unread p-2">
+                                    <div>
+                                        <span class="font-semibold text-sm">Inspection Required</span>
+                                        <p class="text-xs text-gray-600">DA-2026-0018 flagged for inspection</p>
+                                        <span class="notif-time">5 hours ago</span>
+                                    </div>
+                                </div>
+                                <div class="notification-item p-2">
+                                    <div>
+                                        <span class="font-semibold text-sm">Certificate Ready</span>
+                                        <p class="text-xs text-gray-600">CV-2026-0035 ready for download</p>
+                                        <span class="notif-time">1 day ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="notifications/application-updates.html" class="mt-3 text-sm text-emerald-600 hover:underline inline-block">View All →</a>
+                        </div>
+                    </div>
+
+                    <!-- Business Flow Steps -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-route-line text-emerald-500 mr-2"></i>Complete Business Flow</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+                            <div class="p-2 bg-gray-50 rounded-lg">
+                                <div class="text-lg">📝</div>
+                                <div class="text-xs font-semibold">Registration</div>
+                                <div class="text-[0.6rem] text-gray-400">Account Created</div>
+                            </div>
+                            <div class="p-2 bg-gray-50 rounded-lg">
+                                <div class="text-lg">🔐</div>
+                                <div class="text-xs font-semibold">Agent Auth</div>
+                                <div class="text-[0.6rem] text-gray-400">Agent Authorized</div>
+                            </div>
+                            <div class="p-2 bg-gray-50 rounded-lg">
+                                <div class="text-lg">📋</div>
+                                <div class="text-xs font-semibold">Application</div>
+                                <div class="text-[0.6rem] text-gray-400">Submitted</div>
+                            </div>
+                            <div class="p-2 bg-gray-50 rounded-lg">
+                                <div class="text-lg">🤖</div>
+                                <div class="text-xs font-semibold">AI Validation</div>
+                                <div class="text-[0.6rem] text-gray-400">Verified</div>
+                            </div>
+                            <div class="p-2 bg-gray-50 rounded-lg">
+                                <div class="text-lg">👤</div>
+                                <div class="text-xs font-semibold">Officer</div>
+                                <div class="text-[0.6rem] text-gray-400">Review</div>
+                            </div>
+                            <div class="p-2 bg-gray-50 rounded-lg">
+                                <div class="text-lg">🔍</div>
+                                <div class="text-xs font-semibold">Inspection</div>
+                                <div class="text-[0.6rem] text-gray-400">If Required</div>
+                            </div>
+                            <div class="p-2 bg-gray-50 rounded-lg">
+                                <div class="text-lg">⭐</div>
+                                <div class="text-xs font-semibold">Approval</div>
+                                <div class="text-[0.6rem] text-gray-400">Supervisor</div>
+                            </div>
+                            <div class="p-2 bg-emerald-50 rounded-lg border border-emerald-200">
+                                <div class="text-lg">✅</div>
+                                <div class="text-xs font-semibold text-emerald-700">Complete</div>
+                                <div class="text-[0.6rem] text-emerald-600">Certificate</div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleCategory(category) {
+            const submenu = document.getElementById(category + 'Submenu');
+            const arrow = document.getElementById(category + 'Arrow');
+            submenu.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+    <script src="../../src/js/auth.js"></script>
+    <script>requireLogin('trader');</script>
+</body>
+</html>
