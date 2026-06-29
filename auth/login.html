@@ -6,6 +6,8 @@
     <title>Sign In - SSRA Customs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="../js/auth.js"></script>
     <style>
         .ssra-logo-text { background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%); }
         .auth-card { background: white; border-radius: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
@@ -127,7 +129,7 @@
             <p class="text-gray-500 text-sm mt-1">Sign in to your customs account</p>
         </div>
 
-        <form onsubmit="event.preventDefault(); handleSignIn()">
+        <form id="loginForm">
             <div class="mb-4">
                 <label class="block text-gray-700 font-semibold text-sm mb-2">Email / ID Number</label>
                 <input type="text" id="loginIdentifier" placeholder="Enter your email or ID" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-400 outline-none" required>
@@ -136,14 +138,14 @@
                 <label class="block text-gray-700 font-semibold text-sm mb-2">Password</label>
                 <input type="password" id="loginPassword" placeholder="Enter your password" class="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-400 outline-none" required>
             </div>
-            
+
             <!-- Forgot Password Link -->
             <div class="text-right mb-4">
-                <a href="#" onclick="event.preventDefault(); openForgotModal()" class="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium">
+                <a href="#" id="forgotPasswordLink" class="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium">
                     Forgot Password?
                 </a>
             </div>
-            
+
             <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">Sign In</button>
         </form>
 
@@ -164,57 +166,8 @@
         <p class="text-center text-gray-400 mt-2 text-xs"><a href="../index.html" class="hover:text-gray-600">← Back to Home</a></p>
     </div>
 
-    <script>
-        // ============ DEMO USERS ============
-        var demoUsers = [
-            { id: 1, name: "John Importer", email: "john@importer.com", identifier: "TIN-TRD-001", password: "pass123", role: "trader", traderType: "importer", status: "active" },
-            { id: 2, name: "Sarah Exporter", email: "sarah@exporter.com", identifier: "TIN-TRD-002", password: "pass123", role: "trader", traderType: "exporter", status: "active" },
-            { id: 3, name: "Mike Agent", email: "mike@agent.com", identifier: "AGT-003", password: "pass123", role: "agent", traderType: null, status: "active" },
-            { id: 4, name: "David Officer", email: "david@ssra.gov", identifier: "OFF-004", password: "pass123", role: "officer", traderType: null, status: "active" },
-            { id: 5, name: "Grace Supervisor", email: "grace@ssra.gov", identifier: "SUP-005", password: "pass123", role: "supervisor", traderType: null, status: "active" },
-            { id: 6, name: "Admin User", email: "admin@ssra.gov", identifier: "ADMIN-007", password: "admin123", role: "admin", traderType: null, status: "active" },
-            { id: 7, name: "Alice Inspector", email: "alice@ssra.gov", identifier: "INS-008", password: "pass123", role: "inspector", traderType: null, status: "active" },
-            { id: 8, name: "James Revenue", email: "james@ssra.gov", identifier: "REV-009", password: "pass123", role: "revenue", traderType: null, status: "active" },
-            { id: 9, name: "Tessa MultiRole", email: "tessa@customs.gov", identifier: "MULTI-010", password: "pass123", role: "trader", roles: ["trader", "agent"], traderType: "importer", status: "active" }
-        ];
-        
-        function getStoredUsers(key) {
-            var raw = localStorage.getItem(key);
-            if (!raw) return [];
-            try {
-                var parsed = JSON.parse(raw);
-                return Array.isArray(parsed) ? parsed : [];
-            } catch (e) {
-                console.warn('Invalid JSON in localStorage for ' + key + ', resetting.', e);
-                localStorage.removeItem(key);
-                return [];
-            }
-        }
-
-        function initDatabase() {
-            var stored = getStoredUsers('sso_users');
-            if (!stored.length) {
-                localStorage.setItem('sso_users', JSON.stringify(demoUsers));
-            }
-        }
-        initDatabase();
-
-        function getAllUsers() {
-            var ssoUsers = getStoredUsers('sso_users');
-            var portalUsers = getStoredUsers('portal_users');
-            var merged = [].concat(ssoUsers || []);
-            portalUsers.forEach(function(portalUser) {
-                var exists = merged.some(function(user) {
-                    return user.identifier === portalUser.identifier || user.email === portalUser.email;
-                });
-                if (!exists) merged.push(portalUser);
-            });
-            return merged;
-        }
-
-        function normalizeLoginValue(value) {
-            return value ? value.trim().toLowerCase() : '';
-        }
+    <script type="module">
+        import { signIn, signOut, resetPassword, redirectToDashboard, checkAuth } from '../js/auth.js';
 
         // ============ FORGOT PASSWORD ============
         function openForgotModal() {
@@ -227,50 +180,19 @@
             document.getElementById('forgotModal').classList.remove('show');
         }
 
-        function handleForgotPassword() {
-            var identifier = document.getElementById('resetIdentifier').value.trim();
+        async function handleForgotPassword() {
+            const identifier = document.getElementById('resetIdentifier').value.trim();
             if (!identifier) {
-                showToast('Please enter your email or ID number', 'error');
+                showToast('Please enter your email address', 'error');
                 return;
             }
 
-            var users = JSON.parse(localStorage.getItem('sso_users') || '[]');
-            var user = users.find(u => u.email === identifier || u.identifier === identifier);
-            
-            if (user) {
-                // In a real system, this would send an email with a reset link.
-                // For demo, we'll show a message and allow manual reset.
-                showToast('✅ Reset link sent to ' + user.email + ' (Demo: check your console)', 'success');
-                console.log('🔐 Password reset requested for:', user.email);
-                console.log('💡 Demo reset link: /reset-password?token=' + btoa(user.email + '|' + Date.now()));
-                
-                // For demo purposes, let's also offer to reset via alert
-                if (confirm('🔐 Demo Mode\n\nA reset link has been sent to ' + user.email + '\n\nWould you like to reset your password now? (Demo only)')) {
-                    var newPassword = prompt('Enter new password for ' + user.name + ' (min 8 characters):');
-                    if (newPassword && newPassword.length >= 8) {
-                        user.password = newPassword;
-                        localStorage.setItem('sso_users', JSON.stringify(users));
-                        
-                        // Also update portal_users if exists
-                        try {
-                            var pUsers = JSON.parse(localStorage.getItem('portal_users') || '[]');
-                            var pUser = pUsers.find(p => p.email === user.email || p.identifier === user.identifier);
-                            if (pUser) {
-                                pUser.password = newPassword;
-                                localStorage.setItem('portal_users', JSON.stringify(pUsers));
-                            }
-                        } catch (e) {}
-                        
-                        showToast('✅ Password reset successfully! You can now sign in.', 'success');
-                        closeForgotModal();
-                    } else {
-                        showToast('❌ Password reset cancelled or invalid. Must be at least 8 characters.', 'error');
-                    }
-                } else {
-                    closeForgotModal();
-                }
+            const result = await resetPassword(identifier);
+            if (result.success) {
+                showToast('Password reset email sent! Check your inbox.', 'success');
+                closeForgotModal();
             } else {
-                showToast('❌ No account found with that email or ID. Please check and try again.', 'error');
+                showToast(result.error || 'Failed to send reset email', 'error');
             }
         }
 
@@ -289,7 +211,7 @@
 
         // ============ TOAST NOTIFICATION ============
         function showToast(message, type) {
-            var toast = document.getElementById('toast');
+            const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = 'toast ' + (type || 'info');
             toast.style.display = 'block';
@@ -300,23 +222,17 @@
         }
 
         // ============ SIGN OUT ============
-        function handleSignOut() {
-            // Clear all session data
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('userIdentifier');
-            localStorage.removeItem('userRole');
-            localStorage.removeItem('userRoles');
-            localStorage.removeItem('traderType');
-            localStorage.removeItem('portal_session');
-            
-            showToast('👋 You have been signed out successfully.', 'info');
-            
-            // Update UI
-            document.getElementById('signedInBanner').classList.add('hidden');
-            document.getElementById('loginIdentifier').value = '';
-            document.getElementById('loginPassword').value = '';
-            document.getElementById('loginIdentifier').focus();
+        async function handleSignOut() {
+            const result = await signOut();
+            if (result.success) {
+                showToast('You have been signed out successfully.', 'info');
+                document.getElementById('signedInBanner').classList.add('hidden');
+                document.getElementById('loginIdentifier').value = '';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginIdentifier').focus();
+            } else {
+                showToast(result.error || 'Failed to sign out', 'error');
+            }
         }
 
         // ============ SIGN IN ============
@@ -324,24 +240,11 @@
             return new URLSearchParams(window.location.search).get(name);
         }
 
-        function getDashboardUrl(role) {
-            var dashboardMap = {
-                'admin': '../pages/admin/dashboard-admin.html',
-                'agent': '../pages/agent/dashboard-agent.html',
-                'trader': '../pages/trader/dashboard-trader.html',
-                'officer': '../pages/officer/dashboard-officer.html',
-                'inspector': '../pages/inspector/dashboard-inspector.html',
-                'revenue': '../pages/revenue/dashboard-revenue.html',
-                'supervisor': '../pages/supervisor/dashboard-supervisor.html'
-            };
-            return dashboardMap[role] || '../pages/trader/dashboard-trader.html';
-        }
-
         function getRedirectDestination(role) {
-            var redirect = getQueryParam('redirect');
+            const redirect = getQueryParam('redirect');
             if (redirect) {
                 try {
-                    var decoded = decodeURIComponent(redirect);
+                    const decoded = decodeURIComponent(redirect);
                     if (!decoded.includes('://')) {
                         return decoded;
                     }
@@ -349,107 +252,61 @@
                     console.warn('Invalid redirect URL', redirect);
                 }
             }
-            return getDashboardUrl(role);
+            return redirectToDashboard(role);
         }
 
-        function handleSignIn() {
-            var identifier = document.getElementById('loginIdentifier').value;
-            var password = document.getElementById('loginPassword').value;
-            var normalizedIdentifier = normalizeLoginValue(identifier);
-            var normalizedPassword = password ? password.trim() : '';
+        async function handleSignIn() {
+            const identifier = document.getElementById('loginIdentifier').value.trim();
+            const password = document.getElementById('loginPassword').value;
 
-            if (!normalizedIdentifier || !normalizedPassword) {
-                showToast('❌ Please enter both email/ID and password.', 'error');
+            if (!identifier || !password) {
+                showToast('Please enter both email and password.', 'error');
                 return;
             }
 
-            var users = getAllUsers();
-            var user = null;
+            // Treat identifier as email for Supabase auth
+            const result = await signIn(identifier, password);
 
-            for (var i = 0; i < users.length; i++) {
-                var currentUser = users[i];
-                var currentEmail = normalizeLoginValue(currentUser.email);
-                var currentIdentifier = normalizeLoginValue(currentUser.identifier);
-                var currentUsername = normalizeLoginValue(currentUser.username);
-                var currentPassword = currentUser.password ? currentUser.password.trim() : '';
-
-                if ((normalizedIdentifier === currentIdentifier || normalizedIdentifier === currentEmail || normalizedIdentifier === currentUsername) && normalizedPassword === currentPassword) {
-                    user = currentUser;
-                    break;
-                }
-            }
-
-            if (user) {
-                var roles = (user.roles && Array.isArray(user.roles) && user.roles.length > 0) ? user.roles : [user.role];
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userName', user.name);
-                localStorage.setItem('userIdentifier', user.identifier || user.email || '');
-                localStorage.setItem('userRoles', JSON.stringify(roles));
-                localStorage.setItem('userRole', user.role || roles[0]);
-                if (user.traderType) localStorage.setItem('traderType', user.traderType);
-
-                // Sync with portal_users/session
-                try {
-                    var pUsers = getStoredUsers('portal_users');
-                    var p = pUsers.find(function(u) { return normalizeLoginValue(u.identifier) === normalizeLoginValue(user.identifier) || normalizeLoginValue(u.email) === normalizeLoginValue(user.email); });
-                    if (!p) {
-                        var portalUser = {
-                            id: (pUsers.length ? pUsers[pUsers.length-1].id + 1 : 1),
-                            name: user.name,
-                            username: user.email ? user.email.split('@')[0] : (user.identifier || 'user' + Date.now()),
-                            email: user.email,
-                            identifier: user.identifier,
-                            password: user.password,
-                            role: user.role,
-                            status: user.status || 'active',
-                            created: user.created || new Date().toISOString()
-                        };
-                        pUsers.push(portalUser);
-                        localStorage.setItem('portal_users', JSON.stringify(pUsers));
-                        localStorage.setItem('portal_session', JSON.stringify(portalUser));
-                    } else {
-                        localStorage.setItem('portal_session', JSON.stringify(p));
-                    }
-                } catch (e) { console.warn('portal session sync failed', e); }
-
-                showToast('✅ Welcome back, ' + user.name + '! Redirecting...', 'success');
-
-                setTimeout(function() {
-                    window.location.href = getRedirectDestination(user.role || roles[0]);
+            if (result.success) {
+                const role = result.profile?.role || 'trader';
+                showToast('Welcome back! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = getRedirectDestination(role);
                 }, 500);
             } else {
-                showToast('❌ Invalid credentials. Please check your email/ID and password.', 'error');
+                showToast(result.error || 'Invalid credentials', 'error');
             }
         }
 
         // ============ CHECK SESSION ON LOAD ============
-        function checkSession() {
-            var isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            var userName = localStorage.getItem('userName');
-            
-            if (isLoggedIn && userName) {
+        async function checkSession() {
+            const isAuthenticated = await checkAuth();
+            const userName = localStorage.getItem('userName');
+
+            if (isAuthenticated && userName) {
                 document.getElementById('signedInBanner').classList.remove('hidden');
                 document.getElementById('signedInUser').textContent = userName;
-                // Show a subtle toast
-                setTimeout(function() {
-                    showToast('👋 You are already signed in as ' + userName, 'info');
+                setTimeout(() => {
+                    showToast('You are already signed in as ' + userName, 'info');
                 }, 300);
             }
         }
 
-        // Allow Enter key to trigger login
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && !document.getElementById('forgotModal').classList.contains('show')) {
-                var active = document.activeElement;
-                if (active && (active.id === 'loginIdentifier' || active.id === 'loginPassword')) {
-                    handleSignIn();
-                }
-            }
-        });
-
         // Initialize on load
         document.addEventListener('DOMContentLoaded', function() {
             checkSession();
+
+            // Attach form submit handler
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleSignIn();
+            });
+
+            // Attach forgot password link handler
+            document.getElementById('forgotPasswordLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                openForgotModal();
+            });
         });
     </script>
 </body>

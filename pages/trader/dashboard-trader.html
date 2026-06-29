@@ -6,6 +6,10 @@
     <title>SSRA Customs · Trader Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="../../js/auth.js"></script>
+    <script type="module" src="../../js/dashboard.js"></script>
+    <script type="module" src="../../js/applications.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -126,8 +130,8 @@
                             </div>
                         </nav>
 
-                        <button onclick="window.location.href='../auth/logout.html'" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
-                            <i class="ri-logout-box-line"></i> Sign Out (SSO)
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                            <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
                 </aside>
@@ -158,7 +162,7 @@
                                 <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <a href="#"><i class="ri-file-copy-line"></i> My Documents</a>
                                 <div class="divider"></div>
-                                <a href="../auth/logout.html" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
                         </div>
                     </div>
@@ -344,7 +348,11 @@
             </div>
         </div>
     </div>
-    <script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser } from '../../js/auth.js';
+        import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
+
         function toggleCategory(category) {
             const submenu = document.getElementById(category + 'Submenu');
             const arrow = document.getElementById(category + 'Arrow');
@@ -357,8 +365,44 @@
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+
+        async function loadDashboard() {
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const user = await getCurrentUser();
+            const profile = user ? await getUserProfile(user.id) : null;
+            
+            if (profile) {
+                document.querySelector('h3').textContent = profile.full_name || 'User';
+                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Trader';
+            }
+
+            const data = await fetchDashboardData();
+            const recentApps = await fetchRecentApplications(5);
+
+            if (data.applications) {
+                document.querySelector('.stat-number').textContent = data.applications.total || 0;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+
+        // Sign out functionality
+        async function handleSignOut() {
+            const result = await signOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            } else {
+                alert('Sign out failed: ' + result.error);
+            }
+        }
+
+        document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
+        document.getElementById('dropdownSignOut').addEventListener('click', handleSignOut);
     </script>
-    <script src="../../src/js/auth.js"></script>
-    <script>requireLogin('trader');</script>
 </body>
 </html>
