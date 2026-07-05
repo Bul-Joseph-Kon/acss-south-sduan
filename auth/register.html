@@ -3,531 +3,1151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - SSRA Customs</title>
+    <title>SSRA Customs - Create Account</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module" src="../js/auth.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
         * {
-            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f4f8;
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
         }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .gradient-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.3s ease;
-        }
-        
-        .gradient-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
-        }
-        
-        .input-field {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            transition: all 0.3s ease;
-        }
-        
-        .input-field:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+
+        .main-container {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
             background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            padding: 3rem;
         }
-        
+
+        /* Left Column - Branding */
+        .brand-section {
+            padding-right: 1.5rem;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a365d;
+            line-height: 1.2;
+        }
+        .logo-text span {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: #6b7280;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a365d;
+            line-height: 1.2;
+            margin-bottom: 0.5rem;
+        }
+
+        .brand-subtitle {
+            font-size: 0.95rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .feature-item .icon {
+            width: 32px;
+            height: 32px;
+            background: #eff6ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2563eb;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .feature-item .text {
+            font-size: 0.8rem;
+            color: #1f2937;
+            font-weight: 500;
+            line-height: 1.3;
+        }
+        .feature-item .text small {
+            display: block;
+            font-weight: 400;
+            color: #6b7280;
+            font-size: 0.7rem;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f0fdf4;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            color: #065f46;
+            font-weight: 500;
+        }
+        .security-badge i {
+            color: #059669;
+        }
+
+        .security-text {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.75rem;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Right Column - Form */
+        .form-section {
+            padding-left: 1.5rem;
+            border-left: 1px solid #e5e7eb;
+        }
+
+        .form-header {
+            margin-bottom: 1.5rem;
+        }
+        .form-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a365d;
+        }
+        .form-header p {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        /* Role Selection */
+        .role-selector {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
         .role-card {
-            background: white;
-            border: 2px solid #e2e8f0;
-            transition: all 0.3s ease;
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
             cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            background: white;
         }
-        
         .role-card:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+            border-color: #2563eb;
+            background: #f8fafc;
         }
-        
-        .role-card.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        .role-card.active {
+            border-color: #1a365d;
+            background: #eff6ff;
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
         }
-        
-        .step-indicator {
-            width: 40px;
-            height: 40px;
+        .role-card .role-icon {
+            font-size: 1.5rem;
+            color: #1a365d;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+        .role-card .role-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        .role-card .role-tag {
+            font-size: 0.55rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 0.1rem 0.5rem;
+            border-radius: 9999px;
+            display: inline-block;
+            margin-top: 0.15rem;
+        }
+        .role-card.active .role-tag {
+            background: #dbeafe;
+            color: #1a365d;
+        }
+
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.2rem;
+        }
+        .form-group label .required {
+            color: #dc2626;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            background: white;
+            color: #1f2937;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1a365d;
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.08);
+        }
+        .form-group .helper {
+            font-size: 0.65rem;
+            color: #6b7280;
+            margin-top: 0.15rem;
+        }
+        .form-group .error-msg {
+            color: #dc2626;
+            font-size: 0.7rem;
+            margin-top: 0.15rem;
+            display: none;
+        }
+        .form-group.error input,
+        .form-group.error select {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+        .form-group.error .error-msg {
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn-continue {
+            width: 100%;
+            background: #1a365d;
+            color: white;
+            padding: 0.7rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .btn-continue:hover {
+            background: #0f2440;
+        }
+        .btn-continue:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .form-footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        .form-footer a {
+            color: #1a365d;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .terms-text {
+            font-size: 0.65rem;
+            color: #9ca3af;
+            text-align: center;
+            margin-top: 1rem;
+            line-height: 1.5;
+        }
+        .terms-text a {
+            color: #1a365d;
+            text-decoration: none;
+        }
+        .terms-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+                gap: 1.5rem;
+            }
+            .form-section {
+                padding-left: 0;
+                border-left: none;
+                border-top: 1px solid #e5e7eb;
+                padding-top: 1.5rem;
+            }
+            .brand-section {
+                padding-right: 0;
+            }
+            .feature-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 1rem;
+                border-radius: 1rem;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .role-selector {
+                flex-direction: column;
+            }
+            .brand-title {
+                font-size: 1.5rem;
+            }
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Success Modal */
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .success-overlay.show {
+            display: flex;
+        }
+        .success-modal {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .success-modal .success-icon {
+            width: 64px;
+            height: 64px;
+            background: #d1fae5;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+            color: #059669;
+        }
+        .success-modal h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 0.5rem;
+        }
+        .success-modal p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        .success-modal .btn-login {
+            background: #1a365d;
+            color: white;
+            padding: 0.6rem 2rem;
+            border-radius: 0.5rem;
             font-weight: 600;
-            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 1rem;
+            width: 100%;
         }
-        
-        .step-indicator.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .step-indicator.completed {
-            background: #10b981;
-            color: white;
-        }
-        
-        .step-indicator.pending {
-            background: #e2e8f0;
-            color: #94a3b8;
-        }
-        
-        .step-line {
-            height: 3px;
-            background: #e2e8f0;
-            transition: all 0.3s ease;
-        }
-        
-        .step-line.active {
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .step-line.completed {
-            background: #10b981;
-        }
-        
-        .form-section {
-            display: none;
-            animation: fadeIn 0.4s ease;
-        }
-        
-        .form-section.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .floating-label {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-        
-        .input-field:focus + .floating-label,
-        .input-field:not(:placeholder-shown) + .floating-label {
-            top: -0.5rem;
-            left: 0.75rem;
-            font-size: 0.75rem;
-            color: #667eea;
-            background: white;
-            padding: 0 0.5rem;
-        }
-        
-        .password-strength {
-            height: 4px;
-            border-radius: 2px;
-            background: #e2e8f0;
-            overflow: hidden;
-        }
-        
-        .password-strength-bar {
-            height: 100%;
-            transition: all 0.3s ease;
-        }
-        
-        .password-strength-bar.weak { width: 33%; background: #ef4444; }
-        .password-strength-bar.medium { width: 66%; background: #f59e0b; }
-        .password-strength-bar.strong { width: 100%; background: #10b981; }
-        
-        .error-shake {
-            animation: shake 0.5s ease;
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+        .success-modal .btn-login:hover {
+            background: #0f2440;
         }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
-    <div class="glass-card rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden">
-        <div class="grid md:grid-cols-2">
-            <!-- Left Side - Branding -->
-            <div class="bg-gradient-to-br from-indigo-600 to-purple-700 p-8 md:p-12 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center gap-3 mb-8">
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur">
-                            <i class="ri-government-line text-white text-2xl"></i>
-                        </div>
-                        <span class="text-white font-bold text-xl">SSRA Customs</span>
-                    </div>
-                    
-                    <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">Create Your Account</h1>
-                    <p class="text-white/80 text-lg">Join South Sudan Revenue Authority's digital customs platform</p>
+<body>
+
+    <div class="main-container">
+        <!-- LEFT COLUMN - Branding -->
+        <div class="brand-section">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="ri-government-line"></i>
                 </div>
-                
-                <div class="hidden md:block">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
-                            <i class="ri-shield-check-line text-white"></i>
-                        </div>
-                        <div>
-                            <p class="text-white font-semibold">Secure & Protected</p>
-                            <p class="text-white/60 text-sm">Enterprise-grade security</p>
-                        </div>
+                <div class="logo-text">
+                    SSRA Customs
+                    <span>South Sudan Revenue Authority</span>
+                </div>
+            </div>
+
+            <h1 class="brand-title">Create Your Account</h1>
+            <p class="brand-subtitle">
+                Join the digital platform for seamless customs clearance and trade facilitation
+            </p>
+
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <div class="icon"><i class="ri-shield-check-line"></i></div>
+                    <div class="text">
+                        Secure & Protected
+                        <small>Enterprise-grade security for your data</small>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center">
-                            <i class="ri-flashlight-line text-white"></i>
-                        </div>
-                        <div>
-                            <p class="text-white font-semibold">Fast Processing</p>
-                            <p class="text-white/60 text-sm">Quick customs clearance</p>
-                        </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon"><i class="ri-flash-line"></i></div>
+                    <div class="text">
+                        Fast & Efficient
+                        <small>Streamlined customs clearance process</small>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon"><i class="ri-time-line"></i></div>
+                    <div class="text">
+                        24/7 Accessibility
+                        <small>Access your account anytime, anywhere</small>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon"><i class="ri-customer-service-line"></i></div>
+                    <div class="text">
+                        Expert Support
+                        <small>Dedicated support for your success</small>
                     </div>
                 </div>
             </div>
-            
-            <!-- Right Side - Form -->
-            <div class="p-8 md:p-12">
-                <!-- Step Indicators -->
-                <div class="flex items-center justify-center gap-2 mb-8">
-                    <div class="step-indicator active" id="step1Indicator">1</div>
-                    <div class="step-line flex-1" id="line1"></div>
-                    <div class="step-indicator pending" id="step2Indicator">2</div>
-                    <div class="step-line flex-1" id="line2"></div>
-                    <div class="step-indicator pending" id="step3Indicator">3</div>
+
+            <div>
+                <div class="security-badge">
+                    <i class="ri-lock-fill"></i> Your data is encrypted and secure
                 </div>
-                <div class="flex justify-between text-xs text-gray-500 mb-8 px-2">
-                    <span>Personal</span>
-                    <span>Contact</span>
-                    <span>Security</span>
-                </div>
-                
-                <!-- Step 1: Role Selection -->
-                <div class="form-section active" id="step1">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Choose Your Role</h2>
-                    <p class="text-gray-500 mb-6">Select the role that best describes you</p>
-                    
-                    <div class="grid grid-cols-2 gap-3 mb-6">
-                        <div class="role-card rounded-xl p-4 selected" onclick="selectRole('trader', this)">
-                            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mb-3">
-                                <i class="ri-shopping-bag-line text-indigo-600 text-xl"></i>
-                            </div>
-                            <h3 class="font-semibold text-gray-800">Trader</h3>
-                            <p class="text-xs text-gray-500 mt-1">Import/Export goods</p>
-                        </div>
-                        
-                        <div class="role-card rounded-xl p-4" onclick="selectRole('agent', this)">
-                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-                                <i class="ri-user-voice-line text-purple-600 text-xl"></i>
-                            </div>
-                            <h3 class="font-semibold text-gray-800">Agent</h3>
-                            <p class="text-xs text-gray-500 mt-1">Clearing Agent</p>
-                        </div>
-                        
-                        <div class="role-card rounded-xl p-4" onclick="selectRole('officer', this)">
-                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                                <i class="ri-shield-user-line text-blue-600 text-xl"></i>
-                            </div>
-                            <h3 class="font-semibold text-gray-800">Officer</h3>
-                            <p class="text-xs text-gray-500 mt-1">Customs Officer</p>
-                        </div>
-                        
-                        <div class="role-card rounded-xl p-4" onclick="selectRole('inspector', this)">
-                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-                                <i class="ri-search-eye-line text-green-600 text-xl"></i>
-                            </div>
-                            <h3 class="font-semibold text-gray-800">Inspector</h3>
-                            <p class="text-xs text-gray-500 mt-1">Goods Inspection</p>
-                        </div>
-                    </div>
-                    
-                    <button onclick="goToStep(2)" class="w-full gradient-btn text-white py-3 rounded-xl font-semibold">
-                        Continue <i class="ri-arrow-right-line ml-2"></i>
-                    </button>
-                </div>
-                
-                <!-- Step 2: Personal Information -->
-                <div class="form-section" id="step2">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Personal Information</h2>
-                    <p class="text-gray-500 mb-6">Tell us about yourself</p>
-                    
-                    <div class="space-y-4">
-                        <div class="relative">
-                            <input type="text" id="firstName" class="input-field w-full px-4 py-3 rounded-xl" placeholder=" " required>
-                            <label class="floating-label">First Name</label>
-                        </div>
-                        
-                        <div class="relative">
-                            <input type="text" id="lastName" class="input-field w-full px-4 py-3 rounded-xl" placeholder=" " required>
-                            <label class="floating-label">Last Name</label>
-                        </div>
-                        
-                        <div class="relative">
-                            <input type="email" id="email" class="input-field w-full px-4 py-3 rounded-xl" placeholder=" " required>
-                            <label class="floating-label">Email Address</label>
-                        </div>
-                        
-                        <div class="relative">
-                            <input type="tel" id="phone" class="input-field w-full px-4 py-3 rounded-xl" placeholder=" " required>
-                            <label class="floating-label">Phone Number</label>
-                        </div>
-                        
-                        <div class="relative">
-                            <input type="text" id="nationality" class="input-field w-full px-4 py-3 rounded-xl" placeholder=" " value="South Sudan" required>
-                            <label class="floating-label">Nationality</label>
-                        </div>
-                    </div>
-                    
-                    <div class="flex gap-3 mt-6">
-                        <button onclick="goToStep(1)" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition">
-                            <i class="ri-arrow-left-line mr-2"></i> Back
-                        </button>
-                        <button onclick="goToStep(3)" class="flex-1 gradient-btn text-white py-3 rounded-xl font-semibold">
-                            Continue <i class="ri-arrow-right-line ml-2"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Step 3: Security -->
-                <div class="form-section" id="step3">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Set Your Password</h2>
-                    <p class="text-gray-500 mb-6">Create a secure password for your account</p>
-                    
-                    <div class="space-y-4">
-                        <div class="relative">
-                            <input type="password" id="password" class="input-field w-full px-4 py-3 rounded-xl pr-12" placeholder=" " required oninput="checkPasswordStrength()">
-                            <label class="floating-label">Password</label>
-                            <button type="button" onclick="togglePassword('password')" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                <i class="ri-eye-line" id="passwordEye"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="password-strength">
-                            <div class="password-strength-bar" id="strengthBar"></div>
-                        </div>
-                        <p class="text-xs text-gray-500" id="strengthText">Enter a password</p>
-                        
-                        <div class="relative">
-                            <input type="password" id="confirmPassword" class="input-field w-full px-4 py-3 rounded-xl" placeholder=" " required>
-                            <label class="floating-label">Confirm Password</label>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-indigo-50 rounded-xl p-4 mt-6">
-                        <div class="flex items-start gap-3">
-                            <i class="ri-information-line text-indigo-600 mt-0.5"></i>
-                            <p class="text-sm text-indigo-700">Your password must be at least 8 characters with uppercase, lowercase, numbers, and special characters.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex gap-3 mt-6">
-                        <button onclick="goToStep(2)" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition">
-                            <i class="ri-arrow-left-line mr-2"></i> Back
-                        </button>
-                        <button onclick="registerUser()" class="flex-1 gradient-btn text-white py-3 rounded-xl font-semibold">
-                            Create Account <i class="ri-user-add-line ml-2"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Success Message -->
-                <div class="form-section text-center py-8" id="successSection">
-                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <i class="ri-check-line text-green-600 text-4xl"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Account Created!</h2>
-                    <p class="text-gray-500 mb-6">Please check your email to verify your account</p>
-                    <button onclick="window.location.href='login.html'" class="gradient-btn text-white py-3 rounded-xl font-semibold px-8">
-                        Go to Login
-                    </button>
-                </div>
-                
-                <p class="text-center text-gray-500 mt-6 text-sm">
-                    Already have an account? <a href="login.html" class="gradient-text font-semibold hover:underline">Sign In</a>
+                <p class="security-text">We protect your information with bank-level security</p>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN - Form -->
+        <div class="form-section">
+            <div class="form-header">
+                <h2>Choose Your Role</h2>
+                <p>Select your user role from the options below</p>
+            </div>
+
+            <!-- Role Selection -->
+            <div class="form-group mb-4" id="roleSelectorGroup">
+                <label for="roleSelect">Select Your Role <span class="required">*</span></label>
+                <select id="roleSelect" onchange="selectRole(this.value)">
+                    <option value="trader">Trader (Importer / Exporter)</option>
+                    <option value="agent">Agent (Clearing Agent)</option>
+                    <option value="officer">Officer (Customs Officer)</option>
+                    <option value="inspector">Inspector (Customs Inspector)</option>
+                    <option value="supervisor">Supervisor (Customs Supervisor)</option>
+                    <option value="revenue">Revenue Officer</option>
+                    <option value="administrator">Administrator</option>
+                </select>
+            </div>
+
+            <!-- Role Description -->
+            <div id="roleDescription" class="text-sm text-gray-500 mb-4" style="font-size:0.8rem;">
+                <i class="ri-information-line"></i> Trader accounts may be registered by South Sudan citizens or foreign nationals.
+            </div>
+
+            <!-- Registration Note -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <p class="text-xs text-blue-800">
+                    <i class="ri-information-line"></i>
+                    <strong>Note:</strong> Select the role that corresponds to your function. Both Trader and Agent accounts require identity document verification (National ID or Passport).
                 </p>
+            </div>
+
+            <!-- Form -->
+            <form id="registrationForm">
+                <!-- Step: Personal Information -->
+                <div id="step1Content">
+                    <h3 style="font-size:0.9rem; font-weight:600; color:#1f2937; margin-bottom:0.75rem;">Personal Information</h3>
+
+                    <div class="form-row">
+                        <div class="form-group" id="firstNameGroup">
+                            <label>First Name <span class="required">*</span></label>
+                            <input type="text" id="firstName" placeholder="Enter your first name">
+                            <div class="error-msg" id="firstNameError">First name is required</div>
+                        </div>
+                        <div class="form-group" id="lastNameGroup">
+                            <label>Last Name <span class="required">*</span></label>
+                            <input type="text" id="lastName" placeholder="Enter your last name">
+                            <div class="error-msg" id="lastNameError">Last name is required</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="emailGroup">
+                        <label>Email Address <span class="required">*</span></label>
+                        <input type="email" id="regEmail" placeholder="Enter your email address">
+                        <div class="error-msg" id="emailError">Valid email is required</div>
+                    </div>
+
+                    <div class="form-group" id="applicantTypeGroup">
+                        <label>Applicant Type <span class="required">*</span></label>
+                        <select id="applicantType">
+                            <option value="">Select applicant type</option>
+                            <option value="citizen">Citizen</option>
+                            <option value="foreigner">Foreigner</option>
+                        </select>
+                        <div class="helper">Trader accounts can be created for either citizens or foreign nationals.</div>
+                        <div class="error-msg" id="applicantTypeError">Applicant type is required</div>
+                    </div>
+
+                    <div class="form-group" id="identityDocumentTypeGroup">
+                        <label>Identity Document <span class="required">*</span></label>
+                        <select id="identityDocumentType">
+                            <option value="">Select identity document</option>
+                        </select>
+                        <div class="helper" id="identityDocumentHelper">Foreigners must use a passport. Citizens can use a national ID or passport.</div>
+                        <div class="error-msg" id="identityDocumentTypeError">Identity document is required</div>
+                    </div>
+
+                    <div class="form-group" id="identityDocumentNumberGroup">
+                        <label>Document Number <span class="required">*</span></label>
+                        <input type="text" id="identityDocumentNumber" placeholder="Enter document number">
+                        <div class="error-msg" id="identityDocumentNumberError">Document number is required</div>
+                    </div>
+
+                    <div class="form-group" id="nationalityGroup">
+                        <label>Nationality <span class="required">*</span></label>
+                        <input type="text" id="nationality" list="nationalityOptions" placeholder="Select or type your nationality" autocomplete="country-name">
+                        <datalist id="nationalityOptions">
+                            <option value="South Sudan">
+                            <option value="Uganda">
+                            <option value="Kenya">
+                            <option value="Tanzania">
+                            <option value="Ethiopia">
+                            <option value="Sudan">
+                            <option value="Egypt">
+                            <option value="Other">
+                        </datalist>
+                        <div class="error-msg" id="nationalityError">Nationality is required</div>
+                    </div>
+
+                    <button type="button" class="btn-continue" onclick="goToStep(2)">
+                        Continue <i class="ri-arrow-right-line"></i>
+                    </button>
+                </div>
+
+                <!-- Step: Contact & Password (hidden initially) -->
+                <div id="step2Content" style="display:none;">
+                    <h3 style="font-size:0.9rem; font-weight:600; color:#1f2937; margin-bottom:0.75rem;">Contact & Security</h3>
+
+                    <div class="form-group" id="phoneGroup">
+                        <label>Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="phone" placeholder="Enter your phone number">
+                        <div class="helper">Include country code (e.g., +211 XXX XXX XXX)</div>
+                        <div class="error-msg" id="phoneError">Phone number is required</div>
+                    </div>
+
+                    <div class="form-group" id="passwordGroup">
+                        <label>Create Password <span class="required">*</span></label>
+                        <input type="password" id="regPassword" placeholder="Create a strong password">
+                        <div class="helper">Minimum 8 characters with uppercase, lowercase, number & special</div>
+                        <div class="error-msg" id="passwordError">Password must be at least 8 characters with uppercase, lowercase, number & special</div>
+                    </div>
+
+                    <div class="form-group" id="confirmGroup">
+                        <label>Confirm Password <span class="required">*</span></label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm your password">
+                        <div class="error-msg" id="confirmError">Passwords do not match</div>
+                    </div>
+
+                    <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+                        <button type="button" class="btn-continue" style="background:#e5e7eb; color:#374151;" onclick="goToStep(1)">
+                            <i class="ri-arrow-left-line"></i> Back
+                        </button>
+                        <button type="submit" class="btn-continue" style="background:#059669;" id="registerBtn">
+                            Create Account <i class="ri-check-line"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Footer -->
+            <div class="form-footer">
+                Already have an account? <a href="login.html">Sign In</a>
+            </div>
+            <div class="terms-text">
+                By creating an account, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { signUp } from '../js/auth.js';
-        
-        let selectedRole = 'trader';
-        let currentStep = 1;
-        
-        function selectRole(role, element) {
+    <!-- Success Modal -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-modal">
+            <div class="success-icon">
+                <i class="ri-mail-send-line"></i>
+            </div>
+            <h3>Check Your Email</h3>
+            <p>We've sent a confirmation link to your email address. Please click the link to activate your account.</p>
+            <button class="btn-login" onclick="goToLogin()">
+                <i class="ri-login-circle-line"></i> Go to Login
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // State
+        var currentStep = 1;
+        var selectedRole = 'trader';
+        var totalSteps = 2;
+
+        // Role descriptions
+        var roleDescriptions = {
+            'trader': 'Trader accounts may be registered by South Sudan citizens or foreign nationals.',
+            'agent': 'Clearing agent accounts may be registered by South Sudan citizens or foreign nationals.',
+            'officer': 'Customs Officer accounts manage cargo clearance, declarations, and inspections.',
+            'inspector': 'Customs Inspector accounts perform physical cargo and vehicle verification.',
+            'supervisor': 'Customs Supervisor accounts oversee clearance workflows and compliance.',
+            'revenue': 'Revenue Officer accounts process tax assessments and payment verification.',
+            'administrator': 'Administrator accounts manage system settings, users, and configurations.'
+        };
+
+        function selectRole(role) {
             selectedRole = role;
-            document.querySelectorAll('.role-card').forEach(card => card.classList.remove('selected'));
-            element.classList.add('selected');
+            
+            // Update dropdown if value is different
+            const dropdown = document.getElementById('roleSelect');
+            if (dropdown && dropdown.value !== role) {
+                dropdown.value = role;
+            }
+            
+            // Update description
+            const description = roleDescriptions[role] || 'Select a user role to begin.';
+            document.getElementById('roleDescription').innerHTML = '<i class="ri-information-line"></i> ' + description;
+
+            const applicantTypeGroup = document.getElementById('applicantTypeGroup');
+            if (applicantTypeGroup) {
+                applicantTypeGroup.style.display = (role === 'trader' || role === 'agent') ? 'block' : 'none';
+            }
+
+            const documentTypeGroup = document.getElementById('identityDocumentTypeGroup');
+            const documentNumberGroup = document.getElementById('identityDocumentNumberGroup');
+            if (documentTypeGroup && documentNumberGroup) {
+                documentTypeGroup.style.display = (role === 'trader' || role === 'agent') ? 'block' : 'none';
+                documentNumberGroup.style.display = (role === 'trader' || role === 'agent') ? 'block' : 'none';
+            }
+
+            updateIdentityDocumentOptions();
         }
-        
+
+        function updateIdentityDocumentOptions() {
+            const applicantType = document.getElementById('applicantType')?.value;
+            const documentType = document.getElementById('identityDocumentType');
+            const helper = document.getElementById('identityDocumentHelper');
+            if (!documentType) return;
+
+            if (selectedRole !== 'trader' && selectedRole !== 'agent') {
+                documentType.innerHTML = '<option value="">Not required</option>';
+                return;
+            }
+
+            if (applicantType === 'foreigner') {
+                documentType.innerHTML = '<option value="passport">Passport</option>';
+                documentType.value = 'passport';
+                if (helper) helper.textContent = 'Foreigners must register with a passport.';
+            } else {
+                documentType.innerHTML = `
+                    <option value="">Select identity document</option>
+                    <option value="national_id">National ID</option>
+                    <option value="passport">Passport</option>
+                `;
+                if (helper) helper.textContent = 'Citizens can register with a national ID or passport.';
+            }
+        }
+
         function goToStep(step) {
-            if (step === 2 && !validateStep1()) return;
-            if (step === 3 && !validateStep2()) return;
-            
-            currentStep = step;
-            
-            document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
-            document.getElementById('step' + step).classList.add('active');
-            
-            updateStepIndicators();
-        }
-        
-        function updateStepIndicators() {
-            for (let i = 1; i <= 3; i++) {
-                const indicator = document.getElementById('step' + i + 'Indicator');
-                indicator.classList.remove('active', 'completed', 'pending');
-                
-                if (i < currentStep) {
-                    indicator.classList.add('completed');
-                } else if (i === currentStep) {
-                    indicator.classList.add('active');
-                } else {
-                    indicator.classList.add('pending');
-                }
-                
-                if (i < 3) {
-                    const line = document.getElementById('line' + i);
-                    line.classList.remove('active', 'completed');
-                    if (i < currentStep) line.classList.add('completed');
-                    else if (i === currentStep) line.classList.add('active');
-                }
+            if (step === 2) {
+                // Validate step 1
+                if (!validateStep1()) return;
+                document.getElementById('step1Content').style.display = 'none';
+                document.getElementById('step2Content').style.display = 'block';
+                currentStep = 2;
+            } else {
+                document.getElementById('step2Content').style.display = 'none';
+                document.getElementById('step1Content').style.display = 'block';
+                currentStep = 1;
             }
+            // Scroll to top of form
+            document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        
+
         function validateStep1() {
-            return true;
+            var valid = true;
+            var firstName = document.getElementById('firstName').value.trim();
+            var lastName = document.getElementById('lastName').value.trim();
+            var email = document.getElementById('regEmail').value.trim();
+            var applicantType = document.getElementById('applicantType').value;
+            var identityDocumentType = document.getElementById('identityDocumentType').value;
+            var identityDocumentNumber = document.getElementById('identityDocumentNumber').value.trim();
+            var nationality = document.getElementById('nationality').value.trim();
+
+            // First Name
+            if (!firstName) {
+                document.getElementById('firstNameGroup').classList.add('error');
+                document.getElementById('firstNameError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('firstNameGroup').classList.remove('error');
+                document.getElementById('firstNameError').style.display = 'none';
+            }
+
+            // Last Name
+            if (!lastName) {
+                document.getElementById('lastNameGroup').classList.add('error');
+                document.getElementById('lastNameError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('lastNameGroup').classList.remove('error');
+                document.getElementById('lastNameError').style.display = 'none';
+            }
+
+            // Email
+            if (!email || !email.includes('@')) {
+                document.getElementById('emailGroup').classList.add('error');
+                document.getElementById('emailError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('emailGroup').classList.remove('error');
+                document.getElementById('emailError').style.display = 'none';
+            }
+
+            // Applicant Type
+            if ((selectedRole === 'trader' || selectedRole === 'agent') && !applicantType) {
+                document.getElementById('applicantTypeGroup').classList.add('error');
+                document.getElementById('applicantTypeError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('applicantTypeGroup').classList.remove('error');
+                document.getElementById('applicantTypeError').style.display = 'none';
+            }
+
+            // Identity Document Type
+            if ((selectedRole === 'trader' || selectedRole === 'agent') && !identityDocumentType) {
+                document.getElementById('identityDocumentTypeGroup').classList.add('error');
+                document.getElementById('identityDocumentTypeError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('identityDocumentTypeGroup').classList.remove('error');
+                document.getElementById('identityDocumentTypeError').style.display = 'none';
+            }
+
+            // Identity Document Number
+            if ((selectedRole === 'trader' || selectedRole === 'agent') && !identityDocumentNumber) {
+                document.getElementById('identityDocumentNumberGroup').classList.add('error');
+                document.getElementById('identityDocumentNumberError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('identityDocumentNumberGroup').classList.remove('error');
+                document.getElementById('identityDocumentNumberError').style.display = 'none';
+            }
+
+            // Nationality
+            if (!nationality) {
+                document.getElementById('nationalityGroup').classList.add('error');
+                document.getElementById('nationalityError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('nationalityGroup').classList.remove('error');
+                document.getElementById('nationalityError').style.display = 'none';
+            }
+
+            if (!valid) {
+                alert('❌ Please fill all required fields in Personal Information');
+            }
+            return valid;
         }
-        
+
         function validateStep2() {
-            const firstName = document.getElementById('firstName').value.trim();
-            const lastName = document.getElementById('lastName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            
-            if (!firstName || !lastName || !email || !phone) {
-                alert('Please fill all required fields');
-                return false;
-            }
-            
-            if (!email.includes('@')) {
-                alert('Please enter a valid email');
-                return false;
-            }
-            
-            return true;
-        }
-        
-        function checkPasswordStrength() {
-            const password = document.getElementById('password').value;
-            const strengthBar = document.getElementById('strengthBar');
-            const strengthText = document.getElementById('strengthText');
-            
-            let strength = 0;
-            if (password.length >= 8) strength++;
-            if (password.match(/[a-z]/)) strength++;
-            if (password.match(/[A-Z]/)) strength++;
-            if (password.match(/[0-9]/)) strength++;
-            if (password.match(/[^a-zA-Z0-9]/)) strength++;
-            
-            strengthBar.classList.remove('weak', 'medium', 'strong');
-            
-            if (strength <= 2) {
-                strengthBar.classList.add('weak');
-                strengthText.textContent = 'Weak password';
-            } else if (strength <= 4) {
-                strengthBar.classList.add('medium');
-                strengthText.textContent = 'Medium strength';
+            var valid = true;
+            var phone = document.getElementById('phone').value.trim();
+            var password = document.getElementById('regPassword').value;
+            var confirm = document.getElementById('confirmPassword').value;
+            var strong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+            // Phone
+            if (!phone) {
+                document.getElementById('phoneGroup').classList.add('error');
+                document.getElementById('phoneError').style.display = 'block';
+                valid = false;
             } else {
-                strengthBar.classList.add('strong');
-                strengthText.textContent = 'Strong password';
+                document.getElementById('phoneGroup').classList.remove('error');
+                document.getElementById('phoneError').style.display = 'none';
             }
-        }
-        
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const eye = document.getElementById(inputId + 'Eye');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                eye.classList.replace('ri-eye-line', 'ri-eye-off-line');
+
+            // Password
+            if (!strong.test(password)) {
+                document.getElementById('passwordGroup').classList.add('error');
+                document.getElementById('passwordError').style.display = 'block';
+                valid = false;
             } else {
-                input.type = 'password';
-                eye.classList.replace('ri-eye-off-line', 'ri-eye-line');
+                document.getElementById('passwordGroup').classList.remove('error');
+                document.getElementById('passwordError').style.display = 'none';
             }
-        }
-        
-        async function registerUser() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (password.length < 8) {
-                alert('Password must be at least 8 characters');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                alert('Passwords do not match');
-                return;
-            }
-            
-            const firstName = document.getElementById('firstName').value.trim();
-            const lastName = document.getElementById('lastName').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const nationality = document.getElementById('nationality').value.trim();
-            
-            const metadata = {
-                full_name: `${firstName} ${lastName}`,
-                role: selectedRole,
-                nationality,
-                phone
-            };
-            
-            const result = await signUp(email, password, metadata);
-            
-            if (result.success) {
-                document.querySelectorAll('.form-section').forEach(section => section.classList.remove('active'));
-                document.getElementById('successSection').classList.add('active');
+
+            // Confirm
+            if (password !== confirm || password === '') {
+                document.getElementById('confirmGroup').classList.add('error');
+                document.getElementById('confirmError').style.display = 'block';
+                valid = false;
             } else {
-                alert('Registration failed: ' + (result.error || 'Unknown error'));
+                document.getElementById('confirmGroup').classList.remove('error');
+                document.getElementById('confirmError').style.display = 'none';
             }
+
+            if (!valid) {
+                alert('❌ Please fill all required fields in Contact & Security');
+            }
+            return valid;
         }
-        
-        window.selectRole = selectRole;
-        window.goToStep = goToStep;
-        window.checkPasswordStrength = checkPasswordStrength;
-        window.togglePassword = togglePassword;
-        window.registerUser = registerUser;
+
+        function goToLogin() {
+            document.getElementById('successOverlay').classList.remove('show');
+            window.location.href = 'login.html';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            selectRole('trader');
+            document.getElementById('applicantType').addEventListener('change', updateIdentityDocumentOptions);
+            
+            // Add submit event listener to form
+            const form = document.getElementById('registrationForm');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    // Use window.registerUser since it's defined in the Supabase script
+                    if (window.registerUser) {
+                        await window.registerUser();
+                    } else {
+                        alert('Registration system is loading. Please wait a moment and try again.');
+                    }
+                });
+            }
+        });
+
+        // Enter key support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (currentStep === 1) {
+                    goToStep(2);
+                }
+            }
+        });
     </script>
+
+    <script type="module">
+        import { SUPABASE_CONFIG, dashboardUrls } from '../js/config.js';
+        import supabase from '../js/supabase.js';
+        import { signUp } from '../js/auth.js';
+
+        // Registration function
+        async function registerUser() {
+            if (!validateStep1() || !validateStep2()) {
+                if (!validateStep1()) goToStep(1);
+                return;
+            }
+
+            var firstName = document.getElementById('firstName').value.trim();
+            var lastName = document.getElementById('lastName').value.trim();
+            var email = document.getElementById('regEmail').value.trim();
+            var password = document.getElementById('regPassword').value;
+            var nationality = document.getElementById('nationality').value.trim();
+            var applicantType = (selectedRole === 'trader' || selectedRole === 'agent')
+                ? document.getElementById('applicantType').value
+                : 'not_applicable';
+            var identityDocumentType = (selectedRole === 'trader' || selectedRole === 'agent')
+                ? document.getElementById('identityDocumentType').value
+                : 'not_applicable';
+            var identityDocumentNumber = (selectedRole === 'trader' || selectedRole === 'agent')
+                ? document.getElementById('identityDocumentNumber').value.trim()
+                : null;
+            var phone = document.getElementById('phone').value.trim();
+            var role = selectedRole;
+
+            // Map role to main role
+            var mainRole = selectedRole;
+
+            // Combine first and last name for Supabase
+            var fullName = firstName + ' ' + lastName;
+
+            var metadata = {
+                full_name: fullName,
+                first_name: firstName,
+                last_name: lastName,
+                phone: phone,
+                nationality: nationality,
+                applicant_type: applicantType,
+                identity_document_type: identityDocumentType,
+                identity_document_number: identityDocumentNumber,
+                role: mainRole
+            };
+
+            try {
+                // Show loading state
+                document.getElementById('registerBtn').disabled = true;
+                document.getElementById('registerBtn').innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i> Creating Account...';
+
+                // Call Supabase signUp with email confirmation
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: metadata,
+                        emailRedirectTo: window.location.origin + '/auth/register.html'
+                    }
+                });
+
+                if (error) {
+                    // Handle specific errors
+                    if (error.message.includes('already registered')) {
+                        alert('❌ Email already exists. Please use a different email or sign in.');
+                    } else if (error.message.includes('password')) {
+                        alert('❌ Password is too weak. Please use a stronger password.');
+                    } else if (error.message.includes('Invalid email')) {
+                        alert('❌ Invalid email address.');
+                    } else {
+                        alert('❌ Registration failed: ' + error.message);
+                    }
+                    // Reset button state
+                    document.getElementById('registerBtn').disabled = false;
+                    document.getElementById('registerBtn').innerHTML = 'Create Account <i class="ri-check-line"></i>';
+                    return;
+                }
+
+                // Create profile in profiles table
+                if (data.user) {
+                    try {
+                        const { error: profileError } = await supabase
+                            .from('profiles')
+                            .insert({
+                                user_id: data.user.id,
+                                full_name: fullName,
+                                email: email,
+                                phone: phone,
+                                nationality: nationality,
+                                applicant_type: applicantType,
+                                identity_document_type: identityDocumentType,
+                                identity_document_number: identityDocumentNumber,
+                                role: mainRole,
+                                status: 'active',
+                                compliance_score: 100
+                            });
+
+                        if (profileError) {
+                            console.error('Profile creation error:', profileError);
+                        } else {
+                            console.log('Profile created successfully for user:', data.user.id);
+                        }
+                    } catch (profileError) {
+                        console.error('Profile creation failed:', profileError);
+                    }
+                }
+
+                // Check if email confirmation is required or if we can auto-login
+                if (data.user) {
+                    // Store user info for post-confirmation redirect
+                    sessionStorage.setItem('post_signup_email', email);
+                    sessionStorage.setItem('post_signup_role', mainRole);
+                    sessionStorage.setItem('post_signup_name', fullName);
+
+                    // If email confirmation is required
+                    if (!data.user.email_confirmed_at && data.session === null) {
+                        // Show email confirmation message
+                        document.getElementById('successOverlay').classList.add('show');
+                    } else {
+                        // User is confirmed (rare case), auto login and redirect
+                        console.log('User email already confirmed or auto-confirmed');
+                        
+                        // Store session in localStorage
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userName', fullName);
+                        localStorage.setItem('userEmail', email);
+                        localStorage.setItem('userRole', mainRole);
+                        localStorage.setItem('userIdentifier', data.user.id);
+
+                        // Redirect based on role
+                        const dashboardUrls = {
+                            'trader': 'pages/trader/dashboard-trader.html',
+                            'agent': 'pages/agent/dashboard-agent.html',
+                            'officer': 'pages/officer/dashboard-officer.html',
+                            'inspector': 'pages/inspector/dashboard-inspector.html',
+                            'supervisor': 'pages/supervisor/dashboard-supervisor.html',
+                            'revenue': 'pages/revenue/dashboard-revenue.html',
+                            'administrator': 'pages/admin/dashboard-admin.html'
+                        };
+                        
+                        const dashboardUrl = dashboardUrls[mainRole] || dashboardUrls.trader;
+                        
+                        // Small delay to ensure session is set
+                        setTimeout(() => {
+                            window.location.href = dashboardUrl;
+                        }, 500);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Registration error:', error);
+                if (error.message && error.message.includes('fetch')) {
+                    alert('❌ Network error. Please check your internet connection and try again.');
+                } else {
+                    alert('❌ An unexpected error occurred. Please try again.');
+                }
+                // Reset button state
+                document.getElementById('registerBtn').disabled = false;
+                document.getElementById('registerBtn').innerHTML = 'Create Account <i class="ri-check-line"></i>';
+            }
+        }
+
+        // Make registerUser globally available
+        window.registerUser = registerUser;
+        console.log('Registration system initialized successfully');
+
+        // Handle login redirection after email confirmation
+        async function handlePostConfirmationRedirect() {
+            // Check if user is already logged in
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                try {
+                    // Get user profile
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .single();
+
+                    if (profile) {
+                        // Store session in localStorage
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userName', profile.full_name);
+                        localStorage.setItem('userEmail', user.email);
+                        localStorage.setItem('userRole', profile.role);
+                        localStorage.setItem('userIdentifier', profile.id);
+
+                        // Redirect to dashboard based on role
+                        const dashboardUrls = {
+                            'trader': 'pages/trader/dashboard-trader.html',
+                            'agent': 'pages/agent/dashboard-agent.html',
+                            'officer': 'pages/officer/dashboard-officer.html',
+                            'inspector': 'pages/inspector/dashboard-inspector.html',
+                            'supervisor': 'pages/supervisor/dashboard-supervisor.html',
+                            'revenue': 'pages/revenue/dashboard-revenue.html',
+                            'administrator': 'pages/admin/dashboard-admin.html'
+                        };
+                        
+                        const dashboardUrl = dashboardUrls[profile.role] || dashboardUrls['trader'];
+                        window.location.href = dashboardUrl;
+                    }
+                } catch (error) {
+                    console.error('Profile retrieval error:', error);
+                    window.location.href = 'login.html';
+                }
+            }
+        }
+
+        // Check for email confirmation callback
+        if (window.location.hash.includes('access_token')) {
+            console.log('Email confirmation detected, handling redirect...');
+            handlePostConfirmationRedirect();
+        }
+    </script>
+
 </body>
 </html>

@@ -176,5 +176,44 @@
             }
         });
     </script>
+    <script type="module">
+        import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
+
+        async function loadPage() {
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const hasAccess = await verifyRoleAccess('administrator');
+            if (!hasAccess) {
+                alert('You do not have permission to access this page.');
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const user = await getCurrentUser();
+            const profile = user ? await getUserProfile(user.id) : null;
+            
+            if (profile) {
+                document.querySelector('h3').textContent = profile.full_name || 'Administrator';
+                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'System Admin';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPage);
+
+        // Sign out functionality
+        const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
+        if (signOutBtn) {
+            signOutBtn.onclick = async function() {
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+        }
+    </script>
 </body>
 </html>

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Validation Results - SSRA Customs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .validation-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-left: 4px solid #dc2626;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .validation-error .icon {
+            color: #dc2626;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+        .validation-error .text {
+            color: #7f1d1d;
+            font-size: 0.9rem;
+        }
+        .validation-error .text .label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .validation-warning {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-left: 4px solid #f59e0b;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .validation-warning .icon {
+            color: #f59e0b;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+        .validation-warning .text {
+            color: #78350f;
+            font-size: 0.9rem;
+        }
+        .validation-warning .text .label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .validation-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-left: 4px solid #059669;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        .validation-success .icon {
+            color: #059669;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+        }
+        .validation-success .text {
+            color: #065f46;
+            font-size: 0.9rem;
+        }
+        .validation-success .text .label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+
+        .validation-section {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+        .validation-section h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .validation-section .status-badge {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            margin-left: auto;
+        }
+        .status-badge.passed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-badge.failed {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+        .status-badge.warning {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.85rem;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        .detail-value {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        .btn-primary {
+            flex: 1;
+            background: #1a365d;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-primary:hover {
+            background: #0f2440;
+        }
+        .btn-secondary {
+            flex: 1;
+            background: #e5e7eb;
+            color: #374151;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="min-h-screen p-6">
+        <div class="max-w-3xl mx-auto">
+            <!-- Header -->
+            <div class="mb-6">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Application Validation Results</h1>
+                <p class="text-gray-600">Review the validation results below and take necessary actions</p>
+            </div>
+
+            <!-- Status Summary -->
+            <div id="statusSummary" class="validation-section mb-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Application</div>
+                        <div id="appNumber" class="text-lg font-bold text-gray-900">#APP-2024-001234</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Status</div>
+                        <div id="validationStatus" class="text-lg font-bold text-red-600 flex items-center gap-1">
+                            <i class="ri-close-circle-fill"></i> Failed
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Errors</div>
+                        <div id="errorCount" class="text-lg font-bold text-red-600">5</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold text-gray-500 uppercase mb-1">Warnings</div>
+                        <div id="warningCount" class="text-lg font-bold text-amber-600">2</div>
+                    </div>
+                </div>
+                <div class="text-xs text-gray-500">
+                    <i class="ri-time-line"></i>
+                    Validated: <span id="validatedAt">2024-01-15 14:32:00 UTC</span>
+                </div>
+            </div>
+
+            <!-- Errors Section -->
+            <div id="errorsSection" class="validation-section hidden">
+                <h3 class="font-bold text-red-900 mb-4 flex items-center gap-2">
+                    <i class="ri-error-warning-fill"></i>
+                    Required Actions (Errors)
+                </h3>
+                <div id="errorsList"></div>
+            </div>
+
+            <!-- Validation Checks -->
+            <div class="space-y-4">
+                <!-- Data Validation -->
+                <div id="dataValidationSection" class="validation-section">
+                    <h4>
+                        <i class="ri-file-check-line"></i>
+                        Data Validation
+                        <span class="status-badge failed">Failed</span>
+                    </h4>
+                    <div id="dataValidationDetails">
+                        <div class="validation-error">
+                            <div class="icon"><i class="ri-close-circle-fill"></i></div>
+                            <div class="text">
+                                <span class="label">Application type is missing</span>
+                                Please select an application type (Import, Export, Transit, or Re-export)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Verification -->
+                <div id="documentVerificationSection" class="validation-section">
+                    <h4>
+                        <i class="ri-file-list-line"></i>
+                        Document Verification
+                        <span class="status-badge failed">Failed</span>
+                    </h4>
+                    <div id="documentVerificationDetails">
+                        <div class="validation-error">
+                            <div class="icon"><i class="ri-close-circle-fill"></i></div>
+                            <div class="text">
+                                <span class="label">No documents uploaded</span>
+                                Please upload at least one document (Commercial Invoice, Packing List, etc.)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mandatory Fields -->
+                <div id="mandatoryFieldsSection" class="validation-section">
+                    <h4>
+                        <i class="ri-checkbox-circle-line"></i>
+                        Mandatory Fields
+                        <span class="status-badge passed">Passed</span>
+                    </h4>
+                    <div class="validation-success">
+                        <div class="icon"><i class="ri-check-circle-fill"></i></div>
+                        <div class="text">
+                            <span class="label">All mandatory fields are complete</span>
+                            Your application contains all required information
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Duplicate Detection -->
+                <div id="duplicateDetectionSection" class="validation-section">
+                    <h4>
+                        <i class="ri-search-line"></i>
+                        Duplicate Detection
+                        <span class="status-badge passed">Passed</span>
+                    </h4>
+                    <div class="validation-success">
+                        <div class="icon"><i class="ri-check-circle-fill"></i></div>
+                        <div class="text">
+                            <span class="label">No duplicate applications detected</span>
+                            Your application is unique in our system
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HS Code Validation -->
+                <div id="hsCodeValidationSection" class="validation-section">
+                    <h4>
+                        <i class="ri-barcode-line"></i>
+                        HS Code Validation
+                        <span class="status-badge warning">Warning</span>
+                    </h4>
+                    <div id="hsCodeValidationDetails">
+                        <div class="validation-warning">
+                            <div class="icon"><i class="ri-alert-line"></i></div>
+                            <div class="text">
+                                <span class="label">HS Code not found in tariff database</span>
+                                HS code "870190" is not recognized. Please verify or contact support.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customs Value Verification -->
+                <div id="customsValueSection" class="validation-section">
+                    <h4>
+                        <i class="ri-coin-line"></i>
+                        Customs Value Verification
+                        <span class="status-badge passed">Passed</span>
+                    </h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Declared Value:</span>
+                        <span class="detail-value">$15,250.00</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Calculated Total:</span>
+                        <span class="detail-value">$15,250.00</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Variance:</span>
+                        <span class="detail-value">0%</span>
+                    </div>
+                </div>
+
+                <!-- Compliance Checking -->
+                <div id="complianceCheckingSection" class="validation-section">
+                    <h4>
+                        <i class="ri-shield-check-line"></i>
+                        Compliance Checking
+                        <span class="status-badge passed">Passed</span>
+                    </h4>
+                    <div class="validation-success">
+                        <div class="icon"><i class="ri-check-circle-fill"></i></div>
+                        <div class="text">
+                            <span class="label">All compliance checks passed</span>
+                            No restricted countries or items detected
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fraud Detection -->
+                <div id="fraudDetectionSection" class="validation-section">
+                    <h4>
+                        <i class="ri-alert-line"></i>
+                        Fraud Detection
+                        <span class="status-badge passed">Passed</span>
+                    </h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Fraud Risk Score:</span>
+                        <span class="detail-value">15/100 (Low)</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Risk Level:</span>
+                        <span class="detail-value"><span style="background:#d1fae5; color:#065f46; padding:0.25rem 0.6rem; border-radius:9999px; font-size:0.75rem; font-weight:600;">LOW</span></span>
+                    </div>
+                </div>
+
+                <!-- Risk Assessment -->
+                <div id="riskAssessmentSection" class="validation-section">
+                    <h4>
+                        <i class="ri-survey-line"></i>
+                        Risk Assessment
+                        <span class="status-badge passed">Passed</span>
+                    </h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Risk Score:</span>
+                        <span class="detail-value">72/100</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Risk Level:</span>
+                        <span class="detail-value"><span style="background:#dbeafe; color:#1a365d; padding:0.25rem 0.6rem; border-radius:9999px; font-size:0.75rem; font-weight:600;">MEDIUM</span></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Documentation:</span>
+                        <span class="detail-value">90%</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Compliance Score:</span>
+                        <span class="detail-value">95%</span>
+                    </div>
+                </div>
+
+                <!-- Business Rules -->
+                <div id="businessRulesSection" class="validation-section">
+                    <h4>
+                        <i class="ri-git-branch-line"></i>
+                        Business Rules
+                        <span class="status-badge passed">Passed</span>
+                    </h4>
+                    <div class="validation-success">
+                        <div class="icon"><i class="ri-check-circle-fill"></i></div>
+                        <div class="text">
+                            <span class="label">All business rules validated</span>
+                            Application meets all system requirements
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warnings Section -->
+            <div id="warningsSection" class="validation-section hidden mt-6">
+                <h3 class="font-bold text-amber-900 mb-4 flex items-center gap-2">
+                    <i class="ri-alert-fill"></i>
+                    Warnings (For Your Information)
+                </h3>
+                <div id="warningsList"></div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons mt-8 sticky bottom-0 bg-white p-4 rounded-lg shadow-lg">
+                <button class="btn-secondary" onclick="goBackToApplication()">
+                    <i class="ri-arrow-left-line"></i> Back to Application
+                </button>
+                <button class="btn-primary" id="proceedButton" onclick="proceedWithApplication()">
+                    <i class="ri-check-line"></i> Proceed (If No Errors)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to display validation results (will be called from parent page)
+        function displayValidationResults(validationResults) {
+            console.log('Displaying validation results:', validationResults);
+            
+            // Update summary
+            document.getElementById('appNumber').textContent = '#' + (validationResults.applicationNumber || 'APP-2024-001234');
+            document.getElementById('errorCount').textContent = validationResults.errors.length;
+            document.getElementById('warningCount').textContent = validationResults.warnings.length;
+            document.getElementById('validatedAt').textContent = new Date(validationResults.timestamp).toLocaleString();
+
+            // Update status
+            const hasErrors = validationResults.errors.length > 0;
+            const statusElement = document.getElementById('validationStatus');
+            if (hasErrors) {
+                statusElement.innerHTML = '<i class="ri-close-circle-fill"></i> Failed - Requires Correction';
+                statusElement.className = 'text-lg font-bold text-red-600 flex items-center gap-1';
+                document.getElementById('proceedButton').disabled = true;
+            } else {
+                statusElement.innerHTML = '<i class="ri-check-circle-fill"></i> Passed';
+                statusElement.className = 'text-lg font-bold text-green-600 flex items-center gap-1';
+            }
+
+            // Display errors
+            if (validationResults.errors.length > 0) {
+                document.getElementById('errorsSection').classList.remove('hidden');
+                const errorsList = document.getElementById('errorsList');
+                errorsList.innerHTML = validationResults.errors.map(error => `
+                    <div class="validation-error">
+                        <div class="icon"><i class="ri-close-circle-fill"></i></div>
+                        <div class="text">${error}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Display warnings
+            if (validationResults.warnings.length > 0) {
+                document.getElementById('warningsSection').classList.remove('hidden');
+                const warningsList = document.getElementById('warningsList');
+                warningsList.innerHTML = validationResults.warnings.map(warning => `
+                    <div class="validation-warning">
+                        <div class="icon"><i class="ri-alert-line"></i></div>
+                        <div class="text">${warning}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Display detailed validation checks
+            displayValidationDetails(validationResults.details);
+        }
+
+        function displayValidationDetails(details) {
+            // Update each section based on validation details
+            // This would be customized based on the structure of validationResults
+            console.log('Detailed validation info:', details);
+        }
+
+        function goBackToApplication() {
+            window.history.back();
+        }
+
+        function proceedWithApplication() {
+            if (document.getElementById('errorCount').textContent !== '0') {
+                alert('❌ Cannot proceed. Please fix all errors first.');
+                return;
+            }
+            // Parent page should handle actual submission
+            window.parent.postMessage({ action: 'submitValidated' }, '*');
+        }
+    </script>
+
+</body>
+</html>

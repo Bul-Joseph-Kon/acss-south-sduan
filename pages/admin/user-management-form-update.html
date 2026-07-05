@@ -1,0 +1,215 @@
+<!-- ADD/EDIT USER MODAL FORM - UPDATED WITH STAFF FIELDS -->
+<!-- Replace the form section in user-management.html with this content -->
+
+<form id="userForm" class="space-y-4">
+    <input type="hidden" id="userId" />
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+        <input type="text" id="fullName" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" required />
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" id="userEmail" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" required />
+    </div>
+    <div id="passwordField">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <input type="password" id="userPassword" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" />
+        <p class="text-xs text-gray-500 mt-1">Required for new users</p>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+        <input type="tel" id="userPhone" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" />
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+        <input type="text" id="employeeId" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="e.g., EMP-001" />
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+        <select id="department" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+            <option value="">Select Department</option>
+            <option value="Customs">Customs</option>
+            <option value="Inspection">Inspection</option>
+            <option value="Revenue">Revenue</option>
+            <option value="Administration">Administration</option>
+            <option value="Operations">Operations</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Customs Office</label>
+        <select id="customsOffice" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+            <option value="">Select Customs Office</option>
+            <option value="Juba">Juba</option>
+            <option value="Nimule">Nimule</option>
+            <option value="Kaya">Kaya</option>
+            <option value="Rumbek">Rumbek</option>
+            <option value="Wau">Wau</option>
+            <option value="Malakal">Malakal</option>
+        </select>
+    </div>
+    <div id="traderAgentFields" style="display:none;">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+            <input type="text" id="userNationality" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" value="South Sudan" />
+        </div>
+        <div id="userApplicantTypeField" style="display:none;">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Trader Type</label>
+            <select id="userApplicantType" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+                <option value="">Select Trader Type</option>
+                <option value="citizen">Citizen</option>
+                <option value="foreigner">Foreigner</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Required when creating or editing a Trader account</p>
+        </div>
+        <div id="userIdentityDocumentTypeField" style="display:none;">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Identity Document</label>
+            <select id="userIdentityDocumentType" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+                <option value="">Select Identity Document</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1" id="userIdentityDocumentHelper">Foreigners use passport. Citizens use national ID or passport.</p>
+        </div>
+        <div id="userIdentityDocumentNumberField" style="display:none;">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Document Number</label>
+            <input type="text" id="userIdentityDocumentNumber" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" />
+        </div>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+        <select id="userRole" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" required>
+            <option value="">Select Role</option>
+            <option value="officer">Customs Officer</option>
+            <option value="inspector">Inspector</option>
+            <option value="supervisor">Supervisor</option>
+            <option value="revenue">Revenue Officer</option>
+            <option value="administrator">Administrator</option>
+            <option value="trader">Trader</option>
+            <option value="agent">Agent</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <select id="userStatus" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="pending">Pending</option>
+        </select>
+    </div>
+    <div class="flex gap-3 pt-4">
+        <button type="button" onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-200 transition">Cancel</button>
+        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">Save User</button>
+    </div>
+</form>
+
+<!-- JAVASCRIPT UPDATES FOR NEW FIELDS -->
+<!-- Add this to the handleUserSubmit function in user-management.html -->
+
+async function handleUserSubmit(e) {
+    e.preventDefault();
+    
+    const userId = document.getElementById('userId').value;
+    const fullName = document.getElementById('fullName').value;
+    const email = document.getElementById('userEmail').value;
+    const password = document.getElementById('userPassword').value;
+    const phone = document.getElementById('userPhone').value;
+    const employeeId = document.getElementById('employeeId').value;
+    const department = document.getElementById('department').value;
+    const customsOffice = document.getElementById('customsOffice').value;
+    const nationality = document.getElementById('userNationality').value;
+    const role = document.getElementById('userRole').value;
+    const applicantType = role === 'trader' || role === 'agent' ? document.getElementById('userApplicantType').value : 'not_applicable';
+    const identityDocumentType = role === 'trader' || role === 'agent' ? document.getElementById('userIdentityDocumentType').value : 'not_applicable';
+    const identityDocumentNumber = role === 'trader' || role === 'agent' ? document.getElementById('userIdentityDocumentNumber').value.trim() : null;
+    const status = document.getElementById('userStatus').value;
+
+    if (role === 'trader' && !applicantType) {
+        alert('Please select whether the Trader is a Citizen or Foreigner');
+        return;
+    }
+
+    if (role === 'trader' && (!identityDocumentType || !identityDocumentNumber)) {
+        alert('Please select the Trader identity document and enter the document number');
+        return;
+    }
+
+    if (userId) {
+        const roleResult = await updateUserRole(userId, role);
+        const statusResult = await updateUserStatus(userId, status);
+        
+        if (roleResult.success && statusResult.success) {
+            alert('User updated successfully');
+            closeModal();
+            loadUsers();
+        } else {
+            alert('Error updating user: ' + (roleResult.error || statusResult.error));
+        }
+    } else {
+        if (!password) {
+            alert('Password is required for new users');
+            return;
+        }
+
+        const result = await createUser(email, password, fullName, role, phone, nationality, applicantType, identityDocumentType, identityDocumentNumber, employeeId, department, customsOffice);
+        if (result.success) {
+            alert('User created successfully');
+            closeModal();
+            loadUsers();
+        } else {
+            alert('Error creating user: ' + result.error);
+        }
+    }
+}
+
+<!-- UPDATE toggleApplicantTypeField FUNCTION -->
+function toggleApplicantTypeField() {
+    const role = document.getElementById('userRole').value;
+    const traderAgentFields = document.getElementById('traderAgentFields');
+    const field = document.getElementById('userApplicantTypeField');
+    const documentTypeField = document.getElementById('userIdentityDocumentTypeField');
+    const documentNumberField = document.getElementById('userIdentityDocumentNumberField');
+    
+    // Show trader/agent fields only for trader and agent roles
+    if (role === 'trader' || role === 'agent') {
+        traderAgentFields.style.display = 'block';
+        field.style.display = 'block';
+        documentTypeField.style.display = 'block';
+        documentNumberField.style.display = 'block';
+        document.getElementById('userApplicantType').required = true;
+        document.getElementById('userIdentityDocumentType').required = true;
+        document.getElementById('userIdentityDocumentNumber').required = true;
+    } else {
+        traderAgentFields.style.display = 'none';
+        field.style.display = 'none';
+        documentTypeField.style.display = 'none';
+        documentNumberField.style.display = 'none';
+        document.getElementById('userApplicantType').value = '';
+        document.getElementById('userIdentityDocumentType').value = '';
+        document.getElementById('userIdentityDocumentNumber').value = '';
+    }
+    updateAdminIdentityDocumentOptions();
+}
+
+<!-- UPDATE editUser FUNCTION TO INCLUDE NEW FIELDS -->
+window.editUser = function(userId) {
+    const user = allUsers.find(u => u.user_id === userId);
+    if (!user) return;
+
+    document.getElementById('modalTitle').textContent = 'Edit User';
+    document.getElementById('userId').value = userId;
+    document.getElementById('fullName').value = user.full_name || '';
+    document.getElementById('userEmail').value = user.email || '';
+    document.getElementById('userPhone').value = user.phone || '';
+    document.getElementById('employeeId').value = user.employee_id || '';
+    document.getElementById('department').value = user.department || '';
+    document.getElementById('customsOffice').value = user.customs_office || '';
+    document.getElementById('userNationality').value = user.nationality || 'South Sudan';
+    document.getElementById('userRole').value = user.role || '';
+    document.getElementById('userApplicantType').value = user.applicant_type || '';
+    updateAdminIdentityDocumentOptions();
+    document.getElementById('userIdentityDocumentType').value = user.identity_document_type || '';
+    document.getElementById('userIdentityDocumentNumber').value = user.identity_document_number || '';
+    document.getElementById('userStatus').value = user.status || 'active';
+    document.getElementById('passwordField').style.display = 'none';
+    document.getElementById('userPassword').required = false;
+    toggleApplicantTypeField();
+    document.getElementById('userModal').classList.add('open');
+};

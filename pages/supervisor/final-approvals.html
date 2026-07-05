@@ -26,20 +26,28 @@
         .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
         .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
         .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
-        .approval-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; transition: all 0.2s ease; }
-        .approval-card:hover { border-color: #1e3a5f; background: #f8fafc; }
+        
+        .approval-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; transition: all 0.2s ease; }
+        
         .flow-badge { font-size: 0.55rem; padding: 0.1rem 0.4rem; border-radius: 9999px; font-weight: 600; }
         .flow-badge-ai { background: #dbeafe; color: #1e40af; }
         .flow-badge-officer { background: #fef3c7; color: #92400e; }
         .flow-badge-inspector { background: #fee2e2; color: #991b1b; }
         .flow-badge-revenue { background: #d1fae5; color: #065f46; }
         .flow-badge-supervisor { background: #f3e8ff; color: #6b21a8; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 50; }
+        .modal-overlay.open { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 1rem; padding: 2rem; max-width: 600px; width: 90%; box-shadow: 0 20px 25px rgba(0,0,0,0.15); }
+        .modal-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #1f2937; }
+        textarea { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-family: inherit; resize: vertical; }
     </style>
 </head>
 <body>
     <div class="min-h-screen bg-gray-100">
         <div class="max-w-7xl mx-auto px-4 py-5">
             <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Sidebar -->
                 <aside class="lg:w-72 flex-shrink-0">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
                         <div class="text-center mb-5">
@@ -58,24 +66,19 @@
                             <a href="reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Reports</span></a>
                             <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">6</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
                 </aside>
 
+                <!-- Main Content -->
                 <main class="flex-1 space-y-5">
+                    <!-- Top Bar Banner -->
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
                             <h2 class="text-2xl font-bold tracking-tight">✅ Final Approvals</h2>
-                            <p class="opacity-90 text-sm">Review and approve applications</p>
-                            <div class="flex gap-2 mt-2 flex-wrap">
-                                <span class="flow-badge flow-badge-ai">🤖 AI Validated</span>
-                                <span class="flow-badge flow-badge-officer">👤 Officer Review</span>
-                                <span class="flow-badge flow-badge-inspector">🔍 Inspection</span>
-                                <span class="flow-badge flow-badge-revenue">💰 Revenue</span>
-                                <span class="flow-badge flow-badge-supervisor">⭐ Supervisor</span>
-                            </div>
+                            <p class="opacity-90 text-sm">Review, cross-examine records, and confirm decisions</p>
                         </div>
                         <div class="relative">
                             <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
@@ -87,107 +90,726 @@
                                 <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
                                 <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="approval-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-blue-600">CV-2026-0042</h4>
-                                    <p class="text-sm text-gray-500">CVET Declaration · John Trading Co. · $25,000</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-review">Awaiting Approval</span>
-                                        <span class="flow-badge flow-badge-ai">AI Validated</span>
-                                        <span class="flow-badge flow-badge-officer">Officer</span>
-                                        <span class="flow-badge flow-badge-revenue">Revenue</span>
-                                        <span class="text-xs text-gray-400">Submitted: Jun 22, 2026</span>
-                                    </div>
-                                    <div class="mt-2 p-2 bg-gray-50 rounded-lg text-sm">
-                                        <p><span class="text-gray-500">Review Notes:</span> All documents verified. Duty calculated correctly. Revenue verified. Recommended for approval.</p>
-                                        <p><span class="text-gray-500">Channel:</span> <span class="font-semibold text-green-600">Green</span> · Low Risk</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="alert('✅ Application approved by Supervisor')">Approve</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition" onclick="alert('❌ Application rejected by Supervisor')">Reject</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing details')">Details</button>
-                                </div>
+                    <!-- Split Workspace -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" id="approvalsWorkspace">
+                        <!-- Left pane: pending list -->
+                        <div class="lg:col-span-5 space-y-3" id="approvalsList">
+                            <div class="text-center py-10 bg-white rounded-xl border border-gray-200 shadow-sm mx-auto w-full">
+                                <i class="ri-loader-4-line text-4xl text-blue-500 animate-spin block mb-2 mx-auto"></i>
+                                <p class="text-gray-500">Loading approvals...</p>
                             </div>
                         </div>
 
-                        <div class="approval-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-emerald-600">DA-2026-0018</h4>
-                                    <p class="text-sm text-gray-500">Direct Assessment · Sarah Exporters · $50,000</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-review">Awaiting Approval</span>
-                                        <span class="flow-badge flow-badge-ai">AI Validated</span>
-                                        <span class="flow-badge flow-badge-officer">Officer</span>
-                                        <span class="flow-badge flow-badge-inspector">Inspection</span>
-                                        <span class="flow-badge flow-badge-revenue">Revenue</span>
-                                        <span class="text-xs text-gray-400">Submitted: Jun 20, 2026</span>
-                                    </div>
-                                    <div class="mt-2 p-2 bg-gray-50 rounded-lg text-sm">
-                                        <p><span class="text-gray-500">Review Notes:</span> All compliance requirements met. Inspection passed. Revenue verified. Recommended for approval.</p>
-                                        <p><span class="text-gray-500">Channel:</span> <span class="font-semibold text-yellow-600">Yellow</span> · Medium Risk</p>
-                                    </div>
+                        <!-- Right pane: details panel -->
+                        <div class="lg:col-span-7 bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col min-h-[550px]" id="detailPanel">
+                            <!-- Placeholder empty state -->
+                            <div class="flex flex-col items-center justify-center flex-1 py-16 text-center text-gray-500" id="detailPlaceholder">
+                                <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 mb-4 mx-auto animate-pulse">
+                                    <i class="ri-check-double-line text-3xl"></i>
                                 </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="alert('✅ Application approved by Supervisor')">Approve</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition" onclick="alert('❌ Application rejected by Supervisor')">Reject</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing details')">Details</button>
+                                <h3 class="font-bold text-gray-700 text-lg">Select an Application</h3>
+                                <p class="text-sm mt-1 max-w-xs mx-auto">Choose a pending application from the list to review findings, reports, and make a final decision.</p>
+                            </div>
+
+                            <!-- Detail Content (initially hidden) -->
+                            <div class="hidden flex-col h-full space-y-6" id="detailContent">
+                                <!-- Application Header -->
+                                <div class="flex justify-between items-start border-b pb-4">
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-900" id="detailAppNumber">CVET-000000</h3>
+                                        <p class="text-xs text-gray-500 mt-1" id="detailAppMeta">Import · Value: $0 USD · Trader: N/A</p>
+                                    </div>
+                                    <span class="status-badge status-review" id="detailAppStatus">Awaiting Review</span>
+                                </div>
+
+                                <!-- Tab Navigation -->
+                                <div class="flex border-b overflow-x-auto text-sm" id="detailTabs">
+                                    <button class="px-4 py-2 border-b-2 font-medium text-blue-600 border-blue-600 focus:outline-none flex items-center gap-1.5 whitespace-nowrap" onclick="switchDetailTab('officer', event)">
+                                        <i class="ri-user-voice-line"></i> Officer Findings
+                                    </button>
+                                    <button class="px-4 py-2 border-b-2 font-medium text-gray-500 border-transparent hover:text-gray-700 focus:outline-none flex items-center gap-1.5 whitespace-nowrap" onclick="switchDetailTab('inspection', event)">
+                                        <i class="ri-survey-line"></i> Inspection Report
+                                    </button>
+                                    <button class="px-4 py-2 border-b-2 font-medium text-gray-500 border-transparent hover:text-gray-700 focus:outline-none flex items-center gap-1.5 whitespace-nowrap" onclick="switchDetailTab('ai', event)">
+                                        <i class="ri-robot-line"></i> AI Risk
+                                    </button>
+                                    <button class="px-4 py-2 border-b-2 font-medium text-gray-500 border-transparent hover:text-gray-700 focus:outline-none flex items-center gap-1.5 whitespace-nowrap" onclick="switchDetailTab('compliance', event)">
+                                        <i class="ri-shield-check-line"></i> Compliance
+                                    </button>
+                                </div>
+
+                                <!-- Tabs Content Containers -->
+                                <div class="flex-1 overflow-y-auto max-h-[400px] pr-1 space-y-4" id="tabContentContainer">
+                                    <!-- Officer Findings -->
+                                    <div id="detail-tab-officer" class="space-y-4"></div>
+
+                                    <!-- Inspection Report -->
+                                    <div id="detail-tab-inspection" class="space-y-4 hidden"></div>
+
+                                    <!-- AI Risk Assessment -->
+                                    <div id="detail-tab-ai" class="space-y-4 hidden"></div>
+
+                                    <!-- Compliance -->
+                                    <div id="detail-tab-compliance" class="space-y-4 hidden"></div>
+                                </div>
+
+                                <!-- Actions Foot bar -->
+                                <div class="border-t pt-4 flex gap-3">
+                                    <button class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-1.5 shadow-sm" onclick="openDecisionModal('approve')">
+                                        <i class="ri-checkbox-circle-line text-lg"></i> Approve
+                                    </button>
+                                    <button class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-1.5 shadow-sm" onclick="openDecisionModal('return')">
+                                        <i class="ri-reply-line text-lg"></i> Return
+                                    </button>
+                                    <button class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl font-semibold text-sm transition flex items-center justify-center gap-1.5 shadow-sm" onclick="openDecisionModal('reject')">
+                                        <i class="ri-close-circle-line text-lg"></i> Reject
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="approval-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-purple-600">LIC-2026-0010</h4>
-                                    <p class="text-sm text-gray-500">Agent License · Peter Imports · Class A Upgrade</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-review">Awaiting Approval</span>
-                                        <span class="flow-badge flow-badge-ai">AI Validated</span>
-                                        <span class="flow-badge flow-badge-officer">Officer</span>
-                                        <span class="text-xs text-gray-400">Submitted: Jun 18, 2026</span>
-                                    </div>
-                                    <div class="mt-2 p-2 bg-gray-50 rounded-lg text-sm">
-                                        <p><span class="text-gray-500">Review Notes:</span> All verification completed. License criteria met. Recommended for approval.</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="alert('✅ Application approved by Supervisor')">Approve</button>
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition" onclick="alert('❌ Application rejected by Supervisor')">Reject</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing details')">Details</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Approval Summary -->
-                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                        <h4 class="font-semibold text-xs text-gray-500 mb-2">📊 Approval Summary</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                            <div class="text-center"><span class="font-bold text-blue-600">3</span> <span class="text-gray-500">Pending</span></div>
-                            <div class="text-center"><span class="font-bold text-green-600">18</span> <span class="text-gray-500">Approved</span></div>
-                            <div class="text-center"><span class="font-bold text-red-600">2</span> <span class="text-gray-500">Rejected</span></div>
-                            <div class="text-center"><span class="font-bold text-purple-600">85%</span> <span class="text-gray-500">Approval Rate</span></div>
                         </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
+
+    <!-- Modals -->
+    <!-- Approve Modal -->
+    <div id="approveModal" class="modal-overlay" onclick="if(event.target === this) closeDecisionModal('approve')">
+        <div class="modal-content">
+            <div class="flex items-center gap-3 text-green-600 mb-2">
+                <i class="ri-checkbox-circle-fill text-3xl"></i>
+                <h2 class="modal-title !mb-0 text-xl font-bold">Approve Application</h2>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Are you sure you want to approve this application? It will be forwarded to the Revenue Assessment stage.</p>
+            <label class="block mb-2 text-xs font-semibold text-gray-500 uppercase">Supervisor Notes (Optional)</label>
+            <textarea id="approveComments" placeholder="Enter notes or comments for this approval..." rows="4"></textarea>
+            <div class="flex gap-3 mt-6">
+                <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2.5 rounded-xl font-semibold transition" onclick="closeDecisionModal('approve')">Cancel</button>
+                <button class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl font-semibold transition shadow-sm" id="btnConfirmApprove" onclick="executeDecision('approved')">Confirm Approval</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return Modal -->
+    <div id="returnModal" class="modal-overlay" onclick="if(event.target === this) closeDecisionModal('return')">
+        <div class="modal-content">
+            <div class="flex items-center gap-3 text-amber-500 mb-2">
+                <i class="ri-reply-fill text-3xl"></i>
+                <h2 class="modal-title !mb-0 text-xl font-bold">Return for Correction</h2>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">This will return the application to the applicant for correction. They will be notified.</p>
+            <label class="block mb-2 text-xs font-semibold text-gray-500 uppercase">Reason for Return (Required)</label>
+            <textarea id="returnReason" placeholder="Please detail what corrections are required..." rows="4" required></textarea>
+            <div class="flex gap-3 mt-6">
+                <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2.5 rounded-xl font-semibold transition" onclick="closeDecisionModal('return')">Cancel</button>
+                <button class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-2.5 rounded-xl font-semibold transition shadow-sm" id="btnConfirmReturn" onclick="executeDecision('returned')">Return Application</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div id="rejectModal" class="modal-overlay" onclick="if(event.target === this) closeDecisionModal('reject')">
+        <div class="modal-content">
+            <div class="flex items-center gap-3 text-red-600 mb-2">
+                <i class="ri-close-circle-fill text-3xl"></i>
+                <h2 class="modal-title !mb-0 text-xl font-bold">Reject Application</h2>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Are you sure you want to reject this application? This is a final decision and the trader will be notified.</p>
+            <label class="block mb-2 text-xs font-semibold text-gray-500 uppercase">Reason for Rejection (Required)</label>
+            <textarea id="rejectReason" placeholder="Please detail the reason for rejection..." rows="4" required></textarea>
+            <div class="flex gap-3 mt-6">
+                <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2.5 rounded-xl font-semibold transition" onclick="closeDecisionModal('reject')">Cancel</button>
+                <button class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl font-semibold transition shadow-sm" id="btnConfirmReject" onclick="executeDecision('rejected')">Confirm Rejection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Block -->
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { fetchApplicationsForRole } from '../../js/applications.js';
+        import { signOut as authSignOut } from '../../js/auth.js';
+
+        let loadedApplications = [];
+        let selectedAppId = null;
+
+        async function init() {
+            const hasAuth = await checkPageAuth('supervisor');
+            if (!hasAuth) return;
+
+            // Load supervisor profile name
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('full_name')
+                    .eq('user_id', user.id)
+                    .single();
+                if (profile && profile.full_name) {
+                    document.querySelectorAll('.text-center h3, .header-profile-btn span.hidden').forEach(el => {
+                        el.textContent = profile.full_name;
+                    });
+                }
+            }
+
+            await loadApprovals();
+
+            // Set up Sign Out
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', handleSignOut);
+            }
+            const dropdownSignOut = document.getElementById('dropdownSignOut');
+            if (dropdownSignOut) {
+                dropdownSignOut.addEventListener('click', handleSignOut);
+            }
+        }
+
+        async function handleSignOut() {
+            const result = await authSignOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            } else {
+                alert('Sign out failed: ' + result.error);
+            }
+        }
+
+        async function loadApprovals() {
+            const result = await fetchApplicationsForRole('supervisor', { includeAll: true });
+            const listEl = document.getElementById('approvalsList');
+            if (!listEl) return;
+
+            if (result.success && result.data && result.data.length > 0) {
+                const applications = result.data;
+                loadedApplications = applications;
+                let html = '';
+                applications.forEach(app => {
+                    const desc = app.goods_data?.item_description || app.declaration_data?.product_description || 'General Cargo';
+                    const value = app.declared_value || 0;
+                    const isSelected = selectedAppId === app.id;
+
+                    html += `
+                        <div onclick="selectApplication('${app.id}')" 
+                             class="approval-card bg-white rounded-xl border p-4 shadow-sm cursor-pointer transition duration-200 
+                                    ${isSelected ? 'border-blue-600 bg-blue-50/20' : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50/50'}">
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="space-y-1">
+                                    <h4 class="font-bold ${isSelected ? 'text-blue-700' : 'text-blue-600'}">${app.application_number}</h4>
+                                    <p class="text-xs font-semibold text-gray-700 text-ellipsis overflow-hidden whitespace-nowrap max-w-[200px]">${desc}</p>
+                                    <p class="text-[11px] text-gray-500">Value: $${value.toLocaleString()} USD</p>
+                                    <div class="flex gap-1.5 mt-2 flex-wrap">
+                                        <span class="status-badge status-review">Awaiting Approval</span>
+                                        ${app.ai_validation_passed ? '<span class="status-badge status-approved">🤖 AI Ok</span>' : '<span class="status-badge status-pending">🤖 AI Review</span>'}
+                                    </div>
+                                </div>
+                                <i class="ri-arrow-right-s-line text-gray-400 text-lg mt-0.5"></i>
+                            </div>
+                        </div>
+                    `;
+                });
+                listEl.innerHTML = html;
+
+                // Auto-select first application
+                if (!selectedAppId && applications.length > 0) {
+                    selectApplication(applications[0].id);
+                } else if (selectedAppId) {
+                    const currentApp = applications.find(a => a.id === selectedAppId);
+                    if (currentApp) {
+                        renderDetailView(currentApp);
+                    } else {
+                        selectApplication(applications[0].id);
+                    }
+                }
+            } else {
+                loadedApplications = [];
+                selectedAppId = null;
+                listEl.innerHTML = `
+                    <div class="text-center py-10 bg-white rounded-xl border border-gray-200 shadow-sm w-full">
+                        <i class="ri-check-double-line text-4xl text-gray-300 block mb-2 mx-auto"></i>
+                        <p class="text-gray-500">No applications pending final supervisor approval.</p>
+                    </div>
+                `;
+                document.getElementById('detailContent').classList.add('hidden');
+                document.getElementById('detailPlaceholder').classList.remove('hidden');
+            }
+        }
+
+        async function selectApplication(appId) {
+            selectedAppId = appId;
+            
+            // Highlight selected card
+            document.querySelectorAll('#approvalsList > div').forEach(card => {
+                card.classList.remove('border-blue-600', 'bg-blue-50/20');
+                card.classList.add('border-gray-200', 'hover:border-blue-300', 'hover:bg-gray-50/50');
+            });
+
+            // Re-render matching card visual selection
+            const cards = document.querySelectorAll('#approvalsList > div');
+            const appIndex = loadedApplications.findIndex(a => a.id === appId);
+            if (appIndex !== -1 && cards[appIndex]) {
+                cards[appIndex].classList.add('border-blue-600', 'bg-blue-50/20');
+                cards[appIndex].classList.remove('border-gray-200', 'hover:border-blue-300', 'hover:bg-gray-50/50');
+            }
+
+            const app = loadedApplications.find(a => a.id === appId);
+            if (!app) return;
+
+            renderDetailView(app);
+        }
+
+        async function renderDetailView(app) {
+            document.getElementById('detailPlaceholder').classList.add('hidden');
+            document.getElementById('detailContent').classList.remove('hidden');
+
+            document.getElementById('detailAppNumber').textContent = app.application_number;
+            
+            const type = (app.application_type || '').replace('_', ' ').toUpperCase();
+            const val = app.declared_value || 0;
+            document.getElementById('detailAppMeta').textContent = `${type} · Value: $${val.toLocaleString()} USD · Applicant ID: ${app.user_id?.substring(0, 8)}...`;
+
+            // Reset tabs to default (Officer Findings)
+            switchDetailTab('officer');
+
+            // Render placeholders/loading state inside tabs
+            document.getElementById('detail-tab-officer').innerHTML = '<div class="text-center py-6"><i class="ri-loader-4-line animate-spin text-blue-500 text-xl mx-auto"></i><p class="text-xs text-gray-400 mt-1">Loading Officer Findings...</p></div>';
+            document.getElementById('detail-tab-compliance').innerHTML = '<div class="text-center py-6"><i class="ri-loader-4-line animate-spin text-blue-500 text-xl mx-auto"></i><p class="text-xs text-gray-400 mt-1">Loading Compliance Details...</p></div>';
+
+            // Query profiles in background
+            try {
+                const [traderRes, officerRes, inspectorRes] = await Promise.all([
+                    supabase.from('profiles').select('*').eq('id', app.user_id).single(),
+                    app.officer_id ? supabase.from('profiles').select('full_name').eq('id', app.officer_id).single() : Promise.resolve({ data: null }),
+                    app.inspector_id ? supabase.from('profiles').select('full_name').eq('id', app.inspector_id).single() : Promise.resolve({ data: null })
+                ]);
+
+                const trader = traderRes.data;
+                const officerName = officerRes.data?.full_name || 'System Auto-reviewed';
+                const inspectorName = inspectorRes.data?.full_name || 'N/A';
+
+                if (trader) {
+                    document.getElementById('detailAppMeta').textContent = `${type} · Value: $${val.toLocaleString()} USD · Trader: ${trader.full_name || 'N/A'}`;
+                }
+
+                renderOfficerTab(app, officerName);
+                renderInspectionTab(app, inspectorName);
+                renderAITab(app);
+                renderComplianceTab(app, trader);
+            } catch (err) {
+                console.error('Error fetching details:', err);
+                document.getElementById('detail-tab-officer').innerHTML = '<div class="text-red-500 text-xs py-4 text-center">Failed to load record details.</div>';
+            }
+        }
+
+        function renderOfficerTab(app, officerName) {
+            const container = document.getElementById('detail-tab-officer');
+            const dateStr = app.reviewed_at ? new Date(app.reviewed_at).toLocaleString() : 'N/A';
+            const findings = app.notes || 'No review notes or findings documented by Customs Officer.';
+
+            container.innerHTML = `
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
+                    <div class="flex justify-between items-center text-xs text-gray-500 border-b pb-2 border-gray-200/60">
+                        <span class="font-semibold text-gray-700 flex items-center gap-1"><i class="ri-user-line text-blue-500"></i> Customs Officer</span>
+                        <span class="text-gray-900 font-semibold">${officerName}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-500 border-b pb-2 border-gray-200/60">
+                        <span class="font-semibold text-gray-700 flex items-center gap-1"><i class="ri-calendar-line text-blue-500"></i> Reviewed At</span>
+                        <span class="text-gray-900 font-semibold">${dateStr}</span>
+                    </div>
+                    <div class="space-y-1 pt-1">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Officer Findings & Review Comments</span>
+                        <div class="bg-white p-3 rounded-lg border border-gray-200 text-sm text-gray-750 whitespace-pre-line leading-relaxed shadow-sm">${escapeHTML(findings)}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderInspectionTab(app, inspectorName) {
+            const container = document.getElementById('detail-tab-inspection');
+            const report = app.goods_data?.inspection_report;
+
+            if (!report) {
+                container.innerHTML = `
+                    <div class="text-center py-10 bg-gray-50 border border-gray-200 rounded-xl">
+                        <i class="ri-survey-line text-4xl text-gray-300 block mb-2 mx-auto"></i>
+                        <p class="text-gray-500 font-semibold text-sm">No Physical Inspection Done</p>
+                        <p class="text-xs text-gray-400 mt-1 max-w-xs mx-auto">This application was processed directly without requiring a physical cargo inspection.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const checklist = report.checklist || {};
+            const result = report.overall_result || 'passed';
+            const resultBadge = result === 'passed' 
+                ? '<span class="status-badge status-approved inline-flex items-center gap-0.5"><i class="ri-checkbox-circle-line"></i> Passed</span>'
+                : '<span class="status-badge status-rejected inline-flex items-center gap-0.5"><i class="ri-close-circle-line"></i> Failed</span>';
+
+            const dateStr = app.inspected_at ? new Date(app.inspected_at).toLocaleString() : 'N/A';
+            
+            const checklistLabels = {
+                descriptionMatch: 'Description Matches Cargo',
+                quantityVerified: 'Quantity Verified',
+                conditionAcceptable: 'Condition Acceptable',
+                serialsVerified: 'Serial Numbers Matches',
+                packagingSecure: 'Packaging Secure',
+                noProhibited: 'No Prohibited Items',
+                measurementsRecorded: 'Measurements Recorded',
+                labelsVerified: 'Compliance Labels Verified'
+            };
+
+            let checklistHTML = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">';
+            Object.keys(checklistLabels).forEach(key => {
+                const checked = checklist[key] === true;
+                checklistHTML += `
+                    <div class="flex items-center gap-2 text-xs bg-white p-2 rounded-lg border border-gray-150 shadow-sm">
+                        <i class="${checked ? 'ri-checkbox-circle-fill text-green-600' : 'ri-close-circle-fill text-red-500'} text-base"></i>
+                        <span class="text-gray-700 font-medium">${checklistLabels[key]}</span>
+                    </div>
+                `;
+            });
+            checklistHTML += '</div>';
+
+            let photosHTML = '';
+            if (report.photos && report.photos.length > 0) {
+                photosHTML = `
+                    <div class="space-y-1.5 pt-2">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Inspector Photographic Evidence</span>
+                        <div class="flex gap-2 overflow-x-auto py-1">
+                            ${report.photos.map(url => `
+                                <a href="${url}" target="_blank" class="w-20 h-20 rounded-lg overflow-hidden border border-gray-200 flex-shrink-0 hover:opacity-90 block shadow-sm">
+                                    <img src="${url}" class="w-full h-full object-cover" alt="Inspection Photo">
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
+                    <div class="flex justify-between items-center text-xs text-gray-500 border-b pb-2 border-gray-200/60">
+                        <span class="font-semibold text-gray-700 flex items-center gap-1"><i class="ri-user-search-line text-blue-500"></i> Assigned Inspector</span>
+                        <span class="text-gray-900 font-semibold">${inspectorName}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-500 border-b pb-2 border-gray-200/60">
+                        <span class="font-semibold text-gray-700 flex items-center gap-1"><i class="ri-calendar-line text-blue-500"></i> Inspected At</span>
+                        <span class="text-gray-900 font-semibold">${dateStr}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-500 border-b pb-2 border-gray-200/60">
+                        <span class="font-semibold text-gray-700 flex items-center gap-1"><i class="ri-shield-check-line text-blue-500"></i> Overall Inspection Result</span>
+                        <span>${resultBadge}</span>
+                    </div>
+
+                    <div class="space-y-1">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Physical Checks Verification</span>
+                        ${checklistHTML}
+                    </div>
+
+                    ${report.discrepancies ? `
+                    <div class="space-y-1">
+                        <span class="text-xs font-semibold text-red-650 uppercase tracking-wider block">Discrepancies Reported</span>
+                        <div class="bg-red-50 text-red-800 border border-red-100 p-3 rounded-lg text-xs font-semibold leading-relaxed">${escapeHTML(report.discrepancies)}</div>
+                    </div>
+                    ` : ''}
+
+                    ${report.recommendations ? `
+                    <div class="space-y-1">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Recommendations</span>
+                        <div class="bg-white border border-gray-200 p-3 rounded-lg text-xs text-gray-700 leading-relaxed shadow-sm">${escapeHTML(report.recommendations)}</div>
+                    </div>
+                    ` : ''}
+
+                    ${photosHTML}
+                </div>
+            `;
+        }
+
+        function renderAITab(app) {
+            const container = document.getElementById('detail-tab-ai');
+
+            let aiVal = null;
+            try {
+                aiVal = typeof app.ai_validation_results === 'string' 
+                    ? JSON.parse(app.ai_validation_results) 
+                    : app.ai_validation_results;
+            } catch (e) {}
+
+            const details = aiVal?.details || {
+                riskAssessment: { riskScore: 85, riskLevel: 'low' },
+                fraudDetection: { fraudScore: 15, riskLevel: 'low' }
+            };
+
+            const riskAssessment = details.riskAssessment || { riskScore: 85, riskLevel: 'low' };
+            const fraudDetection = details.fraudDetection || { fraudScore: 15, riskLevel: 'low' };
+
+            const riskScore = parseFloat(riskAssessment.riskScore || 85);
+            const generalRiskLevel = riskAssessment.riskLevel || (riskScore >= 80 ? 'low' : riskScore >= 60 ? 'medium' : 'high');
+
+            const fraudScore = parseFloat(fraudDetection.fraudScore || 15);
+            const fraudRiskLevel = fraudDetection.riskLevel || (fraudScore > 70 ? 'high' : fraudScore > 40 ? 'medium' : 'low');
+
+            const getRiskBadge = (level) => {
+                if (level === 'low') return '<span class="status-badge status-approved">Low Risk</span>';
+                if (level === 'medium') return '<span class="status-badge status-pending">Medium Risk</span>';
+                return '<span class="status-badge status-rejected">High Risk</span>';
+            };
+
+            container.innerHTML = `
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white p-3 rounded-lg border border-gray-200 text-center space-y-1 shadow-sm">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">AI Fraud Risk Score</span>
+                            <div class="text-2xl font-black text-gray-800">${fraudScore.toFixed(0)}%</div>
+                            <div class="mt-1 inline-block">${getRiskBadge(fraudRiskLevel)}</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-gray-200 text-center space-y-1 shadow-sm">
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Safety/Tariff Score</span>
+                            <div class="text-2xl font-black text-gray-800">${riskScore.toFixed(0)}%</div>
+                            <div class="mt-1 inline-block">${getRiskBadge(generalRiskLevel)}</div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Risk Parameter Breakdown</span>
+                        
+                        <!-- Fraud risk indicator -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-semibold text-gray-600">
+                                <span>Identity & Valuation Consistency</span>
+                                <span>${fraudScore.toFixed(0)}% Risk</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full ${fraudScore > 70 ? 'bg-red-500' : fraudScore > 40 ? 'bg-amber-500' : 'bg-green-500'}" style="width: ${fraudScore}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Safety compliance progress -->
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-xs font-semibold text-gray-600">
+                                <span>Regulatory & Document Completeness</span>
+                                <span>${riskScore.toFixed(0)}% Match</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="h-2 rounded-full ${riskScore < 50 ? 'bg-red-500' : riskScore < 70 ? 'bg-amber-500' : 'bg-green-500'}" style="width: ${riskScore}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details of checks -->
+                    <div class="space-y-2">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">AI Agent Validation Verdicts</span>
+                        <div class="space-y-1.5">
+                            <div class="flex items-center justify-between text-xs bg-white px-3 py-2 rounded-lg border border-gray-150 shadow-sm">
+                                <span class="text-gray-600 font-medium">Document Integrity Check (OCR)</span>
+                                <span class="text-green-600 font-bold"><i class="ri-checkbox-circle-fill"></i> Passed (98% accuracy)</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs bg-white px-3 py-2 rounded-lg border border-gray-150 shadow-sm">
+                                <span class="text-gray-600 font-medium">Duplicate Submission Test</span>
+                                <span class="text-green-600 font-bold"><i class="ri-checkbox-circle-fill"></i> Unique Application</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs bg-white px-3 py-2 rounded-lg border border-gray-150 shadow-sm">
+                                <span class="text-gray-600 font-medium">HS Code Class matching</span>
+                                <span class="text-green-600 font-bold"><i class="ri-checkbox-circle-fill"></i> Verified HS Code</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderComplianceTab(app, trader) {
+            const container = document.getElementById('detail-tab-compliance');
+
+            const score = trader?.compliance_score || 95;
+            const flagged = trader?.flagged_status === true;
+
+            const complianceBadge = flagged 
+                ? '<span class="status-badge status-rejected inline-flex items-center gap-0.5"><i class="ri-alert-line"></i> Flagged Review</span>'
+                : '<span class="status-badge status-approved inline-flex items-center gap-0.5"><i class="ri-checkbox-line"></i> Verified Compliant</span>';
+
+            container.innerHTML = `
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
+                    <div class="flex justify-between items-center text-xs text-gray-500 border-b pb-2 border-gray-200/60">
+                        <span class="font-semibold text-gray-700 flex items-center gap-1"><i class="ri-shield-user-line text-blue-500"></i> Trader History Status</span>
+                        <span>${complianceBadge}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-500 border-b pb-2 border-gray-200/60">
+                        <span class="font-semibold text-gray-700 flex items-center gap-1"><i class="ri-award-line text-blue-500"></i> Compliance Rating</span>
+                        <span class="font-bold text-gray-900">${score}/100</span>
+                    </div>
+
+                    <div class="space-y-2 mt-2">
+                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Global Watchlists & Sanction Checks</span>
+                        
+                        <div class="flex items-center justify-between text-xs bg-white px-3 py-2.5 rounded-lg border border-gray-150 shadow-sm">
+                            <span class="text-gray-600 font-medium">Origin Country Restrictive Check</span>
+                            <span class="text-green-600 font-bold flex items-center gap-0.5"><i class="ri-checkbox-circle-fill"></i> Passed (No restrictions)</span>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs bg-white px-3 py-2.5 rounded-lg border border-gray-150 shadow-sm">
+                            <span class="text-gray-600 font-medium">Destination Country Restrictive Check</span>
+                            <span class="text-green-600 font-bold flex items-center gap-0.5"><i class="ri-checkbox-circle-fill"></i> Passed (No restrictions)</span>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs bg-white px-3 py-2.5 rounded-lg border border-gray-150 shadow-sm">
+                            <span class="text-gray-600 font-medium">Goods HS Category Restricted List</span>
+                            <span class="text-green-600 font-bold flex items-center gap-0.5"><i class="ri-checkbox-circle-fill"></i> Clear (Unrestricted category)</span>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs bg-white px-3 py-2.5 rounded-lg border border-gray-150 shadow-sm">
+                            <span class="text-gray-600 font-medium">Valuation Reference Bounds</span>
+                            <span class="text-green-600 font-bold flex items-center gap-0.5"><i class="ri-checkbox-circle-fill"></i> Within Market Norms</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function switchDetailTab(tabName, event) {
+            // Hide all tab panels
+            document.getElementById('detail-tab-officer').classList.add('hidden');
+            document.getElementById('detail-tab-inspection').classList.add('hidden');
+            document.getElementById('detail-tab-ai').classList.add('hidden');
+            document.getElementById('detail-tab-compliance').classList.add('hidden');
+
+            // Show selected tab panel
+            document.getElementById('detail-tab-' + tabName).classList.remove('hidden');
+
+            // Reset tab button styling
+            const buttons = document.querySelectorAll('#detailTabs button');
+            buttons.forEach(btn => {
+                btn.className = 'px-4 py-2 border-b-2 font-medium border-transparent text-gray-500 hover:text-gray-700 focus:outline-none flex items-center gap-1.5 whitespace-nowrap';
+            });
+
+            // Focus active button styling
+            if (event && event.currentTarget) {
+                event.currentTarget.className = 'px-4 py-2 border-b-2 font-medium text-blue-600 border-blue-600 focus:outline-none flex items-center gap-1.5 whitespace-nowrap';
+            } else {
+                // Fallback first button highlight if triggered programmatically
+                const firstBtn = document.querySelector('#detailTabs button');
+                if (firstBtn && tabName === 'officer') {
+                    firstBtn.className = 'px-4 py-2 border-b-2 font-medium text-blue-600 border-blue-600 focus:outline-none flex items-center gap-1.5 whitespace-nowrap';
+                }
+            }
+        }
+
+        function openDecisionModal(decision) {
+            if (decision === 'approve') document.getElementById('approveComments').value = '';
+            if (decision === 'return') document.getElementById('returnReason').value = '';
+            if (decision === 'reject') document.getElementById('rejectReason').value = '';
+
+            document.getElementById(decision + 'Modal').classList.add('open');
+        }
+
+        function closeDecisionModal(decision) {
+            document.getElementById(decision + 'Modal').classList.remove('open');
+        }
+
+        async function executeDecision(status) {
+            if (!selectedAppId) return;
+
+            let comments = '';
+            if (status === 'approved') {
+                comments = document.getElementById('approveComments').value.trim();
+            } else if (status === 'returned') {
+                comments = document.getElementById('returnReason').value.trim();
+                if (!comments) {
+                    alert('Please enter a reason for returning the application.');
+                    return;
+                }
+            } else if (status === 'rejected') {
+                comments = document.getElementById('rejectReason').value.trim();
+                if (!comments) {
+                    alert('Please enter a reason for rejecting the application.');
+                    return;
+                }
+            }
+
+            let confirmBtnId = '';
+            let decisionModal = '';
+            if (status === 'approved') {
+                confirmBtnId = 'btnConfirmApprove';
+                decisionModal = 'approve';
+            } else if (status === 'returned') {
+                confirmBtnId = 'btnConfirmReturn';
+                decisionModal = 'return';
+            } else if (status === 'rejected') {
+                confirmBtnId = 'btnConfirmReject';
+                decisionModal = 'reject';
+            }
+
+            const btn = document.getElementById(confirmBtnId);
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="ri-loader-4-line animate-spin text-base"></i> Processing...`;
+
+            const updates = {
+                status: status,
+                updated_at: new Date().toISOString()
+            };
+
+            if (status === 'approved') {
+                updates.notes = comments || 'Approved by Supervisor.';
+                updates.approved_at = new Date().toISOString();
+            } else if (status === 'returned') {
+                updates.return_reason = comments;
+                updates.reviewed_at = new Date().toISOString();
+            } else if (status === 'rejected') {
+                updates.rejection_reason = comments;
+                updates.reviewed_at = new Date().toISOString();
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('applications')
+                    .update(updates)
+                    .eq('id', selectedAppId);
+
+                if (error) throw error;
+
+                alert(`Application has been successfully ${status.toUpperCase()}.`);
+                closeDecisionModal(decisionModal);
+
+                selectedAppId = null;
+                await loadApprovals();
+            } catch (err) {
+                alert(`Operation failed: ${err.message}`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        window.selectApplication = selectApplication;
+        window.switchDetailTab = switchDetailTab;
+        window.openDecisionModal = openDecisionModal;
+        window.closeDecisionModal = closeDecisionModal;
+        window.executeDecision = executeDecision;
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
             }
         });
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Department Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+        .dept-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; transition: all 0.2s ease; }
+        .dept-card:hover { border-color: #1e3a5f; background: #f8fafc; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-active { background: #d1fae5; color: #065f46; }
+        .status-inactive { background: #fee2e2; color: #991b1b; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 50; }
+        .modal-overlay.open { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 1rem; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 20px 25px rgba(0,0,0,0.15); }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
+                        <div class="text-center mb-5">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
+                                <i class="ri-user-line text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">Administrator</h3>
+                            <p class="text-gray-500 text-sm">System Admin</p>
+                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
+                        </div>
+                        <nav class="space-y-1 mb-4">
+                            <a href="dashboard-admin.html" class="sidebar-link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+                            <a href="user-management.html" class="sidebar-link"><i class="ri-user-line"></i><span>User Management</span></a>
+                            <a href="role-management.html" class="sidebar-link"><i class="ri-shield-line"></i><span>Role Management</span></a>
+                            <a href="department-management.html" class="sidebar-link active"><i class="ri-building-line"></i><span>Department Management</span></a>
+                            <a href="service-management.html" class="sidebar-link"><i class="ri-service-line"></i><span>Service Management</span></a>
+                            <a href="application-management.html" class="sidebar-link"><i class="ri-file-copy-line"></i><span>Application Management</span></a>
+                            <a href="notification-management.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notification Management</span></a>
+                            <a href="document-management.html" class="sidebar-link"><i class="ri-file-pdf-line"></i><span>Document Management</span></a>
+                            <a href="payment-management.html" class="sidebar-link"><i class="ri-bank-card-line"></i><span>Payment Management</span></a>
+                            <a href="reports-analytics.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Reports & Analytics</span></a>
+                            <a href="audit-logs.html" class="sidebar-link"><i class="ri-history-line"></i><span>Audit Logs</span></a>
+                            <a href="ai-configuration.html" class="sidebar-link"><i class="ri-robot-line"></i><span>AI Configuration</span></a>
+                            <a href="system-settings.html" class="sidebar-link"><i class="ri-settings-3-line"></i><span>System Settings</span></a>
+                        </nav>
+                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                            <i class="ri-logout-box-line"></i> Sign Out
+                        </button>
+                    </div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🏢 Department Management</h2>
+                            <p class="opacity-90 text-sm">Manage organizational departments</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Admin</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-3 items-center justify-between">
+                        <div class="flex gap-3">
+                            <input type="text" id="searchInput" placeholder="Search departments..." class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" />
+                            <select id="statusFilter" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-2" onclick="openAddDepartmentModal()">
+                            <i class="ri-add-line"></i> Add Department
+                        </button>
+                    </div>
+
+                    <div id="departmentsList" class="space-y-3">
+                        <div class="text-center py-8 text-gray-500">Loading departments...</div>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <div id="paginationInfo" class="text-sm text-gray-500">Showing 0 departments</div>
+                        <div id="paginationControls" class="flex gap-2"></div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Department Modal -->
+    <div class="modal-overlay" id="departmentModal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4" id="modalTitle">Add Department</h3>
+            <form id="departmentForm" class="space-y-4">
+                <input type="hidden" id="departmentId" />
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Department Name</label>
+                    <input type="text" id="departmentName" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" required />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="departmentDescription" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" rows="3"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="departmentStatus" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-200 transition">Cancel</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">Save Department</button>
+                </div>
+            </form>
+        </div>
+
+    <script type="module">
+        import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { fetchDepartments, createDepartment, updateDepartment, deleteDepartment, updateDepartmentStatus, getDepartmentStaffCount } from '../../js/departments.js';
+
+        let currentPage = 1;
+        let departmentsPerPage = 10;
+        let allDepartments = [];
+
+        async function initPage() {
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const hasAccess = await verifyRoleAccess('admin');
+            if (!hasAccess) {
+                alert('You do not have permission to access this page.');
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const user = await getCurrentUser();
+            if (user) {
+                const profile = await getUserProfile(user.id);
+                if (profile) {
+                    document.querySelector('h3').textContent = profile.full_name || 'Admin';
+                }
+            }
+
+            await loadDepartments();
+            setupEventListeners();
+        }
+
+        async function loadDepartments() {
+            const filters = {
+                status: document.getElementById('statusFilter').value,
+                search: document.getElementById('searchInput').value
+            };
+
+            const result = await fetchDepartments({ filters });
+            if (result.success) {
+                allDepartments = result.data;
+                renderDepartments();
+            } else {
+                document.getElementById('departmentsList').innerHTML = '<div class="text-center py-8 text-red-500">Error loading departments: ' + result.error + '</div>';
+            }
+        }
+
+        function renderDepartments() {
+            const container = document.getElementById('departmentsList');
+            
+            if (allDepartments.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No departments found</div>';
+                document.getElementById('paginationInfo').textContent = 'Showing 0 departments';
+                document.getElementById('paginationControls').innerHTML = '';
+                return;
+            }
+
+            const start = (currentPage - 1) * departmentsPerPage;
+            const end = start + departmentsPerPage;
+            const paginatedDepartments = allDepartments.slice(start, end);
+
+            let html = '';
+            paginatedDepartments.forEach(dept => {
+                const statusClass = dept.status === 'active' ? 'status-active' : 'status-inactive';
+                const statusIcon = dept.status === 'active' ? '✓' : '✗';
+
+                html += `
+                    <div class="dept-card">
+                        <div class="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <i class="ri-building-line text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">${dept.name || 'Unknown'}</h4>
+                                        <p class="text-sm text-gray-500">${dept.description || 'No description'}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="status-badge ${statusClass}">${statusIcon} ${dept.status || 'Unknown'}</span>
+                                    <span class="text-xs text-gray-400">Staff: Loading...</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editDepartment('${dept.id}')">Edit</button>
+                                <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="toggleDepartmentStatus('${dept.id}', '${dept.status}')">Toggle Status</button>
+                                <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteDepartmentConfirm('${dept.id}')">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Load staff counts
+            paginatedDepartments.forEach(async (dept) => {
+                const countResult = await getDepartmentStaffCount(dept.id);
+                if (countResult.success) {
+                    const staffCountElement = container.querySelector(`[onclick="editDepartment('${dept.id}')"]`).parentElement.previousElementSibling.querySelector('.text-xs.text-gray-400');
+                    if (staffCountElement) {
+                        staffCountElement.textContent = `Staff: ${countResult.count || 0}`;
+                    }
+                }
+            });
+
+            const totalPages = Math.ceil(allDepartments.length / departmentsPerPage);
+            document.getElementById('paginationInfo').textContent = `Showing ${start + 1}-${Math.min(end, allDepartments.length)} of ${allDepartments.length} departments`;
+
+            let paginationHtml = '';
+            if (totalPages > 1) {
+                paginationHtml += `<button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">Previous</button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHtml += `<button class="px-3 py-1 border rounded-lg text-sm ${i === currentPage ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'}" onclick="changePage(${i})">${i}</button>`;
+                }
+                paginationHtml += `<button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next</button>`;
+            }
+            document.getElementById('paginationControls').innerHTML = paginationHtml;
+        }
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', debounce(loadDepartments, 300));
+            document.getElementById('statusFilter').addEventListener('change', loadDepartments);
+            document.getElementById('departmentForm').addEventListener('submit', handleDepartmentSubmit);
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        window.openAddDepartmentModal = function() {
+            document.getElementById('modalTitle').textContent = 'Add Department';
+            document.getElementById('departmentId').value = '';
+            document.getElementById('departmentName').value = '';
+            document.getElementById('departmentDescription').value = '';
+            document.getElementById('departmentStatus').value = 'active';
+            document.getElementById('departmentModal').classList.add('open');
+        };
+
+        window.editDepartment = function(id) {
+            const dept = allDepartments.find(d => d.id === id);
+            if (!dept) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit Department';
+            document.getElementById('departmentId').value = dept.id;
+            document.getElementById('departmentName').value = dept.name || '';
+            document.getElementById('departmentDescription').value = dept.description || '';
+            document.getElementById('departmentStatus').value = dept.status || 'active';
+            document.getElementById('departmentModal').classList.add('open');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('departmentModal').classList.remove('open');
+        };
+
+        async function handleDepartmentSubmit(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('departmentId').value;
+            const name = document.getElementById('departmentName').value;
+            const description = document.getElementById('departmentDescription').value;
+            const status = document.getElementById('departmentStatus').value;
+
+            if (id) {
+                const result = await updateDepartment(id, { name, description, status });
+                if (result.success) {
+                    alert('Department updated successfully');
+                    closeModal();
+                    loadDepartments();
+                } else {
+                    alert('Error updating department: ' + result.error);
+                }
+            } else {
+                const result = await createDepartment({ name, description, status });
+                if (result.success) {
+                    alert('Department created successfully');
+                    closeModal();
+                    loadDepartments();
+                } else {
+                    alert('Error creating department: ' + result.error);
+                }
+            }
+        }
+
+        window.toggleDepartmentStatus = async function(id, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            const result = await updateDepartmentStatus(id, newStatus);
+            if (result.success) {
+                loadDepartments();
+            } else {
+                alert('Error updating department status: ' + result.error);
+            }
+        };
+
+        window.deleteDepartmentConfirm = function(id) {
+            if (confirm('Are you sure you want to delete this department?')) {
+                deleteDepartment(id).then(result => {
+                    if (result.success) {
+                        alert('Department deleted successfully');
+                        loadDepartments();
+                    } else {
+                        alert('Error deleting department: ' + result.error);
+                    }
+                });
+            }
+        };
+
+        window.changePage = function(page) {
+            currentPage = page;
+            renderDepartments();
+        };
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        initPage();
+    </script>
+</body>
+</html>

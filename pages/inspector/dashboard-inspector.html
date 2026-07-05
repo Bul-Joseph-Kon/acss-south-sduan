@@ -56,7 +56,7 @@
                             <a href="cargo-inspection.html" class="sidebar-link"><i class="ri-truck-line"></i><span>Cargo Inspection</span></a>
                             <a href="vehicle-inspection.html" class="sidebar-link"><i class="ri-car-line"></i><span>Vehicle Inspection</span></a>
                             <a href="inspection-reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Inspection Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">4</span></a>
+                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span></a>
                         </nav>
                         <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
@@ -86,10 +86,10 @@
                     </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="stat-card"><div class="stat-number text-blue-600">8</div><div class="stat-label">Pending Inspections</div></div>
-                        <div class="stat-card"><div class="stat-number text-yellow-600">3</div><div class="stat-label">In Progress</div></div>
-                        <div class="stat-card"><div class="stat-number text-green-600">15</div><div class="stat-label">Completed</div></div>
-                        <div class="stat-card"><div class="stat-number text-red-600">2</div><div class="stat-label">Failed</div></div>
+                        <div class="stat-card"><div class="stat-number text-blue-600" id="statPendingInspections">0</div><div class="stat-label">Pending Inspections</div></div>
+                        <div class="stat-card"><div class="stat-number text-yellow-600" id="statInProgress">0</div><div class="stat-label">In Progress</div></div>
+                        <div class="stat-card"><div class="stat-number text-green-600" id="statCompleted">0</div><div class="stat-label">Completed</div></div>
+                        <div class="stat-card"><div class="stat-number text-red-600" id="statFailed">0</div><div class="stat-label">Failed</div></div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
@@ -105,18 +105,14 @@
                     <div class="grid lg:grid-cols-2 gap-4">
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-clipboard-line text-blue-500 mr-2"></i>Inspection Queue</h3>
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Cargo Inspections</span><span class="font-bold text-blue-600">5</span></div>
-                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Vehicle Inspections</span><span class="font-bold text-orange-600">3</span></div>
-                                <div class="flex justify-between items-center"><span class="text-sm">Warehouse Inspections</span><span class="font-bold text-purple-600">2</span></div>
+                            <div class="space-y-2" id="inspectionQueue">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading queue...</div>
                             </div>
                         </div>
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-notification-3-line text-blue-500 mr-2"></i>Recent Notifications</h3>
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center border-b pb-2 text-sm"><span>New cargo inspection request</span><span class="text-gray-400">1 hour ago</span></div>
-                                <div class="flex justify-between items-center border-b pb-2 text-sm"><span>Vehicle inspection completed</span><span class="text-gray-400">3 hours ago</span></div>
-                                <div class="flex justify-between items-center text-sm"><span>Inspection report approved</span><span class="text-gray-400">1 day ago</span></div>
+                            <div class="space-y-2" id="recentNotifications">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading notifications...</div>
                             </div>
                         </div>
                     </div>
@@ -126,8 +122,10 @@
     </div>
     <script type="module">
         import supabase from '../../js/supabase.js';
-        import { checkAuth, getUserProfile, signOut, getCurrentUser } from '../../js/auth.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess } from '../../js/auth.js';
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
+        import { fetchApplicationsForRole } from '../../js/applications.js';
+        import { fetchUnreadNotifications } from '../../js/notifications.js';
 
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
@@ -136,8 +134,26 @@
         });
 
         async function loadDashboard() {
+            console.log('=== LOADING INSPECTOR DASHBOARD ===');
             const isAuthenticated = await checkAuth();
             if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            // Verify role access
+            const hasAccess = await verifyRoleAccess('inspector');
+            if (!hasAccess) {
+                // Get user's actual role and redirect to their dashboard
+                const user = await getCurrentUser();
+                if (user) {
+                    const profile = await getUserProfile(user.id);
+                    if (profile && profile.role) {
+                        const dashboardUrl = redirectToDashboard(profile.role);
+                        window.location.href = dashboardUrl;
+                        return;
+                    }
+                }
                 window.location.href = '../../auth/login.html';
                 return;
             }
@@ -150,15 +166,132 @@
                 document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Inspector';
             }
 
-            const data = await fetchDashboardData();
-            const recentApps = await fetchRecentApplications(5);
+            // Load workflow-based applications
+            await loadWorkflowApplications();
+            
+            // Load notifications
+            await loadNotifications();
+        }
 
-            if (data.applications) {
-                const statNumbers = document.querySelectorAll('.stat-number');
-                if (statNumbers[0]) statNumbers[0].textContent = data.applications.pending || 0;
-                if (statNumbers[1]) statNumbers[1].textContent = data.applications.total || 0;
-                if (statNumbers[2]) statNumbers[2].textContent = data.applications.approved || 0;
-                if (statNumbers[3]) statNumbers[3].textContent = data.applications.rejected || 0;
+        async function loadWorkflowApplications() {
+            console.log('=== LOADING WORKFLOW APPLICATIONS FOR INSPECTOR ===');
+            
+            const result = await fetchApplicationsForRole('inspector', { limit: 10 });
+            
+            if (result.success && result.data) {
+                const applications = result.data;
+                console.log('Applications loaded:', applications);
+                
+                // Update stats
+                updateWorkflowStats(applications);
+                
+                // Update inspection queues
+                updateInspectionQueues(applications);
+            } else {
+                console.error('Failed to load applications:', result.error);
+            }
+        }
+
+        function updateWorkflowStats(applications) {
+            const stats = {
+                under_inspection: 0,
+                in_progress: 0,
+                completed: 0,
+                failed: 0,
+                pending_review: 0
+            };
+
+            applications.forEach(app => {
+                if (app.status === 'under_inspection') stats.under_inspection++;
+                else if (app.status === 'in_progress') stats.in_progress++;
+                else if (app.status === 'completed' || app.status === 'cleared') stats.completed++;
+                else if (app.status === 'rejected') stats.failed++;
+                else if (app.status === 'pending_review') stats.pending_review++;
+            });
+
+            // Update stat cards by ID
+            document.getElementById('statPendingInspections').textContent = stats.under_inspection + stats.pending_review;
+            document.getElementById('statInProgress').textContent = stats.in_progress;
+            document.getElementById('statCompleted').textContent = stats.completed;
+            document.getElementById('statFailed').textContent = stats.failed;
+        }
+
+        function updateInspectionQueues(applications) {
+            const queues = {
+                cargo: 0,
+                vehicle: 0,
+                warehouse: 0
+            };
+
+            applications.forEach(app => {
+                if (app.inspection_type === 'cargo') queues.cargo++;
+                else if (app.inspection_type === 'vehicle') queues.vehicle++;
+                else if (app.inspection_type === 'warehouse') queues.warehouse++;
+            });
+
+            const queueContainer = document.getElementById('inspectionQueue');
+            if (queueContainer) {
+                queueContainer.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Cargo Inspections</span><span class="font-bold text-blue-600">${queues.cargo}</span></div>
+                    <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Vehicle Inspections</span><span class="font-bold text-orange-600">${queues.vehicle}</span></div>
+                    <div class="flex justify-between items-center"><span class="text-sm">Warehouse Inspections</span><span class="font-bold text-purple-600">${queues.warehouse}</span></div>
+                `;
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const result = await fetchUnreadNotifications();
+                if (result.success && result.data) {
+                    // Update notification badge
+                    document.getElementById('notificationBadge').textContent = result.data.length;
+                    document.getElementById('notificationBadge').style.display = result.data.length > 0 ? 'inline-block' : 'none';
+
+                    // Update recent notifications list
+                    const notifContainer = document.getElementById('recentNotifications');
+                    if (notifContainer) {
+                        notifContainer.innerHTML = result.data.slice(0, 3).map(notif => `
+                            <div class="flex justify-between items-center border-b pb-2 text-sm">
+                                <span>${notif.title || 'Notification'}</span>
+                                <span class="text-gray-400">${formatTimeAgo(notif.created_at)}</span>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    document.getElementById('notificationBadge').style.display = 'none';
+                    document.getElementById('recentNotifications').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No notifications</div>';
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                document.getElementById('recentNotifications').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Error loading notifications</div>';
+            }
+        }
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+            return date.toLocaleDateString();
+        }
+
+        function getAIStatusBadge(aiValidationPassed, aiMonitoringResults) {
+            if (!aiValidationPassed && aiMonitoringResults) {
+                if (aiMonitoringResults.hasIssues) {
+                    return `<span class="status-badge status-rejected">🤖 AI Issues</span>`;
+                }
+            }
+            
+            if (aiValidationPassed === true) {
+                return `<span class="status-badge status-approved">✓ AI Validated</span>`;
+            } else if (aiValidationPassed === false) {
+                return `<span class="status-badge status-rejected">✗ AI Failed</span>`;
+            } else {
+                return `<span class="status-badge status-pending">⏳ AI Pending</span>`;
             }
         }
 

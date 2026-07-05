@@ -126,6 +126,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     email TEXT NOT NULL,
     phone TEXT,
     nationality TEXT DEFAULT 'South Sudan',
+    applicant_type TEXT DEFAULT 'not_applicable' CHECK (applicant_type IN ('citizen', 'foreigner', 'not_applicable')),
     organization TEXT,
     company TEXT,
     avatar TEXT,

@@ -1,0 +1,109 @@
+    <script type="module">
+        import { createApplication, submitApplication, triggerAIServicesForStage } from '../../../../../../js/applications.js';
+        
+        let applicationId = null;
+        
+        async function submitApplication() {
+            console.log('=== SUBMITTING APPLICATION ===');
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Submitting...';
+            
+            try {
+                // Collect all form data from localStorage
+                const declarantInfo = JSON.parse(localStorage.getItem('cvet_declarant_info') || '{}');
+                const shipmentInfo = JSON.parse(localStorage.getItem('cvet_shipment_info') || '{}');
+                const goodsInfo = JSON.parse(localStorage.getItem('cvet_goods_info') || '{}');
+                const documentsInfo = JSON.parse(localStorage.getItem('cvet_documents_info') || '{}');
+                
+                // Generate unique application number
+                const applicationNumber = 'CV-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                
+                console.log('Application Number:', applicationNumber);
+                console.log('Declarant Info:', declarantInfo);
+                console.log('Shipment Info:', shipmentInfo);
+                console.log('Goods Info:', goodsInfo);
+                console.log('Documents Info:', documentsInfo);
+                
+                // Create application with all data
+                const appData = {
+                    application_number: applicationNumber,
+                    application_type: 'cvet',
+                    declaration_type: declarantInfo.declaration_type,
+                    importer_name: declarantInfo.importer_name,
+                    importer_tin: declarantInfo.importer_tin,
+                    exporter_name: declarantInfo.exporter_name,
+                    exporter_tin: declarantInfo.exporter_tin,
+                    origin_country: shipmentInfo.origin_country,
+                    destination_country: shipmentInfo.destination,
+                    transport_mode: shipmentInfo.transport_mode,
+                    carrier_name: shipmentInfo.carrier_name,
+                    vessel_flight: shipmentInfo.vessel_flight,
+                    bill_of_lading: shipmentInfo.bill_of_lading,
+                    goods_description: goodsInfo.goods_description,
+                    hs_code: goodsInfo.hs_code,
+                    tariff_classification: goodsInfo.tariff_classification,
+                    quantity: goodsInfo.quantity,
+                    unit_value: goodsInfo.unit_value,
+                    documents: Object.keys(documentsInfo).map(key => ({
+                        type: key,
+                        name: documentsInfo[key].name,
+                        uploaded_at: documentsInfo[key].uploadedAt
+                    })),
+                    status: 'draft'
+                };
+                
+                // Create application
+                const createResult = await createApplication(appData);
+                if (!createResult.success) {
+                    throw new Error(createResult.error);
+                }
+                
+                applicationId = createResult.data.id;
+                localStorage.setItem('current_application_id', applicationId);
+                console.log('Application created with ID:', applicationId);
+                
+                // Submit application with AI validation
+                btn.innerHTML = '<i class="ri-robot-line animate-spin"></i> Running AI Validation...';
+                const submitResult = await submitApplication(applicationId);
+                
+                if (submitResult.success) {
+                    console.log('Application submitted successfully');
+                    alert('✅ Application submitted successfully!\n\nApplication Number: ' + applicationNumber + '\n\nYour application is now being processed by the Customs Officer.');
+                    
+                    // Clear localStorage
+                    localStorage.removeItem('cvet_declarant_info');
+                    localStorage.removeItem('cvet_shipment_info');
+                    localStorage.removeItem('cvet_goods_info');
+                    localStorage.removeItem('cvet_documents_info');
+                    
+                    // Navigate to dashboard
+                    window.location.href = '../../dashboard-trader.html';
+                } else {
+                    // AI validation failed - show errors
+                    console.error('AI validation failed:', submitResult.errors);
+                    
+                    let errorMsg = '❌ AI Validation Failed\n\n';
+                    if (submitResult.errors && submitResult.errors.length > 0) {
+                        errorMsg += 'The following issues were detected:\n';
+                        submitResult.errors.forEach((err, index) => {
+                            errorMsg += '\n' + (index + 1) + '. ' + err;
+                        });
+                    }
+                    errorMsg += '\n\nPlease correct these issues and resubmit.';
+                    
+                    alert(errorMsg);
+                    
+                    // Update application status to returned
+                    btn.innerHTML = 'Submit Application <i class="ri-send-plane-line"></i>';
+                    btn.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('Submission failed: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Submit Application <i class="ri-send-plane-line"></i>';
+            }
+        }
+    </script>

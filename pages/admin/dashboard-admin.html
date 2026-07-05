@@ -88,10 +88,10 @@
                     </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="stat-card"><div class="stat-number text-blue-600">28</div><div class="stat-label">Total Users</div></div>
-                        <div class="stat-card"><div class="stat-number text-green-600">6</div><div class="stat-label">Active Services</div></div>
-                        <div class="stat-card"><div class="stat-number text-yellow-600">156</div><div class="stat-label">Total Applications</div></div>
-                        <div class="stat-card"><div class="stat-number text-purple-600">12</div><div class="stat-label">System Alerts</div></div>
+                        <div class="stat-card"><div class="stat-number text-blue-600" id="statTotalUsers">0</div><div class="stat-label">Total Users</div></div>
+                        <div class="stat-card"><div class="stat-number text-green-600" id="statActiveServices">0</div><div class="stat-label">Active Services</div></div>
+                        <div class="stat-card"><div class="stat-number text-yellow-600" id="statTotalApplications">0</div><div class="stat-label">Total Applications</div></div>
+                        <div class="stat-card"><div class="stat-number text-purple-600" id="statSystemAlerts">0</div><div class="stat-label">System Alerts</div></div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
@@ -108,19 +108,14 @@
                     <div class="grid lg:grid-cols-2 gap-4">
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-user-line text-blue-500 mr-2"></i>User Statistics</h3>
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Traders</span><span class="font-bold text-blue-600">12</span></div>
-                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Agents</span><span class="font-bold text-emerald-600">8</span></div>
-                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Officers</span><span class="font-bold text-purple-600">4</span></div>
-                                <div class="flex justify-between items-center"><span class="text-sm">Admins</span><span class="font-bold text-red-600">2</span></div>
+                            <div class="space-y-2" id="userStatistics">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading user stats...</div>
                             </div>
                         </div>
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-notification-3-line text-blue-500 mr-2"></i>Recent System Alerts</h3>
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center border-b pb-2 text-sm"><span>System update successful</span><span class="text-gray-400">2 hours ago</span></div>
-                                <div class="flex justify-between items-center border-b pb-2 text-sm"><span>New user registered</span><span class="text-gray-400">4 hours ago</span></div>
-                                <div class="flex justify-between items-center text-sm"><span>AI model updated</span><span class="text-gray-400">1 day ago</span></div>
+                            <div class="space-y-2" id="systemAlerts">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading alerts...</div>
                             </div>
                         </div>
                     </div>
@@ -130,7 +125,7 @@
     </div>
     <script type="module">
         import supabase from '../../js/supabase.js';
-        import { checkAuth, getUserProfile, signOut, getCurrentUser } from '../../js/auth.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess } from '../../js/auth.js';
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
 
         document.addEventListener('click', function(e) {
@@ -140,8 +135,26 @@
         });
 
         async function loadDashboard() {
+            console.log('=== LOADING ADMIN DASHBOARD ===');
             const isAuthenticated = await checkAuth();
             if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            // Verify role access - admin or administrator role required
+            const hasAccess = await verifyRoleAccess('admin');
+            if (!hasAccess) {
+                // Get user's actual role and redirect to their dashboard
+                const user = await getCurrentUser();
+                if (user) {
+                    const profile = await getUserProfile(user.id);
+                    if (profile && profile.role) {
+                        const dashboardUrl = redirectToDashboard(profile.role);
+                        window.location.href = dashboardUrl;
+                        return;
+                    }
+                }
                 window.location.href = '../../auth/login.html';
                 return;
             }
@@ -154,13 +167,98 @@
                 document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Admin';
             }
 
-            const data = await fetchDashboardData();
-            const recentApps = await fetchRecentApplications(5);
+            // Load dashboard data
+            await loadAdminData();
+        }
 
-            if (data.applications) {
-                const statNumbers = document.querySelectorAll('.stat-number');
-                if (statNumbers[0]) statNumbers[0].textContent = data.applications.total || 0;
+        async function loadAdminData() {
+            try {
+                // Fetch users count
+                const { data: profiles, error: profilesError } = await supabase
+                    .from('profiles')
+                    .select('role');
+                
+                if (!profilesError && profiles) {
+                    document.getElementById('statTotalUsers').textContent = profiles.length;
+                    
+                    // Count users by role
+                    const userStats = {
+                        trader: 0,
+                        agent: 0,
+                        officer: 0,
+                        inspector: 0,
+                        supervisor: 0,
+                        revenue: 0,
+                        administrator: 0
+                    };
+                    
+                    profiles.forEach(p => {
+                        if (userStats.hasOwnProperty(p.role)) {
+                            userStats[p.role]++;
+                        }
+                    });
+                    
+                    // Update user statistics
+                    document.getElementById('userStatistics').innerHTML = `
+                        <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Traders</span><span class="font-bold text-blue-600">${userStats.trader}</span></div>
+                        <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Agents</span><span class="font-bold text-emerald-600">${userStats.agent}</span></div>
+                        <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Officers</span><span class="font-bold text-purple-600">${userStats.officer + userStats.inspector}</span></div>
+                        <div class="flex justify-between items-center"><span class="text-sm">Admins</span><span class="font-bold text-red-600">${userStats.administrator}</span></div>
+                    `;
+                }
+
+                // Fetch services count
+                const { data: services, error: servicesError } = await supabase
+                    .from('services')
+                    .select('id', { count: 'exact', head: true });
+                
+                if (!servicesError) {
+                    document.getElementById('statActiveServices').textContent = services || 0;
+                }
+
+                // Fetch applications count
+                const { data: applications, error: appsError } = await supabase
+                    .from('applications')
+                    .select('id', { count: 'exact', head: true });
+                
+                if (!appsError) {
+                    document.getElementById('statTotalApplications').textContent = applications || 0;
+                }
+
+                // Fetch system alerts (notifications for admin)
+                const { data: alerts, error: alertsError } = await supabase
+                    .from('notifications')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(3);
+                
+                if (!alertsError && alerts) {
+                    document.getElementById('statSystemAlerts').textContent = alerts.length;
+                    
+                    document.getElementById('systemAlerts').innerHTML = alerts.map(alert => `
+                        <div class="flex justify-between items-center border-b pb-2 text-sm">
+                            <span>${alert.title || 'System Alert'}</span>
+                            <span class="text-gray-400">${formatTimeAgo(alert.created_at)}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('systemAlerts').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No alerts</div>';
+                }
+            } catch (error) {
+                console.error('Error loading admin data:', error);
             }
+        }
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+            return date.toLocaleDateString();
         }
 
         document.addEventListener('DOMContentLoaded', loadDashboard);

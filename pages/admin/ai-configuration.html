@@ -175,22 +175,22 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div class="form-group">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Model Version</label>
-                                <select class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                                    <option>Latest (3.2.1)</option>
-                                    <option>Stable (3.1.0)</option>
-                                    <option>Legacy (2.9.0)</option>
+                                <select id="modelVersion" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                                    <option value="3.2.1">Latest (3.2.1)</option>
+                                    <option value="3.1.0">Stable (3.1.0)</option>
+                                    <option value="2.9.0">Legacy (2.9.0)</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Confidence Threshold</label>
-                                <select class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                                    <option>High (95%)</option>
-                                    <option selected>Medium (85%)</option>
-                                    <option>Low (75%)</option>
+                                <select id="confidenceThreshold" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                                    <option value="95">High (95%)</option>
+                                    <option value="85" selected>Medium (85%)</option>
+                                    <option value="75">Low (75%)</option>
                                 </select>
                             </div>
                         </div>
-                        <button class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1" onclick="alert('💾 AI configuration saved')">
+                        <button class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1" onclick="saveAIConfiguration()">
                             <i class="ri-save-line"></i> Save Configuration
                         </button>
                     </div>
@@ -204,6 +204,102 @@
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+    </script>
+    <script type="module">
+        import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { getAIServiceSettings, toggleAIService, updateAIServiceModel, updateAIServiceAccuracy, batchUpdateSystemSettings } from '../../js/system-settings.js';
+
+        async function loadPage() {
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const hasAccess = await verifyRoleAccess('administrator');
+            if (!hasAccess) {
+                alert('You do not have permission to access this page.');
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const user = await getCurrentUser();
+            const profile = user ? await getUserProfile(user.id) : null;
+            
+            if (profile) {
+                document.querySelector('h3').textContent = profile.full_name || 'Administrator';
+                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'System Admin';
+            }
+
+            await loadAISettings();
+        }
+
+        // Load AI settings
+        async function loadAISettings() {
+            const services = ['ocr', 'fraudDetection', 'riskAssessment', 'dutyCalculation'];
+            for (const service of services) {
+                const result = await getAIServiceSettings(service);
+                if (result.success) {
+                    result.data.forEach(setting => {
+                        const settingElement = document.querySelector(`[data-ai-setting="${setting.key}"]`);
+                        if (settingElement) {
+                            if (settingElement.tagName === 'INPUT' || settingElement.tagName === 'SELECT') {
+                                settingElement.value = setting.value;
+                            } else {
+                                settingElement.textContent = setting.value;
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        // Save AI configuration
+        async function saveAIConfiguration() {
+            const modelVersion = document.getElementById('modelVersion').value;
+            const confidenceThreshold = document.getElementById('confidenceThreshold').value;
+
+            const settings = [
+                { key: 'ai_model_version', value: modelVersion },
+                { key: 'ai_confidence_threshold', value: confidenceThreshold }
+            ];
+
+            const result = await batchUpdateSystemSettings(settings);
+            if (result.success) {
+                alert('AI configuration saved successfully');
+            } else {
+                alert('Error saving AI configuration: ' + result.error);
+            }
+        }
+
+        // Toggle AI service
+        async function toggleAIServiceEnabled(serviceName) {
+            const result = await toggleAIService(serviceName, true);
+            if (result.success) {
+                loadAISettings();
+                alert('AI service enabled');
+            } else {
+                alert('Error enabling AI service: ' + result.error);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadPage);
+
+        // Expose functions to window
+        window.saveAIConfiguration = saveAIConfiguration;
+        window.toggleAIServiceEnabled = toggleAIServiceEnabled;
+
+        // Sign out functionality
+        const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
+        if (signOutBtn) {
+            signOutBtn.onclick = async function() {
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+        }
     </script>
 </body>
 </html>

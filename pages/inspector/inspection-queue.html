@@ -61,7 +61,7 @@
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
                             <h2 class="text-2xl font-bold tracking-tight">📋 Inspection Queue</h2>
-                            <p class="opacity-90 text-sm">Manage pending inspections</p>
+                            <p class="opacity-90 text-sm">Auto-assigned applications requiring Inspector Review</p>
                         </div>
                         <div class="relative">
                             <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
@@ -78,71 +78,135 @@
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="inspection-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-blue-600">DA-2026-0015</h4>
-                                    <p class="text-sm text-gray-500">Cargo Inspection · Juba Port · Vehicles</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-pending">Pending</span>
-                                        <span class="text-xs text-gray-400">Assigned: Jun 18, 2026</span>
-                                        <span class="text-xs text-gray-400">Priority: High</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <a href="cargo-inspection.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Start Inspection</a>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing details')">Details</button>
-                                </div>
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                            <div>
+                                <h3 class="font-bold text-gray-900">Inspector Review workflow</h3>
+                                <p class="text-sm text-gray-600 mt-1">Inspect physical goods, verify declarations, capture photos if required, record findings, and upload the inspection report.</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                                <span class="px-3 py-1 rounded-full bg-blue-100 text-blue-700">Workflow assigned</span>
+                                <span class="px-3 py-1 rounded-full bg-purple-100 text-purple-700">AI validates report</span>
+                                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700">Correction if inconsistent</span>
+                                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700">Supervisor if validated</span>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="inspection-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-orange-600">VQ-2026-0012</h4>
-                                    <p class="text-sm text-gray-500">Vehicle Inspection · Juba · Toyota Hilux</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-in-progress">In Progress</span>
-                                        <span class="text-xs text-gray-400">Started: Jun 15, 2026</span>
-                                        <span class="text-xs text-gray-400">Inspector: You</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <a href="vehicle-inspection.html" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Continue</a>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing details')">Details</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="inspection-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-emerald-600">DA-2026-0010</h4>
-                                    <p class="text-sm text-gray-500">Cargo Inspection · Kaya Port · Electronics</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-approved">✓ Completed</span>
-                                        <span class="text-xs text-gray-400">Completed: Jun 12, 2026</span>
-                                        <span class="text-xs text-gray-400">Inspector: You</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="alert('📄 Viewing report')">View Report</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing details')">Details</button>
-                                </div>
-                            </div>
+                    <div class="space-y-3" id="queueContainer">
+                        <div class="text-center py-10 bg-white rounded-xl border border-gray-200 shadow-sm">
+                            <i class="ri-loader-4-line text-4xl text-blue-500 animate-spin block mb-2"></i>
+                            <p class="text-gray-500">Loading inspection queue...</p>
                         </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { fetchApplicationsForRole } from '../../js/applications.js';
+        import { signOut as authSignOut } from '../../js/auth.js';
+
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown) dropdown.classList.remove('open');
             }
         });
+
+        async function init() {
+            const hasAuth = await checkPageAuth('inspector');
+            if (!hasAuth) return;
+
+            // Load profile name in dashboard
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('full_name')
+                    .eq('user_id', user.id)
+                    .single();
+                if (profile && profile.full_name) {
+                    document.querySelectorAll('.text-center h3, .header-profile-btn span.hidden').forEach(el => {
+                        el.textContent = profile.full_name;
+                    });
+                }
+            }
+
+            await loadInspectionQueue();
+
+            // Set up Sign Out
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) {
+                signOutBtn.addEventListener('click', handleSignOut);
+            }
+        }
+
+        async function handleSignOut() {
+            const result = await authSignOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            } else {
+                alert('Sign out failed: ' + result.error);
+            }
+        }
+
+        async function loadInspectionQueue() {
+            const result = await fetchApplicationsForRole('inspector', { includeAll: true });
+            const queueEl = document.getElementById('queueContainer');
+            if (!queueEl) return;
+
+            if (result.success && result.data && result.data.length > 0) {
+                const applications = result.data;
+                let html = '';
+                applications.forEach(app => {
+                    let badgeClass = 'status-pending';
+                    let badgeText = 'Pending';
+                    if (app.status === 'in_progress') {
+                        badgeClass = 'status-in-progress';
+                        badgeText = 'In Progress';
+                    } else if (app.status === 'completed' || app.status === 'cleared') {
+                        badgeClass = 'status-approved';
+                        badgeText = 'Completed';
+                    }
+
+                    const desc = app.goods_data?.item_description || app.declaration_data?.product_description || 'General Cargo';
+                    const location = app.declaration_data?.port_of_entry || 'Juba Port';
+                    const type = app.application_type || 'Cargo';
+
+                    html += `
+                        <div class="inspection-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <div class="flex flex-wrap justify-between items-start gap-2">
+                                <div>
+                                    <h4 class="font-bold text-blue-600">${app.application_number}</h4>
+                                    <p class="text-sm text-gray-500">${(type || '').replace('_', ' ').toUpperCase()} · ${location} · ${desc}</p>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <span class="status-badge ${badgeClass}">${badgeText}</span>
+                                        <span class="text-xs text-gray-400">Assigned: ${new Date(app.created_at).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a href="inspection-details.html?id=${app.id}" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Start Inspection</a>
+                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('Viewing application number: ${app.application_number}')">Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                queueEl.innerHTML = html;
+            } else {
+                queueEl.innerHTML = `
+                    <div class="text-center py-10 bg-white rounded-xl border border-gray-200 shadow-sm">
+                        <i class="ri-clipboard-line text-4xl text-gray-300 block mb-2"></i>
+                        <p class="text-gray-500">No applications assigned for physical inspection.</p>
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>

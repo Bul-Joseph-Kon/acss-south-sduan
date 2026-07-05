@@ -156,5 +156,108 @@
             }
         });
     </script>
+    <script type="module">
+        import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { fetchTable } from '../../js/database.js';
+
+        let currentPage = 1;
+        let notificationsPerPage = 10;
+        let allNotifications = [];
+
+        async function loadPage() {
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const hasAccess = await verifyRoleAccess('administrator');
+            if (!hasAccess) {
+                alert('You do not have permission to access this page.');
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const user = await getCurrentUser();
+            const profile = user ? await getUserProfile(user.id) : null;
+            
+            if (profile) {
+                document.querySelector('h3').textContent = profile.full_name || 'Administrator';
+                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'System Admin';
+            }
+
+            await loadNotifications();
+        }
+
+        async function loadNotifications() {
+            const result = await fetchTable('notifications', { orderBy: { column: 'created_at', ascending: false }, limit: 100 });
+            if (result.success) {
+                allNotifications = result.data;
+                renderNotifications();
+            } else {
+                console.error('Error loading notifications:', result.error);
+            }
+        }
+
+        function renderNotifications() {
+            const container = document.querySelector('.space-y-3');
+            if (!container) return;
+
+            if (allNotifications.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No notifications found</div>';
+                return;
+            }
+
+            let html = '';
+            allNotifications.forEach(notif => {
+                const statusClass = notif.status === 'sent' ? 'status-sent' : (notif.status === 'scheduled' ? 'status-scheduled' : 'status-draft');
+                const statusIcon = notif.status === 'sent' ? '✓' : (notif.status === 'scheduled' ? '⏳' : '📝');
+                const statusText = notif.status || 'Unknown';
+
+                html += `
+                    <div class="notif-card">
+                        <div class="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-bold">${notif.title || 'Notification'}</h4>
+                                <p class="text-sm text-gray-500">${notif.message || 'No message'}</p>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="status-badge ${statusClass}">${statusIcon} ${statusText}</span>
+                                    <span class="text-xs text-gray-400">Created: ${new Date(notif.created_at).toLocaleDateString()}</span>
+                                    <span class="text-xs text-gray-400">Recipients: ${notif.recipient_type || 'All Users'}</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editNotification('${notif.id}')">Edit</button>
+                                <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteNotification('${notif.id}')">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        window.editNotification = function(id) {
+            alert('Edit notification - ID: ' + id);
+        };
+
+        window.deleteNotification = function(id) {
+            alert('Delete notification - ID: ' + id);
+        };
+
+        document.addEventListener('DOMContentLoaded', loadPage);
+
+        // Sign out functionality
+        const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
+        if (signOutBtn) {
+            signOutBtn.onclick = async function() {
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+        }
+    </script>
 </body>
 </html>

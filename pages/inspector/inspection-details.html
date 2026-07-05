@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Inspection Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+        .tab-btn { padding: 0.75rem 1.5rem; border-bottom: 3px solid transparent; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #6b7280; }
+        .tab-btn.active { border-bottom-color: #7c3aed; color: #7c3aed; }
+        .section-card { border-left: 4px solid #7c3aed; background: #f5f3ff; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .info-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb; }
+        .info-row:last-child { border-bottom: none; }
+        .badge { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; }
+        .badge-pending { background: #fef3c7; color: #92400e; }
+        .badge-inspecting { background: #dbeafe; color: #1e40af; }
+        .badge-completed { background: #d1fae5; color: #065f46; }
+        .doc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; margin-bottom: 0.5rem; }
+        .doc-icon { width: 2.5rem; height: 2.5rem; background: #ede9fe; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: #7c3aed; }
+        .photo-item { position: relative; display: inline-block; margin: 0.5rem; }
+        .photo-item img { width: 120px; height: 120px; object-fit: cover; border-radius: 0.5rem; border: 2px solid #e5e7eb; }
+        .photo-item .remove-btn { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .finding-item { padding: 0.75rem; border-left: 3px solid #7c3aed; background: #f5f3ff; margin-bottom: 0.5rem; border-radius: 0.3rem; }
+        .action-btn { padding: 0.6rem 1.5rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; font-size: 0.9rem; }
+        .btn-submit { background: #10b981; color: white; }
+        .btn-submit:hover { background: #059669; }
+        .btn-camera { background: #7c3aed; color: white; }
+        .btn-camera:hover { background: #6d28d9; }
+        textarea { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-family: inherit; resize: vertical; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 50; }
+        .modal-overlay.open { display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 1rem; padding: 2rem; max-width: 600px; width: 90%; box-shadow: 0 20px 25px rgba(0,0,0,0.15); }
+        .modal-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #1f2937; }
+        video { width: 100%; border-radius: 0.5rem; margin: 1rem 0; background: #000; }
+        .status-badge-large { padding: 0.5rem 1rem; border-radius: 0.75rem; font-weight: 600; display: inline-block; }
+        .status-inspecting { background: #dbeafe; color: #1e40af; }
+        .workflow-step { display: flex; gap: 0.75rem; padding: 0.9rem; border: 1px solid #e5e7eb; border-radius: 0.75rem; background: #fff; }
+        .workflow-step-icon { width: 2.25rem; height: 2.25rem; border-radius: 9999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .routing-card { border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
+                        <div class="text-center mb-5">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
+                                <i class="ri-user-line text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">Inspector</h3>
+                            <p class="text-gray-500 text-sm">Customs Inspector</p>
+                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
+                        </div>
+                        <nav class="space-y-1 mb-4">
+                            <a href="dashboard-inspector.html" class="sidebar-link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+                            <a href="inspection-queue.html" class="sidebar-link"><i class="ri-clipboard-line"></i><span>Queue</span></a>
+                            <a href="inspection-reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Reports</span></a>
+                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span></a>
+                        </nav>
+                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                            <i class="ri-logout-box-line"></i> Sign Out
+                        </button>
+                    </div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg">
+                        <div class="flex items-start justify-between gap-4 mb-4">
+                            <div>
+                                <h2 class="text-3xl font-bold tracking-tight">🔍 Physical Inspection</h2>
+                                <p class="opacity-90 text-sm mt-1">Application DA-2026-0015</p>
+                            </div>
+                            <a href="inspection-queue.html" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                                <i class="ri-arrow-left-line"></i> Back
+                            </a>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="badge badge-inspecting">In Progress</span>
+                            <span class="badge badge-pending">Auto-assigned by Workflow Engine</span>
+                            <span class="text-sm opacity-90">Started: Jun 22, 2026 at 10:15 AM</span>
+                            <span class="text-sm opacity-90">Inspector: Ahmed Hassan</span>
+                        </div>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm flex overflow-x-auto">
+                        <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+                        <button class="tab-btn" onclick="switchTab('inspection')">Inspection</button>
+                        <button class="tab-btn" onclick="switchTab('photographs')">Photographs</button>
+                        <button class="tab-btn" onclick="switchTab('findings')">Findings</button>
+                    </div>
+
+                    <!-- OVERVIEW TAB -->
+                    <div id="tab-overview" class="space-y-4">
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-5">
+                                <div>
+                                    <h3 class="font-bold text-lg">Inspector Review Workflow</h3>
+                                    <p class="text-sm text-gray-600 mt-1">This application was assigned automatically because physical inspection is required.</p>
+                                </div>
+                                <span class="status-badge-large status-inspecting">Inspector Review</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+                                <div class="workflow-step">
+                                    <div class="workflow-step-icon bg-blue-100 text-blue-700"><i class="ri-route-line"></i></div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 text-sm">Automatic assignment</p>
+                                        <p class="text-xs text-gray-600 mt-1">The workflow engine sends inspection-required applications to an Inspector queue.</p>
+                                    </div>
+                                </div>
+                                <div class="workflow-step">
+                                    <div class="workflow-step-icon bg-amber-100 text-amber-700"><i class="ri-search-eye-line"></i></div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 text-sm">Physical inspection</p>
+                                        <p class="text-xs text-gray-600 mt-1">Inspect the goods, verify the declaration, and record field observations.</p>
+                                    </div>
+                                </div>
+                                <div class="workflow-step">
+                                    <div class="workflow-step-icon bg-purple-100 text-purple-700"><i class="ri-camera-line"></i></div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 text-sm">Evidence and report</p>
+                                        <p class="text-xs text-gray-600 mt-1">Attach photographs if required, enter findings, and upload the inspection report.</p>
+                                    </div>
+                                </div>
+                                <div class="workflow-step">
+                                    <div class="workflow-step-icon bg-emerald-100 text-emerald-700"><i class="ri-brain-line"></i></div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900 text-sm">AI validation</p>
+                                        <p class="text-xs text-gray-600 mt-1">AI checks the report against declared goods, findings, and supporting evidence.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-[#0f2b44] text-white rounded-xl p-5">
+                                <div class="flex items-center justify-between gap-3 mb-4">
+                                    <h4 class="font-bold">Automatic routing after submission</h4>
+                                    <i class="ri-git-branch-line text-2xl text-emerald-300"></i>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div class="routing-card">
+                                        <p class="text-sm font-semibold text-amber-200">Inconsistencies detected</p>
+                                        <p class="text-xs text-white/80 mt-1">Application is returned for correction with AI validation issues and inspection findings attached.</p>
+                                    </div>
+                                    <div class="routing-card">
+                                        <p class="text-sm font-semibold text-emerald-200">Report validated</p>
+                                        <p class="text-xs text-white/80 mt-1">Application proceeds to the Supervisor for the next review stage.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4">Application Details</h3>
+                            <div class="info-row">
+                                <span class="text-gray-600">Application Number</span>
+                                <span class="font-semibold text-blue-600">DA-2026-0015</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-gray-600">Trader</span>
+                                <span class="font-semibold">Juba Importers Ltd.</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-gray-600">Application Type</span>
+                                <span class="font-semibold">Direct Assessment</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-gray-600">Declared Value</span>
+                                <span class="font-semibold text-green-600">$45,000 USD</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-gray-600">Port of Entry</span>
+                                <span class="font-semibold">Juba Port Authority</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4">Goods Information</h3>
+                            <div class="info-row">
+                                <span class="text-gray-600">Product Description</span>
+                                <span class="font-semibold">Industrial Machinery & Equipment</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-gray-600">HS Code</span>
+                                <span class="font-semibold">8479.89.90</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-gray-600">Quantity</span>
+                                <span class="font-semibold">25 units</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-gray-600">Origin Country</span>
+                                <span class="font-semibold">Germany</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-gray-600">Condition</span>
+                                <span class="font-semibold text-amber-600">Used</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4">📁 Supporting Documents</h3>
+                            <div class="doc-item">
+                                <div class="doc-icon"><i class="ri-file-pdf-2-line"></i></div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">packing_list_da2026_0015.pdf</p>
+                                    <p class="text-xs text-gray-500">Packing List · 1.5 MB</p>
+                                </div>
+                            </div>
+                            <div class="doc-item">
+                                <div class="doc-icon"><i class="ri-file-pdf-2-line"></i></div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">bill_of_lading_da2026_0015.pdf</p>
+                                    <p class="text-xs text-gray-500">Bill of Lading · 0.9 MB</p>
+                                </div>
+                            </div>
+                            <div class="doc-item">
+                                <div class="doc-icon"><i class="ri-file-pdf-2-line"></i></div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">certificate_of_origin_da2026_0015.pdf</p>
+                                    <p class="text-xs text-gray-500">Certificate of Origin · 0.7 MB</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- INSPECTION TAB -->
+                    <div id="tab-inspection" class="space-y-4" style="display: none;">
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4">📋 Inspection Checklist</h3>
+                            
+                            <div class="space-y-3 mb-6">
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
+                                    <span class="text-sm font-medium text-gray-700">Physical goods match declared description</span>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
+                                    <span class="text-sm font-medium text-gray-700">Quantity verified and matches declaration</span>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
+                                    <span class="text-sm font-medium text-gray-700">Goods condition acceptable (no damage)</span>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
+                                    <span class="text-sm font-medium text-gray-700">Serial numbers/marks verified</span>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
+                                    <span class="text-sm font-medium text-gray-700">Packaging intact and secure</span>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
+                                    <span class="text-sm font-medium text-gray-700">No prohibited or restricted items detected</span>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
+                                    <span class="text-sm font-medium text-gray-700">Weight/volume measurements recorded</span>
+                                </label>
+
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
+                                    <span class="text-sm font-medium text-gray-700">All markings and labels verified</span>
+                                </label>
+                            </div>
+
+                            <div class="border-t pt-6">
+                                <h4 class="font-semibold mb-3">Inspection Notes</h4>
+                                <textarea placeholder="Record your detailed inspection findings here..." rows="5"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PHOTOGRAPHS TAB -->
+                    <div id="tab-photographs" class="space-y-4" style="display: none;">
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4">📸 Inspection Photographs</h3>
+                            
+                            <button class="action-btn btn-camera mb-6" onclick="openCameraModal()">
+                                <i class="ri-camera-line"></i> Take Photo
+                            </button>
+
+                            <div class="bg-gray-50 p-6 rounded-lg border-2 border-dashed border-gray-300 text-center mb-6">
+                                <p class="text-sm text-gray-600 mb-3">Or drag photos here to upload</p>
+                                <input type="file" id="photoInput" multiple accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)" />
+                                <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition" onclick="document.getElementById('photoInput').click()">
+                                    Select Photos
+                                </button>
+                                <p class="text-xs text-gray-500 mt-2">JPG, PNG up to 10MB each</p>
+                            </div>
+
+                            <div id="photoGallery" class="flex flex-wrap gap-2 min-h-[120px] bg-gray-50 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500 w-full">Photos will appear here</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FINDINGS TAB -->
+                    <div id="tab-findings" class="space-y-4" style="display: none;">
+                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4">🎯 Inspection Findings</h3>
+
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">Overall Inspection Result</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <input type="radio" name="result" value="passed" class="w-4 h-4 text-green-600" />
+                                        <span class="text-sm text-gray-700"><strong>✓ Passed</strong> - Goods verified, no discrepancies</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <input type="radio" name="result" value="failed" class="w-4 h-4 text-red-600" />
+                                        <span class="text-sm text-gray-700"><strong>✗ Failed</strong> - Discrepancies detected, requires further action</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer">
+                                        <input type="radio" name="result" value="conditional" class="w-4 h-4 text-amber-600" />
+                                        <span class="text-sm text-gray-700"><strong>⚠ Conditional Pass</strong> - Minor issues requiring correction</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Discrepancies Found (if any)</label>
+                                <textarea id="discrepancies" placeholder="Describe any discrepancies between declared and actual goods..." rows="4"></textarea>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Recommendations</label>
+                                <textarea id="recommendations" placeholder="Provide your recommendation. Valid reports proceed to Supervisor; inconsistent reports are returned for correction." rows="4"></textarea>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" id="samplesRequired" class="w-5 h-5 text-purple-600" />
+                                    <span class="text-sm font-semibold text-gray-700">Physical samples required for laboratory analysis</span>
+                                </label>
+                            </div>
+
+                            <div class="mb-6">
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Laboratory Test Required</label>
+                                <select id="labTest" class="w-full p-2 border border-gray-300 rounded-lg">
+                                    <option value="none">None</option>
+                                    <option value="quality">Quality Analysis</option>
+                                    <option value="composition">Material Composition</option>
+                                    <option value="hazmat">Hazardous Material Test</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBMIT BUTTON -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div class="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-900">
+                            <strong>Submit workflow:</strong> Uploads the inspection report, starts AI validation, then automatically returns the application for correction if inconsistencies are found or routes it to the Supervisor if validated.
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition">
+                                Save as Draft
+                            </button>
+                            <button class="flex-1 action-btn btn-submit" onclick="submitInspectionReport()">
+                                <i class="ri-check-line"></i> Submit Inspection Report
+                            </button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- CAMERA MODAL -->
+    <div id="cameraModal" class="modal-overlay" onclick="if(event.target === this) closeCameraModal()">
+        <div class="modal-content">
+            <h2 class="modal-title">📸 Take Inspection Photo</h2>
+            <video id="videoStream" width="100%"></video>
+            <canvas id="photoCanvas" style="display: none;"></canvas>
+            <div class="flex gap-3">
+                <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition" onclick="closeCameraModal()">Cancel</button>
+                <button class="flex-1 action-btn btn-camera" onclick="capturePhoto()">Capture Photo</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { fetchApplicationById } from '../../js/applications.js';
+        import { validateInspectionReport, updateApplicationStatusAfterInspection } from '../../js/ai-validation.js';
+        import { signOut as authSignOut } from '../../js/auth.js';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        let appId = urlParams.get('id');
+        let application = null;
+        let photos = [];
+        let stream = null;
+
+        async function init() {
+            const hasAuth = await checkPageAuth('inspector');
+            if (!hasAuth) return;
+
+            if (!appId) {
+                // Fetch the first under_inspection application if no id is provided
+                const { data: apps } = await supabase
+                    .from('applications')
+                    .select('id')
+                    .eq('status', 'under_inspection')
+                    .limit(1);
+                if (apps && apps.length > 0) {
+                    appId = apps[0].id;
+                    window.history.replaceState({}, '', `?id=${appId}`);
+                }
+            }
+
+            if (appId) {
+                const result = await fetchApplicationById(appId);
+                if (result.success && result.data) {
+                    application = result.data;
+                    populateDetails(application);
+                } else {
+                    alert('Failed to load application details: ' + (result.error || 'Unknown error'));
+                }
+            }
+
+            // Bind sign out click handler
+            const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
+            if (signOutBtn) {
+                signOutBtn.removeAttribute('onclick');
+                signOutBtn.addEventListener('click', handleSignOut);
+            }
+        }
+
+        async function handleSignOut() {
+            const result = await authSignOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            } else {
+                alert('Sign out failed: ' + result.error);
+            }
+        }
+
+        function populateDetails(app) {
+            // Update Title/Header
+            document.querySelectorAll('.text-3xl.font-bold').forEach(el => {
+                el.innerHTML = `🔍 Physical Inspection`;
+            });
+            document.querySelectorAll('.opacity-90.text-sm.mt-1').forEach(el => {
+                el.textContent = `Application ${app.application_number}`;
+            });
+
+            // Date
+            document.querySelectorAll('.text-sm.opacity-90')[0].textContent = `Started: ${new Date(app.created_at).toLocaleString()}`;
+
+            // Populate inspector name
+            supabase.from('profiles').select('full_name').eq('id', app.inspector_id).single().then(({ data }) => {
+                if (data && data.full_name) {
+                    document.querySelectorAll('.text-sm.opacity-90')[1].textContent = `Inspector: ${data.full_name}`;
+                    // Update sidebar name too
+                    const sidebarName = document.querySelector('.text-lg.font-bold');
+                    if (sidebarName) sidebarName.textContent = data.full_name;
+                }
+            });
+
+            // Overview Details
+            const overviewSpans = document.querySelectorAll('#tab-overview .info-row span.font-semibold');
+            if (overviewSpans.length >= 5) {
+                overviewSpans[0].textContent = app.application_number;
+                // Query trader name
+                supabase.from('profiles').select('full_name').eq('id', app.user_id).single().then(({ data }) => {
+                    if (data && data.full_name) overviewSpans[1].textContent = data.full_name;
+                });
+                overviewSpans[2].textContent = (app.application_type || '').replace('_', ' ').toUpperCase();
+                overviewSpans[3].textContent = `$${(app.declared_value || 0).toLocaleString()} USD`;
+                overviewSpans[4].textContent = app.declaration_data?.port_of_entry || 'Juba Port';
+            }
+
+            // Goods Info
+            const goodsSpans = document.querySelectorAll('#tab-overview .bg-white:nth-of-type(3) .info-row span.font-semibold');
+            if (goodsSpans.length >= 5) {
+                goodsSpans[0].textContent = app.goods_data?.item_description || app.declaration_data?.product_description || 'General Cargo';
+                goodsSpans[1].textContent = app.goods_data?.hs_code || app.declaration_data?.hs_code || 'N/A';
+                goodsSpans[2].textContent = app.goods_data?.quantity || app.declaration_data?.quantity || 'N/A';
+                goodsSpans[3].textContent = app.goods_data?.origin_country || app.declaration_data?.origin_country || 'N/A';
+                goodsSpans[4].textContent = app.goods_data?.condition || 'New';
+            }
+        }
+
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('[id^="tab-"]');
+            tabs.forEach(tab => tab.style.display = 'none');
+            
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabName).style.display = 'block';
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+
+        function openCameraModal() {
+            document.getElementById('cameraModal').classList.add('open');
+            startCamera();
+        }
+
+        function closeCameraModal() {
+            document.getElementById('cameraModal').classList.remove('open');
+            stopCamera();
+        }
+
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                document.getElementById('videoStream').srcObject = stream;
+            } catch (err) {
+                alert('Unable to access camera: ' + err.message);
+            }
+        }
+
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('videoStream');
+            const canvas = document.getElementById('photoCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                photos.push(url);
+                displayPhotos();
+                closeCameraModal();
+            });
+        }
+
+        function handlePhotoUpload(event) {
+            const files = event.target.files;
+            for (let file of files) {
+                const url = URL.createObjectURL(file);
+                photos.push(url);
+            }
+            displayPhotos();
+        }
+
+        function displayPhotos() {
+            const gallery = document.getElementById('photoGallery');
+            if (photos.length === 0) {
+                gallery.innerHTML = '<p class="text-sm text-gray-500 w-full">Photos will appear here</p>';
+                return;
+            }
+            
+            gallery.innerHTML = photos.map((url, index) => `
+                <div class="photo-item">
+                    <img src="${url}" alt="Inspection photo ${index + 1}">
+                    <button class="remove-btn" onclick="removePhoto(${index})"><i class="ri-close-line"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function removePhoto(index) {
+            photos.splice(index, 1);
+            displayPhotos();
+        }
+
+        async function submitInspectionReport() {
+            if (!appId) return;
+
+            const result = document.querySelector('input[name="result"]:checked');
+            if (!result) {
+                alert('Please select an inspection result');
+                return;
+            }
+
+            const checklistItems = document.querySelectorAll('#tab-inspection input[type="checkbox"]');
+            const checklist = {
+                descriptionMatch: checklistItems[0]?.checked || false,
+                quantityVerified: checklistItems[1]?.checked || false,
+                conditionAcceptable: checklistItems[2]?.checked || false,
+                serialsVerified: checklistItems[3]?.checked || false,
+                packagingSecure: checklistItems[4]?.checked || false,
+                noProhibited: checklistItems[5]?.checked || false,
+                measurementsRecorded: checklistItems[6]?.checked || false,
+                labelsVerified: checklistItems[7]?.checked || false
+            };
+
+            const discrepancies = document.getElementById('discrepancies').value.trim();
+            const recommendations = document.getElementById('recommendations').value.trim();
+            const samplesRequired = document.getElementById('samplesRequired')?.checked || false;
+            const labTest = document.getElementById('labTest')?.value || 'none';
+
+            const inspectionReport = {
+                overall_result: result.value,
+                checklist: checklist,
+                discrepancies: discrepancies,
+                recommendations: recommendations,
+                samples_required: samplesRequired,
+                lab_test: labTest,
+                photos: photos
+            };
+
+            // Toggle submit button loading state
+            const submitBtn = document.querySelector('.btn-submit');
+            const oldHtml = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="ri-loader-4-line animate-spin"></i> Validating...`;
+
+            try {
+                // AI validate the inspection report
+                const validationResults = await validateInspectionReport(appId, inspectionReport);
+
+                // Update application status & route based on validation results
+                const statusUpdate = await updateApplicationStatusAfterInspection(appId, validationResults, inspectionReport);
+
+                // Prepare result notification details
+                let detailsMsg = `=== AI Report Validation Result ===\n`;
+                detailsMsg += `Validation Score: ${validationResults.validation_score}/100\n`;
+                detailsMsg += `Validation Status: ${validationResults.validation_passed ? 'PASSED ✓' : 'FAILED ✗'}\n\n`;
+
+                if (validationResults.errors.length > 0) {
+                    detailsMsg += `Inconsistencies Detected:\n` + validationResults.errors.map(e => `- ${e}`).join('\n') + `\n\n`;
+                }
+
+                if (validationResults.warnings.length > 0) {
+                    detailsMsg += `Warnings:\n` + validationResults.warnings.map(w => `- ${w}`).join('\n') + `\n\n`;
+                }
+
+                detailsMsg += `Routing Decision:\n${statusUpdate.message}`;
+
+                alert(detailsMsg);
+
+                // Redirect to Queue
+                window.location.href = 'inspection-queue.html';
+            } catch (err) {
+                alert('Submission failed: ' + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = oldHtml;
+            }
+        }
+
+        // Bind functions to window context for inline HTML attributes
+        window.switchTab = switchTab;
+        window.openCameraModal = openCameraModal;
+        window.closeCameraModal = closeCameraModal;
+        window.capturePhoto = capturePhoto;
+        window.handlePhotoUpload = handlePhotoUpload;
+        window.removePhoto = removePhoto;
+        window.submitInspectionReport = submitInspectionReport;
+        window.handleSignOut = handleSignOut;
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCameraModal();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -6,8 +6,6 @@
     <title>Sign In - SSRA Customs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module" src="../js/auth.js"></script>
     <style>
         .ssra-logo-text { background: linear-gradient(135deg, #1a365d 0%, #2563eb 100%); }
         .auth-card { background: white; border-radius: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
@@ -45,7 +43,7 @@
         .modal-box .input-group { margin-bottom: 1rem; }
         .modal-box .input-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem; }
         .modal-box .input-group input { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; font-size: 0.9rem; transition: 0.2s; }
-        .modal-box .input-group input:focus { outline: none; border-color: #1a365d; ring: 2px solid rgba(26,54,93,0.1); }
+        .modal-box .input-group input:focus { outline: none; border-color: #1a365d; box-shadow: 0 0 0 2px rgba(26,54,93,0.1); }
         .modal-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
         .modal-actions button { flex: 1; padding: 0.6rem; border-radius: 0.5rem; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; }
         .btn-primary { background: #1a365d; color: white; }
@@ -102,25 +100,14 @@
             </div>
             
             <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeForgotModal()">Cancel</button>
-                <button class="btn-primary" onclick="handleForgotPassword()">Send Reset Link</button>
+                <button class="btn-secondary" id="cancelResetBtn">Cancel</button>
+                <button class="btn-primary" id="sendResetBtn">Send Reset Link</button>
             </div>
         </div>
     </div>
 
     <!-- Main Login Card -->
     <div class="auth-card max-w-md w-full p-8">
-        <!-- Sign Out Banner (visible when logged in) -->
-        <div id="signedInBanner" class="hidden bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4 flex items-center justify-between">
-            <div class="flex items-center gap-2 text-emerald-700 text-sm">
-                <i class="ri-checkbox-circle-fill"></i>
-                <span>Signed in as <strong id="signedInUser">User</strong></span>
-            </div>
-            <button onclick="handleSignOut()" class="text-sm text-red-600 hover:text-red-800 font-semibold flex items-center gap-1">
-                <i class="ri-logout-box-r-line"></i> Sign Out
-            </button>
-        </div>
-
         <div class="text-center mb-8">
             <div class="w-20 h-20 rounded-2xl ssra-logo-text flex items-center justify-center text-white shadow-lg mx-auto mb-4">
                 <div class="text-center"><i class="ri-government-line text-3xl block"></i><span class="text-[10px] font-bold tracking-wider">SSRA</span></div>
@@ -149,20 +136,7 @@
             <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">Sign In</button>
         </form>
 
-        <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-            <p class="text-xs text-gray-600 text-center font-bold mb-1">Demo Accounts:</p>
-            <div class="grid grid-cols-2 gap-1 text-xs text-gray-500">
-                <span>Agent: AGT-003 / pass123</span>
-                <span>Trader: TIN-TRD-001 / pass123</span>
-                <span>Admin: ADMIN-007 / admin123</span>
-                <span>Officer: OFF-004 / pass123</span>
-                <span>Supervisor: SUP-005 / pass123</span>
-                <span>Inspector: INS-008 / pass123</span>
-                <span>Revenue: REV-009 / pass123</span>
-            </div>
-        </div>
-
-        <p class="text-center text-gray-500 mt-4 text-sm">Don't have an account? <a href="register.html" class="text-emerald-600 hover:underline font-semibold">Register</a></p>
+        <p class="text-center text-gray-500 mt-6 text-sm">Don't have an account? <a href="register.html" class="text-emerald-600 hover:underline font-semibold">Register</a></p>
         <p class="text-center text-gray-400 mt-2 text-xs"><a href="../index.html" class="hover:text-gray-600">← Back to Home</a></p>
     </div>
 
@@ -264,38 +238,48 @@
                 return;
             }
 
+            console.log('=== HANDLE SIGN IN ===');
+            console.log('Identifier:', identifier);
+
             // Treat identifier as email for Supabase auth
             const result = await signIn(identifier, password);
 
+            console.log('=== SIGN IN RESULT ===');
+            console.log('Success:', result.success);
+            console.log('Profile:', result.profile);
+
             if (result.success) {
-                const role = result.profile?.role || 'trader';
+                const role = result.profile?.role;
+                console.log('=== REDIRECTING BASED ON ROLE ===');
+                console.log('Role from profile:', role);
+                
+                if (!role) {
+                    console.error('No role found in profile!');
+                    showToast('Invalid user profile. Please contact administrator.', 'error');
+                    return;
+                }
+                
                 showToast('Welcome back! Redirecting...', 'success');
                 setTimeout(() => {
-                    window.location.href = getRedirectDestination(role);
+                    const dashboardUrl = getRedirectDestination(role);
+                    console.log('Dashboard URL:', dashboardUrl);
+                    // Prepend ../ to navigate from auth folder to pages folder
+                    if (dashboardUrl && dashboardUrl !== 'undefined') {
+                        console.log('=== FINAL REDIRECT ===');
+                        console.log('Redirecting to:', '../' + dashboardUrl);
+                        window.location.href = '../' + dashboardUrl;
+                    } else {
+                        console.error('Invalid dashboard URL for role:', role);
+                        showToast('Error redirecting to dashboard', 'error');
+                    }
                 }, 500);
             } else {
                 showToast(result.error || 'Invalid credentials', 'error');
             }
         }
 
-        // ============ CHECK SESSION ON LOAD ============
-        async function checkSession() {
-            const isAuthenticated = await checkAuth();
-            const userName = localStorage.getItem('userName');
-
-            if (isAuthenticated && userName) {
-                document.getElementById('signedInBanner').classList.remove('hidden');
-                document.getElementById('signedInUser').textContent = userName;
-                setTimeout(() => {
-                    showToast('You are already signed in as ' + userName, 'info');
-                }, 300);
-            }
-        }
-
         // Initialize on load
         document.addEventListener('DOMContentLoaded', function() {
-            checkSession();
-
             // Attach form submit handler
             document.getElementById('loginForm').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -307,7 +291,73 @@
                 e.preventDefault();
                 openForgotModal();
             });
+
+            // Attach cancel button handler
+            document.getElementById('cancelResetBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                closeForgotModal();
+            });
+
+            // Attach send reset link button handler
+            document.getElementById('sendResetBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                handleForgotPassword();
+            });
         });
     </script>
+
+    <script type="module">
+        import { signIn, checkAuth, dashboardUrls } from '../js/auth.js';
+        import { ERROR_MESSAGES } from '../js/config.js';
+        import supabase from '../js/supabase.js';
+
+        // Make functions globally available
+        window.signIn = signIn;
+        window.checkAuth = checkAuth;
+        window.dashboardUrls = dashboardUrls;
+        window.ERROR_MESSAGES = ERROR_MESSAGES;
+        console.log('Login authentication system initialized successfully');
+
+        // Handle post-email confirmation redirect
+        async function handleEmailConfirmation() {
+            try {
+                // Check if user has access token (email confirmed)
+                const { data: { user } } = await supabase.auth.getUser();
+                
+                if (user) {
+                    console.log('Email confirmed user detected, auto-redirecting...');
+                    
+                    // Get user profile
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .single();
+
+                    if (profile) {
+                        // Store session in localStorage
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userName', profile.full_name);
+                        localStorage.setItem('userEmail', user.email);
+                        localStorage.setItem('userRole', profile.role);
+                        localStorage.setItem('userIdentifier', profile.id);
+
+                        // Redirect to dashboard
+                        const dashboardUrl = dashboardUrls[profile.role] || dashboardUrls.trader;
+                        window.location.href = dashboardUrl;
+                    }
+                }
+            } catch (error) {
+                console.error('Post-confirmation redirect error:', error);
+            }
+        }
+
+        // Check for email confirmation callback on page load
+        if (window.location.hash.includes('access_token') || window.location.hash.includes('type=recovery')) {
+            console.log('Email confirmation or recovery token detected');
+            handleEmailConfirmation();
+        }
+    </script>
+
 </body>
 </html>

@@ -6,6 +6,9 @@
     <title>SSRA Customs · AI Validation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="../../../../js/auth.js"></script>
+    <script type="module" src="../../../../js/applications.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -79,15 +82,15 @@
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span>Step 5 of 8</span>
-                            <span>62% Complete</span>
+                            <span>Step 9 of 10</span>
+                            <span>90% Complete</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-emerald-600 h-2 rounded-full" style="width:62%"></div>
+                            <div class="bg-emerald-600 h-2 rounded-full" style="width:90%"></div>
                         </div>
                     </div>
 
-                    <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4">
+                    <div class="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-4" id="validationStatus">
                         <div class="flex items-center gap-3">
                             <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center">
                                 <i class="ri-robot-line text-2xl text-emerald-600"></i>
@@ -97,6 +100,35 @@
                                 <p class="text-sm text-gray-600">All checks completed. Review the AI findings below.</p>
                             </div>
                             <span class="ml-auto text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">✓ Analysis Done</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 hidden" id="returnedStatus">
+                        <div class="flex items-start gap-3">
+                            <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                                <i class="ri-error-warning-line text-2xl text-red-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-sm text-red-800 mb-1">Application Returned for Correction</h4>
+                                <p class="text-sm text-red-700 mb-3">Your application has been returned by the Customs Officer. Please review the errors below and make the necessary corrections.</p>
+                                <div class="bg-white rounded-lg p-3 border border-red-200">
+                                    <h5 class="font-semibold text-sm text-gray-800 mb-2">Error Details:</h5>
+                                    <ul class="space-y-2 text-sm">
+                                        <li class="flex items-start gap-2">
+                                            <i class="ri-close-circle-line text-red-500 mt-0.5"></i>
+                                            <span class="text-gray-700">HS Code 8471.30 does not match the goods description. Please verify the correct classification.</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="ri-close-circle-line text-red-500 mt-0.5"></i>
+                                            <span class="text-gray-700">Invoice value (SSP 30,000,000) does not match the declared customs value. Please provide supporting documentation.</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <i class="ri-information-line text-yellow-500 mt-0.5"></i>
+                                            <span class="text-gray-700">Certificate of Origin is missing. Please upload a valid certificate.</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -173,10 +205,13 @@
                         </div>
 
                         <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
-                            <a href="supporting-documents.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <a href="declaration-statement.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
                                 <i class="ri-arrow-left-line"></i> Previous
                             </a>
-                            <a href="duty-assessment.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <button onclick="submitApplication()" id="submitBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                Submit Application <i class="ri-send-plane-line"></i>
+                            </button>
+                            <a href="duty-assessment.html" id="continueBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1 hidden">
                                 Continue to Duty Assessment <i class="ri-arrow-right-line"></i>
                             </a>
                         </div>
@@ -191,6 +226,90 @@
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+
+        async function submitApplication() {
+            console.log('=== SUBMITTING APPLICATION ===');
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Submitting...';
+            
+            try {
+                const declarantInfo = JSON.parse(localStorage.getItem('cvet_declarant_info') || '{}');
+                const shipmentInfo = JSON.parse(localStorage.getItem('cvet_shipment_info') || '{}');
+                const goodsInfo = JSON.parse(localStorage.getItem('cvet_goods_info') || '{}');
+                const documentsInfo = JSON.parse(localStorage.getItem('cvet_documents_info') || '{}');
+                
+                const applicationNumber = 'CV-' + new Date().getFullYear() + '-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                
+                const appData = {
+                    application_number: applicationNumber,
+                    application_type: 'cvet',
+                    declaration_type: declarantInfo.declaration_type,
+                    importer_name: declarantInfo.importer_name,
+                    importer_tin: declarantInfo.importer_tin,
+                    exporter_name: declarantInfo.exporter_name,
+                    exporter_tin: declarantInfo.exporter_tin,
+                    origin_country: shipmentInfo.origin_country,
+                    destination_country: shipmentInfo.destination,
+                    transport_mode: shipmentInfo.transport_mode,
+                    carrier_name: shipmentInfo.carrier_name,
+                    vessel_flight: shipmentInfo.vessel_flight,
+                    bill_of_lading: shipmentInfo.bill_of_lading,
+                    goods_description: goodsInfo.goods_description,
+                    hs_code: goodsInfo.hs_code,
+                    tariff_classification: goodsInfo.tariff_classification,
+                    quantity: goodsInfo.quantity,
+                    unit_value: goodsInfo.unit_value,
+                    documents: Object.keys(documentsInfo).map(key => ({
+                        type: key,
+                        name: documentsInfo[key].name,
+                        uploaded_at: documentsInfo[key].uploadedAt
+                    })),
+                    status: 'draft'
+                };
+                
+                // For now, simulate submission since backend integration needs proper setup
+                console.log('Application Data:', appData);
+                
+                btn.innerHTML = '<i class="ri-robot-line animate-spin"></i> Running AI Validation...';
+                
+                // Simulate AI validation delay
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Simulate success
+                alert('✅ Application submitted successfully!\n\nApplication Number: ' + applicationNumber + '\n\nYour application is now being processed by the Customs Officer.');
+                
+                localStorage.removeItem('cvet_declarant_info');
+                localStorage.removeItem('cvet_shipment_info');
+                localStorage.removeItem('cvet_goods_info');
+                localStorage.removeItem('cvet_documents_info');
+                
+                btn.disabled = false;
+                btn.innerHTML = 'Submit Application <i class="ri-send-plane-line"></i>';
+                
+                window.location.href = '../../dashboard-trader.html';
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('Submission failed: ' + error.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Submit Application <i class="ri-send-plane-line"></i>';
+            }
+        }
+    </script>
+    <script type="module">
+        import { checkPageAuth, signOut } from '../../../../js/auth-check.js';
+        import { signOut as authSignOut } from '../../../../js/auth.js';
+        await checkPageAuth('trader');
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await authSignOut();
+                if (result.success) {
+                    window.location.href = '../../../../auth/login.html';
+                }
+            });
+        }
     </script>
 </body>
 </html>

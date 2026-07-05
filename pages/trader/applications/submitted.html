@@ -27,6 +27,16 @@
         .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
         .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
         .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+        .timeline { position: relative; padding-left: 2rem; }
+        .timeline::before { content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 2px; background: #e5e7eb; }
+        .timeline-item { position: relative; padding-bottom: 1.5rem; }
+        .timeline-item::before { content: ''; position: absolute; left: -1.75rem; top: 0.25rem; width: 1rem; height: 1rem; border-radius: 50%; background: #e5e7eb; border: 2px solid white; }
+        .timeline-item.completed::before { background: #10b981; }
+        .timeline-item.in-progress::before { background: #3b82f6; }
+        .timeline-item.pending::before { background: #d1d5db; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+        .modal.open { display: flex; }
+        .modal-content { background: white; border-radius: 1rem; max-width: 2xl; width: 90%; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -83,24 +93,24 @@
                     <!-- Filters -->
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex flex-wrap gap-3">
-                            <select class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
-                                <option>All Services</option>
-                                <option>CVET</option>
-                                <option>Direct Assessment</option>
-                                <option>Vehicle Query</option>
+                            <select id="filterService" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
+                                <option value="">All Services</option>
+                                <option value="cvet">CVET</option>
+                                <option value="assessment">Direct Assessment</option>
+                                <option value="vehicle">Vehicle Query</option>
                             </select>
-                            <select class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
-                                <option>All Status</option>
-                                <option>Pending</option>
-                                <option>Under Review</option>
-                                <option>Approved</option>
-                                <option>Rejected</option>
-                                <option>Completed</option>
+                            <select id="filterStatus" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="review">Under Review</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="completed">Completed</option>
                             </select>
-                            <input type="date" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none" />
-                            <input type="date" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none" />
+                            <input type="date" id="filterDateFrom" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none" />
+                            <input type="date" id="filterDateTo" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none" />
                             <button class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">Filter</button>
-                            <button class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition">Clear</button>
+                            <button onclick="clearFilters()" class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition">Clear</button>
                         </div>
                     </div>
 
@@ -126,7 +136,7 @@
                                     <td class="py-2 px-3">$25,000</td>
                                     <td class="py-2 px-3"><span class="status-badge status-review">Under Review</span></td>
                                     <td class="py-2 px-3">Jun 22, 2026</td>
-                                    <td class="py-2 px-3"><a href="../services/cvet/tracking.html" class="text-emerald-600 hover:underline">Track</a></td>
+                                    <td class="py-2 px-3"><button onclick="showWorkflowTimeline('CV-2026-0042')" class="text-emerald-600 hover:underline">Track</button></td>
                                 </tr>
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="py-2 px-3 font-mono text-blue-600">DA-2026-0018</td>
@@ -135,7 +145,7 @@
                                     <td class="py-2 px-3">$50,000</td>
                                     <td class="py-2 px-3"><span class="status-badge status-pending">Pending Payment</span></td>
                                     <td class="py-2 px-3">Jun 20, 2026</td>
-                                    <td class="py-2 px-3"><a href="../services/direct-assessment/payment.html" class="text-emerald-600 hover:underline">Pay</a></td>
+                                    <td class="py-2 px-3"><button onclick="showWorkflowTimeline('DA-2026-0018')" class="text-emerald-600 hover:underline">Track</button></td>
                                 </tr>
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="py-2 px-3 font-mono text-purple-600">VQ-2026-0012</td>
@@ -144,7 +154,7 @@
                                     <td class="py-2 px-3">-</td>
                                     <td class="py-2 px-3"><span class="status-badge status-completed">Completed</span></td>
                                     <td class="py-2 px-3">Jun 15, 2026</td>
-                                    <td class="py-2 px-3"><a href="../services/vehicle-query/verification-result.html" class="text-emerald-600 hover:underline">View</a></td>
+                                    <td class="py-2 px-3"><button onclick="showWorkflowTimeline('VQ-2026-0012')" class="text-emerald-600 hover:underline">View</button></td>
                                 </tr>
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="py-2 px-3 font-mono text-emerald-600">CV-2026-0035</td>
@@ -153,7 +163,7 @@
                                     <td class="py-2 px-3">$12,500</td>
                                     <td class="py-2 px-3"><span class="status-badge status-approved">Approved</span></td>
                                     <td class="py-2 px-3">Jun 18, 2026</td>
-                                    <td class="py-2 px-3"><a href="../services/cvet/certificate.html" class="text-emerald-600 hover:underline">Certificate</a></td>
+                                    <td class="py-2 px-3"><button onclick="showWorkflowTimeline('CV-2026-0035')" class="text-emerald-600 hover:underline">Certificate</button></td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
                                     <td class="py-2 px-3 font-mono text-red-600">CV-2026-0030</td>
@@ -162,7 +172,7 @@
                                     <td class="py-2 px-3">$8,000</td>
                                     <td class="py-2 px-3"><span class="status-badge status-rejected">Rejected</span></td>
                                     <td class="py-2 px-3">Jun 10, 2026</td>
-                                    <td class="py-2 px-3"><a href="#" class="text-emerald-600 hover:underline">View</a></td>
+                                    <td class="py-2 px-3"><button onclick="showWorkflowTimeline('CV-2026-0030')" class="text-emerald-600 hover:underline">View</button></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -172,22 +182,103 @@
                     <div class="flex justify-between items-center bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <span class="text-sm text-gray-500">Showing 1-5 of 8 applications</span>
                         <div class="flex gap-2">
-                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">Previous</button>
+                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50" disabled>Previous</button>
                             <button class="px-3 py-1 border rounded-lg text-sm bg-emerald-600 text-white">1</button>
-                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">2</button>
-                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">Next</button>
+                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50" onclick="alert('Navigate to page 2')">2</button>
+                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50" onclick="alert('Navigate to next page')">Next</button>
                         </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
+
+    <!-- Workflow Timeline Modal -->
+    <div id="workflowModal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Application Workflow Timeline</h3>
+                <button onclick="closeWorkflowModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div id="workflowContent" class="timeline">
+                <!-- Timeline content will be dynamically inserted -->
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+
+        function showWorkflowTimeline(appRef) {
+            const modal = document.getElementById('workflowModal');
+            const content = document.getElementById('workflowContent');
+
+            // Sample workflow data based on application reference
+            const workflows = {
+                'CV-2026-0042': [
+                    { status: 'completed', title: 'Application Submitted', date: 'Jun 22, 2026 09:30 AM' },
+                    { status: 'completed', title: 'AI Validation Passed', date: 'Jun 22, 2026 09:35 AM' },
+                    { status: 'in-progress', title: 'Officer Review', date: 'Jun 22, 2026 10:00 AM' },
+                    { status: 'pending', title: 'Inspection', date: 'Pending' },
+                    { status: 'pending', title: 'Approval', date: 'Pending' }
+                ],
+                'DA-2026-0018': [
+                    { status: 'completed', title: 'Application Submitted', date: 'Jun 20, 2026 14:20 PM' },
+                    { status: 'completed', title: 'AI Validation Passed', date: 'Jun 20, 2026 14:25 PM' },
+                    { status: 'completed', title: 'Officer Review', date: 'Jun 20, 2026 15:00 PM' },
+                    { status: 'completed', title: 'Payment Required', date: 'Jun 20, 2026 15:30 PM' },
+                    { status: 'in-progress', title: 'Payment Pending', date: 'Pending' }
+                ],
+                'VQ-2026-0012': [
+                    { status: 'completed', title: 'Query Submitted', date: 'Jun 15, 2026 11:00 AM' },
+                    { status: 'completed', title: 'Vehicle Verified', date: 'Jun 15, 2026 11:15 AM' },
+                    { status: 'completed', title: 'Results Generated', date: 'Jun 15, 2026 11:20 AM' },
+                    { status: 'completed', title: 'Completed', date: 'Jun 15, 2026 11:25 AM' }
+                ],
+                'CV-2026-0035': [
+                    { status: 'completed', title: 'Application Submitted', date: 'Jun 18, 2026 08:00 AM' },
+                    { status: 'completed', title: 'AI Validation Passed', date: 'Jun 18, 2026 08:05 AM' },
+                    { status: 'completed', title: 'Officer Review', date: 'Jun 18, 2026 09:00 AM' },
+                    { status: 'completed', title: 'Approved', date: 'Jun 18, 2026 10:30 AM' },
+                    { status: 'completed', title: 'Certificate Generated', date: 'Jun 18, 2026 10:35 AM' }
+                ],
+                'CV-2026-0030': [
+                    { status: 'completed', title: 'Application Submitted', date: 'Jun 10, 2026 16:45 PM' },
+                    { status: 'completed', title: 'AI Validation Failed', date: 'Jun 10, 2026 16:50 PM' },
+                    { status: 'completed', title: 'Rejected', date: 'Jun 10, 2026 17:00 PM' },
+                    { status: 'completed', title: 'Notification Sent', date: 'Jun 10, 2026 17:05 PM' }
+                ]
+            };
+
+            const workflow = workflows[appRef] || [];
+
+            let html = '';
+            workflow.forEach(step => {
+                html += `
+                    <div class="timeline-item ${step.status}">
+                        <div class="font-semibold text-gray-800">${step.title}</div>
+                        <div class="text-sm text-gray-500">${step.date}</div>
+                    </div>
+                `;
+            });
+
+            content.innerHTML = html || '<p class="text-gray-500">No workflow data available</p>';
+            modal.classList.add('open');
+        }
+
+        function closeWorkflowModal() {
+            document.getElementById('workflowModal').classList.remove('open');
+        }
+
+        function clearFilters() {
+            document.getElementById('filterService').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterDateFrom').value = '';
+            document.getElementById('filterDateTo').value = '';
+        }
     </script>
-</body>
-</html>
+<script type="module">import { checkPageAuth } from '../../../js/auth-check.js';import { signOut as authSignOut } from '../../../js/auth.js';await checkPageAuth('trader');const signOutBtn = document.getElementById('signOutBtn');if (signOutBtn) { signOutBtn.addEventListener('click', async () => { const result = await authSignOut(); if (result.success) { window.location.href = '../../../auth/login.html'; } }); }</script></body></html>

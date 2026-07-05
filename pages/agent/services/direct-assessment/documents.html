@@ -88,44 +88,27 @@
 
                     <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                         <h3 class="font-bold text-lg mb-4">Required Documents</h3>
-                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <div class="doc-upload-box uploaded" onclick="alert('📄 Commercial Invoice uploaded')">
-                                <i class="ri-file-pdf-2-line doc-icon"></i>
-                                <p class="font-medium text-sm mt-1">Commercial Invoice</p>
-                                <p class="text-xs text-green-600">✓ Uploaded</p>
-                                <p class="text-xs text-gray-400">Invoice_DA-2026-0018.pdf</p>
-                            </div>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div class="doc-upload-box" onclick="alert('📄 Upload Packing List')">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
-                                <p class="font-medium text-sm mt-1">Packing List</p>
+                                <p class="font-medium text-sm mt-1">Packing List <span class="text-red-500">*</span></p>
                                 <p class="text-xs text-yellow-600">⏳ Pending</p>
                             </div>
                             <div class="doc-upload-box" onclick="alert('📄 Upload Bill of Lading')">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
-                                <p class="font-medium text-sm mt-1">Bill of Lading</p>
+                                <p class="font-medium text-sm mt-1">Bill of Lading <span class="text-red-500">*</span></p>
                                 <p class="text-xs text-yellow-600">⏳ Pending</p>
                             </div>
                             <div class="doc-upload-box" onclick="alert('📄 Upload Certificate of Origin')">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
-                                <p class="font-medium text-sm mt-1">Certificate of Origin</p>
+                                <p class="font-medium text-sm mt-1">Certificate of Origin <span class="text-red-500">*</span></p>
                                 <p class="text-xs text-gray-400">Not uploaded</p>
                             </div>
                             <div class="doc-upload-box" onclick="alert('📄 Upload Import Permit')">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
-                                <p class="font-medium text-sm mt-1">Import Permit</p>
+                                <p class="font-medium text-sm mt-1">Import Permit <span class="text-red-500">*</span></p>
                                 <p class="text-xs text-gray-400">Not uploaded</p>
                             </div>
-                            <div class="doc-upload-box" onclick="alert('📄 Upload Insurance Certificate')">
-                                <i class="ri-file-pdf-2-line doc-icon"></i>
-                                <p class="font-medium text-sm mt-1">Insurance Certificate</p>
-                                <p class="text-xs text-gray-400">Not uploaded</p>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 transition" onclick="alert('📎 Upload other documents')">
-                            <i class="ri-upload-2-line text-2xl text-gray-400"></i>
-                            <p class="text-sm text-gray-500">Drop additional documents here or click to browse</p>
-                            <p class="text-xs text-gray-400">PDF, JPG, PNG (max 10MB)</p>
                         </div>
 
                         <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
@@ -148,5 +131,4 @@
             }
         });
     </script>
-</body>
-</html>
+</body></html>

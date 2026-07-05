@@ -79,11 +79,11 @@
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span>Step 3 of 8</span>
-                            <span>37% Complete</span>
+                            <span>Step 6 of 10</span>
+                            <span>60% Complete</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-emerald-600 h-2 rounded-full" style="width:37%"></div>
+                            <div class="bg-emerald-600 h-2 rounded-full" style="width:60%"></div>
                         </div>
                     </div>
 
@@ -97,6 +97,47 @@
                             <div class="form-group">
                                 <label>HS Code <span class="text-red-500">*</span> <span class="ai-badge-sm">AI Recommend</span></label>
                                 <input type="text" class="form-input ai-highlight" placeholder="Enter HS Code" value="8471.30" />
+                            </div>
+                            <div class="form-group">
+                                <label>Country of Manufacture <span class="text-red-500">*</span></label>
+                                <select class="form-input">
+                                    <option selected>China</option>
+                                    <option>Kenya</option>
+                                    <option>Uganda</option>
+                                    <option>Ethiopia</option>
+                                    <option>Sudan</option>
+                                    <option>India</option>
+                                    <option>United States</option>
+                                    <option>Germany</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Packaging Type <span class="text-red-500">*</span></label>
+                                <select class="form-input">
+                                    <option selected>Cartons</option>
+                                    <option>Pallets</option>
+                                    <option>Containers</option>
+                                    <option>Crates</option>
+                                    <option>Bags</option>
+                                    <option>Bundles</option>
+                                    <option>Loose</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Tariff Classification <span class="text-red-500">*</span> <span class="ai-badge-sm">AI Verify</span></label>
+                                <select class="form-input ai-highlight">
+                                    <option>Chapter 84 - Machinery</option>
+                                    <option>Chapter 85 - Electrical</option>
+                                    <option>Chapter 87 - Vehicles</option>
+                                    <option>Chapter 90 - Instruments</option>
+                                    <option>Chapter 94 - Furniture</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Duty Rate (%) <span class="ai-badge-sm">AI Calculate</span></label>
+                                <input type="text" class="form-input ai-highlight" value="15%" readonly />
                             </div>
                             <div class="form-group">
                                 <label>Quantity <span class="text-red-500">*</span></label>
@@ -146,9 +187,9 @@
                             <a href="shipment-information.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
                                 <i class="ri-arrow-left-line"></i> Previous
                             </a>
-                            <a href="supporting-documents.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <button onclick="saveAndContinue()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
                                 Save & Continue <i class="ri-arrow-right-line"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </main>
@@ -161,6 +202,75 @@
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+
+        function saveAndContinue() {
+            const inputs = document.querySelectorAll('.form-input');
+            const selects = document.querySelectorAll('select');
+            const formData = {
+                goods_description: inputs[0].value,
+                hs_code: inputs[1].value,
+                country_of_manufacture: selects[0].value,
+                packaging_type: selects[1].value,
+                tariff_classification: selects[2].value,
+                duty_rate: inputs[2].value,
+                quantity: inputs[3].value,
+                unit_of_measurement: selects[3].value,
+                gross_weight: inputs[4].value,
+                net_weight: inputs[5].value,
+                unit_value: inputs[6].value,
+                customs_value: inputs[7].value,
+                cif_value: inputs[8].value,
+                currency: selects[4].value
+            };
+
+            const requiredFields = ['goods_description', 'hs_code', 'country_of_manufacture', 'packaging_type', 'tariff_classification', 'quantity', 'unit_of_measurement', 'gross_weight', 'net_weight', 'unit_value', 'currency'];
+            const missingFields = requiredFields.filter(field => !formData[field]);
+            
+            if (missingFields.length > 0) {
+                alert('Please fill in all required fields: ' + missingFields.join(', '));
+                return;
+            }
+
+            localStorage.setItem('cvet_goods_info', JSON.stringify(formData));
+            window.location.href = 'transport-information.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedData = localStorage.getItem('cvet_goods_info');
+            if (savedData) {
+                const formData = JSON.parse(savedData);
+                const inputs = document.querySelectorAll('.form-input');
+                const selects = document.querySelectorAll('select');
+                if (formData.goods_description) inputs[0].value = formData.goods_description;
+                if (formData.hs_code) inputs[1].value = formData.hs_code;
+                if (formData.country_of_manufacture) selects[0].value = formData.country_of_manufacture;
+                if (formData.packaging_type) selects[1].value = formData.packaging_type;
+                if (formData.tariff_classification) selects[2].value = formData.tariff_classification;
+                if (formData.duty_rate) inputs[2].value = formData.duty_rate;
+                if (formData.quantity) inputs[3].value = formData.quantity;
+                if (formData.unit_of_measurement) selects[3].value = formData.unit_of_measurement;
+                if (formData.gross_weight) inputs[4].value = formData.gross_weight;
+                if (formData.net_weight) inputs[5].value = formData.net_weight;
+                if (formData.unit_value) inputs[6].value = formData.unit_value;
+                if (formData.customs_value) inputs[7].value = formData.customs_value;
+                if (formData.cif_value) inputs[8].value = formData.cif_value;
+                if (formData.currency) selects[4].value = formData.currency;
+            }
+        });
+    </script>
+    <script type="module">
+        import { checkPageAuth, signOut } from '../../../../js/auth-check.js';
+        import { signOut as authSignOut } from '../../../../js/auth.js';
+        await checkPageAuth('trader');
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await authSignOut();
+                if (result.success) {
+                    window.location.href = '../../../../auth/login.html';
+                }
+            });
+        }
     </script>
 </body>
 </html>

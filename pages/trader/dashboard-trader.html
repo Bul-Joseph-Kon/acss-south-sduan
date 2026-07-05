@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../js/dashboard-ui.js"></script>
     <script type="module" src="../../js/auth.js"></script>
     <script type="module" src="../../js/dashboard.js"></script>
     <script type="module" src="../../js/applications.js"></script>
@@ -72,10 +73,10 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">John Trader</h3>
-                            <p class="text-gray-500 text-sm">Importer</p>
-                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
-                            <div class="mt-1 text-xs text-gray-400">TIN: TIN-TRD-001</div>
+                            <h3 id="traderProfileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="traderProfileRole" class="text-gray-500 text-sm">Loading...</p>
+                            <span id="traderProfileStatus" class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Loading...</span>
+                            <div id="traderProfileTIN" class="mt-1 text-xs text-gray-400">TIN: Loading...</div>
                         </div>
 
                         <nav class="space-y-1">
@@ -119,7 +120,7 @@
                                     <i class="ri-notification-3-line"></i>
                                     <span>Notifications</span>
                                     <span class="ml-auto arrow" id="notificationsArrow"><i class="ri-arrow-down-s-line"></i></span>
-                                    <span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">3</span>
+                                    <span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span>
                                 </div>
                             </div>
                             <div class="category-submenu" id="notificationsSubmenu">
@@ -141,7 +142,7 @@
                     <!-- Welcome Banner -->
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
-                            <h2 class="text-2xl font-bold tracking-tight">Welcome back, John! 👋</h2>
+                            <h2 id="traderWelcomeTitle" class="text-2xl font-bold tracking-tight">Welcome back, John! 👋</h2>
                             <p class="opacity-90 text-sm">Manage your customs declarations and track applications</p>
                             <div class="flex gap-2 mt-2 flex-wrap">
                                 <span class="flow-badge flow-badge-ai">🤖 AI Verified</span>
@@ -154,15 +155,15 @@
                         <div class="relative">
                             <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
                                 <span class="avatar-sm"><i class="ri-user-line"></i></span>
-                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <span id="traderHeaderRole" class="text-sm font-medium hidden sm:inline">Loading...</span>
                                 <i class="ri-arrow-down-s-line text-sm"></i>
                             </button>
                             <div class="profile-dropdown" id="profileDropdown">
-                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
-                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
-                                <a href="#"><i class="ri-file-copy-line"></i> My Documents</a>
+                                <a href="home/overview.html" onclick="document.getElementById('profileDropdown').classList.remove('open')"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="home/overview.html" onclick="document.getElementById('profileDropdown').classList.remove('open')"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <a href="applications/submitted.html" onclick="document.getElementById('profileDropdown').classList.remove('open')"><i class="ri-file-copy-line"></i> My Documents</a>
                                 <div class="divider"></div>
-                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <button id="dropdownSignOut" class="danger" style="width:100%;text-align:left;background:none;border:none;padding:0.6rem 1rem;font-size:0.85rem;color:#dc2626;cursor:pointer;display:flex;align-items:center;gap:0.75rem;"><i class="ri-logout-box-line"></i> Sign Out</button>
                             </div>
                         </div>
                     </div>
@@ -186,11 +187,11 @@
 
                     <!-- Stats -->
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                        <div class="stat-card"><div class="stat-number text-emerald-600">12</div><div class="stat-label">Total Applications</div></div>
-                        <div class="stat-card"><div class="stat-number text-yellow-600">3</div><div class="stat-label">Pending Review</div></div>
-                        <div class="stat-card"><div class="stat-number text-blue-600">2</div><div class="stat-label">Under Inspection</div></div>
-                        <div class="stat-card"><div class="stat-number text-green-600">8</div><div class="stat-label">Approved</div></div>
-                        <div class="stat-card"><div class="stat-number text-red-600">1</div><div class="stat-label">Rejected</div></div>
+                        <a href="applications/submitted.html" class="stat-card"><div class="stat-number text-emerald-600" id="statTotal">0</div><div class="stat-label">Total Applications</div></a>
+                        <a href="applications/under-review.html" class="stat-card"><div class="stat-number text-yellow-600" id="statPending">0</div><div class="stat-label">Pending Review</div></a>
+                        <a href="applications/under-review.html" class="stat-card"><div class="stat-number text-blue-600" id="statInspection">0</div><div class="stat-label">Under Inspection</div></a>
+                        <a href="applications/approved.html" class="stat-card"><div class="stat-number text-green-600" id="statApproved">0</div><div class="stat-label">Approved</div></a>
+                        <a href="applications/rejected.html" class="stat-card"><div class="stat-number text-red-600" id="statRejected">0</div><div class="stat-label">Rejected</div></a>
                     </div>
 
                     <!-- Quick Actions -->
@@ -212,22 +213,22 @@
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                             <div class="text-center p-2 border rounded-lg">
                                 <div class="text-2xl">📋</div>
-                                <div class="text-xs font-semibold text-emerald-600">5</div>
+                                <div class="text-xs font-semibold text-emerald-600" id="flowSubmitted">0</div>
                                 <div class="text-xs text-gray-500">Submitted</div>
                             </div>
                             <div class="text-center p-2 border rounded-lg">
                                 <div class="text-2xl">🤖</div>
-                                <div class="text-xs font-semibold text-blue-600">3</div>
+                                <div class="text-xs font-semibold text-blue-600" id="flowAIValidated">0</div>
                                 <div class="text-xs text-gray-500">AI Validated</div>
                             </div>
                             <div class="text-center p-2 border rounded-lg">
                                 <div class="text-2xl">👤</div>
-                                <div class="text-xs font-semibold text-yellow-600">2</div>
+                                <div class="text-xs font-semibold text-yellow-600" id="flowOfficerReview">0</div>
                                 <div class="text-xs text-gray-500">Officer Review</div>
                             </div>
                             <div class="text-center p-2 border rounded-lg">
                                 <div class="text-2xl">✅</div>
-                                <div class="text-xs font-semibold text-green-600">8</div>
+                                <div class="text-xs font-semibold text-green-600" id="flowCompleted">0</div>
                                 <div class="text-xs text-gray-500">Completed</div>
                             </div>
                         </div>
@@ -237,62 +238,15 @@
                     <div class="grid lg:grid-cols-2 gap-4">
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-file-copy-line text-emerald-500 mr-2"></i>Recent Applications</h3>
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center border-b pb-2">
-                                    <span class="text-sm font-medium">CV-2026-0042</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="status-badge status-review">Review</span>
-                                        <span class="flow-badge flow-badge-officer text-[0.5rem]">Officer</span>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center border-b pb-2">
-                                    <span class="text-sm font-medium">DA-2026-0018</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="status-badge status-inspection">Inspection</span>
-                                        <span class="flow-badge flow-badge-inspector text-[0.5rem]">Inspector</span>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center border-b pb-2">
-                                    <span class="text-sm font-medium">CV-2026-0035</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="status-badge status-approved">Approved</span>
-                                        <span class="flow-badge flow-badge-supervisor text-[0.5rem]">Supervisor</span>
-                                    </div>
-                                </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm font-medium">VQ-2026-0012</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="status-badge status-completed">Completed</span>
-                                        <span class="flow-badge flow-badge-completed text-[0.5rem]">✓ Done</span>
-                                    </div>
-                                </div>
+                            <div class="space-y-2" id="recentApplicationsList">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading applications...</div>
                             </div>
                             <a href="applications/submitted.html" class="mt-3 text-sm text-emerald-600 hover:underline inline-block">View All →</a>
                         </div>
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-notification-3-line text-emerald-500 mr-2"></i>Recent Notifications</h3>
-                            <div class="space-y-2">
-                                <div class="notification-item unread p-2">
-                                    <div>
-                                        <span class="font-semibold text-sm">Application Submitted</span>
-                                        <p class="text-xs text-gray-600">CV-2026-0042 submitted for review</p>
-                                        <span class="notif-time">2 hours ago</span>
-                                    </div>
-                                </div>
-                                <div class="notification-item unread p-2">
-                                    <div>
-                                        <span class="font-semibold text-sm">Inspection Required</span>
-                                        <p class="text-xs text-gray-600">DA-2026-0018 flagged for inspection</p>
-                                        <span class="notif-time">5 hours ago</span>
-                                    </div>
-                                </div>
-                                <div class="notification-item p-2">
-                                    <div>
-                                        <span class="font-semibold text-sm">Certificate Ready</span>
-                                        <p class="text-xs text-gray-600">CV-2026-0035 ready for download</p>
-                                        <span class="notif-time">1 day ago</span>
-                                    </div>
-                                </div>
+                            <div class="space-y-2" id="recentNotificationsList">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading notifications...</div>
                             </div>
                             <a href="notifications/application-updates.html" class="mt-3 text-sm text-emerald-600 hover:underline inline-block">View All →</a>
                         </div>
@@ -375,18 +329,194 @@
 
             const user = await getCurrentUser();
             const profile = user ? await getUserProfile(user.id) : null;
-            
+
             if (profile) {
-                document.querySelector('h3').textContent = profile.full_name || 'User';
-                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Trader';
+                const displayName = profile.full_name || localStorage.getItem('userName') || user.email || 'Trader';
+                const displayRole = formatRole(profile.role || localStorage.getItem('userRole') || 'trader');
+                const displayStatus = profile.status || 'active';
+                const displayTIN = profile.tin || `TIN-${profile.id?.substring(0, 8).toUpperCase()}` || 'Not Available';
+
+                document.getElementById('traderProfileName').textContent = displayName;
+                document.getElementById('traderProfileRole').textContent = displayRole;
+                document.getElementById('traderHeaderRole').textContent = displayRole;
+                document.getElementById('traderWelcomeTitle').textContent = `Welcome back, ${displayName}!`;
+                document.getElementById('traderProfileStatus').textContent = `● ${displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}`;
+                document.getElementById('traderProfileTIN').textContent = `TIN: ${displayTIN}`;
+
+                // Update status badge color based on status
+                const statusBadge = document.getElementById('traderProfileStatus');
+                if (displayStatus === 'active') {
+                    statusBadge.className = 'inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium';
+                } else if (displayStatus === 'inactive') {
+                    statusBadge.className = 'inline-block mt-1 text-xs bg-gray-100 text-gray-700 px-2.5 py-0.5 rounded-full font-medium';
+                } else if (displayStatus === 'suspended') {
+                    statusBadge.className = 'inline-block mt-1 text-xs bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full font-medium';
+                }
+            } else {
+                document.getElementById('traderProfileName').textContent = 'Trader';
+                document.getElementById('traderProfileRole').textContent = 'Trader';
+                document.getElementById('traderHeaderRole').textContent = 'Trader';
+                document.getElementById('traderWelcomeTitle').textContent = 'Welcome back!';
+                document.getElementById('traderProfileStatus').textContent = '● Active';
+                document.getElementById('traderProfileTIN').textContent = 'TIN: Not Available';
             }
 
-            const data = await fetchDashboardData();
-            const recentApps = await fetchRecentApplications(5);
+            // Fetch dashboard data from Supabase
+            const data = await fetchDashboardData('trader');
+            const recentApps = await fetchRecentApplications('trader', 5);
 
+            // Update statistics
             if (data.applications) {
-                document.querySelector('.stat-number').textContent = data.applications.total || 0;
+                document.getElementById('statTotal').textContent = data.applications.total || 0;
+                document.getElementById('statPending').textContent = data.applications.pending || 0;
+                document.getElementById('statInspection').textContent = data.applications.under_inspection || 0;
+                document.getElementById('statApproved').textContent = data.applications.approved || 0;
+                document.getElementById('statRejected').textContent = data.applications.rejected || 0;
             }
+
+            // Update notification badge
+            if (data.notifications) {
+                const unreadCount = data.notifications.unread || 0;
+                document.getElementById('notificationBadge').textContent = unreadCount;
+                document.getElementById('notificationBadge').style.display = unreadCount > 0 ? 'inline-block' : 'none';
+            }
+
+            // Update flow status
+            if (data.applications) {
+                document.getElementById('flowSubmitted').textContent = data.applications.submitted || 0;
+                document.getElementById('flowAIValidated').textContent = data.applications.pending_review || 0;
+                document.getElementById('flowOfficerReview').textContent = data.applications.under_inspection || 0;
+                document.getElementById('flowCompleted').textContent = data.applications.completed || 0;
+            }
+
+            // Update recent applications list
+            if (recentApps.success && recentApps.data && recentApps.data.length > 0) {
+                const appsList = document.getElementById('recentApplicationsList');
+                appsList.innerHTML = recentApps.data.slice(0, 5).map(app => {
+                    const statusBadge = getStatusBadgeClass(app.status);
+                    const flowBadge = getFlowBadgeClass(app.status);
+                    return `
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="text-sm font-medium">${app.application_number || 'N/A'}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="status-badge ${statusBadge}">${formatStatus(app.status)}</span>
+                                <span class="flow-badge ${flowBadge} text-[0.5rem]">${getFlowStage(app.status)}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                document.getElementById('recentApplicationsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No applications yet</div>';
+            }
+
+            // Fetch and update recent notifications
+            try {
+                const { data: notifications } = await supabase
+                    .from('notifications')
+                    .select('*')
+                    .eq('user_id', profile?.id)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (notifications && notifications.length > 0) {
+                    const notifList = document.getElementById('recentNotificationsList');
+                    notifList.innerHTML = notifications.slice(0, 5).map(notif => `
+                        <div class="notification-item ${notif.read ? '' : 'unread'} p-2">
+                            <div>
+                                <span class="font-semibold text-sm">${notif.title}</span>
+                                <p class="text-xs text-gray-600">${notif.message}</p>
+                                <span class="notif-time">${formatTimeAgo(notif.created_at)}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('recentNotificationsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No notifications</div>';
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+                document.getElementById('recentNotificationsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Error loading notifications</div>';
+            }
+        }
+
+        function getStatusBadgeClass(status) {
+            const classes = {
+                draft: 'status-draft',
+                submitted: 'status-pending',
+                pending_review: 'status-review',
+                under_inspection: 'status-inspection',
+                approved: 'status-approved',
+                rejected: 'status-rejected',
+                paid: 'status-approved',
+                completed: 'status-completed',
+                returned: 'status-rejected'
+            };
+            return classes[status] || 'status-draft';
+        }
+
+        function getFlowBadgeClass(status) {
+            const classes = {
+                submitted: 'flow-badge-ai',
+                pending_review: 'flow-badge-officer',
+                under_inspection: 'flow-badge-inspector',
+                approved: 'flow-badge-supervisor',
+                paid: 'flow-badge-revenue',
+                completed: 'flow-badge-completed'
+            };
+            return classes[status] || '';
+        }
+
+        function formatStatus(status) {
+            const labels = {
+                draft: 'Draft',
+                submitted: 'Submitted',
+                pending_review: 'Review',
+                under_inspection: 'Inspection',
+                approved: 'Approved',
+                rejected: 'Rejected',
+                paid: 'Paid',
+                completed: 'Completed',
+                returned: 'Returned'
+            };
+            return labels[status] || status;
+        }
+
+        function getFlowStage(status) {
+            const stages = {
+                submitted: 'AI',
+                pending_review: 'Officer',
+                under_inspection: 'Inspector',
+                approved: 'Supervisor',
+                paid: 'Revenue',
+                completed: '✓ Done'
+            };
+            return stages[status] || '';
+        }
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+            return date.toLocaleDateString();
+        }
+
+        function formatRole(role) {
+            const labels = {
+                agent: 'Agent',
+                trader: 'Trader',
+                officer: 'Officer',
+                inspector: 'Inspector',
+                supervisor: 'Supervisor',
+                revenue: 'Revenue Officer',
+                revenue_officer: 'Revenue Officer',
+                administrator: 'Administrator',
+                admin: 'Administrator'
+            };
+            return labels[String(role || '').toLowerCase()] || 'Trader';
         }
 
         document.addEventListener('DOMContentLoaded', loadDashboard);

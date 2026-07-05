@@ -87,9 +87,9 @@
                     <!-- Notification Filters -->
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-3 items-center justify-between">
                         <div class="flex flex-wrap gap-2">
-                            <button class="px-4 py-1.5 rounded-full text-sm bg-emerald-600 text-white">All</button>
-                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Unread</button>
-                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Read</button>
+                            <button id="filterAll" class="px-4 py-1.5 rounded-full text-sm bg-emerald-600 text-white" onclick="filterNotifications('all')">All</button>
+                            <button id="filterUnread" class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50" onclick="filterNotifications('unread')">Unread</button>
+                            <button id="filterRead" class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50" onclick="filterNotifications('read')">Read</button>
                             <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Application Updates</button>
                             <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Payment Alerts</button>
                             <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Approval Alerts</button>
@@ -215,6 +215,45 @@
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+
+        function filterNotifications(filter) {
+            const notifications = document.querySelectorAll('.notification-item');
+            const filterAll = document.getElementById('filterAll');
+            const filterUnread = document.getElementById('filterUnread');
+            const filterRead = document.getElementById('filterRead');
+
+            // Reset button styles
+            [filterAll, filterUnread, filterRead].forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('border', 'hover:bg-gray-50');
+            });
+
+            // Set active button style
+            if (filter === 'all') {
+                filterAll.classList.add('bg-emerald-600', 'text-white');
+                filterAll.classList.remove('border', 'hover:bg-gray-50');
+                notifications.forEach(notif => notif.style.display = 'flex');
+            } else if (filter === 'unread') {
+                filterUnread.classList.add('bg-emerald-600', 'text-white');
+                filterUnread.classList.remove('border', 'hover:bg-gray-50');
+                notifications.forEach(notif => {
+                    if (notif.classList.contains('unread')) {
+                        notif.style.display = 'flex';
+                    } else {
+                        notif.style.display = 'none';
+                    }
+                });
+            } else if (filter === 'read') {
+                filterRead.classList.add('bg-emerald-600', 'text-white');
+                filterRead.classList.remove('border', 'hover:bg-gray-50');
+                notifications.forEach(notif => {
+                    if (!notif.classList.contains('unread')) {
+                        notif.style.display = 'flex';
+                    } else {
+                        notif.style.display = 'none';
+                    }
+                });
+            }
+        }
     </script>
-</body>
-</html>
+<script type="module">import { checkPageAuth, signOut } from '../../../js/auth-check.js';import { signOut as authSignOut } from '../../../js/auth.js';await checkPageAuth('trader');const signOutBtn = document.getElementById('signOutBtn');if (signOutBtn) { signOutBtn.addEventListener('click', async () => { const result = await authSignOut(); if (result.success) { window.location.href = '../../../auth/login.html'; } }); }</script>\n</body>\n</html>

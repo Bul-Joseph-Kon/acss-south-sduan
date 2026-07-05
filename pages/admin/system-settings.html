@@ -170,5 +170,106 @@
             }
         });
     </script>
+    <script type="module">
+        import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { fetchSystemSettings, updateSystemSetting, setMaintenanceMode, updateSystemName, getSystemInfo } from '../../js/system-settings.js';
+
+        async function loadPage() {
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const hasAccess = await verifyRoleAccess('administrator');
+            if (!hasAccess) {
+                alert('You do not have permission to access this page.');
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const user = await getCurrentUser();
+            const profile = user ? await getUserProfile(user.id) : null;
+            
+            if (profile) {
+                document.querySelector('h3').textContent = profile.full_name || 'Administrator';
+                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'System Admin';
+            }
+
+            await loadSystemSettings();
+        }
+
+        // Load system settings
+        async function loadSystemSettings() {
+            const result = await fetchSystemSettings();
+            if (result.success) {
+                const settings = result.data;
+                settings.forEach(setting => {
+                    const settingElement = document.querySelector(`[data-setting="${setting.key}"]`);
+                    if (settingElement) {
+                        if (settingElement.tagName === 'INPUT' || settingElement.tagName === 'SELECT') {
+                            settingElement.value = setting.value;
+                        } else {
+                            settingElement.textContent = setting.value;
+                        }
+                    }
+                });
+            }
+        }
+
+        // Save system setting
+        async function saveSetting(key, value) {
+            const result = await updateSystemSetting(key, value);
+            if (result.success) {
+                alert('Setting saved successfully');
+            } else {
+                alert('Error saving setting: ' + result.error);
+            }
+        }
+
+        // Toggle maintenance mode
+        async function toggleMaintenanceMode() {
+            const currentMode = document.querySelector('[data-setting="maintenance_mode"]').textContent.trim() === 'Enabled';
+            const result = await setMaintenanceMode(!currentMode);
+            if (result.success) {
+                loadSystemSettings();
+                alert('Maintenance mode ' + (!currentMode ? 'enabled' : 'disabled'));
+            } else {
+                alert('Error updating maintenance mode: ' + result.error);
+            }
+        }
+
+        // Update system name
+        async function updateSystemNameSetting() {
+            const newName = prompt('Enter new system name:');
+            if (newName) {
+                const result = await updateSystemName(newName);
+                if (result.success) {
+                    loadSystemSettings();
+                    alert('System name updated successfully');
+                } else {
+                    alert('Error updating system name: ' + result.error);
+                }
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', loadPage);
+
+        // Expose functions to window for onclick handlers
+        window.toggleMaintenanceMode = toggleMaintenanceMode;
+        window.updateSystemNameSetting = updateSystemNameSetting;
+
+        // Sign out functionality
+        const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
+        if (signOutBtn) {
+            signOutBtn.onclick = async function() {
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+        }
+    </script>
 </body>
 </html>

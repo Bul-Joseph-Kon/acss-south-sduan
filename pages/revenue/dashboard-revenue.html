@@ -58,7 +58,7 @@
                             <a href="payment-verification.html" class="sidebar-link"><i class="ri-bank-card-line"></i><span>Payment Verification</span></a>
                             <a href="revenue-monitoring.html" class="sidebar-link"><i class="ri-line-chart-line"></i><span>Revenue Monitoring</span></a>
                             <a href="tax-reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Tax Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">3</span></a>
+                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span></a>
                         </nav>
                         <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
@@ -88,10 +88,10 @@
                     </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="revenue-stat"><div class="stat-number">SSP 1,494,000,000</div><div class="stat-label">Total Revenue Collected</div></div>
-                        <div class="revenue-stat"><div class="stat-number">SSP 102,240,000</div><div class="stat-label">Pending Collection</div></div>
-                        <div class="revenue-stat"><div class="stat-number">92%</div><div class="stat-label">Collection Rate</div></div>
-                        <div class="revenue-stat"><div class="stat-number">156</div><div class="stat-label">Transactions</div></div>
+                        <div class="revenue-stat"><div class="stat-number" id="statTotalRevenue">SSP 0</div><div class="stat-label">Total Revenue Collected</div></div>
+                        <div class="revenue-stat"><div class="stat-number" id="statPendingCollection">SSP 0</div><div class="stat-label">Pending Collection</div></div>
+                        <div class="revenue-stat"><div class="stat-number" id="statCollectionRate">0%</div><div class="stat-label">Collection Rate</div></div>
+                        <div class="revenue-stat"><div class="stat-number" id="statTransactions">0</div><div class="stat-label">Transactions</div></div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
@@ -107,19 +107,14 @@
                     <div class="grid lg:grid-cols-2 gap-4">
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-line-chart-line text-blue-500 mr-2"></i>Revenue Overview (SSP)</h3>
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Import Duties</span><span class="font-bold">SSP 1,014,000,000</span></div>
-                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">VAT</span><span class="font-bold">SSP 384,000,000</span></div>
-                                <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Excise Duties</span><span class="font-bold">SSP 78,000,000</span></div>
-                                <div class="flex justify-between items-center"><span class="text-sm">Service Charges</span><span class="font-bold">SSP 18,000,000</span></div>
+                            <div class="space-y-2" id="revenueOverview">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading revenue data...</div>
                             </div>
                         </div>
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-notification-3-line text-blue-500 mr-2"></i>Recent Notifications</h3>
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center border-b pb-2 text-sm"><span>Duty payment verified</span><span class="text-gray-400">2 hours ago</span></div>
-                                <div class="flex justify-between items-center border-b pb-2 text-sm"><span>Revenue target met</span><span class="text-gray-400">4 hours ago</span></div>
-                                <div class="flex justify-between items-center text-sm"><span>Payment discrepancy flagged</span><span class="text-gray-400">1 day ago</span></div>
+                            <div class="space-y-2" id="recentNotifications">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading notifications...</div>
                             </div>
                         </div>
                     </div>
@@ -129,8 +124,10 @@
     </div>
     <script type="module">
         import supabase from '../../js/supabase.js';
-        import { checkAuth, getUserProfile, signOut, getCurrentUser } from '../../js/auth.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess } from '../../js/auth.js';
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
+        import { fetchApplicationsForRole } from '../../js/applications.js';
+        import { fetchUnreadNotifications } from '../../js/notifications.js';
 
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
@@ -139,8 +136,26 @@
         });
 
         async function loadDashboard() {
+            console.log('=== LOADING REVENUE DASHBOARD ===');
             const isAuthenticated = await checkAuth();
             if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            // Verify role access
+            const hasAccess = await verifyRoleAccess('revenue');
+            if (!hasAccess) {
+                // Get user's actual role and redirect to their dashboard
+                const user = await getCurrentUser();
+                if (user) {
+                    const profile = await getUserProfile(user.id);
+                    if (profile && profile.role) {
+                        const dashboardUrl = redirectToDashboard(profile.role);
+                        window.location.href = dashboardUrl;
+                        return;
+                    }
+                }
                 window.location.href = '../../auth/login.html';
                 return;
             }
@@ -153,12 +168,150 @@
                 document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Revenue';
             }
 
-            const data = await fetchDashboardData();
-            const recentApps = await fetchRecentApplications(5);
+            // Load workflow-based applications
+            await loadWorkflowApplications();
+            
+            // Load notifications
+            await loadNotifications();
+        }
 
-            if (data.applications) {
-                const statNumbers = document.querySelectorAll('.stat-number');
-                if (statNumbers[0]) statNumbers[0].textContent = data.applications.total || 0;
+        async function loadWorkflowApplications() {
+            console.log('=== LOADING WORKFLOW APPLICATIONS FOR REVENUE ===');
+            
+            const result = await fetchApplicationsForRole('revenue', { limit: 10 });
+            
+            if (result.success && result.data) {
+                const applications = result.data;
+                console.log('Applications loaded:', applications);
+                
+                // Update stats
+                updateWorkflowStats(applications);
+                
+                // Update revenue overview
+                updateRevenueOverview(applications);
+            } else {
+                console.error('Failed to load applications:', result.error);
+            }
+        }
+
+        function updateWorkflowStats(applications) {
+            const stats = {
+                approved: 0,
+                awaiting_payment: 0,
+                paid: 0,
+                cleared: 0,
+                totalRevenue: 0,
+                pendingRevenue: 0
+            };
+
+            applications.forEach(app => {
+                if (app.status === 'approved') {
+                    stats.approved++;
+                    stats.pendingRevenue += app.total_amount || 0;
+                }
+                else if (app.status === 'awaiting_payment') {
+                    stats.awaiting_payment++;
+                    stats.pendingRevenue += app.total_amount || 0;
+                }
+                else if (app.status === 'paid') {
+                    stats.paid++;
+                    stats.totalRevenue += app.total_amount || 0;
+                }
+                else if (app.status === 'cleared' || app.status === 'completed') {
+                    stats.cleared++;
+                    stats.totalRevenue += app.total_amount || 0;
+                }
+            });
+
+            // Update stat cards by ID
+            document.getElementById('statTotalRevenue').textContent = `SSP ${stats.totalRevenue.toLocaleString()}`;
+            document.getElementById('statPendingCollection').textContent = `SSP ${stats.pendingRevenue.toLocaleString()}`;
+            
+            const total = stats.totalRevenue + stats.pendingRevenue;
+            const rate = total > 0 ? Math.round((stats.totalRevenue / total) * 100) : 0;
+            document.getElementById('statCollectionRate').textContent = `${rate}%`;
+            document.getElementById('statTransactions').textContent = applications.length;
+        }
+
+        function updateRevenueOverview(applications) {
+            const revenue = {
+                import_duties: 0,
+                vat: 0,
+                excise_duties: 0,
+                service_charges: 0
+            };
+
+            applications.forEach(app => {
+                if (app.duty_type === 'import_duties') revenue.import_duties += app.total_amount || 0;
+                else if (app.duty_type === 'vat') revenue.vat += app.total_amount || 0;
+                else if (app.duty_type === 'excise_duties') revenue.excise_duties += app.total_amount || 0;
+                else if (app.duty_type === 'service_charges') revenue.service_charges += app.total_amount || 0;
+            });
+
+            const revenueContainer = document.getElementById('revenueOverview');
+            if (revenueContainer) {
+                revenueContainer.innerHTML = `
+                    <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Import Duties</span><span class="font-bold">SSP ${revenue.import_duties.toLocaleString()}</span></div>
+                    <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">VAT</span><span class="font-bold">SSP ${revenue.vat.toLocaleString()}</span></div>
+                    <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Excise Duties</span><span class="font-bold">SSP ${revenue.excise_duties.toLocaleString()}</span></div>
+                    <div class="flex justify-between items-center"><span class="text-sm">Service Charges</span><span class="font-bold">SSP ${revenue.service_charges.toLocaleString()}</span></div>
+                `;
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const result = await fetchUnreadNotifications();
+                if (result.success && result.data) {
+                    // Update notification badge
+                    document.getElementById('notificationBadge').textContent = result.data.length;
+                    document.getElementById('notificationBadge').style.display = result.data.length > 0 ? 'inline-block' : 'none';
+
+                    // Update recent notifications list
+                    const notifContainer = document.getElementById('recentNotifications');
+                    if (notifContainer) {
+                        notifContainer.innerHTML = result.data.slice(0, 3).map(notif => `
+                            <div class="flex justify-between items-center border-b pb-2 text-sm">
+                                <span>${notif.title || 'Notification'}</span>
+                                <span class="text-gray-400">${formatTimeAgo(notif.created_at)}</span>
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    document.getElementById('notificationBadge').style.display = 'none';
+                    document.getElementById('recentNotifications').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No notifications</div>';
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                document.getElementById('recentNotifications').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Error loading notifications</div>';
+            }
+        }
+
+        function formatTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+            return date.toLocaleDateString();
+        }
+
+        function getAIStatusBadge(aiValidationPassed, aiMonitoringResults) {
+            if (!aiValidationPassed && aiMonitoringResults) {
+                if (aiMonitoringResults.hasIssues) {
+                    return `<span class="status-badge status-rejected">🤖 AI Issues</span>`;
+                }
+            }
+            
+            if (aiValidationPassed === true) {
+                return `<span class="status-badge status-approved">✓ AI Validated</span>`;
+            } else if (aiValidationPassed === false) {
+                return `<span class="status-badge status-rejected">✗ AI Failed</span>`;
+            } else {
+                return `<span class="status-badge status-pending">⏳ AI Pending</span>`;
             }
         }
 

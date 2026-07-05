@@ -4,6 +4,7 @@
 // Handles service-related operations
 // ================================================================
 
+import supabase from './supabase.js';
 import { fetchTable, fetchById } from './database.js';
 
 // ================================================================

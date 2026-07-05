@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup First Administrator - SSRA Customs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-lg p-8 max-w-md w-full">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Setup First Administrator</h1>
+            <p class="text-gray-500 text-sm mt-2">Create the initial admin account for the system</p>
+        </div>
+
+        <form id="adminSetupForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <input type="text" id="fullName" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Admin Name">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="email" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none" placeholder="admin@example.com">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="password" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none" placeholder="••••••••">
+                <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input type="tel" id="phone" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none" placeholder="+211 XXX XXX XXX">
+            </div>
+            <button type="submit" id="submitBtn" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+                Create Administrator
+            </button>
+        </form>
+
+        <div id="result" class="mt-4 hidden"></div>
+
+        <div class="mt-6 pt-6 border-t">
+            <p class="text-center text-sm text-gray-500">
+                After setup, delete this file for security.
+            </p>
+            <p class="text-center text-xs text-gray-400 mt-2">
+                <a href="auth/login.html" class="hover:text-blue-600">Go to Login →</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://avpoufxsjiecbsxvngip.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_XZ7BUTHNhF1ojqoxlJq7Bg_cqn9o8HE';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.getElementById('adminSetupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const phone = document.getElementById('phone').value;
+
+            const submitBtn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
+            try {
+                console.log('Starting admin account creation...');
+                console.log('Email:', email);
+                console.log('Full Name:', fullName);
+
+                // Step 1: Create auth user
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { full_name: fullName }
+                    }
+                });
+
+                console.log('Auth response:', authData);
+                console.log('Auth error:', authError);
+
+                if (authError) throw authError;
+
+                if (!authData.user) {
+                    throw new Error('Failed to create auth user - no user returned');
+                }
+
+                console.log('Auth user created with ID:', authData.user.id);
+
+                // Step 2: Create profile with admin role
+                const profileData = {
+                    user_id: authData.user.id,
+                    full_name: fullName,
+                    email: email,
+                    phone: phone || null,
+                    nationality: 'South Sudan',
+                    applicant_type: 'not_applicable',
+                    identity_document_type: 'not_applicable',
+                    identity_document_number: null,
+                    role: 'administrator',
+                    status: 'active',
+                    compliance_score: 100
+                };
+
+                console.log('Creating profile with data:', profileData);
+
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .insert(profileData);
+
+                console.log('Profile error:', profileError);
+
+                if (profileError) {
+                    console.error('Profile creation error:', profileError);
+                    throw new Error('Profile creation failed: ' + profileError.message);
+                }
+                console.log('Profile created successfully');
+
+                resultDiv.className = 'mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800';
+                resultDiv.innerHTML = `
+                    <p class="font-semibold">✓ Administrator created successfully!</p>
+                    <p class="text-sm mt-1">Email: ${email}</p>
+                    <p class="text-sm mt-2">Please check your email to confirm your account, then login.</p>
+                    <p class="text-sm mt-2"><a href="auth/login.html" class="underline font-medium">Go to Login →</a></p>
+                `;
+                resultDiv.classList.remove('hidden');
+
+                submitBtn.textContent = 'Created!';
+                submitBtn.className = 'w-full bg-green-600 text-white py-2 rounded-lg font-semibold cursor-not-allowed';
+
+            } catch (error) {
+                console.error('Setup error:', error);
+                resultDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800';
+                resultDiv.innerHTML = `
+                    <p class="font-semibold">✗ Error creating administrator</p>
+                    <p class="text-sm mt-1">${error.message}</p>
+                    <p class="text-xs mt-2">Check browser console (F12) for details</p>
+                `;
+                resultDiv.classList.remove('hidden');
+
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Try Again';
+            }
+        });
+    </script>
+</body>
+</html>

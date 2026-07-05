@@ -6,6 +6,9 @@
     <title>SSRA Customs · Payment</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="../../../../js/auth.js"></script>
+    <script type="module" src="../../../../js/applications.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -138,7 +141,7 @@
                                 <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                                     <p class="text-sm text-blue-700">📱 Mobile Money: *182# or pay via approved mobile money providers</p>
                                 </div>
-                                <button onclick="alert('✅ Payment processed successfully!')" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
+                                <button onclick="processPayment()" id="payBtn" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
                                     <i class="ri-check-line"></i> Pay Now
                                 </button>
                             </div>
@@ -168,5 +171,4 @@
             }
         });
     </script>
-</body>
-</html>
+</body></html>

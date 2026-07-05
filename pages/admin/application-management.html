@@ -190,5 +190,124 @@
             }
         });
     </script>
+    <script type="module">
+        import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { fetchApplicationsForRole } from '../../js/applications.js';
+
+        let currentPage = 1;
+        let applicationsPerPage = 10;
+        let allApplications = [];
+
+        async function loadPage() {
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const hasAccess = await verifyRoleAccess('administrator');
+            if (!hasAccess) {
+                alert('You do not have permission to access this page.');
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const user = await getCurrentUser();
+            const profile = user ? await getUserProfile(user.id) : null;
+            
+            if (profile) {
+                document.querySelector('h3').textContent = profile.full_name || 'Administrator';
+                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'System Admin';
+            }
+
+            await loadApplications();
+        }
+
+        async function loadApplications() {
+            const result = await fetchApplicationsForRole('administrator', { limit: 100 });
+            if (result.success) {
+                allApplications = result.data;
+                renderApplications();
+            } else {
+                console.error('Error loading applications:', result.error);
+            }
+        }
+
+        function renderApplications() {
+            const container = document.querySelector('.space-y-3');
+            if (!container) return;
+
+            if (allApplications.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No applications found</div>';
+                return;
+            }
+
+            let html = '';
+            allApplications.forEach(app => {
+                const statusClass = getStatusClass(app.status);
+                const statusText = app.status || 'Unknown';
+
+                html += `
+                    <div class="app-card">
+                        <div class="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-bold text-blue-600">${app.application_number || 'N/A'}</h4>
+                                <p class="text-sm text-gray-500">${app.applicant_name || 'Unknown'} · ${app.service_type || 'Unknown'} · $${app.total_amount || 0}</p>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
+                                    <span class="text-xs text-gray-400">Submitted: ${new Date(app.created_at).toLocaleDateString()}</span>
+                                    <span class="text-xs text-gray-400">Service: ${app.service_type || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="viewApplication('${app.id}')">View</button>
+                                <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="editApplication('${app.id}')">Edit</button>
+                                <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteApplication('${app.id}')">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'pending': 'status-pending',
+                'under_review': 'status-review',
+                'review': 'status-review',
+                'approved': 'status-approved',
+                'rejected': 'status-rejected',
+                'completed': 'status-completed'
+            };
+            return statusMap[status] || 'status-pending';
+        }
+
+        window.viewApplication = function(id) {
+            alert('View application - ID: ' + id);
+        };
+
+        window.editApplication = function(id) {
+            alert('Edit application - ID: ' + id);
+        };
+
+        window.deleteApplication = function(id) {
+            alert('Delete application - ID: ' + id);
+        };
+
+        document.addEventListener('DOMContentLoaded', loadPage);
+
+        // Sign out functionality
+        const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
+        if (signOutBtn) {
+            signOutBtn.onclick = async function() {
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+        }
+    </script>
 </body>
 </html>

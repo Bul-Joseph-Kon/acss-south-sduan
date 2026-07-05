@@ -85,31 +85,51 @@
                     <!-- Progress -->
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span>Step 1 of 8</span>
-                            <span>12% Complete</span>
+                            <span>Step 1 of 9</span>
+                            <span>11% Complete</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-emerald-600 h-2 rounded-full" style="width:12%"></div>
+                            <div class="bg-emerald-600 h-2 rounded-full" style="width:11%"></div>
                         </div>
                     </div>
 
                     <!-- Steps -->
                     <div class="space-y-3">
+                        <a href="declaration-details.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-file-list-3-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 1: Declaration Details</div>
+                                    <div class="step-desc">Declaration number, type, customs office, procedure</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-current">In Progress</span>
+                        </a>
                         <a href="declarant-information.html" class="step-card">
                             <div class="flex items-center gap-3">
                                 <div class="step-icon"><i class="ri-user-2-line"></i></div>
                                 <div>
-                                    <div class="step-title">Step 1: Declarant Information</div>
-                                    <div class="step-desc">Importer, exporter, and agent details</div>
+                                    <div class="step-title">Step 2: Declarant Information</div>
+                                    <div class="step-desc">Importer and exporter details</div>
                                 </div>
                             </div>
-                            <span class="step-status step-status-current">In Progress</span>
+                            <span class="step-status step-status-locked">Locked</span>
+                        </a>
+                        <a href="parties-information.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-building-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 3: Parties Information</div>
+                                    <div class="step-desc">Importer, exporter, consignor, consignee details</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-locked">Locked</span>
                         </a>
                         <a href="shipment-information.html" class="step-card">
                             <div class="flex items-center gap-3">
                                 <div class="step-icon"><i class="ri-ship-2-line"></i></div>
                                 <div>
-                                    <div class="step-title">Step 2: Shipment Information</div>
+                                    <div class="step-title">Step 4: Shipment Information</div>
                                     <div class="step-desc">Consignment, manifest, and transport details</div>
                                 </div>
                             </div>
@@ -119,8 +139,18 @@
                             <div class="flex items-center gap-3">
                                 <div class="step-icon"><i class="ri-package-line"></i></div>
                                 <div>
-                                    <div class="step-title">Step 3: Goods Information</div>
+                                    <div class="step-title">Step 5: Goods Information</div>
                                     <div class="step-desc">Goods description, HS Code, quantity, weight</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-locked">Locked</span>
+                        </a>
+                        <a href="transport-information.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-truck-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 6: Transport Information</div>
+                                    <div class="step-desc">Vehicle registration, transport company, driver details</div>
                                 </div>
                             </div>
                             <span class="step-status step-status-locked">Locked</span>
@@ -129,7 +159,7 @@
                             <div class="flex items-center gap-3">
                                 <div class="step-icon"><i class="ri-attachment-line"></i></div>
                                 <div>
-                                    <div class="step-title">Step 4: Supporting Documents</div>
+                                    <div class="step-title">Step 7: Supporting Documents</div>
                                     <div class="step-desc">Invoice, packing list, bill of lading, permits</div>
                                 </div>
                             </div>
@@ -139,38 +169,18 @@
                             <div class="flex items-center gap-3">
                                 <div class="step-icon"><i class="ri-robot-line"></i></div>
                                 <div>
-                                    <div class="step-title">Step 5: AI Validation</div>
+                                    <div class="step-title">Step 8: AI Validation</div>
                                     <div class="step-desc">AI-powered document validation and risk assessment</div>
                                 </div>
                             </div>
                             <span class="step-status step-status-locked">Locked</span>
                         </a>
-                        <a href="duty-assessment.html" class="step-card">
+                        <a href="declaration-statement.html" class="step-card">
                             <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-calculator-line"></i></div>
+                                <div class="step-icon"><i class="ri-fileText-line"></i></div>
                                 <div>
-                                    <div class="step-title">Step 6: Duty Assessment</div>
-                                    <div class="step-desc">Customs duty, VAT, and tax calculation</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-locked">Locked</span>
-                        </a>
-                        <a href="payment.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-bank-card-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 7: Payment Processing</div>
-                                    <div class="step-desc">Duty payment and receipt generation</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-locked">Locked</span>
-                        </a>
-                        <a href="certificate.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-file-pdf-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 8: Certificate</div>
-                                    <div class="step-desc">Download CVET certificate and clearance documents</div>
+                                    <div class="step-title">Step 9: Declaration Statement</div>
+                                    <div class="step-desc">Legal binding confirmation and electronic signature</div>
                                 </div>
                             </div>
                             <span class="step-status step-status-locked">Locked</span>
@@ -186,6 +196,20 @@
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+    </script>
+    <script type="module">
+        import { checkPageAuth, signOut } from '../../../../js/auth-check.js';
+        import { signOut as authSignOut } from '../../../../js/auth.js';
+        await checkPageAuth('trader');
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await authSignOut();
+                if (result.success) {
+                    window.location.href = '../../../../auth/login.html';
+                }
+            });
+        }
     </script>
 </body>
 </html>

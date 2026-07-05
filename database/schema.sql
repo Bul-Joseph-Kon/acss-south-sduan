@@ -125,6 +125,7 @@ CREATE TABLE profiles (
     email TEXT NOT NULL,
     phone TEXT,
     nationality TEXT DEFAULT 'South Sudan',
+    applicant_type TEXT DEFAULT 'not_applicable' CHECK (applicant_type IN ('citizen', 'foreigner', 'not_applicable')),
     organization TEXT,
     company TEXT,
     avatar TEXT,
@@ -379,6 +380,28 @@ CREATE TABLE activity_logs (
 CREATE INDEX idx_activity_logs_user_id ON activity_logs(user_id);
 CREATE INDEX idx_activity_logs_activity_type ON activity_logs(activity_type);
 CREATE INDEX idx_activity_logs_created_at ON activity_logs(created_at DESC);
+
+-- ================================================================
+-- AI AUDIT LOGS TABLE
+-- ================================================================
+
+CREATE TABLE ai_audit_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    
+    action_type TEXT NOT NULL,
+    application_id UUID REFERENCES applications(id) ON DELETE SET NULL,
+    
+    details JSONB DEFAULT '{}',
+    
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX idx_ai_audit_logs_user_id ON ai_audit_logs(user_id);
+CREATE INDEX idx_ai_audit_logs_application_id ON ai_audit_logs(application_id);
+CREATE INDEX idx_ai_audit_logs_action_type ON ai_audit_logs(action_type);
+CREATE INDEX idx_ai_audit_logs_timestamp ON ai_audit_logs(timestamp DESC);
 
 -- ================================================================
 -- SYSTEM SETTINGS TABLE

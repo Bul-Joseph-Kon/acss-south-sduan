@@ -6,6 +6,7 @@
     <title>SSRA Customs · User Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -27,6 +28,9 @@
         .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
         .user-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; transition: all 0.2s ease; }
         .user-card:hover { border-color: #1e3a5f; background: #f8fafc; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .modal.open { display: flex; }
+        .modal-content { background: white; border-radius: 1rem; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -39,7 +43,7 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Administrator</h3>
+                            <h3 class="text-lg font-bold text-gray-800" id="adminName">Administrator</h3>
                             <p class="text-gray-500 text-sm">System Admin</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
@@ -57,7 +61,7 @@
                             <a href="ai-configuration.html" class="sidebar-link"><i class="ri-robot-line"></i><span>AI Configuration</span></a>
                             <a href="system-settings.html" class="sidebar-link"><i class="ri-settings-3-line"></i><span>System Settings</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -86,124 +90,440 @@
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap justify-between items-center gap-3">
                         <div class="flex flex-wrap gap-3">
-                            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-2" onclick="alert('➕ Adding new user')">
+                            <button id="addUserBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-2">
                                 <i class="ri-add-line"></i> Add User
                             </button>
-                            <select class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                                <option>Filter by Role</option>
-                                <option>Trader</option>
-                                <option>Agent</option>
-                                <option>Officer</option>
-                                <option>Inspector</option>
-                                <option>Revenue</option>
-                                <option>Supervisor</option>
-                                <option>Admin</option>
+                            <select id="roleFilter" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                                <option value="">All Roles</option>
+                                <option value="trader">Trader</option>
+                                <option value="agent">Agent</option>
+                                <option value="officer">Officer</option>
+                                <option value="inspector">Inspector</option>
+                                <option value="revenue">Revenue</option>
+                                <option value="supervisor">Supervisor</option>
+                                <option value="administrator">Administrator</option>
                             </select>
-                            <input type="text" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Search users..." />
-                            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Search</button>
+                            <input type="text" id="searchInput" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Search users..." />
+                            <button id="searchBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Search</button>
+                            <select id="statusFilter" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="pending">Pending</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="user-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                            <i class="ri-user-line text-blue-600 text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-bold">John Trader</h4>
-                                            <p class="text-sm text-gray-500">john@trader.com · Trader</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-active">✓ Active</span>
-                                        <span class="text-xs text-gray-400">Joined: Jan 15, 2026</span>
-                                        <span class="text-xs text-gray-400">Last Login: Jun 22, 2026</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing user')">Edit</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('🔒 Toggling user status')">Toggle Status</button>
-                                    <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="alert('🗑️ Deleting user')">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="user-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                                            <i class="ri-user-line text-emerald-600 text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-bold">Sarah Agent</h4>
-                                            <p class="text-sm text-gray-500">sarah@agent.com · Agent</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-active">✓ Active</span>
-                                        <span class="text-xs text-gray-400">Joined: Feb 10, 2026</span>
-                                        <span class="text-xs text-gray-400">Last Login: Jun 21, 2026</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing user')">Edit</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('🔒 Toggling user status')">Toggle Status</button>
-                                    <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="alert('🗑️ Deleting user')">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="user-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                                            <i class="ri-user-line text-purple-600 text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-bold">Officer Peter</h4>
-                                            <p class="text-sm text-gray-500">peter@customs.gov · Officer</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-pending">⏳ Pending</span>
-                                        <span class="text-xs text-gray-400">Joined: Jun 1, 2026</span>
-                                        <span class="text-xs text-gray-400">Last Login: Jun 19, 2026</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing user')">Edit</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('🔒 Toggling user status')">Toggle Status</button>
-                                    <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="alert('🗑️ Deleting user')">Delete</button>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="usersList" class="space-y-3">
+                        <div class="text-center py-8 text-gray-500">Loading users...</div>
                     </div>
 
-                    <div class="flex justify-between items-center bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                        <span class="text-sm text-gray-500">Showing 1-3 of 28 users</span>
-                        <div class="flex gap-2">
-                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">Previous</button>
-                            <button class="px-3 py-1 border rounded-lg text-sm bg-blue-600 text-white">1</button>
-                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">2</button>
-                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">3</button>
-                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">Next</button>
+                    <div id="pagination" class="flex justify-between items-center bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <span class="text-sm text-gray-500" id="paginationInfo">Showing 0 users</span>
+                        <div class="flex gap-2" id="paginationControls">
                         </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
+
+    <!-- Add/Edit User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold" id="modalTitle">Add New User</h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="ri-close-line text-2xl"></i>
+                </button>
+            </div>
+            <form id="userForm" class="space-y-4">
+                <input type="hidden" id="userId" />
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input type="text" id="fullName" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" required />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="userEmail" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" required />
+                </div>
+                <div id="passwordField">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input type="password" id="userPassword" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" />
+                    <p class="text-xs text-gray-500 mt-1">Required for new users</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input type="tel" id="userPhone" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                    <input type="text" id="userNationality" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" value="South Sudan" />
+                </div>
+                <div id="userApplicantTypeField" style="display:none;">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Trader Type</label>
+                    <select id="userApplicantType" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+                        <option value="">Select Trader Type</option>
+                        <option value="citizen">Citizen</option>
+                        <option value="foreigner">Foreigner</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Required when creating or editing a Trader account</p>
+                </div>
+                <div id="userIdentityDocumentTypeField" style="display:none;">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Identity Document</label>
+                    <select id="userIdentityDocumentType" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+                        <option value="">Select Identity Document</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1" id="userIdentityDocumentHelper">Foreigners use passport. Citizens use national ID or passport.</p>
+                </div>
+                <div id="userIdentityDocumentNumberField" style="display:none;">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Document Number</label>
+                    <input type="text" id="userIdentityDocumentNumber" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                    <select id="userRole" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" required>
+                        <option value="">Select Role</option>
+                        <option value="trader">Trader</option>
+                        <option value="agent">Agent</option>
+                        <option value="officer">Officer</option>
+                        <option value="inspector">Inspector</option>
+                        <option value="revenue">Revenue</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="userStatus" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-200 transition">Cancel</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile, createUser, updateUserRole, updateUserStatus, deleteUser, resetPassword, getAllUsers } from '../../js/auth.js';
+
+        let currentPage = 1;
+        let usersPerPage = 10;
+        let allUsers = [];
+
+        async function initPage() {
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
             }
-        });
+
+            const hasAccess = await verifyRoleAccess('admin');
+            if (!hasAccess) {
+                alert('You do not have permission to access this page.');
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const user = await getCurrentUser();
+            if (user) {
+                const profile = await getUserProfile(user.id);
+                if (profile) {
+                    document.getElementById('adminName').textContent = profile.full_name || 'Admin';
+                }
+            }
+
+            await loadUsers();
+            setupEventListeners();
+        }
+
+        async function loadUsers() {
+            const filters = {
+                role: document.getElementById('roleFilter').value,
+                status: document.getElementById('statusFilter').value,
+                search: document.getElementById('searchInput').value
+            };
+
+            const result = await getAllUsers(filters);
+            if (result.success) {
+                allUsers = result.data;
+                renderUsers();
+            } else {
+                document.getElementById('usersList').innerHTML = '<div class="text-center py-8 text-red-500">Error loading users: ' + result.error + '</div>';
+            }
+        }
+
+        function renderUsers() {
+            const container = document.getElementById('usersList');
+            
+            if (allUsers.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No users found</div>';
+                document.getElementById('paginationInfo').textContent = 'Showing 0 users';
+                document.getElementById('paginationControls').innerHTML = '';
+                return;
+            }
+
+            const start = (currentPage - 1) * usersPerPage;
+            const end = start + usersPerPage;
+            const paginatedUsers = allUsers.slice(start, end);
+
+            let html = '';
+            paginatedUsers.forEach(user => {
+                const statusClass = user.status === 'active' ? 'status-active' : 
+                                   user.status === 'inactive' ? 'status-inactive' : 'status-pending';
+                const statusIcon = user.status === 'active' ? '✓' : 
+                                  user.status === 'inactive' ? '✗' : '⏳';
+
+                html += `
+                    <div class="user-card">
+                        <div class="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <i class="ri-user-line text-blue-600 text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold">${user.full_name || 'Unknown'}</h4>
+                                        <p class="text-sm text-gray-500">${user.email} · ${user.role || 'Unknown'}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="status-badge ${statusClass}">${statusIcon} ${user.status || 'Unknown'}</span>
+                                    <span class="text-xs text-gray-400">Phone: ${user.phone || 'N/A'}</span>
+                                    <span class="text-xs text-gray-400">Nationality: ${user.nationality || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.user_id}')">Edit</button>
+                                <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="toggleUserStatus('${user.user_id}', '${user.status}')">Toggle Status</button>
+                                <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="resetUserPassword('${user.email}')">Reset Password</button>
+                                <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.user_id}')">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            const totalPages = Math.ceil(allUsers.length / usersPerPage);
+            document.getElementById('paginationInfo').textContent = `Showing ${start + 1}-${Math.min(end, allUsers.length)} of ${allUsers.length} users`;
+
+            let paginationHtml = '';
+            if (totalPages > 1) {
+                paginationHtml += `<button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">Previous</button>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHtml += `<button class="px-3 py-1 border rounded-lg text-sm ${i === currentPage ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'}" onclick="changePage(${i})">${i}</button>`;
+                }
+                paginationHtml += `<button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next</button>`;
+            }
+            document.getElementById('paginationControls').innerHTML = paginationHtml;
+        }
+
+        function setupEventListeners() {
+            document.getElementById('addUserBtn').addEventListener('click', openAddUserModal);
+            document.getElementById('searchBtn').addEventListener('click', () => { currentPage = 1; loadUsers(); });
+            document.getElementById('roleFilter').addEventListener('change', () => { currentPage = 1; loadUsers(); });
+            document.getElementById('statusFilter').addEventListener('change', () => { currentPage = 1; loadUsers(); });
+            document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
+            document.getElementById('userRole').addEventListener('change', toggleApplicantTypeField);
+            document.getElementById('userApplicantType').addEventListener('change', updateAdminIdentityDocumentOptions);
+            document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                    document.getElementById('profileDropdown').classList.remove('open');
+                }
+            });
+        }
+
+        function openAddUserModal() {
+            document.getElementById('modalTitle').textContent = 'Add New User';
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.getElementById('passwordField').style.display = 'block';
+            document.getElementById('userPassword').required = true;
+            document.getElementById('userNationality').value = 'South Sudan';
+            document.getElementById('userApplicantType').value = '';
+            document.getElementById('userIdentityDocumentType').value = '';
+            document.getElementById('userIdentityDocumentNumber').value = '';
+            toggleApplicantTypeField();
+            document.getElementById('userModal').classList.add('open');
+        }
+
+        window.editUser = function(userId) {
+            const user = allUsers.find(u => u.user_id === userId);
+            if (!user) return;
+
+            document.getElementById('modalTitle').textContent = 'Edit User';
+            document.getElementById('userId').value = userId;
+            document.getElementById('fullName').value = user.full_name || '';
+            document.getElementById('userEmail').value = user.email || '';
+            document.getElementById('userPhone').value = user.phone || '';
+            document.getElementById('userNationality').value = user.nationality || 'South Sudan';
+            document.getElementById('userRole').value = user.role || '';
+            document.getElementById('userApplicantType').value = user.applicant_type || '';
+            updateAdminIdentityDocumentOptions();
+            document.getElementById('userIdentityDocumentType').value = user.identity_document_type || '';
+            document.getElementById('userIdentityDocumentNumber').value = user.identity_document_number || '';
+            document.getElementById('userStatus').value = user.status || 'active';
+            document.getElementById('passwordField').style.display = 'none';
+            document.getElementById('userPassword').required = false;
+            toggleApplicantTypeField();
+            document.getElementById('userModal').classList.add('open');
+        };
+
+        window.closeModal = function() {
+            document.getElementById('userModal').classList.remove('open');
+        };
+
+        async function handleUserSubmit(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const phone = document.getElementById('userPhone').value;
+            const nationality = document.getElementById('userNationality').value;
+            const role = document.getElementById('userRole').value;
+            const applicantType = role === 'trader' ? document.getElementById('userApplicantType').value : 'not_applicable';
+            const identityDocumentType = role === 'trader' ? document.getElementById('userIdentityDocumentType').value : 'not_applicable';
+            const identityDocumentNumber = role === 'trader' ? document.getElementById('userIdentityDocumentNumber').value.trim() : null;
+            const status = document.getElementById('userStatus').value;
+
+            if (role === 'trader' && !applicantType) {
+                alert('Please select whether the Trader is a Citizen or Foreigner');
+                return;
+            }
+
+            if (role === 'trader' && (!identityDocumentType || !identityDocumentNumber)) {
+                alert('Please select the Trader identity document and enter the document number');
+                return;
+            }
+
+            if (userId) {
+                const roleResult = await updateUserRole(userId, role);
+                const statusResult = await updateUserStatus(userId, status);
+                
+                if (roleResult.success && statusResult.success) {
+                    alert('User updated successfully');
+                    closeModal();
+                    loadUsers();
+                } else {
+                    alert('Error updating user: ' + (roleResult.error || statusResult.error));
+                }
+            } else {
+                if (!password) {
+                    alert('Password is required for new users');
+                    return;
+                }
+
+                const result = await createUser(email, password, fullName, role, phone, nationality, applicantType, identityDocumentType, identityDocumentNumber);
+                if (result.success) {
+                    alert('User created successfully');
+                    closeModal();
+                    loadUsers();
+                } else {
+                    alert('Error creating user: ' + result.error);
+                }
+            }
+        }
+
+        window.toggleUserStatus = async function(userId, currentStatus) {
+            const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+            const result = await updateUserStatus(userId, newStatus);
+            
+            if (result.success) {
+                alert('User status updated');
+                loadUsers();
+            } else {
+                alert('Error updating status: ' + result.error);
+            }
+        };
+
+        function toggleApplicantTypeField() {
+            const role = document.getElementById('userRole').value;
+            const field = document.getElementById('userApplicantTypeField');
+            const documentTypeField = document.getElementById('userIdentityDocumentTypeField');
+            const documentNumberField = document.getElementById('userIdentityDocumentNumberField');
+            field.style.display = role === 'trader' ? 'block' : 'none';
+            documentTypeField.style.display = role === 'trader' ? 'block' : 'none';
+            documentNumberField.style.display = role === 'trader' ? 'block' : 'none';
+            document.getElementById('userApplicantType').required = role === 'trader';
+            document.getElementById('userIdentityDocumentType').required = role === 'trader';
+            document.getElementById('userIdentityDocumentNumber').required = role === 'trader';
+            if (role !== 'trader') {
+                document.getElementById('userApplicantType').value = '';
+                document.getElementById('userIdentityDocumentType').value = '';
+                document.getElementById('userIdentityDocumentNumber').value = '';
+            }
+            updateAdminIdentityDocumentOptions();
+        }
+
+        function updateAdminIdentityDocumentOptions() {
+            const role = document.getElementById('userRole').value;
+            const applicantType = document.getElementById('userApplicantType').value;
+            const documentType = document.getElementById('userIdentityDocumentType');
+            const helper = document.getElementById('userIdentityDocumentHelper');
+            if (role !== 'trader') {
+                documentType.innerHTML = '<option value="">Not required</option>';
+                return;
+            }
+            if (applicantType === 'foreigner') {
+                documentType.innerHTML = '<option value="passport">Passport</option>';
+                documentType.value = 'passport';
+                helper.textContent = 'Foreign traders must use a passport.';
+            } else {
+                documentType.innerHTML = `
+                    <option value="">Select Identity Document</option>
+                    <option value="national_id">National ID</option>
+                    <option value="passport">Passport</option>
+                `;
+                helper.textContent = 'Citizen traders can use a national ID or passport.';
+            }
+        }
+
+        window.resetUserPassword = async function(email) {
+            if (!confirm('Send password reset email to ' + email + '?')) return;
+
+            const result = await resetPassword(email);
+            if (result.success) {
+                alert('Password reset email sent');
+            } else {
+                alert('Error sending reset email: ' + result.error);
+            }
+        };
+
+        window.deleteUserConfirm = async function(userId) {
+            if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+
+            const result = await deleteUser(userId);
+            if (result.success) {
+                alert('User deleted successfully');
+                loadUsers();
+            } else {
+                alert('Error deleting user: ' + result.error);
+            }
+        };
+
+        window.changePage = function(page) {
+            currentPage = page;
+            renderUsers();
+        };
+
+        async function handleSignOut() {
+            const result = await signOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
     </script>
-</body>
-</html>
+</body></html>
