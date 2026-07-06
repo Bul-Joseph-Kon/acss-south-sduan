@@ -531,12 +531,8 @@
                 <select id="roleSelect" onchange="selectRole(this.value)">
                     <option value="trader">Trader (Importer / Exporter)</option>
                     <option value="agent">Agent (Clearing Agent)</option>
-                    <option value="officer">Officer (Customs Officer)</option>
-                    <option value="inspector">Inspector (Customs Inspector)</option>
-                    <option value="supervisor">Supervisor (Customs Supervisor)</option>
-                    <option value="revenue">Revenue Officer</option>
-                    <option value="administrator">Administrator</option>
                 </select>
+                <div class="helper">Only Traders and Clearing Agents can self-register. Other roles must be created by an Administrator.</div>
             </div>
 
             <!-- Role Description -->
@@ -673,10 +669,10 @@
     <div class="success-overlay" id="successOverlay">
         <div class="success-modal">
             <div class="success-icon">
-                <i class="ri-mail-send-line"></i>
+                <i class="ri-check-line"></i>
             </div>
-            <h3>Check Your Email</h3>
-            <p>We've sent a confirmation link to your email address. Please click the link to activate your account.</p>
+            <h3>Registration Submitted</h3>
+            <p>Your registration has been submitted successfully. Your account is awaiting administrator approval. You will be notified once your account is approved.</p>
             <button class="btn-login" onclick="goToLogin()">
                 <i class="ri-login-circle-line"></i> Go to Login
             </button>
@@ -936,9 +932,8 @@
     <script type="module">
         import { SUPABASE_CONFIG, dashboardUrls } from '../js/config.js';
         import supabase from '../js/supabase.js';
-        import { signUp } from '../js/auth.js';
 
-        // Registration function
+        // Registration function using self-register Edge Function
         async function registerUser() {
             if (!validateStep1() || !validateStep2()) {
                 if (!validateStep1()) goToStep(1);
@@ -962,126 +957,39 @@
             var phone = document.getElementById('phone').value.trim();
             var role = selectedRole;
 
-            // Map role to main role
-            var mainRole = selectedRole;
-
-            // Combine first and last name for Supabase
+            // Combine first and last name
             var fullName = firstName + ' ' + lastName;
-
-            var metadata = {
-                full_name: fullName,
-                first_name: firstName,
-                last_name: lastName,
-                phone: phone,
-                nationality: nationality,
-                applicant_type: applicantType,
-                identity_document_type: identityDocumentType,
-                identity_document_number: identityDocumentNumber,
-                role: mainRole
-            };
 
             try {
                 // Show loading state
                 document.getElementById('registerBtn').disabled = true;
                 document.getElementById('registerBtn').innerHTML = '<i class="ri-loader-4-line" style="animation: spin 1s linear infinite;"></i> Creating Account...';
 
-                // Call Supabase signUp with email confirmation
-                const { data, error } = await supabase.auth.signUp({
-                    email: email,
-                    password: password,
-                    options: {
-                        data: metadata,
-                        emailRedirectTo: window.location.origin + '/auth/register.html'
+                // Call self-register Edge Function
+                const { data, error } = await supabase.functions.invoke('self-register', {
+                    body: {
+                        email: email,
+                        password: password,
+                        fullName: fullName,
+                        role: role,
+                        phone: phone,
+                        nationality: nationality,
+                        organization: null,
+                        company: null
                     }
                 });
 
                 if (error) {
-                    // Handle specific errors
-                    if (error.message.includes('already registered')) {
-                        alert('❌ Email already exists. Please use a different email or sign in.');
-                    } else if (error.message.includes('password')) {
-                        alert('❌ Password is too weak. Please use a stronger password.');
-                    } else if (error.message.includes('Invalid email')) {
-                        alert('❌ Invalid email address.');
-                    } else {
-                        alert('❌ Registration failed: ' + error.message);
-                    }
+                    console.error('Edge function error:', error);
+                    alert('❌ Registration failed: ' + (error.message || 'Please try again'));
                     // Reset button state
                     document.getElementById('registerBtn').disabled = false;
                     document.getElementById('registerBtn').innerHTML = 'Create Account <i class="ri-check-line"></i>';
                     return;
                 }
 
-                // Create profile in profiles table
-                if (data.user) {
-                    try {
-                        const { error: profileError } = await supabase
-                            .from('profiles')
-                            .insert({
-                                user_id: data.user.id,
-                                full_name: fullName,
-                                email: email,
-                                phone: phone,
-                                nationality: nationality,
-                                applicant_type: applicantType,
-                                identity_document_type: identityDocumentType,
-                                identity_document_number: identityDocumentNumber,
-                                role: mainRole,
-                                status: 'active',
-                                compliance_score: 100
-                            });
-
-                        if (profileError) {
-                            console.error('Profile creation error:', profileError);
-                        } else {
-                            console.log('Profile created successfully for user:', data.user.id);
-                        }
-                    } catch (profileError) {
-                        console.error('Profile creation failed:', profileError);
-                    }
-                }
-
-                // Check if email confirmation is required or if we can auto-login
-                if (data.user) {
-                    // Store user info for post-confirmation redirect
-                    sessionStorage.setItem('post_signup_email', email);
-                    sessionStorage.setItem('post_signup_role', mainRole);
-                    sessionStorage.setItem('post_signup_name', fullName);
-
-                    // If email confirmation is required
-                    if (!data.user.email_confirmed_at && data.session === null) {
-                        // Show email confirmation message
-                        document.getElementById('successOverlay').classList.add('show');
-                    } else {
-                        // User is confirmed (rare case), auto login and redirect
-                        console.log('User email already confirmed or auto-confirmed');
-                        
-                        // Store session in localStorage
-                        localStorage.setItem('isLoggedIn', 'true');
-                        localStorage.setItem('userName', fullName);
-                        localStorage.setItem('userEmail', email);
-                        localStorage.setItem('userRole', mainRole);
-                        localStorage.setItem('userIdentifier', data.user.id);
-
-                        // Redirect based on role
-                        const dashboardUrls = {
-                            'trader': 'pages/trader/dashboard-trader.html',
-                            'agent': 'pages/agent/dashboard-agent.html',
-                            'officer': 'pages/officer/dashboard-officer.html',
-                            'inspector': 'pages/inspector/dashboard-inspector.html',
-                            'supervisor': 'pages/supervisor/dashboard-supervisor.html',
-                            'revenue': 'pages/revenue/dashboard-revenue.html',
-                            'administrator': 'pages/admin/dashboard-admin.html'
-                        };
-                        
-                        const dashboardUrl = dashboardUrls[mainRole] || dashboardUrls.trader;
-                        
-                        // Small delay to ensure session is set
-                        setTimeout(() => {
-                            window.location.href = dashboardUrl;
-                        }, 500);
-                    }
-                }
+                // Show success modal
+                document.getElementById('successOverlay').classList.add('show');
 
             } catch (error) {
                 console.error('Registration error:', error);
@@ -1099,54 +1007,6 @@
         // Make registerUser globally available
         window.registerUser = registerUser;
         console.log('Registration system initialized successfully');
-
-        // Handle login redirection after email confirmation
-        async function handlePostConfirmationRedirect() {
-            // Check if user is already logged in
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                try {
-                    // Get user profile
-                    const { data: profile } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('user_id', user.id)
-                        .single();
-
-                    if (profile) {
-                        // Store session in localStorage
-                        localStorage.setItem('isLoggedIn', 'true');
-                        localStorage.setItem('userName', profile.full_name);
-                        localStorage.setItem('userEmail', user.email);
-                        localStorage.setItem('userRole', profile.role);
-                        localStorage.setItem('userIdentifier', profile.id);
-
-                        // Redirect to dashboard based on role
-                        const dashboardUrls = {
-                            'trader': 'pages/trader/dashboard-trader.html',
-                            'agent': 'pages/agent/dashboard-agent.html',
-                            'officer': 'pages/officer/dashboard-officer.html',
-                            'inspector': 'pages/inspector/dashboard-inspector.html',
-                            'supervisor': 'pages/supervisor/dashboard-supervisor.html',
-                            'revenue': 'pages/revenue/dashboard-revenue.html',
-                            'administrator': 'pages/admin/dashboard-admin.html'
-                        };
-                        
-                        const dashboardUrl = dashboardUrls[profile.role] || dashboardUrls['trader'];
-                        window.location.href = dashboardUrl;
-                    }
-                } catch (error) {
-                    console.error('Profile retrieval error:', error);
-                    window.location.href = 'login.html';
-                }
-            }
-        }
-
-        // Check for email confirmation callback
-        if (window.location.hash.includes('access_token')) {
-            console.log('Email confirmation detected, handling redirect...');
-            handlePostConfirmationRedirect();
-        }
     </script>
 
 </body>

@@ -53,6 +53,7 @@ serve(async (req) => {
       nationality,
       organization,
       company,
+      status = "active",
     } = body;
 
     // Validate required fields
@@ -218,7 +219,7 @@ serve(async (req) => {
       full_name,
       email,
       role,
-      status: "active",
+      status: status,
       nationality: nationality || "South Sudan",
     };
 

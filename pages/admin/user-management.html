@@ -16,6 +16,8 @@
         .status-active { background: #d1fae5; color: #065f46; }
         .status-inactive { background: #fee2e2; color: #991b1b; }
         .status-pending { background: #fef3c7; color: #92400e; }
+        .status-suspended { background: #f3e8ff; color: #6b21a8; }
+        .status-rejected { background: #f1f5f9; color: #64748b; }
         .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
         .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
         .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
@@ -110,6 +112,8 @@
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>
                                 <option value="pending">Pending</option>
+                                <option value="suspended">Suspended</option>
+                                <option value="rejected">Rejected</option>
                             </select>
                         </div>
                     </div>
@@ -221,6 +225,8 @@
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                         <option value="pending">Pending</option>
+                        <option value="suspended">Suspended</option>
+                        <option value="rejected">Rejected</option>
                     </select>
                 </div>
                 <div class="flex gap-3 pt-4">
@@ -232,7 +238,15 @@
     </div>
 
     <script type="module">
+        console.log("USER MANAGEMENT VERSION 2");
+        console.log("Current URL:", window.location.href);
+        console.log("Current Path:", window.location.pathname);
+
         import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile, createUser, updateUserRole, updateUserStatus, deleteUser, resetPassword, getAllUsers } from '../../js/auth.js';
+        import supabase from '../../js/supabase.js';
+
+        console.log("USER MANAGEMENT: Imports loaded");
+        console.log("USER MANAGEMENT: supabase client:", supabase);
 
         let currentPage = 1;
         let usersPerPage = 10;
@@ -265,24 +279,73 @@
         }
 
         async function loadUsers() {
+            console.log('=== DIAGNOSTIC 1: Browser Session Verification ===');
+            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { user } } = await supabase.auth.getUser();
+            console.log('SESSION:', session);
+            console.log('USER:', user);
+            console.log('JWT ROLE:', session?.user?.role);
+            console.log('JWT UID:', session?.user?.id);
+
+            console.log('=== DIAGNOSTIC 2: admin_users Visibility Test ===');
+            const adminTest = await supabase.from("admin_users").select("*");
+            console.log('admin_users query result:', adminTest);
+            console.log('admin_users data:', adminTest.data);
+            console.log('admin_users error:', adminTest.error);
+            console.log('admin_users count:', adminTest.data?.length);
+
+            console.log('=== DIAGNOSTIC 3: profiles Visibility Test ===');
+            const profilesTest = await supabase.from("profiles").select("*");
+            console.log('profiles query result:', profilesTest);
+            console.log('profiles data:', profilesTest.data);
+            console.log('profiles error:', profilesTest.error);
+            console.log('profiles count:', profilesTest.data?.length);
+
+            console.log('=== DEBUG: loadUsers START ===');
+
             const filters = {
                 role: document.getElementById('roleFilter').value,
                 status: document.getElementById('statusFilter').value,
                 search: document.getElementById('searchInput').value
             };
 
+            console.log('=== DEBUG: loadUsers - Filter values ===');
+            console.log('roleFilter DOM element value:', document.getElementById('roleFilter').value);
+            console.log('statusFilter DOM element value:', document.getElementById('statusFilter').value);
+            console.log('searchInput DOM element value:', document.getElementById('searchInput').value);
+            console.log('Filters object passed to getAllUsers:', JSON.stringify(filters));
+
             const result = await getAllUsers(filters);
+
+            console.log('=== DEBUG: loadUsers - Received from getAllUsers ===');
+            console.log('result.success:', result.success);
+            console.log('result.error:', result.error);
+            console.log('result.data:', result.data);
+            console.log('result.data length:', result.data ? result.data.length : 'null');
+
             if (result.success) {
                 allUsers = result.data;
+                console.log('=== DEBUG: loadUsers - Assigned to allUsers ===');
+                console.log('allUsers array:', allUsers);
+                console.log('allUsers.length:', allUsers.length);
+                console.log('User details:', allUsers.map(u => `${u.full_name} - ${u.email} - ${u.status} - ${u.role}`));
+                console.log('=== DEBUG: loadUsers - Calling renderUsers ===');
                 renderUsers();
             } else {
                 document.getElementById('usersList').innerHTML = '<div class="text-center py-8 text-red-500">Error loading users: ' + result.error + '</div>';
+                console.error('=== DEBUG: loadUsers - ERROR ===');
+                console.error('Error loading users:', result.error);
             }
         }
 
         function renderUsers() {
             const container = document.getElementById('usersList');
-            
+
+            console.log('=== DEBUG: renderUsers called ===');
+            console.log('allUsers length before render:', allUsers.length);
+            console.log('currentPage:', currentPage);
+            console.log('usersPerPage:', usersPerPage);
+
             if (allUsers.length === 0) {
                 container.innerHTML = '<div class="text-center py-8 text-gray-500">No users found</div>';
                 document.getElementById('paginationInfo').textContent = 'Showing 0 users';
@@ -294,12 +357,63 @@
             const end = start + usersPerPage;
             const paginatedUsers = allUsers.slice(start, end);
 
+            console.log('=== DEBUG: Pagination ===');
+            console.log('start index:', start);
+            console.log('end index:', end);
+            console.log('paginatedUsers length:', paginatedUsers.length);
+            console.log('Displayed users:', paginatedUsers);
+            console.log('Displayed count:', paginatedUsers.length);
+
             let html = '';
             paginatedUsers.forEach(user => {
                 const statusClass = user.status === 'active' ? 'status-active' : 
-                                   user.status === 'inactive' ? 'status-inactive' : 'status-pending';
+                                   user.status === 'inactive' ? 'status-inactive' : 
+                                   user.status === 'pending' ? 'status-pending' :
+                                   user.status === 'suspended' ? 'status-suspended' : 'status-rejected';
                 const statusIcon = user.status === 'active' ? '✓' : 
-                                  user.status === 'inactive' ? '✗' : '⏳';
+                                  user.status === 'inactive' ? '✗' : 
+                                  user.status === 'pending' ? '⏳' :
+                                  user.status === 'suspended' ? '⚠' : '✗';
+
+                // Generate action buttons based on status
+                let actionButtons = '';
+                if (user.status === 'pending') {
+                    // Pending registrations get approve/reject buttons
+                    actionButtons = `
+                        <button class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="approveUser('${user.user_id}')">Approve</button>
+                        <button class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition" onclick="rejectUser('${user.user_id}')">Reject</button>
+                        <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="editUser('${user.user_id}')">Edit</button>
+                    `;
+                } else if (user.status === 'active') {
+                    // Active users get suspend/deactivate buttons
+                    actionButtons = `
+                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.user_id}')">Edit</button>
+                        <button class="bg-purple-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-purple-700 transition" onclick="suspendUser('${user.user_id}')">Suspend</button>
+                        <button class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-700 transition" onclick="deactivateUser('${user.user_id}')">Deactivate</button>
+                        <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="resetUserPassword('${user.email}')">Reset Password</button>
+                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.user_id}')">Delete</button>
+                    `;
+                } else if (user.status === 'suspended') {
+                    // Suspended users get activate button
+                    actionButtons = `
+                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.user_id}')">Edit</button>
+                        <button class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="activateUser('${user.user_id}')">Activate</button>
+                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.user_id}')">Delete</button>
+                    `;
+                } else if (user.status === 'inactive') {
+                    // Inactive users get activate button
+                    actionButtons = `
+                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.user_id}')">Edit</button>
+                        <button class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="activateUser('${user.user_id}')">Activate</button>
+                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.user_id}')">Delete</button>
+                    `;
+                } else {
+                    // Rejected or other statuses
+                    actionButtons = `
+                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.user_id}')">Edit</button>
+                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.user_id}')">Delete</button>
+                    `;
+                }
 
                 html += `
                     <div class="user-card">
@@ -320,11 +434,8 @@
                                     <span class="text-xs text-gray-400">Nationality: ${user.nationality || 'N/A'}</span>
                                 </div>
                             </div>
-                            <div class="flex gap-2">
-                                <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.user_id}')">Edit</button>
-                                <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="toggleUserStatus('${user.user_id}', '${user.status}')">Toggle Status</button>
-                                <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="resetUserPassword('${user.email}')">Reset Password</button>
-                                <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.user_id}')">Delete</button>
+                            <div class="flex gap-2 flex-wrap">
+                                ${actionButtons}
                             </div>
                         </div>
                     </div>
@@ -475,6 +586,66 @@
                 loadUsers();
             } else {
                 alert('Error updating status: ' + result.error);
+            }
+        };
+
+        window.approveUser = async function(userId) {
+            if (!confirm('Approve this user registration? This will allow them to access the system.')) return;
+            
+            const result = await updateUserStatus(userId, 'active');
+            if (result.success) {
+                alert('User approved successfully');
+                loadUsers();
+            } else {
+                alert('Error approving user: ' + result.error);
+            }
+        };
+
+        window.rejectUser = async function(userId) {
+            if (!confirm('Reject this user registration? This will deny them access to the system.')) return;
+            
+            const result = await updateUserStatus(userId, 'rejected');
+            if (result.success) {
+                alert('User rejected successfully');
+                loadUsers();
+            } else {
+                alert('Error rejecting user: ' + result.error);
+            }
+        };
+
+        window.suspendUser = async function(userId) {
+            if (!confirm('Suspend this user? This will temporarily deny them access to the system.')) return;
+            
+            const result = await updateUserStatus(userId, 'suspended');
+            if (result.success) {
+                alert('User suspended successfully');
+                loadUsers();
+            } else {
+                alert('Error suspending user: ' + result.error);
+            }
+        };
+
+        window.activateUser = async function(userId) {
+            if (!confirm('Activate this user? This will allow them to access the system.')) return;
+            
+            const result = await updateUserStatus(userId, 'active');
+            if (result.success) {
+                alert('User activated successfully');
+                loadUsers();
+            } else {
+                alert('Error activating user: ' + result.error);
+            }
+        };
+
+        window.deactivateUser = async function(userId) {
+            if (!confirm('Deactivate this user? This will deny them access to the system.')) return;
+            
+            const result = await updateUserStatus(userId, 'inactive');
+            if (result.success) {
+                alert('User deactivated successfully');
+                loadUsers();
+            } else {
+                alert('Error deactivating user: ' + result.error);
             }
         };
 

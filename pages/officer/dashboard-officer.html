@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="../../js/auth.js"></script>
     <script type="module" src="../../js/dashboard.js"></script>
+    <script type="module" src="../../js/realtime.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -130,10 +131,15 @@
     </div>
     <script type="module">
         import supabase from '../../js/supabase.js';
-        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess } from '../../js/auth.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
         import { fetchApplicationsForRole } from '../../js/applications.js';
         import { fetchUnreadNotifications } from '../../js/notifications.js';
+        import { realtimeManager } from '../../js/realtime.js';
+
+        const PAGE_KEY = 'officer-dashboard';
+        let currentRole = null;
+        let currentUserId = null;
 
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
@@ -172,6 +178,11 @@
             if (profile) {
                 document.querySelector('h3').textContent = profile.full_name || 'Officer';
                 document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Officer';
+                currentRole = profile.role || 'officer';
+                currentUserId = profile.id;
+            } else {
+                currentRole = 'officer';
+                currentUserId = user?.id;
             }
 
             // Load workflow-based applications
@@ -179,6 +190,22 @@
             
             // Load notifications
             await loadNotifications();
+
+            // Initialize realtime monitoring
+            await initializeRealtimeMonitoring();
+        }
+
+        async function initializeRealtimeMonitoring() {
+            await realtimeManager.initialize();
+            
+            realtimeManager.registerPage(PAGE_KEY, currentRole, currentUserId, {
+                onApplicationChange: async () => {
+                    await loadWorkflowApplications();
+                },
+                onPaymentChange: async () => {
+                    await loadWorkflowApplications();
+                }
+            });
         }
 
         async function loadWorkflowApplications() {
@@ -294,6 +321,16 @@
             if (aiResults && aiResults.hasIssues) return '<span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">⚠ AI Issues</span>';
             return '<span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">Pending AI</span>';
         }
+
+        // Cleanup realtime subscriptions when leaving page
+        window.addEventListener('beforeunload', () => {
+            realtimeManager.unregisterPage(PAGE_KEY);
+        });
+
+        // Cleanup on sign out
+        document.getElementById('signOutBtn')?.addEventListener('click', () => {
+            realtimeManager.unregisterPage(PAGE_KEY);
+        });
 
         document.addEventListener('DOMContentLoaded', loadDashboard);
 

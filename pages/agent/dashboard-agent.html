@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="../../js/auth.js"></script>
     <script type="module" src="../../js/dashboard.js"></script>
+    <script type="module" src="../../js/realtime.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -272,8 +273,13 @@
     </div>
     <script type="module">
         import supabase from '../../js/supabase.js';
-        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess } from '../../js/auth.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
+        import { realtimeManager } from '../../js/realtime.js';
+
+        const PAGE_KEY = 'agent-dashboard';
+        let currentRole = null;
+        let currentUserId = null;
 
         function toggleCategory(category) {
             const submenu = document.getElementById(category + 'Submenu');
@@ -324,11 +330,15 @@
                 document.getElementById('agentProfileRole').textContent = displayRole;
                 document.getElementById('agentHeaderRole').textContent = displayRole;
                 document.getElementById('agentWelcomeTitle').textContent = `Welcome back, ${displayName}!`;
+                currentRole = profile.role || 'agent';
+                currentUserId = profile.id;
             } else {
                 document.getElementById('agentProfileName').textContent = 'Agent';
                 document.getElementById('agentProfileRole').textContent = 'Agent';
                 document.getElementById('agentHeaderRole').textContent = 'Agent';
                 document.getElementById('agentWelcomeTitle').textContent = 'Welcome back!';
+                currentRole = 'agent';
+                currentUserId = user?.id;
             }
 
             // Fetch dashboard data from Supabase
@@ -382,7 +392,55 @@
             // Load clients (for agents, this would be traders they represent)
             // For now, show placeholder since client management is a separate feature
             document.getElementById('clientsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Client management coming soon</div>';
+
+            // Initialize realtime monitoring
+            await initializeRealtimeMonitoring(profile?.id);
         }
+
+        async function initializeRealtimeMonitoring() {
+            await realtimeManager.initialize();
+            
+            realtimeManager.registerPage(PAGE_KEY, currentRole, currentUserId, {
+                onApplicationChange: async () => {
+                    const data = await fetchDashboardData('agent');
+                    if (data.applications) {
+                        document.getElementById('statTotal').textContent = data.applications.total || 0;
+                        document.getElementById('statPending').textContent = data.applications.pending || 0;
+                        document.getElementById('statAIValidated').textContent = data.applications.pending_review || 0;
+                        document.getElementById('statApproved').textContent = data.applications.approved || 0;
+                        document.getElementById('statRejected').textContent = data.applications.rejected || 0;
+                    }
+                },
+                onPaymentChange: async () => {
+                    const data = await fetchDashboardData('agent');
+                    if (data.applications) {
+                        document.getElementById('statTotal').textContent = data.applications.total || 0;
+                        document.getElementById('statApproved').textContent = data.applications.approved || 0;
+                    }
+                },
+                onProfileChange: async (payload) => {
+                    // Show toast notification for profile status changes
+                    realtimeManager.showToastForProfileStatusChange(payload, currentRole, currentUserId);
+                    
+                    // If account was approved, reload to ensure proper access
+                    if (payload.new && payload.new.status === 'active' && payload.old && payload.old.status === 'pending') {
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }
+                }
+            });
+        }
+
+        // Cleanup realtime subscriptions when leaving page
+        window.addEventListener('beforeunload', () => {
+            realtimeManager.unregisterPage(PAGE_KEY);
+        });
+
+        // Cleanup on sign out
+        document.getElementById('signOutBtn')?.addEventListener('click', () => {
+            realtimeManager.unregisterPage(PAGE_KEY);
+        });
 
         function getStatusBadgeClass(status) {
             const classes = {

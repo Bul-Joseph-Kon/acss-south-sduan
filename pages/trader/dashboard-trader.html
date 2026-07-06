@@ -11,6 +11,7 @@
     <script type="module" src="../../js/auth.js"></script>
     <script type="module" src="../../js/dashboard.js"></script>
     <script type="module" src="../../js/applications.js"></script>
+    <script type="module" src="../../js/realtime.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -306,6 +307,11 @@
         import supabase from '../../js/supabase.js';
         import { checkAuth, getUserProfile, signOut, getCurrentUser } from '../../js/auth.js';
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
+        import { realtimeManager } from '../../js/realtime.js';
+
+        const PAGE_KEY = 'trader-dashboard';
+        let currentRole = null;
+        let currentUserId = null;
 
         function toggleCategory(category) {
             const submenu = document.getElementById(category + 'Submenu');
@@ -352,6 +358,10 @@
                 } else if (displayStatus === 'suspended') {
                     statusBadge.className = 'inline-block mt-1 text-xs bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full font-medium';
                 }
+
+                // Store role and userId for RealtimeManager
+                currentRole = profile.role || 'trader';
+                currentUserId = profile.id;
             } else {
                 document.getElementById('traderProfileName').textContent = 'Trader';
                 document.getElementById('traderProfileRole').textContent = 'Trader';
@@ -359,6 +369,8 @@
                 document.getElementById('traderWelcomeTitle').textContent = 'Welcome back!';
                 document.getElementById('traderProfileStatus').textContent = '● Active';
                 document.getElementById('traderProfileTIN').textContent = 'TIN: Not Available';
+                currentRole = 'trader';
+                currentUserId = user?.id;
             }
 
             // Fetch dashboard data from Supabase
@@ -436,7 +448,71 @@
                 console.error('Error fetching notifications:', error);
                 document.getElementById('recentNotificationsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Error loading notifications</div>';
             }
+
+            // Initialize realtime monitoring
+            await initializeRealtimeMonitoring();
         }
+
+        async function initializeRealtimeMonitoring() {
+            await realtimeManager.initialize();
+            
+            realtimeManager.registerPage(PAGE_KEY, currentRole, currentUserId, {
+                onApplicationChange: async () => {
+                    const data = await fetchDashboardData('trader');
+                    if (data.applications) {
+                        const oldTotal = parseInt(document.getElementById('statTotal').textContent);
+                        const newTotal = data.applications.total || 0;
+                        
+                        document.getElementById('statTotal').textContent = newTotal;
+                        document.getElementById('statPending').textContent = data.applications.pending || 0;
+                        document.getElementById('statInspection').textContent = data.applications.under_inspection || 0;
+                        document.getElementById('statApproved').textContent = data.applications.approved || 0;
+                        document.getElementById('statRejected').textContent = data.applications.rejected || 0;
+                        
+                        // Animate changed stats
+                        if (oldTotal !== newTotal) {
+                            realtimeManager.animateStatChange('statTotal', oldTotal, newTotal);
+                        }
+                    }
+                },
+                onPaymentChange: async () => {
+                    const data = await fetchDashboardData('trader');
+                    if (data.applications) {
+                        document.getElementById('statTotal').textContent = data.applications.total || 0;
+                        document.getElementById('statApproved').textContent = data.applications.approved || 0;
+                    }
+                },
+                onNotificationChange: async () => {
+                    const data = await fetchDashboardData('trader');
+                    if (data.notifications) {
+                        const unreadCount = data.notifications.unread || 0;
+                        document.getElementById('notificationBadge').textContent = unreadCount;
+                        document.getElementById('notificationBadge').style.display = unreadCount > 0 ? 'inline-block' : 'none';
+                    }
+                },
+                onProfileChange: async (payload) => {
+                    // Show toast notification for profile status changes
+                    realtimeManager.showToastForProfileStatusChange(payload, currentRole, currentUserId);
+                    
+                    // If account was approved, reload to ensure proper access
+                    if (payload.new && payload.new.status === 'active' && payload.old && payload.old.status === 'pending') {
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }
+                }
+            });
+        }
+
+        // Cleanup realtime subscriptions when leaving page
+        window.addEventListener('beforeunload', () => {
+            realtimeManager.unregisterPage(PAGE_KEY);
+        });
+
+        // Cleanup on sign out
+        document.getElementById('signOutBtn')?.addEventListener('click', () => {
+            realtimeManager.unregisterPage(PAGE_KEY);
+        });
 
         function getStatusBadgeClass(status) {
             const classes = {

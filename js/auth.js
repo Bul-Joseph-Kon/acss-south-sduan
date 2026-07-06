@@ -6,6 +6,7 @@
 
 import supabase from './supabase.js';
 import { SUPABASE_CONFIG, ERROR_MESSAGES, SUCCESS_MESSAGES, dashboardUrls } from './config.js';
+import { realtimeManager } from './realtime.js';
 
 // Debug: Log dashboardUrls on import
 console.log('=== AUTH.JS IMPORT DEBUG ===');
@@ -84,6 +85,58 @@ export async function signIn(email, password) {
             console.error('Profile:', profile);
             return { success: false, error: 'User profile has no role assigned. Please contact administrator.' };
         }
+
+        // Check profile status
+        console.log('=== CHECKING PROFILE STATUS ===');
+        console.log('Profile status:', profile.status);
+        
+        if (!profile.status) {
+            console.error('=== PROFILE HAS NO STATUS ===');
+            return { success: false, error: 'User profile has no status assigned. Please contact administrator.' };
+        }
+
+        if (profile.status === 'pending') {
+            console.log('=== ACCOUNT PENDING APPROVAL ===');
+            // Sign out the user immediately
+            await supabase.auth.signOut();
+            return { 
+                success: false, 
+                error: 'Your account is awaiting administrator approval. Please check back later.' 
+            };
+        }
+
+        if (profile.status === 'inactive') {
+            console.log('=== ACCOUNT INACTIVE ===');
+            // Sign out the user immediately
+            await supabase.auth.signOut();
+            return { 
+                success: false, 
+                error: 'Your account is inactive. Please contact the administrator.' 
+            };
+        }
+
+        if (profile.status === 'suspended') {
+            console.log('=== ACCOUNT SUSPENDED ===');
+            // Sign out the user immediately
+            await supabase.auth.signOut();
+            return { 
+                success: false, 
+                error: 'Your account has been suspended. Please contact the administrator.' 
+            };
+        }
+
+        if (profile.status !== 'active') {
+            console.error('=== UNKNOWN PROFILE STATUS ===');
+            console.error('Status:', profile.status);
+            // Sign out the user immediately
+            await supabase.auth.signOut();
+            return { 
+                success: false, 
+                error: 'Your account has an unknown status. Please contact the administrator.' 
+            };
+        }
+
+        console.log('=== ACCOUNT STATUS ACTIVE - PROCEEDING ===');
 
         console.log('=== STORING PROFILE DATA ===');
         console.log('User ID:', sessionData.session.user.id);
@@ -194,6 +247,10 @@ export async function signUp(email, password, metadata = {}) {
 export async function signOut() {
     try {
         console.log('=== SIGN OUT ===');
+        
+        // Cleanup Realtime subscriptions
+        realtimeManager.cleanupOnSignOut();
+        
         const { error } = await supabase.auth.signOut();
 
         if (error) throw error;
@@ -323,12 +380,19 @@ export async function getUserProfile(userId) {
 
 export async function updateUserProfile(profileId, updates) {
     try {
+        console.log('=== updateUserProfile DEBUG ===');
+        console.log('profileId:', profileId);
+        console.log('updates:', updates);
+
         const { data, error } = await supabase
             .from('profiles')
             .update(updates)
             .eq('id', profileId)
-            .select()
-            .single();
+            .select();
+
+        console.log('Update result data:', data);
+        console.log('Update result error:', error);
+        console.log('Update result data length:', data?.length);
 
         if (error) throw error;
 
@@ -543,12 +607,19 @@ export async function createUser(email, password, fullName, role, phone = null, 
 
 export async function updateUserRole(userId, newRole) {
     try {
+        console.log('=== updateUserRole DEBUG ===');
+        console.log('userId:', userId);
+        console.log('newRole:', newRole);
+
         const { data, error } = await supabase
             .from('profiles')
             .update({ role: newRole })
             .eq('user_id', userId)
-            .select()
-            .single();
+            .select();
+
+        console.log('Update result data:', data);
+        console.log('Update result error:', error);
+        console.log('Update result data length:', data?.length);
 
         if (error) throw error;
 
@@ -565,12 +636,39 @@ export async function updateUserRole(userId, newRole) {
 
 export async function updateUserStatus(userId, status) {
     try {
-        const { data, error } = await supabase
+        console.log('=== updateUserStatus DEBUG ===');
+        console.log('userId:', userId);
+        console.log('status:', status);
+
+        // Diagnostic: Check if record exists with this identifier
+        const check = await supabase
             .from('profiles')
-            .update({ status: status })
+            .select('id, user_id, status')
+            .or(`id.eq.${userId},user_id.eq.${userId}`);
+
+        console.log('Lookup before update:', check.data);
+        console.log('Lookup error:', check.error);
+        if (check.data && check.data.length > 0) {
+            console.log('Found record - id:', check.data[0].id, 'user_id:', check.data[0].user_id, 'status:', check.data[0].status);
+        }
+
+        const { data, error, count } = await supabase
+            .from('profiles')
+            .update({ status })
             .eq('user_id', userId)
-            .select()
-            .single();
+            .select('id,user_id,status', { count: 'exact' });
+
+        console.log('Updated rows:', count);
+        console.log('Returned data:', data);
+        console.log('Error:', error);
+
+        // Verify database state after update
+        const verify = await supabase
+            .from('profiles')
+            .select('id,user_id,status')
+            .eq('user_id', userId);
+
+        console.log('Database after update:', verify.data);
 
         if (error) throw error;
 
@@ -613,31 +711,99 @@ export async function deleteUser(userId) {
 
 export async function getAllUsers(filters = {}) {
     try {
+        console.log('=== DEBUG: getAllUsers START ===');
+        console.log('Input filters:', JSON.stringify(filters));
+        console.log('filters.role:', filters.role);
+        console.log('filters.status:', filters.status);
+        console.log('filters.search:', filters.search);
+
+        // JWT payload inspection
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('ACCESS TOKEN EXISTS:', !!session?.access_token);
+
+        if (session?.access_token) {
+            try {
+                const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+                console.log('JWT PAYLOAD:', payload);
+            } catch (e) {
+                console.error('Failed to parse JWT:', e);
+            }
+        }
+
+        // Direct query tests before main query
+        console.log('=== DIAGNOSTIC: Direct admin_users query ===');
+        const adminUsers = await supabase.from('admin_users').select('*');
+        console.log('ADMIN USERS:', adminUsers);
+        console.log('admin_users data:', adminUsers.data);
+        console.log('admin_users error:', adminUsers.error);
+        console.log('admin_users count:', adminUsers.data?.length);
+
+        console.log('=== DIAGNOSTIC: Direct profiles query ===');
+        const profiles = await supabase.from('profiles').select('*');
+        console.log('PROFILES:', profiles);
+        console.log('profiles data:', profiles.data);
+        console.log('profiles error:', profiles.error);
+        console.log('profiles count:', profiles.data?.length);
+
+        console.log('=== DIAGNOSTIC: Direct own profile query ===');
+        const ownProfile = await supabase.from('profiles').select('*').eq('user_id', session?.user?.id);
+        console.log('OWN PROFILE:', ownProfile);
+        console.log('ownProfile data:', ownProfile.data);
+        console.log('ownProfile error:', ownProfile.error);
+
         let query = supabase
             .from('profiles')
             .select('*')
             .order('created_at', { ascending: false });
 
+        console.log('Base query: SELECT * FROM profiles ORDER BY created_at DESC');
+
         // Apply filters
         if (filters.role) {
+            console.log('Applying role filter:', filters.role);
             query = query.eq('role', filters.role);
+            console.log('Query now includes: role =', filters.role);
+        } else {
+            console.log('No role filter applied (filters.role is falsy)');
         }
 
         if (filters.status) {
+            console.log('Applying status filter:', filters.status);
             query = query.eq('status', filters.status);
+            console.log('Query now includes: status =', filters.status);
+        } else {
+            console.log('No status filter applied (filters.status is falsy)');
         }
 
         if (filters.search) {
+            console.log('Applying search filter:', filters.search);
             query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+            console.log('Query now includes search:', filters.search);
+        } else {
+            console.log('No search filter applied (filters.search is falsy)');
         }
 
+        console.log('=== DEBUG: Executing Supabase query ===');
         const { data, error } = await query;
+
+        console.log('=== DEBUG: Supabase response ===');
+        console.log('Error:', error);
+        console.log('Data length:', data ? data.length : 'null');
+        console.log('Data:', data);
+        console.log('Raw data array:', JSON.stringify(data));
 
         if (error) throw error;
 
+        console.log('=== DEBUG: getAllUsers RETURN ===');
+        console.log('Returning: success=true, data.length=', data.length);
+        console.log('Returning data:', data);
+
         return { success: true, data };
     } catch (error) {
-        console.error('Get all users error:', error);
+        console.error('=== DEBUG: getAllUsers ERROR ===');
+        console.error('Error:', error);
+        console.error('Error message:', error.message);
+        console.error('Returning: success=false, error=', error.message);
         return { success: false, error: error.message };
     }
 }
