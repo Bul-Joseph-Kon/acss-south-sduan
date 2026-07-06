@@ -193,6 +193,28 @@
                         <option value="administrator">Administrator</option>
                     </select>
                 </div>
+                <div id="staffFields" style="display:none;">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+                        <input type="text" id="employeeId" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="e.g., EMP-001" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                        <input type="text" id="department" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none" placeholder="e.g., Customs Operations" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Customs Office</label>
+                        <select id="customsOffice" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
+                            <option value="">Select Customs Office</option>
+                            <option value="Juba">Juba</option>
+                            <option value="Nimule">Nimule</option>
+                            <option value="Kaya">Kaya</option>
+                            <option value="Rumbek">Rumbek</option>
+                            <option value="Wau">Wau</option>
+                            <option value="Malakal">Malakal</option>
+                        </select>
+                    </div>
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select id="userStatus" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none">
@@ -331,7 +353,7 @@
             document.getElementById('roleFilter').addEventListener('change', () => { currentPage = 1; loadUsers(); });
             document.getElementById('statusFilter').addEventListener('change', () => { currentPage = 1; loadUsers(); });
             document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
-            document.getElementById('userRole').addEventListener('change', toggleApplicantTypeField);
+            document.getElementById('userRole').addEventListener('change', toggleRoleSpecificFields);
             document.getElementById('userApplicantType').addEventListener('change', updateAdminIdentityDocumentOptions);
             document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
 
@@ -352,7 +374,10 @@
             document.getElementById('userApplicantType').value = '';
             document.getElementById('userIdentityDocumentType').value = '';
             document.getElementById('userIdentityDocumentNumber').value = '';
-            toggleApplicantTypeField();
+            document.getElementById('employeeId').value = '';
+            document.getElementById('department').value = '';
+            document.getElementById('customsOffice').value = '';
+            toggleRoleSpecificFields();
             document.getElementById('userModal').classList.add('open');
         }
 
@@ -371,10 +396,13 @@
             updateAdminIdentityDocumentOptions();
             document.getElementById('userIdentityDocumentType').value = user.identity_document_type || '';
             document.getElementById('userIdentityDocumentNumber').value = user.identity_document_number || '';
+            document.getElementById('employeeId').value = user.employee_id || '';
+            document.getElementById('department').value = user.department || '';
+            document.getElementById('customsOffice').value = user.customs_office || '';
             document.getElementById('userStatus').value = user.status || 'active';
             document.getElementById('passwordField').style.display = 'none';
             document.getElementById('userPassword').required = false;
-            toggleApplicantTypeField();
+            toggleRoleSpecificFields();
             document.getElementById('userModal').classList.add('open');
         };
 
@@ -395,6 +423,9 @@
             const applicantType = role === 'trader' ? document.getElementById('userApplicantType').value : 'not_applicable';
             const identityDocumentType = role === 'trader' ? document.getElementById('userIdentityDocumentType').value : 'not_applicable';
             const identityDocumentNumber = role === 'trader' ? document.getElementById('userIdentityDocumentNumber').value.trim() : null;
+            const employeeId = ['officer', 'inspector', 'supervisor', 'revenue', 'administrator'].includes(role) ? document.getElementById('employeeId').value.trim() || null : null;
+            const department = ['officer', 'inspector', 'supervisor', 'revenue', 'administrator'].includes(role) ? document.getElementById('department').value.trim() || null : null;
+            const customsOffice = ['officer', 'inspector', 'supervisor', 'revenue', 'administrator'].includes(role) ? document.getElementById('customsOffice').value || null : null;
             const status = document.getElementById('userStatus').value;
 
             if (role === 'trader' && !applicantType) {
@@ -424,7 +455,7 @@
                     return;
                 }
 
-                const result = await createUser(email, password, fullName, role, phone, nationality, applicantType, identityDocumentType, identityDocumentNumber);
+                const result = await createUser(email, password, fullName, role, phone, nationality, applicantType, identityDocumentType, identityDocumentNumber, employeeId, department, customsOffice);
                 if (result.success) {
                     alert('User created successfully');
                     closeModal();
@@ -447,21 +478,35 @@
             }
         };
 
-        function toggleApplicantTypeField() {
+        function toggleRoleSpecificFields() {
             const role = document.getElementById('userRole').value;
-            const field = document.getElementById('userApplicantTypeField');
+            const traderFields = document.getElementById('userApplicantTypeField');
             const documentTypeField = document.getElementById('userIdentityDocumentTypeField');
             const documentNumberField = document.getElementById('userIdentityDocumentNumberField');
-            field.style.display = role === 'trader' ? 'block' : 'none';
+            const staffFields = document.getElementById('staffFields');
+            
+            // Show trader fields for trader role
+            traderFields.style.display = role === 'trader' ? 'block' : 'none';
             documentTypeField.style.display = role === 'trader' ? 'block' : 'none';
             documentNumberField.style.display = role === 'trader' ? 'block' : 'none';
             document.getElementById('userApplicantType').required = role === 'trader';
             document.getElementById('userIdentityDocumentType').required = role === 'trader';
             document.getElementById('userIdentityDocumentNumber').required = role === 'trader';
+            
+            // Show staff fields for staff roles
+            const isStaffRole = ['officer', 'inspector', 'supervisor', 'revenue', 'administrator'].includes(role);
+            staffFields.style.display = isStaffRole ? 'block' : 'none';
+            
+            // Clear fields when hiding
             if (role !== 'trader') {
                 document.getElementById('userApplicantType').value = '';
                 document.getElementById('userIdentityDocumentType').value = '';
                 document.getElementById('userIdentityDocumentNumber').value = '';
+            }
+            if (!isStaffRole) {
+                document.getElementById('employeeId').value = '';
+                document.getElementById('department').value = '';
+                document.getElementById('customsOffice').value = '';
             }
             updateAdminIdentityDocumentOptions();
         }

@@ -210,6 +210,6 @@ window.editUser = function(userId) {
     document.getElementById('userStatus').value = user.status || 'active';
     document.getElementById('passwordField').style.display = 'none';
     document.getElementById('userPassword').required = false;
-    toggleApplicantTypeField();
+    toggleRoleSpecificFields();
     document.getElementById('userModal').classList.add('open');
 };

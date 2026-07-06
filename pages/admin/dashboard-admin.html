@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="../../js/auth.js"></script>
     <script type="module" src="../../js/dashboard.js"></script>
+    <script type="module" src="../../js/realtime.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -72,26 +73,48 @@
                             <h2 class="text-2xl font-bold tracking-tight">👋 Welcome, Administrator</h2>
                             <p class="opacity-90 text-sm">Manage system settings and configurations</p>
                         </div>
-                        <div class="relative">
-                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
-                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
-                                <span class="text-sm font-medium hidden sm:inline">Admin</span>
-                                <i class="ri-arrow-down-s-line text-sm"></i>
-                            </button>
-                            <div class="profile-dropdown" id="profileDropdown">
-                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
-                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
-                                <div class="divider"></div>
-                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                        <div class="flex items-center gap-4">
+                            <div class="text-right">
+                                <div class="text-lg font-bold" id="liveClock">--:--:--</div>
+                                <div class="text-xs opacity-75" id="liveDate">Loading...</div>
+                            </div>
+                            <div class="relative">
+                                <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                    <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                    <span class="text-sm font-medium hidden sm:inline">Admin</span>
+                                    <i class="ri-arrow-down-s-line text-sm"></i>
+                                </button>
+                                <div class="profile-dropdown" id="profileDropdown">
+                                    <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                    <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                    <div class="divider"></div>
+                                    <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
                         <div class="stat-card"><div class="stat-number text-blue-600" id="statTotalUsers">0</div><div class="stat-label">Total Users</div></div>
-                        <div class="stat-card"><div class="stat-number text-green-600" id="statActiveServices">0</div><div class="stat-label">Active Services</div></div>
-                        <div class="stat-card"><div class="stat-number text-yellow-600" id="statTotalApplications">0</div><div class="stat-label">Total Applications</div></div>
-                        <div class="stat-card"><div class="stat-number text-purple-600" id="statSystemAlerts">0</div><div class="stat-label">System Alerts</div></div>
+                        <div class="stat-card"><div class="stat-number text-green-600" id="statActiveUsers">0</div><div class="stat-label">Active Users</div></div>
+                        <div class="stat-card"><div class="stat-number text-cyan-600" id="statOnlineUsers">0</div><div class="stat-label">Online Users</div></div>
+                        <div class="stat-card"><div class="stat-number text-emerald-600" id="statTraders">0</div><div class="stat-label">Traders</div></div>
+                        <div class="stat-card"><div class="stat-number text-teal-600" id="statAgents">0</div><div class="stat-label">Agents</div></div>
+                        <div class="stat-card"><div class="stat-number text-indigo-600" id="statOfficers">0</div><div class="stat-label">Officers</div></div>
+                        <div class="stat-card"><div class="stat-number text-violet-600" id="statInspectors">0</div><div class="stat-label">Inspectors</div></div>
+                        <div class="stat-card"><div class="stat-number text-purple-600" id="statSupervisors">0</div><div class="stat-label">Supervisors</div></div>
+                        <div class="stat-card"><div class="stat-number text-pink-600" id="statRevenueOfficers">0</div><div class="stat-label">Revenue Officers</div></div>
+                        <div class="stat-card"><div class="stat-number text-red-600" id="statAdministrators">0</div><div class="stat-label">Administrators</div></div>
+                        <div class="stat-card"><div class="stat-number text-orange-600" id="statTotalDeclarations">0</div><div class="stat-label">Total Declarations</div></div>
+                        <div class="stat-card"><div class="stat-number text-yellow-600" id="statPendingDeclarations">0</div><div class="stat-label">Pending</div></div>
+                        <div class="stat-card"><div class="stat-number text-green-600" id="statApprovedDeclarations">0</div><div class="stat-label">Approved</div></div>
+                        <div class="stat-card"><div class="stat-number text-red-600" id="statRejectedDeclarations">0</div><div class="stat-label">Rejected</div></div>
+                        <div class="stat-card"><div class="stat-number text-amber-600" id="statReturnedDeclarations">0</div><div class="stat-label">Returned</div></div>
+                        <div class="stat-card"><div class="stat-number text-blue-600" id="statAIValidations">0</div><div class="stat-label">AI Validations</div></div>
+                        <div class="stat-card"><div class="stat-number text-purple-600" id="statAIFlagged">0</div><div class="stat-label">AI Flagged</div></div>
+                        <div class="stat-card"><div class="stat-number text-green-600" id="statPaymentsCompleted">0</div><div class="stat-label">Payments</div></div>
+                        <div class="stat-card"><div class="stat-number text-emerald-600" id="statRevenueCollected">$0</div><div class="stat-label">Revenue</div></div>
+                        <div class="stat-card"><div class="stat-number text-pink-600" id="statNotifications">0</div><div class="stat-label">Notifications</div></div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
@@ -105,18 +128,46 @@
                         </div>
                     </div>
 
-                    <div class="grid lg:grid-cols-2 gap-4">
+                    <div class="grid lg:grid-cols-3 gap-4">
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-user-line text-blue-500 mr-2"></i>User Statistics</h3>
-                            <div class="space-y-2" id="userStatistics">
-                                <div class="text-sm text-gray-500 text-center py-4">Loading user stats...</div>
+                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-pulse-line text-blue-500 mr-2"></i>Live Activity Feed</h3>
+                            <div class="space-y-2 max-h-64 overflow-y-auto" id="liveActivityFeed">
+                                <div class="text-sm text-gray-500 text-center py-4">Waiting for activity...</div>
                             </div>
                         </div>
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-notification-3-line text-blue-500 mr-2"></i>Recent System Alerts</h3>
-                            <div class="space-y-2" id="systemAlerts">
-                                <div class="text-sm text-gray-500 text-center py-4">Loading alerts...</div>
+                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-wifi-line text-green-500 mr-2"></i>System Status</h3>
+                            <div class="space-y-3" id="systemStatus">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm">Database</span>
+                                    <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700" id="dbStatus">Connected</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm">AI Engine</span>
+                                    <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700" id="aiStatus">Running</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm">Realtime</span>
+                                    <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700" id="realtimeStatus">Connected</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm">Last Sync</span>
+                                    <span class="text-xs text-gray-500" id="lastSyncTime">--</span>
+                                </div>
                             </div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-user-line text-blue-500 mr-2"></i>Online Users</h3>
+                            <div class="space-y-2 max-h-64 overflow-y-auto" id="onlineUsersList">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading online users...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-notification-3-line text-blue-500 mr-2"></i>Recent Notifications</h3>
+                        <div class="space-y-2" id="recentNotifications">
+                            <div class="text-sm text-gray-500 text-center py-4">Loading notifications...</div>
                         </div>
                     </div>
                 </main>
@@ -125,8 +176,9 @@
     </div>
     <script type="module">
         import supabase from '../../js/supabase.js';
-        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess } from '../../js/auth.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
+        import { realtimeMonitor } from '../../js/realtime.js';
 
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
@@ -173,80 +225,260 @@
 
         async function loadAdminData() {
             try {
-                // Fetch users count
-                const { data: profiles, error: profilesError } = await supabase
-                    .from('profiles')
-                    .select('role');
+                console.log('=== LOADING ADMIN DASHBOARD DATA ===');
                 
-                if (!profilesError && profiles) {
-                    document.getElementById('statTotalUsers').textContent = profiles.length;
-                    
-                    // Count users by role
-                    const userStats = {
-                        trader: 0,
-                        agent: 0,
-                        officer: 0,
-                        inspector: 0,
-                        supervisor: 0,
-                        revenue: 0,
-                        administrator: 0
-                    };
-                    
-                    profiles.forEach(p => {
-                        if (userStats.hasOwnProperty(p.role)) {
-                            userStats[p.role]++;
-                        }
-                    });
-                    
-                    // Update user statistics
-                    document.getElementById('userStatistics').innerHTML = `
-                        <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Traders</span><span class="font-bold text-blue-600">${userStats.trader}</span></div>
-                        <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Agents</span><span class="font-bold text-emerald-600">${userStats.agent}</span></div>
-                        <div class="flex justify-between items-center border-b pb-2"><span class="text-sm">Officers</span><span class="font-bold text-purple-600">${userStats.officer + userStats.inspector}</span></div>
-                        <div class="flex justify-between items-center"><span class="text-sm">Admins</span><span class="font-bold text-red-600">${userStats.administrator}</span></div>
-                    `;
-                }
-
-                // Fetch services count
-                const { data: services, error: servicesError } = await supabase
-                    .from('services')
-                    .select('id', { count: 'exact', head: true });
+                // Fetch all statistics
+                await refreshAllStatistics();
                 
-                if (!servicesError) {
-                    document.getElementById('statActiveServices').textContent = services || 0;
-                }
-
-                // Fetch applications count
-                const { data: applications, error: appsError } = await supabase
-                    .from('applications')
-                    .select('id', { count: 'exact', head: true });
+                // Initialize realtime monitoring
+                await initializeRealtimeMonitoring();
                 
-                if (!appsError) {
-                    document.getElementById('statTotalApplications').textContent = applications || 0;
-                }
-
-                // Fetch system alerts (notifications for admin)
-                const { data: alerts, error: alertsError } = await supabase
-                    .from('notifications')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(3);
+                // Start live clock
+                startLiveClock();
                 
-                if (!alertsError && alerts) {
-                    document.getElementById('statSystemAlerts').textContent = alerts.length;
-                    
-                    document.getElementById('systemAlerts').innerHTML = alerts.map(alert => `
-                        <div class="flex justify-between items-center border-b pb-2 text-sm">
-                            <span>${alert.title || 'System Alert'}</span>
-                            <span class="text-gray-400">${formatTimeAgo(alert.created_at)}</span>
-                        </div>
-                    `).join('');
-                } else {
-                    document.getElementById('systemAlerts').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No alerts</div>';
-                }
             } catch (error) {
                 console.error('Error loading admin data:', error);
             }
+        }
+
+        async function refreshAllStatistics() {
+            console.log('=== REFRESHING ALL STATISTICS ===');
+            
+            // Fetch users count and role breakdown
+            const { data: profiles, error: profilesError } = await supabase
+                .from('profiles')
+                .select('role, full_name, email, created_at');
+            
+            if (!profilesError && profiles) {
+                document.getElementById('statTotalUsers').textContent = profiles.length;
+                
+                // Count users by role
+                const userStats = {
+                    trader: 0,
+                    agent: 0,
+                    officer: 0,
+                    inspector: 0,
+                    supervisor: 0,
+                    revenue: 0,
+                    administrator: 0
+                };
+                
+                profiles.forEach(p => {
+                    if (userStats.hasOwnProperty(p.role)) {
+                        userStats[p.role]++;
+                    }
+                });
+                
+                // Update role statistics
+                document.getElementById('statTraders').textContent = userStats.trader;
+                document.getElementById('statAgents').textContent = userStats.agent;
+                document.getElementById('statOfficers').textContent = userStats.officer;
+                document.getElementById('statInspectors').textContent = userStats.inspector;
+                document.getElementById('statSupervisors').textContent = userStats.supervisor;
+                document.getElementById('statRevenueOfficers').textContent = userStats.revenue;
+                document.getElementById('statAdministrators').textContent = userStats.administrator;
+                
+                // Active users (created in last 30 days)
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                const activeUsers = profiles.filter(p => new Date(p.created_at) >= thirtyDaysAgo).length;
+                document.getElementById('statActiveUsers').textContent = activeUsers;
+            }
+
+            // Fetch applications count and status breakdown
+            const { data: applications, error: appsError } = await supabase
+                .from('applications')
+                .select('status, ai_validation_status');
+            
+            if (!appsError && applications) {
+                document.getElementById('statTotalDeclarations').textContent = applications.length;
+                
+                // Count by status
+                const statusCounts = {
+                    pending: 0,
+                    approved: 0,
+                    rejected: 0,
+                    returned: 0
+                };
+                
+                const aiCounts = {
+                    validated: 0,
+                    flagged: 0
+                };
+                
+                applications.forEach(app => {
+                    if (app.status === 'pending_review' || app.status === 'under_inspection') {
+                        statusCounts.pending++;
+                    } else if (app.status === 'approved') {
+                        statusCounts.approved++;
+                    } else if (app.status === 'rejected') {
+                        statusCounts.rejected++;
+                    } else if (app.status === 'returned') {
+                        statusCounts.returned++;
+                    }
+                    
+                    if (app.ai_validation_status === 'passed') {
+                        aiCounts.validated++;
+                    } else if (app.ai_validation_status === 'flagged') {
+                        aiCounts.flagged++;
+                    }
+                });
+                
+                document.getElementById('statPendingDeclarations').textContent = statusCounts.pending;
+                document.getElementById('statApprovedDeclarations').textContent = statusCounts.approved;
+                document.getElementById('statRejectedDeclarations').textContent = statusCounts.rejected;
+                document.getElementById('statReturnedDeclarations').textContent = statusCounts.returned;
+                document.getElementById('statAIValidations').textContent = aiCounts.validated;
+                document.getElementById('statAIFlagged').textContent = aiCounts.flagged;
+            }
+
+            // Fetch payments
+            const { data: payments, error: paymentsError } = await supabase
+                .from('payments')
+                .select('amount, status');
+            
+            if (!paymentsError && payments) {
+                const completedPayments = payments.filter(p => p.status === 'completed').length;
+                const totalRevenue = payments
+                    .filter(p => p.status === 'completed')
+                    .reduce((sum, p) => sum + (p.amount || 0), 0);
+                
+                document.getElementById('statPaymentsCompleted').textContent = completedPayments;
+                document.getElementById('statRevenueCollected').textContent = '$' + totalRevenue.toLocaleString();
+            }
+
+            // Fetch notifications
+            const { data: notifications, error: notificationsError } = await supabase
+                .from('notifications')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(10);
+            
+            if (!notificationsError && notifications) {
+                document.getElementById('statNotifications').textContent = notifications.length;
+                
+                document.getElementById('recentNotifications').innerHTML = notifications.map(notif => `
+                    <div class="flex justify-between items-center border-b pb-2 text-sm">
+                        <span>${notif.title || 'Notification'}</span>
+                        <span class="text-gray-400">${formatTimeAgo(notif.created_at)}</span>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('recentNotifications').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No notifications</div>';
+            }
+        }
+
+        async function initializeRealtimeMonitoring() {
+            console.log('=== INITIALIZING REALTIME MONITORING ===');
+            
+            await realtimeMonitor.initialize();
+            
+            // Subscribe to activity feed updates
+            realtimeMonitor.subscribe('activity', (activityFeed) => {
+                updateActivityFeed(activityFeed);
+            });
+            
+            // Subscribe to system status updates
+            realtimeMonitor.subscribe('systemStatus', (status) => {
+                updateSystemStatus(status);
+            });
+            
+            // Subscribe to online users updates
+            realtimeMonitor.subscribe('onlineUsers', (users) => {
+                updateOnlineUsers(users);
+            });
+            
+            // Subscribe to admin dashboard changes
+            const channels = realtimeMonitor.subscribeToAdminDashboard({
+                onProfileChange: async () => {
+                    console.log('Profile changed, refreshing statistics');
+                    await refreshAllStatistics();
+                },
+                onApplicationChange: async () => {
+                    console.log('Application changed, refreshing statistics');
+                    await refreshAllStatistics();
+                },
+                onPaymentChange: async () => {
+                    console.log('Payment changed, refreshing statistics');
+                    await refreshAllStatistics();
+                },
+                onNotificationChange: async () => {
+                    console.log('Notification changed, refreshing notifications');
+                    await refreshAllStatistics();
+                },
+                onDocumentChange: async () => {
+                    console.log('Document changed');
+                    // Documents don't affect top-level stats
+                }
+            });
+            
+            console.log('Realtime monitoring initialized');
+        }
+
+        function updateActivityFeed(activityFeed) {
+            console.log('=== UPDATING ACTIVITY FEED ===', activityFeed);
+            
+            if (activityFeed.length === 0) {
+                document.getElementById('liveActivityFeed').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Waiting for activity...</div>';
+                return;
+            }
+            
+            document.getElementById('liveActivityFeed').innerHTML = activityFeed.slice(0, 10).map(activity => `
+                <div class="flex items-center gap-2 text-sm border-b pb-2">
+                    <i class="${activity.icon} ${activity.color}"></i>
+                    <span class="flex-1">${activity.text}</span>
+                    <span class="text-xs text-gray-400">${formatTimeAgo(activity.timestamp)}</span>
+                </div>
+            `).join('');
+        }
+
+        function updateSystemStatus(status) {
+            console.log('=== UPDATING SYSTEM STATUS ===', status);
+            
+            document.getElementById('dbStatus').textContent = status.database === 'connected' ? 'Connected' : 'Disconnected';
+            document.getElementById('dbStatus').className = `text-xs px-2 py-1 rounded-full ${status.database === 'connected' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+            
+            document.getElementById('aiStatus').textContent = status.aiEngine === 'running' ? 'Running' : 'Offline';
+            document.getElementById('aiStatus').className = `text-xs px-2 py-1 rounded-full ${status.aiEngine === 'running' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+            
+            document.getElementById('realtimeStatus').textContent = status.realtime === 'connected' ? 'Connected' : 'Disconnected';
+            document.getElementById('realtimeStatus').className = `text-xs px-2 py-1 rounded-full ${status.realtime === 'connected' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+            
+            document.getElementById('lastSyncTime').textContent = formatTimeAgo(status.lastSync);
+        }
+
+        function updateOnlineUsers(users) {
+            console.log('=== UPDATING ONLINE USERS ===', users);
+            
+            if (users.length === 0) {
+                document.getElementById('onlineUsersList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No online users</div>';
+                document.getElementById('statOnlineUsers').textContent = '0';
+                return;
+            }
+            
+            document.getElementById('statOnlineUsers').textContent = users.length;
+            
+            document.getElementById('onlineUsersList').innerHTML = users.map(user => `
+                <div class="flex items-center gap-2 text-sm border-b pb-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span class="flex-1">User ${user.userId.substring(0, 8)}...</span>
+                    <span class="text-xs text-gray-400">${formatTimeAgo(user.lastSeen)}</span>
+                </div>
+            `).join('');
+        }
+
+        function startLiveClock() {
+            const updateClock = () => {
+                const now = new Date();
+                const time = now.toLocaleTimeString('en-US', { hour12: false });
+                const date = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                
+                document.getElementById('liveClock').textContent = time;
+                document.getElementById('liveDate').textContent = date;
+            };
+            
+            updateClock();
+            setInterval(updateClock, 1000);
         }
 
         function formatTimeAgo(dateString) {

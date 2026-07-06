@@ -490,67 +490,50 @@ export async function checkAdminExists() {
 
 export async function createUser(email, password, fullName, role, phone = null, nationality = 'South Sudan', applicantType = 'not_applicable', identityDocumentType = 'not_applicable', identityDocumentNumber = null, employeeId = null, department = null, customsOffice = null) {
     try {
-        console.log('=== CREATING USER ===');
+        console.log('=== CREATING USER VIA EDGE FUNCTION ===');
         console.log('Email:', email);
         console.log('Role:', role);
         console.log('Full Name:', fullName);
 
-        // Create auth user
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    full_name: fullName,
-                    role: role,
-                    phone: phone,
-                    nationality: nationality,
-                    applicant_type: applicantType,
-                    identity_document_type: identityDocumentType,
-                    identity_document_number: identityDocumentNumber,
-                    employee_id: employeeId,
-                    department: department,
-                    customs_office: customsOffice
-                }
+        // Get current session to send authorization header
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !session) {
+            console.error('No active session:', sessionError);
+            return { success: false, error: 'You must be logged in to create users' };
+        }
+
+        // Call the Edge Function
+        const { data, error } = await supabase.functions.invoke('create-user', {
+            body: {
+                email,
+                password,
+                full_name: fullName,
+                role,
+                phone,
+                nationality,
+                applicant_type: applicantType,
+                identity_document_type: identityDocumentType,
+                identity_document_number: identityDocumentNumber,
+                employee_id: employeeId,
+                department,
+                customs_office: customsOffice
+            },
+            headers: {
+                Authorization: `Bearer ${session.access_token}`
             }
         });
 
-        if (error) throw error;
-
-        console.log('Auth user created:', data.user);
-
-        // Create profile
-        if (data.user) {
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .insert({
-                    user_id: data.user.id,
-                    full_name: fullName,
-                    email: email,
-                    phone: phone,
-                    nationality: nationality,
-                    applicant_type: applicantType,
-                    identity_document_type: identityDocumentType,
-                    identity_document_number: identityDocumentNumber,
-                    role: role,
-                    status: 'active',
-                    employee_id: employeeId,
-                    department: department,
-                    customs_office: customsOffice
-                })
-                .select()
-                .single();
-
-            if (profileError) throw profileError;
-
-            console.log('Profile created:', profileData);
-            return { success: true, data: profileData };
+        if (error) {
+            console.error('Edge function error:', error);
+            return { success: false, error: error.message || 'Failed to create user' };
         }
 
-        return { success: false, error: 'Failed to create user' };
+        console.log('User created successfully:', data);
+        return { success: true, data: data.data };
     } catch (error) {
         console.error('Create user error:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: error.message || 'Failed to create user' };
     }
 }
 
