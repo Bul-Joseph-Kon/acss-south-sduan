@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Transport Information</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: #374151; margin-bottom: 0.2rem; }
+        .form-group .form-input { width: 100%; padding: 0.4rem 0.6rem; border-radius: 0.4rem; border: 1px solid #d1d5db; font-size: 0.85rem; transition: border-color 0.2s; }
+        .form-group .form-input:focus { outline: none; border-color: #0a4d3e; box-shadow: 0 0 0 3px rgba(10,77,62,0.1); }
+        .ai-badge-sm { font-size: 0.5rem; font-weight: 700; background: linear-gradient(135deg, #0a4d3e, #0a6b58); color: white; padding: 0.05rem 0.35rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.3px; display: inline-block; }
+        .form-input.ai-highlight { border-color: #0a4d3e; background: #ecfdf5; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🚚 Step 6: Transport Information</h2>
+                            <p class="opacity-90 text-sm">Vehicle registration, transport company, and driver details</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+                            <span id="progressText">Step 6 of 9</span>
+                            <span id="progressPercent">67% Complete</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:67%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Transport Information</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label>Vehicle Registration Number <span class="text-red-500">*</span> <span class="ai-badge-sm">AI Verify</span></label>
+                                <input type="text" id="vehicleRegistration" class="form-input ai-highlight" placeholder="Enter vehicle registration" />
+                            </div>
+                            <div class="form-group">
+                                <label>Vehicle Type <span class="text-red-500">*</span></label>
+                                <select id="vehicleType" class="form-input">
+                                    <option value="">Select type</option>
+                                    <option value="Truck">Truck</option>
+                                    <option value="Van">Van</option>
+                                    <option value="Container Truck">Container Truck</option>
+                                    <option value="Trailer">Trailer</option>
+                                    <option value="Private Vehicle">Private Vehicle</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Transport Company Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="transportCompany" class="form-input" placeholder="Enter transport company" />
+                            </div>
+                            <div class="form-group">
+                                <label>Transport Company License <span class="ai-badge-sm">AI Verify</span></label>
+                                <input type="text" id="transportCompanyLicense" class="form-input ai-highlight" placeholder="Enter license number" />
+                            </div>
+                            <div class="form-group">
+                                <label>Driver Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="driverName" class="form-input" placeholder="Enter driver name" />
+                            </div>
+                            <div class="form-group">
+                                <label>Driver License Number <span class="text-red-500">*</span> <span class="ai-badge-sm">AI Verify</span></label>
+                                <input type="text" id="driverLicense" class="form-input ai-highlight" placeholder="Enter driver license" />
+                            </div>
+                            <div class="form-group">
+                                <label>Driver Phone Number <span class="text-red-500">*</span></label>
+                                <input type="tel" id="driverPhone" class="form-input" placeholder="Enter driver phone" />
+                            </div>
+                            <div class="form-group">
+                                <label>Driver National ID <span class="text-red-500">*</span></label>
+                                <input type="text" id="driverId" class="form-input" placeholder="Enter driver ID" />
+                            </div>
+                            <div class="form-group">
+                                <label>Trailer Number (if applicable)</label>
+                                <input type="text" id="trailerNumber" class="form-input" placeholder="Enter trailer number" />
+                            </div>
+                            <div class="form-group">
+                                <label>Transport Mode Confirmation <span class="text-red-500">*</span></label>
+                                <select id="transportMode" class="form-input">
+                                    <option value="">Select mode</option>
+                                    <option value="Road Transport">Road Transport</option>
+                                    <option value="Air Transport">Air Transport</option>
+                                    <option value="Rail Transport">Rail Transport</option>
+                                    <option value="Water/River Transport">Water/River Transport</option>
+                                    <option value="Mixed Mode">Mixed Mode</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
+                            <a href="goods-information.html" id="backBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                <i class="ri-arrow-left-line"></i> Previous
+                            </a>
+                            <button id="saveAndContinueBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                Save & Continue <i class="ri-arrow-right-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        import { getWorkflow, initializeWorkflowFromURL } from '../../js/cvet-workflow-manager.js';
+        
+        import { signOut } from '../../js/auth.js';
+        
+        import { checkPageAuth } from '../../js/auth-check.js';
+        
+        import { getUnreadCount } from '../../js/notifications.js';
+        
+        import toastManager from '../../js/toast.js';
+
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Check authentication
+        await checkPageAuth('trader');
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Sign out handler
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await signOut();
+                if (result.success) {
+                    toastManager.success('Signed out successfully');
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        // Initialize workflow
+        const workflow = getWorkflow();
+        const state = await initializeWorkflowFromURL();
+
+        // Update progress
+        function updateProgress() {
+            const progress = Math.round((state.currentStep / 9) * 100);
+            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 9`;
+            document.getElementById('progressPercent').textContent = `${progress}% Complete`;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+        updateProgress();
+
+        // Update back button URL
+        if (state.applicationId) {
+            document.getElementById('backBtn').href = 'goods-information.html?id=' + state.applicationId;
+        }
+
+        // Load saved data
+        function loadFormData() {
+            if (state.draftData) {
+                if (state.draftData.vehicle_registration) document.getElementById('vehicleRegistration').value = state.draftData.vehicle_registration;
+                if (state.draftData.vehicle_type) document.getElementById('vehicleType').value = state.draftData.vehicle_type;
+                if (state.draftData.transport_company) document.getElementById('transportCompany').value = state.draftData.transport_company;
+                if (state.draftData.transport_company_license) document.getElementById('transportCompanyLicense').value = state.draftData.transport_company_license;
+                if (state.draftData.driver_name) document.getElementById('driverName').value = state.draftData.driver_name;
+                if (state.draftData.driver_license) document.getElementById('driverLicense').value = state.draftData.driver_license;
+                if (state.draftData.driver_phone) document.getElementById('driverPhone').value = state.draftData.driver_phone;
+                if (state.draftData.driver_id) document.getElementById('driverId').value = state.draftData.driver_id;
+                if (state.draftData.trailer_number) document.getElementById('trailerNumber').value = state.draftData.trailer_number;
+                if (state.draftData.transport_mode) document.getElementById('transportMode').value = state.draftData.transport_mode;
+            }
+        }
+        loadFormData();
+
+        // Save and continue
+        document.getElementById('saveAndContinueBtn').addEventListener('click', async function() {
+            const stepData = {
+                vehicle_registration: document.getElementById('vehicleRegistration').value,
+                vehicle_type: document.getElementById('vehicleType').value,
+                transport_company: document.getElementById('transportCompany').value,
+                transport_company_license: document.getElementById('transportCompanyLicense').value,
+                driver_name: document.getElementById('driverName').value,
+                driver_license: document.getElementById('driverLicense').value,
+                driver_phone: document.getElementById('driverPhone').value,
+                driver_id: document.getElementById('driverId').value,
+                trailer_number: document.getElementById('trailerNumber').value,
+                transport_mode: document.getElementById('transportMode').value
+            };
+
+            // Validate
+            const validation = workflow.validateStep(6, stepData);
+            if (!validation.success) {
+                toastManager.warning('Please fill in all required fields: ' + validation.missingFields.join(', '));
+                return;
+            }
+
+            // Save draft
+            const saveResult = await workflow.saveDraft(stepData);
+            if (!saveResult.success) {
+                toastManager.error('Error saving: ' + saveResult.error);
+                return;
+            }
+
+            // Move to next step
+            const nextResult = workflow.nextStep();
+            if (nextResult.success) {
+                toastManager.success('Step saved successfully');
+                window.location.href = nextResult.step.page + '?id=' + workflow.applicationId;
+            }
+        });
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

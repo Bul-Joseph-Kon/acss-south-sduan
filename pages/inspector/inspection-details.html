@@ -51,8 +51,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Inspector</h3>
-                            <p class="text-gray-500 text-sm">Customs Inspector</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -61,7 +61,7 @@
                             <a href="inspection-reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Reports</span></a>
                             <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -72,7 +72,7 @@
                         <div class="flex items-start justify-between gap-4 mb-4">
                             <div>
                                 <h2 class="text-3xl font-bold tracking-tight">🔍 Physical Inspection</h2>
-                                <p class="opacity-90 text-sm mt-1">Application DA-2026-0015</p>
+                                <p class="opacity-90 text-sm mt-1" id="headerAppNumber">Application Loading...</p>
                             </div>
                             <a href="inspection-queue.html" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
                                 <i class="ri-arrow-left-line"></i> Back
@@ -81,17 +81,17 @@
                         <div class="flex flex-wrap gap-3">
                             <span class="badge badge-inspecting">In Progress</span>
                             <span class="badge badge-pending">Auto-assigned by Workflow Engine</span>
-                            <span class="text-sm opacity-90">Started: Jun 22, 2026 at 10:15 AM</span>
-                            <span class="text-sm opacity-90">Inspector: Ahmed Hassan</span>
+                            <span class="text-sm opacity-90" id="startDateDisplay">Started: Loading...</span>
+                            <span class="text-sm opacity-90" id="inspectorNameDisplay">Inspector: Loading...</span>
                         </div>
                     </div>
 
                     <!-- Tab Navigation -->
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm flex overflow-x-auto">
-                        <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
-                        <button class="tab-btn" onclick="switchTab('inspection')">Inspection</button>
-                        <button class="tab-btn" onclick="switchTab('photographs')">Photographs</button>
-                        <button class="tab-btn" onclick="switchTab('findings')">Findings</button>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm flex overflow-x-auto" id="tabNavigation">
+                        <button class="tab-btn active" data-tab="overview">Overview</button>
+                        <button class="tab-btn" data-tab="inspection">Inspection</button>
+                        <button class="tab-btn" data-tab="photographs">Photographs</button>
+                        <button class="tab-btn" data-tab="findings">Findings</button>
                     </div>
 
                     <!-- OVERVIEW TAB -->
@@ -158,23 +158,23 @@
                             <h3 class="font-bold text-lg mb-4">Application Details</h3>
                             <div class="info-row">
                                 <span class="text-gray-600">Application Number</span>
-                                <span class="font-semibold text-blue-600">DA-2026-0015</span>
+                                <span class="font-semibold text-blue-600" id="applicationNumber">Loading...</span>
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">Trader</span>
-                                <span class="font-semibold">Juba Importers Ltd.</span>
+                                <span class="font-semibold" id="traderName">Loading...</span>
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">Application Type</span>
-                                <span class="font-semibold">Direct Assessment</span>
+                                <span class="font-semibold" id="applicationType">Loading...</span>
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">Declared Value</span>
-                                <span class="font-semibold text-green-600">$45,000 USD</span>
+                                <span class="font-semibold text-green-600" id="declaredValue">Loading...</span>
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">Port of Entry</span>
-                                <span class="font-semibold">Juba Port Authority</span>
+                                <span class="font-semibold" id="portOfEntry">Loading...</span>
                             </div>
                         </div>
 
@@ -182,48 +182,30 @@
                             <h3 class="font-bold text-lg mb-4">Goods Information</h3>
                             <div class="info-row">
                                 <span class="text-gray-600">Product Description</span>
-                                <span class="font-semibold">Industrial Machinery & Equipment</span>
+                                <span class="font-semibold" id="productDescription">Loading...</span>
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">HS Code</span>
-                                <span class="font-semibold">8479.89.90</span>
+                                <span class="font-semibold" id="hsCode">Loading...</span>
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">Quantity</span>
-                                <span class="font-semibold">25 units</span>
+                                <span class="font-semibold" id="quantity">Loading...</span>
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">Origin Country</span>
-                                <span class="font-semibold">Germany</span>
+                                <span class="font-semibold" id="originCountry">Loading...</span>
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">Condition</span>
-                                <span class="font-semibold text-amber-600">Used</span>
+                                <span class="font-semibold" id="condition">Loading...</span>
                             </div>
                         </div>
 
                         <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                             <h3 class="font-bold text-lg mb-4">📁 Supporting Documents</h3>
-                            <div class="doc-item">
-                                <div class="doc-icon"><i class="ri-file-pdf-2-line"></i></div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-sm">packing_list_da2026_0015.pdf</p>
-                                    <p class="text-xs text-gray-500">Packing List · 1.5 MB</p>
-                                </div>
-                            </div>
-                            <div class="doc-item">
-                                <div class="doc-icon"><i class="ri-file-pdf-2-line"></i></div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-sm">bill_of_lading_da2026_0015.pdf</p>
-                                    <p class="text-xs text-gray-500">Bill of Lading · 0.9 MB</p>
-                                </div>
-                            </div>
-                            <div class="doc-item">
-                                <div class="doc-icon"><i class="ri-file-pdf-2-line"></i></div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-sm">certificate_of_origin_da2026_0015.pdf</p>
-                                    <p class="text-xs text-gray-500">Certificate of Origin · 0.7 MB</p>
-                                </div>
+                            <div id="documentsContainer">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading documents...</div>
                             </div>
                         </div>
                     </div>
@@ -287,14 +269,14 @@
                         <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                             <h3 class="font-bold text-lg mb-4">📸 Inspection Photographs</h3>
                             
-                            <button class="action-btn btn-camera mb-6" onclick="openCameraModal()">
+                            <button class="action-btn btn-camera mb-6" id="cameraBtn">
                                 <i class="ri-camera-line"></i> Take Photo
                             </button>
 
                             <div class="bg-gray-50 p-6 rounded-lg border-2 border-dashed border-gray-300 text-center mb-6">
                                 <p class="text-sm text-gray-600 mb-3">Or drag photos here to upload</p>
-                                <input type="file" id="photoInput" multiple accept="image/*" style="display: none;" onchange="handlePhotoUpload(event)" />
-                                <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition" onclick="document.getElementById('photoInput').click()">
+                                <input type="file" id="photoInput" multiple accept="image/*" style="display: none;" />
+                                <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition" id="selectPhotosBtn">
                                     Select Photos
                                 </button>
                                 <p class="text-xs text-gray-500 mt-2">JPG, PNG up to 10MB each</p>
@@ -365,10 +347,10 @@
                             <strong>Submit workflow:</strong> Uploads the inspection report, starts AI validation, then automatically returns the application for correction if inconsistencies are found or routes it to the Supervisor if validated.
                         </div>
                         <div class="flex flex-col sm:flex-row gap-3">
-                            <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition">
+                            <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition" id="saveDraftBtn">
                                 Save as Draft
                             </button>
-                            <button class="flex-1 action-btn btn-submit" onclick="submitInspectionReport()">
+                            <button class="flex-1 action-btn btn-submit" id="submitBtn">
                                 <i class="ri-check-line"></i> Submit Inspection Report
                             </button>
                         </div>
@@ -379,33 +361,48 @@
     </div>
 
     <!-- CAMERA MODAL -->
-    <div id="cameraModal" class="modal-overlay" onclick="if(event.target === this) closeCameraModal()">
+    <div id="cameraModal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="modal-title">📸 Take Inspection Photo</h2>
             <video id="videoStream" width="100%"></video>
             <canvas id="photoCanvas" style="display: none;"></canvas>
             <div class="flex gap-3">
-                <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition" onclick="closeCameraModal()">Cancel</button>
-                <button class="flex-1 action-btn btn-camera" onclick="capturePhoto()">Capture Photo</button>
+                <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition" id="closeCameraBtn">Cancel</button>
+                <button class="flex-1 action-btn btn-camera" id="capturePhotoBtn">Capture Photo</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { checkPageAuth } from '../../js/auth-check.js';
-        import { fetchApplicationById } from '../../js/applications.js';
+        
+        import { fetchApplicationById, updateApplication, logInspectionActivity, logAuditAction } from '../../js/applications.js';
+        
         import { validateInspectionReport, updateApplicationStatusAfterInspection } from '../../js/ai-validation.js';
-        import { signOut as authSignOut } from '../../js/auth.js';
+        
+        import { sendInspectionCompletedNotification, sendInspectionEscalatedNotification } from '../../js/notifications.js';
 
+        import { createEscalationCase } from '../../js/escalation-service.js';
+        
+        import { signOut as authSignOut } from '../../js/auth.js';
+        
+        import { realtimeManager } from '../../js/realtime.js';
+
+        
         const urlParams = new URLSearchParams(window.location.search);
         let appId = urlParams.get('id');
         let application = null;
         let photos = [];
         let stream = null;
+        const PAGE_KEY = 'inspection-details';
 
         async function init() {
             const hasAuth = await checkPageAuth('inspector');
+
+        // Load user profile
+        await loadCurrentUserProfile();
             if (!hasAuth) return;
 
             if (!appId) {
@@ -426,85 +423,213 @@
                 if (result.success && result.data) {
                     application = result.data;
                     populateDetails(application);
+                    await loadDocuments(appId);
                 } else {
-                    alert('Failed to load application details: ' + (result.error || 'Unknown error'));
+                    console.error('Failed to load application details:', result.error);
                 }
             }
 
-            // Bind sign out click handler
-            const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
-            if (signOutBtn) {
-                signOutBtn.removeAttribute('onclick');
-                signOutBtn.addEventListener('click', handleSignOut);
-            }
+            await initializeRealtime();
+
+            // Set up event listeners
+            document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
+            document.getElementById('tabNavigation')?.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tab-btn')) {
+                    const tabName = e.target.getAttribute('data-tab');
+                    if (tabName) switchTab(tabName);
+                }
+            });
+            document.getElementById('cameraBtn')?.addEventListener('click', openCameraModal);
+            document.getElementById('closeCameraBtn')?.addEventListener('click', closeCameraModal);
+            document.getElementById('capturePhotoBtn')?.addEventListener('click', capturePhoto);
+            document.getElementById('selectPhotosBtn')?.addEventListener('click', () => {
+                document.getElementById('photoInput').click();
+            });
+            document.getElementById('cameraModal')?.addEventListener('click', (e) => {
+                if (e.target.id === 'cameraModal') closeCameraModal();
+            });
+            document.getElementById('submitBtn')?.addEventListener('click', submitInspectionReport);
+            document.getElementById('photoGallery')?.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-btn') || e.target.closest('.remove-btn')) {
+                    const btn = e.target.classList.contains('remove-btn') ? e.target : e.target.closest('.remove-btn');
+                    const index = parseInt(btn.getAttribute('data-photo-index'));
+                    if (!isNaN(index)) removePhoto(index);
+                }
+            });
         }
 
         async function handleSignOut() {
+            realtimeManager.unregisterPage(PAGE_KEY);
             const result = await authSignOut();
             if (result.success) {
                 window.location.href = '../../auth/login.html';
             } else {
-                alert('Sign out failed: ' + result.error);
+                console.error('Sign out failed:', result.error);
             }
         }
+
+        async function loadDocuments(applicationId) {
+            const container = document.getElementById('documentsContainer');
+            if (!container) return;
+
+            const { data: documents, error } = await supabase
+                .from('documents')
+                .select('*')
+                .eq('application_id', applicationId)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                container.innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Error loading documents</div>';
+                return;
+            }
+
+            if (!documents || documents.length === 0) {
+                container.innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No documents uploaded</div>';
+                return;
+            }
+
+            container.innerHTML = documents.map(doc => `
+                <div class="doc-item">
+                    <div class="doc-icon"><i class="ri-file-${getDocumentIcon(doc.document_type)}-line"></i></div>
+                    <div class="flex-1">
+                        <p class="font-semibold text-sm">${doc.document_name || 'Document'}</p>
+                        <p class="text-xs text-gray-500">${formatDocumentType(doc.document_type)} · ${formatFileSize(doc.file_size || 0)}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getDocumentIcon(type) {
+            const iconMap = {
+                'packing_list': 'list',
+                'bill_of_lading': 'ship',
+                'certificate_of_origin': 'award',
+                'invoice': 'money-dollar-circle',
+                'insurance': 'shield-check',
+                'permit': 'file-text'
+            };
+            return iconMap[type] || 'file';
+        }
+
+        function formatDocumentType(type) {
+            return type?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Document';
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes) return 'Unknown size';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        async function initializeRealtime() {
+            await realtimeManager.initialize();
+            
+            
+            const profile = user ? await supabase.from('profiles').select('*').eq('user_id', user.id).single() : null;
+            const userId = profile?.data?.id;
+            const role = profile?.data?.role;
+
+            realtimeManager.registerPage(PAGE_KEY, role, userId, {
+                onApplicationChange: async (payload) => {
+                    if (appId && payload.new?.id === appId) {
+                        const result = await fetchApplicationById(appId);
+                        if (result.success && result.data) {
+                            application = result.data;
+                            populateDetails(application);
+                        }
+                    }
+                },
+                onDocumentChange: async () => {
+                    if (appId) {
+                        await loadDocuments(appId);
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('beforeunload', () => {
+            realtimeManager.unregisterPage(PAGE_KEY);
+        });
 
         function populateDetails(app) {
             // Update Title/Header
             document.querySelectorAll('.text-3xl.font-bold').forEach(el => {
                 el.innerHTML = `🔍 Physical Inspection`;
             });
-            document.querySelectorAll('.opacity-90.text-sm.mt-1').forEach(el => {
-                el.textContent = `Application ${app.application_number}`;
-            });
+            const headerAppNumber = document.getElementById('headerAppNumber');
+            if (headerAppNumber) headerAppNumber.textContent = `Application ${app.application_number || 'Loading...'}`;
 
             // Date
-            document.querySelectorAll('.text-sm.opacity-90')[0].textContent = `Started: ${new Date(app.created_at).toLocaleString()}`;
+            const dateEl = document.getElementById('startDateDisplay');
+            if (dateEl) dateEl.textContent = `Started: ${new Date(app.created_at).toLocaleString()}`;
 
-            // Populate inspector name
-            supabase.from('profiles').select('full_name').eq('id', app.inspector_id).single().then(({ data }) => {
-                if (data && data.full_name) {
-                    document.querySelectorAll('.text-sm.opacity-90')[1].textContent = `Inspector: ${data.full_name}`;
-                    // Update sidebar name too
+            // Populate inspector name and trader name in parallel (N+1 fix)
+            Promise.all([
+                app.inspector_id ? supabase.from('profiles').select('full_name').eq('id', app.inspector_id).single() : Promise.resolve({ data: null }),
+                app.user_id ? supabase.from('profiles').select('full_name').eq('id', app.user_id).single() : Promise.resolve({ data: null })
+            ]).then(([inspectorResult, traderResult]) => {
+                if (inspectorResult.data && inspectorResult.data.full_name) {
+                    const inspectorEl = document.getElementById('inspectorNameDisplay');
+                    if (inspectorEl) inspectorEl.textContent = `Inspector: ${inspectorResult.data.full_name}`;
                     const sidebarName = document.querySelector('.text-lg.font-bold');
-                    if (sidebarName) sidebarName.textContent = data.full_name;
+                    if (sidebarName) sidebarName.textContent = inspectorResult.data.full_name;
+                }
+
+                const traderNameEl = document.getElementById('traderName');
+                if (traderNameEl) {
+                    if (traderResult.data && traderResult.data.full_name) {
+                        traderNameEl.textContent = traderResult.data.full_name;
+                    } else {
+                        traderNameEl.textContent = 'Unknown';
+                    }
                 }
             });
 
-            // Overview Details
-            const overviewSpans = document.querySelectorAll('#tab-overview .info-row span.font-semibold');
-            if (overviewSpans.length >= 5) {
-                overviewSpans[0].textContent = app.application_number;
-                // Query trader name
-                supabase.from('profiles').select('full_name').eq('id', app.user_id).single().then(({ data }) => {
-                    if (data && data.full_name) overviewSpans[1].textContent = data.full_name;
-                });
-                overviewSpans[2].textContent = (app.application_type || '').replace('_', ' ').toUpperCase();
-                overviewSpans[3].textContent = `$${(app.declared_value || 0).toLocaleString()} USD`;
-                overviewSpans[4].textContent = app.declaration_data?.port_of_entry || 'Juba Port';
-            }
+            // Overview Details using IDs
+            const appNumberEl = document.getElementById('applicationNumber');
+            if (appNumberEl) appNumberEl.textContent = app.application_number || 'N/A';
 
-            // Goods Info
-            const goodsSpans = document.querySelectorAll('#tab-overview .bg-white:nth-of-type(3) .info-row span.font-semibold');
-            if (goodsSpans.length >= 5) {
-                goodsSpans[0].textContent = app.goods_data?.item_description || app.declaration_data?.product_description || 'General Cargo';
-                goodsSpans[1].textContent = app.goods_data?.hs_code || app.declaration_data?.hs_code || 'N/A';
-                goodsSpans[2].textContent = app.goods_data?.quantity || app.declaration_data?.quantity || 'N/A';
-                goodsSpans[3].textContent = app.goods_data?.origin_country || app.declaration_data?.origin_country || 'N/A';
-                goodsSpans[4].textContent = app.goods_data?.condition || 'New';
+            const appTypeEl = document.getElementById('applicationType');
+            if (appTypeEl) appTypeEl.textContent = (app.application_type || '').replace('_', ' ').toUpperCase() || 'N/A';
+
+            const declaredValueEl = document.getElementById('declaredValue');
+            if (declaredValueEl) declaredValueEl.textContent = `$${(app.declared_value || 0).toLocaleString()} USD`;
+
+            const portOfEntryEl = document.getElementById('portOfEntry');
+            if (portOfEntryEl) portOfEntryEl.textContent = app.declaration_data?.port_of_entry || app.goods_data?.location || 'N/A';
+
+            // Goods Info using IDs
+            const productDescEl = document.getElementById('productDescription');
+            if (productDescEl) productDescEl.textContent = app.goods_data?.item_description || app.declaration_data?.product_description || 'N/A';
+
+            const hsCodeEl = document.getElementById('hsCode');
+            if (hsCodeEl) hsCodeEl.textContent = app.goods_data?.hs_code || app.declaration_data?.hs_code || 'N/A';
+
+            const quantityEl = document.getElementById('quantity');
+            if (quantityEl) quantityEl.textContent = app.goods_data?.quantity || app.declaration_data?.quantity || 'N/A';
+
+            const originCountryEl = document.getElementById('originCountry');
+            if (originCountryEl) originCountryEl.textContent = app.goods_data?.origin_country || app.declaration_data?.origin_country || 'N/A';
+
+            const conditionEl = document.getElementById('condition');
+            if (conditionEl) {
+                const condition = app.goods_data?.condition || 'New';
+                conditionEl.textContent = condition;
+                conditionEl.className = 'font-semibold ' + (condition.toLowerCase() === 'used' ? 'text-amber-600' : 'text-green-600');
             }
         }
 
         function switchTab(tabName) {
             const tabs = document.querySelectorAll('[id^="tab-"]');
             tabs.forEach(tab => tab.style.display = 'none');
-            
+
             const buttons = document.querySelectorAll('.tab-btn');
             buttons.forEach(btn => btn.classList.remove('active'));
-            
+
             document.getElementById('tab-' + tabName).style.display = 'block';
-            if (event && event.target) {
-                event.target.classList.add('active');
-            }
+            const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
         }
 
         function openCameraModal() {
@@ -522,7 +647,7 @@
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                 document.getElementById('videoStream').srcObject = stream;
             } catch (err) {
-                alert('Unable to access camera: ' + err.message);
+                console.error('Unable to access camera:', err.message);
             }
         }
 
@@ -564,11 +689,11 @@
                 gallery.innerHTML = '<p class="text-sm text-gray-500 w-full">Photos will appear here</p>';
                 return;
             }
-            
+
             gallery.innerHTML = photos.map((url, index) => `
                 <div class="photo-item">
                     <img src="${url}" alt="Inspection photo ${index + 1}">
-                    <button class="remove-btn" onclick="removePhoto(${index})"><i class="ri-close-line"></i></button>
+                    <button class="remove-btn" data-photo-index="${index}"><i class="ri-close-line"></i></button>
                 </div>
             `).join('');
         }
@@ -579,11 +704,12 @@
         }
 
         async function submitInspectionReport() {
+            console.log("STEP 1: Submit Inspection Report button clicked");
             if (!appId) return;
 
             const result = document.querySelector('input[name="result"]:checked');
             if (!result) {
-                alert('Please select an inspection result');
+                console.error('Please select an inspection result');
                 return;
             }
 
@@ -621,11 +747,62 @@
             submitBtn.innerHTML = `<i class="ri-loader-4-line animate-spin"></i> Validating...`;
 
             try {
+                console.log("STEP 2: Starting validation process");
+                const oldStatus = application?.status || 'unknown';
+
                 // AI validate the inspection report
+                console.log("STEP 3: Calling validateInspectionReport");
                 const validationResults = await validateInspectionReport(appId, inspectionReport);
+                console.log("STEP 3.1: Validation results received", validationResults);
 
                 // Update application status & route based on validation results
+                console.log("STEP 4: Calling updateApplicationStatusAfterInspection");
                 const statusUpdate = await updateApplicationStatusAfterInspection(appId, validationResults, inspectionReport);
+                console.log("STEP 4.1: Status update received", statusUpdate);
+
+                // Log inspection activity
+                await logInspectionActivity(
+                    'inspection_completed',
+                    appId,
+                    'Physical inspection report submitted with AI validation',
+                    { validation_score: validationResults.validation_score, validation_passed: validationResults.validation_passed }
+                );
+
+                // Log audit action
+                await logAuditAction(
+                    'UPDATE',
+                    'applications',
+                    appId,
+                    { status: oldStatus },
+                    { status: statusUpdate.newStatus, inspection_report: inspectionReport }
+                );
+
+                // Send notification based on routing decision
+                console.log("STEP 5: Checking if escalation needed, newStatus:", statusUpdate.newStatus);
+                if (application?.user_id) {
+                    if (statusUpdate.newStatus === 'escalated') {
+                        console.log("STEP 6: ESCALATION TRIGGERED - Calling createEscalationCase");
+                        console.log("STEP 6.1: Escalation payload", {
+                            applicationId: appId,
+                            reason: statusUpdate.message,
+                            priority: 'high',
+                            applicationStatus: 'pending_review',
+                            notes: 'Escalated from inspection due to AI validation failure'
+                        });
+                        // Create escalation case in escalated_cases table
+                        const escalationResult = await createEscalationCase(appId, {
+                            reason: statusUpdate.message,
+                            priority: 'high',
+                            applicationStatus: 'pending_review',
+                            notes: 'Escalated from inspection due to AI validation failure'
+                        });
+                        console.log("STEP 7: createEscalationCase result", escalationResult);
+                        await sendInspectionEscalatedNotification(application.user_id, appId, statusUpdate.message);
+                    } else {
+                        console.log("STEP 6: No escalation - sending completion notification");
+                        await sendInspectionCompletedNotification(application.user_id, appId);
+                    }
+                }
 
                 // Prepare result notification details
                 let detailsMsg = `=== AI Report Validation Result ===\n`;
@@ -642,12 +819,12 @@
 
                 detailsMsg += `Routing Decision:\n${statusUpdate.message}`;
 
-                alert(detailsMsg);
+                console.log('Inspection report submitted:', detailsMsg);
 
                 // Redirect to Queue
                 window.location.href = 'inspection-queue.html';
             } catch (err) {
-                alert('Submission failed: ' + err.message);
+                console.error('Submission failed:', err.message);
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = oldHtml;
             }
@@ -673,3 +850,7 @@
     </script>
 </body>
 </html>
+
+
+
+

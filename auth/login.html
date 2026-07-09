@@ -266,8 +266,9 @@
                     // Prepend ../ to navigate from auth folder to pages folder
                     if (dashboardUrl && dashboardUrl !== 'undefined') {
                         console.log('=== FINAL REDIRECT ===');
-                        console.log('Redirecting to:', '../' + dashboardUrl);
-                        window.location.href = '../' + dashboardUrl;
+                        const targetUrl = dashboardUrl.startsWith('/') ? dashboardUrl : '../' + dashboardUrl;
+                        console.log('Redirecting to:', targetUrl);
+                        window.location.href = targetUrl;
                     } else {
                         console.error('Invalid dashboard URL for role:', role);
                         showToast('Error redirecting to dashboard', 'error');

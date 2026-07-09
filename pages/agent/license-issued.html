@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Agent License Issued</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="../../js/agent-sidebar.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%);
+        }
+
+        .sidebar-link {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background-color: #e8f0fe;
+            color: #1e3a5f;
+        }
+
+        .sidebar-link i {
+            font-size: 1.2rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .notification-item {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .notification-item:hover {
+            background: #f9fafb;
+        }
+
+        .notification-item.unread {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+        .notification-item .notif-time {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem);
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            min-width: 200px;
+            z-index: 50;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .profile-dropdown.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .profile-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            color: #374151;
+            transition: background 0.15s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .profile-dropdown a:hover {
+            background: #e8f0fe;
+            color: #1e3a5f;
+        }
+
+        .profile-dropdown .divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+
+        .profile-dropdown .danger {
+            color: #dc2626;
+        }
+
+        .profile-dropdown .danger:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .header-profile-btn {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.75rem 0.3rem 0.5rem;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.2);
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-profile-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .header-profile-btn .avatar-sm {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e3a5f;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Sidebar -->
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="agent-sidebar"></div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🪪 Licenses Issued</h2>
+                            <p class="opacity-90 text-sm">Monitor issued and active clearing agent licenses</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')"
+                                class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign
+                                    Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- License List -->
+                    <div class="space-y-3" id="licenseList">
+                        <div class="text-center py-8 text-gray-500">Loading issued licenses...</div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        let currentUserId = null;
+        let realtimeChannel = null;
+
+        async function initPage() {
+            const role = 'agent';
+            const hasAccess = await checkPageAuth(role);
+            if (!hasAccess) return;
+
+            const { user, profile } = await loadCurrentUserProfile();
+            if (profile) {
+                currentUserId = profile.id;
+            }
+
+            await loadLicenses();
+            setupRealtimeSubscriptions();
+
+            document.getElementById('dropdownSignOut')?.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        async function loadLicenses() {
+            try {
+                // Fetch approved agent licenses for the current authenticated user
+                const { data: licenses, error } = await supabase
+                    .from('applications')
+                    .select('*, profiles!applications_user_id_fkey(full_name, organization)')
+                    .eq('user_id', currentUserId)
+                    .eq('application_type', 'agent_license')
+                    .in('status', ['approved', 'completed'])
+                    .order('approved_at', { ascending: false });
+
+                if (error) throw error;
+
+                const listContainer = document.getElementById('licenseList');
+                if (!licenses || licenses.length === 0) {
+                    listContainer.innerHTML = '<div class="text-center py-8 text-gray-500 bg-white rounded-xl border border-gray-200">No issued licenses found</div>';
+                    return;
+                }
+
+                listContainer.innerHTML = licenses.map(lic => {
+                    const licenseNum = lic.application_number || 'N/A';
+                    const issueDate = lic.approved_at || lic.updated_at;
+                    const issueDateStr = issueDate ? new Date(issueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+                    // Expiry date (e.g. 1 year from issue date)
+                    const expiryDate = issueDate ? new Date(new Date(issueDate).getTime() + 365 * 24 * 60 * 60 * 1000) : null;
+                    const expiryDateStr = expiryDate ? expiryDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+                    const holderName = lic.profiles?.full_name || 'Clearing Agent';
+
+                    return `
+                        <div class="notification-item">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="ri-id-card-line text-purple-600 text-xl"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start">
+                                        <h4 class="font-semibold text-sm">License Issued: ${licenseNum}</h4>
+                                        <span class="text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">Active</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mt-1">Holder: ${holderName} · Class: Customs Agent License</p>
+                                    <div class="grid md:grid-cols-2 gap-1 text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded">
+                                        <div><span class="font-medium">Issue Date:</span> ${issueDateStr}</div>
+                                        <div><span class="font-medium">Expiry Date:</span> ${expiryDateStr}</div>
+                                    </div>
+                                    <div class="flex items-center justify-end mt-2">
+                                        <a href="download-license.html?id=${lic.id}" class="text-blue-600 text-sm hover:underline font-semibold flex items-center gap-1">
+                                            <i class="ri-download-line"></i> Download PDF Copy
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading licenses:', error);
+                document.getElementById('licenseList').innerHTML = '<div class="text-center py-8 text-red-500 bg-white rounded-xl border border-gray-200">Error loading licenses</div>';
+            }
+        }
+
+        function setupRealtimeSubscriptions() {
+            realtimeChannel = supabase
+                .channel('agent-licenses')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, async () => {
+                    await loadLicenses();
+                })
+                .subscribe();
+
+            window.addEventListener('beforeunload', () => {
+                if (realtimeChannel) {
+                    supabase.removeChannel(realtimeChannel);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+
+</html>

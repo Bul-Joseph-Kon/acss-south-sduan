@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Pending Payment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="../../js/agent-sidebar.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%);
+        }
+
+        .sidebar-link {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background-color: #e8f0fe;
+            color: #1e3a5f;
+        }
+
+        .sidebar-link i {
+            font-size: 1.2rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem);
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            min-width: 200px;
+            z-index: 50;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .profile-dropdown.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .profile-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            color: #374151;
+            transition: background 0.15s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .profile-dropdown a:hover {
+            background: #e8f0fe;
+            color: #1e3a5f;
+        }
+
+        .profile-dropdown .divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+
+        .profile-dropdown .danger {
+            color: #dc2626;
+        }
+
+        .profile-dropdown .danger:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .header-profile-btn {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.75rem 0.3rem 0.5rem;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.2);
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-profile-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .header-profile-btn .avatar-sm {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e3a5f;
+        }
+
+        .status-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Sidebar -->
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="agent-sidebar"></div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">💰 Pending Payment Queue</h2>
+                            <p class="opacity-90 text-sm">Declarations and applications awaiting payment clearance</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')"
+                                class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign
+                                    Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-500" id="queueHeaderCount">0 applications pending
+                                payment</span>
+                            <span class="text-sm text-red-600 font-semibold">Action required</span>
+                        </div>
+                    </div>
+
+                    <!-- Pending Payment Cards Container -->
+                    <div class="space-y-3" id="pendingPaymentsList">
+                        <div class="text-center py-8 text-gray-500">Loading pending payments...</div>
+                    </div>
+
+                    <div class="bg-blue-50 rounded-xl border border-blue-200 p-5">
+                        <h3 class="font-bold text-blue-800 mb-2"><i class="ri-information-line mr-2"></i>Payment Summary
+                        </h3>
+                        <div class="grid md:grid-cols-3 gap-3 text-sm">
+                            <div><span class="text-blue-700">Total Pending:</span> <span class="font-bold"
+                                    id="summaryTotal">$0.00</span></div>
+                            <div><span class="text-blue-700">Overdue:</span> <span class="font-bold text-red-600"
+                                    id="summaryOverdue">$0.00</span></div>
+                            <div><span class="text-blue-700">Due This Week:</span> <span class="font-bold"
+                                    id="summaryThisWeek">$0.00</span></div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        let currentAgentId = null;
+        let realtimeChannel = null;
+
+        async function initPage() {
+            const role = 'agent';
+            const hasAccess = await checkPageAuth(role);
+            if (!hasAccess) return;
+
+            const { user, profile } = await loadCurrentUserProfile();
+            if (profile) {
+                currentAgentId = profile.id;
+            }
+
+            await loadPendingPayments();
+            setupRealtimeSubscriptions();
+
+            document.getElementById('dropdownSignOut')?.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        async function loadPendingPayments() {
+            try {
+                const { data: applications, error } = await supabase
+                    .from('applications')
+                    .select('*, profiles!applications_user_id_fkey(full_name, organization)')
+                    .eq('agent_id', currentAgentId)
+                    .eq('status', 'awaiting_payment')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const headerCount = document.getElementById('queueHeaderCount');
+                headerCount.textContent = `${applications?.length || 0} applications pending payment`;
+
+                const listContainer = document.getElementById('pendingPaymentsList');
+                if (!applications || applications.length === 0) {
+                    listContainer.innerHTML = '<div class="text-center py-8 text-gray-500 bg-white rounded-xl border border-gray-200">No applications pending payment</div>';
+                    document.getElementById('summaryTotal').textContent = '$0.00';
+                    document.getElementById('summaryThisWeek').textContent = '$0.00';
+                    return;
+                }
+
+                let totalPending = 0;
+                listContainer.innerHTML = applications.map(app => {
+                    const traderName = app.profiles?.full_name || app.profiles?.organization || 'Unknown Trader';
+                    const amount = app.declared_value ? app.declared_value * 0.15 : 0; // standard mock duty calculate
+                    totalPending += amount;
+
+                    const invoiceNum = app.application_number ? `INV-${app.application_number.replace(/^\w+-/, '')}` : 'N/A';
+                    const dueDate = app.submitted_at ? new Date(new Date(app.submitted_at).getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString() : 'N/A';
+
+                    return `
+                        <div class="bg-white rounded-xl border border-yellow-200 p-5 shadow-sm">
+                            <div class="flex flex-wrap justify-between items-start gap-2">
+                                <div>
+                                    <h4 class="font-bold text-emerald-600">${app.application_number || 'N/A'}</h4>
+                                    <p class="text-sm text-gray-500">${app.application_type || 'Customs Declaration'} · ${traderName} · Invoice: ${invoiceNum}</p>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <span class="status-badge status-pending">Pending Payment</span>
+                                        <span class="text-xs text-gray-400">Due: ${dueDate}</span>
+                                        <span class="text-xs text-red-600 font-semibold">Amount: ${formatCurrency(amount)}</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <a href="payment.html?id=${app.id}" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Pay Now</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('summaryTotal').textContent = formatCurrency(totalPending);
+                document.getElementById('summaryThisWeek').textContent = formatCurrency(totalPending);
+            } catch (error) {
+                console.error('Error loading pending payments:', error);
+                document.getElementById('pendingPaymentsList').innerHTML = '<div class="text-center py-8 text-red-500 bg-white rounded-xl border border-gray-200">Error loading pending payments</div>';
+            }
+        }
+
+        function formatCurrency(val) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
+        }
+
+        function setupRealtimeSubscriptions() {
+            realtimeChannel = supabase
+                .channel('agent-pending-payments')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, async () => {
+                    await loadPendingPayments();
+                })
+                .subscribe();
+
+            window.addEventListener('beforeunload', () => {
+                if (realtimeChannel) {
+                    supabase.removeChannel(realtimeChannel);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1208 @@
+[
+  {
+    "file": "pages/admin/ai-configuration.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/application-management.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/audit-logs.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/admin/dashboard-admin.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/department-management.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/document-management.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/notification-management.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/payment-management.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/reports-analytics.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/service-management.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/system-settings.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/user-management-form-update.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/admin/user-management.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/ai-assessment.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/ai-validation.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/ai-verification.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/approved.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/cargo-release.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/cargo-released.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/certificate.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/clearance-documents.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/completed.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/create-assessment.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/create-declaration.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/customs-information.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/cvet-ready.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/dashboard-agent.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/agent/dashboard.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/agent/declarant-information.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/agent/documents.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/download-license.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/agent/draft.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/duty-assessment.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/duty-calculation.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/generate-license.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/agent/goods-information.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/license-issued.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/agent/new-license.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/overview.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/owner-information.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/payment-required.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/payment.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/pending-payment.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/quick-actions.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/recent-applications.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/recent-notifications.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/rejected.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/renewal.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/agent/replacement.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/agent/risk-assessment.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/search-vehicle.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/shipment-information.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/statistics.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/submitted.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/system-alerts.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/tax-information.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/tracking.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/under-review.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/upgrade.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/vehicle-information.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/verification-result.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/agent/verification.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/inspector/cargo-inspection.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/inspector/dashboard-inspector.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/inspector/inspection-details.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/inspector/inspection-queue.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/inspector/inspection-reports.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/inspector/notifications.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/inspector/vehicle-inspection.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/officer/agent-license-review.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/officer/cvet-review-queue.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/officer/dashboard-officer.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/officer/direct-assessment-queue.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/officer/inspection-requests.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/officer/notifications.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/officer/reports.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/officer/review-application.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/officer/risk-assessment-queue.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/revenue/dashboard-revenue.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/revenue/duty-verification.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/revenue/notifications.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/revenue/payment-verification.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/revenue/revenue-monitoring.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/revenue/tax-reports.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/supervisor/compliance-monitoring.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/supervisor/dashboard-supervisor.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/supervisor/escalated-cases.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/supervisor/final-approvals.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/supervisor/notifications.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/supervisor/reports.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/agent-information.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/ai-assessment.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/ai-validation.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/application-updates.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/approval-alerts.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/approved.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/cargo-release.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/certificate.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/clearance-documents.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/completed.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/create-assessment.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/create-declaration.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/customs-application.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/customs-information.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/dashboard-trader.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": false,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/trader/dashboard.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/declarant-information.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/declaration-details.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/declaration-statement.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/draft.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/duty-assessment.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/duty-calculation.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/goods-information.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/overview.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/parties-information.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/payment-alerts.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/payment.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/quick-actions.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/recent-applications.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/recent-notifications.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/rejected.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/search-vehicle.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/shipment-information.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/statistics.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/submitted.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/supporting-documents.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/system-alerts.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/tax-information.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/tracking.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/transport-information.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": false,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/under-review.html",
+    "isProtected": false,
+    "hasAuthImport": true,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/trader/vehicle-information.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": true
+  },
+  {
+    "file": "pages/trader/verification-result.html",
+    "isProtected": true,
+    "hasAuthImport": true,
+    "hasCheckAuth": true,
+    "hasSupabaseClient": true,
+    "isMockLogout": true,
+    "hasMockContent": false
+  },
+  {
+    "file": "pages/validation-results.html",
+    "isProtected": false,
+    "hasAuthImport": false,
+    "hasCheckAuth": false,
+    "hasSupabaseClient": false,
+    "isMockLogout": false,
+    "hasMockContent": false
+  }
+]

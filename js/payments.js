@@ -202,6 +202,41 @@ export async function processPayment(paymentId, paymentMethod, transactionDetail
 
             if (error) throw error;
 
+            // Log activity for successful payment
+            const payload = {
+                user_id: payment.user_id,
+                activity_type: 'payment_processed',
+                description: `Payment processed successfully: ${payment.amount} ${payment.currency}`,
+                metadata: JSON.stringify({
+                    payment_id: paymentId,
+                    application_id: payment.application_id,
+                    amount: payment.amount,
+                    payment_method: paymentMethod
+                }),
+                ip_address: null,
+                created_at: new Date().toISOString()
+            };
+
+            console.log("=== BEFORE ACTIVITY INSERT ===");
+            console.log(payload);
+
+            const { data: activityData, error: activityError } = await supabase
+                .from('activity_logs')
+                .insert(payload)
+                .select()
+                .single();
+
+            console.log("=== AFTER ACTIVITY INSERT ===");
+            console.log(activityData);
+            console.log(activityError);
+
+            if (activityError) {
+                console.error(activityError.code);
+                console.error(activityError.message);
+                console.error(activityError.details);
+                console.error(activityError.hint);
+            }
+
             console.log('Payment processed successfully:', data);
             return { success: true, data };
         } else {
@@ -218,6 +253,40 @@ export async function processPayment(paymentId, paymentMethod, transactionDetail
                 .single();
 
             if (error) throw error;
+
+            // Log activity for failed payment
+            const payload = {
+                user_id: payment.user_id,
+                activity_type: 'payment_failed',
+                description: 'Payment processing failed',
+                metadata: JSON.stringify({
+                    payment_id: paymentId,
+                    application_id: payment.application_id,
+                    amount: payment.amount
+                }),
+                ip_address: null,
+                created_at: new Date().toISOString()
+            };
+
+            console.log("=== BEFORE ACTIVITY INSERT ===");
+            console.log(payload);
+
+            const { data: activityData, error: activityError } = await supabase
+                .from('activity_logs')
+                .insert(payload)
+                .select()
+                .single();
+
+            console.log("=== AFTER ACTIVITY INSERT ===");
+            console.log(activityData);
+            console.log(activityError);
+
+            if (activityError) {
+                console.error(activityError.code);
+                console.error(activityError.message);
+                console.error(activityError.details);
+                console.error(activityError.hint);
+            }
 
             console.log('Payment processing failed:', data);
             return { success: false, error: 'Payment processing failed', data };

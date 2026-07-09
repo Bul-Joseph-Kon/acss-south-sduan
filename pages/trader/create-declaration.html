@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Create CVET Declaration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .step-card { transition: all 0.3s ease; cursor: pointer; background: white; border-radius: 0.75rem; padding: 1rem 1.25rem; border: 2px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+        .step-card:hover { border-color: #0a4d3e; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+        .step-card .step-icon { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; background: #ecfdf5; color: #0a4d3e; flex-shrink: 0; }
+        .step-card .step-title { font-weight: 600; font-size: 0.95rem; color: #1f2937; }
+        .step-card .step-desc { font-size: 0.8rem; color: #6b7280; }
+        .step-card .step-status { font-size: 0.6rem; font-weight: 600; padding: 0.15rem 0.6rem; border-radius: 9999px; }
+        .step-status-current { background: #dbeafe; color: #1e40af; }
+        .step-status-locked { background: #f3f4f6; color: #6b7280; }
+        .step-status-done { background: #d1fae5; color: #065f46; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Sidebar -->
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">📄 Create CVET Declaration</h2>
+                            <p class="opacity-90 text-sm">Complete the declaration workflow step by step</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+                            <span id="progressText">Step 1 of 9</span>
+                            <span id="progressPercent">11% Complete</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:11%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Steps -->
+                    <div class="space-y-3" id="stepsContainer">
+                        <div class="text-center py-8 text-gray-500">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-2"></div>
+                            Loading workflow...
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        import { getWorkflow, initializeWorkflowFromURL } from '../../js/cvet-workflow-manager.js';
+        
+        import { signOut } from '../../js/auth.js';
+        
+        import { checkPageAuth } from '../../js/auth-check.js';
+        
+        import { getUnreadCount } from '../../js/notifications.js';
+        
+        import toastManager from '../../js/toast.js';
+
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Check authentication
+        await checkPageAuth('trader');
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Sign out handler
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await signOut();
+                if (result.success) {
+                    toastManager.success('Signed out successfully');
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        // Initialize workflow
+        async function initWorkflow() {
+            const state = await initializeWorkflowFromURL();
+            renderSteps(state);
+            updateProgress(state);
+        }
+
+        function renderSteps(state) {
+            const container = document.getElementById('stepsContainer');
+            const steps = getWorkflow().getAllSteps();
+            const currentStep = state.currentStep;
+
+            container.innerHTML = steps.map(step => {
+                const stepStatus = getWorkflow().getStepStatus(step.id);
+                const statusClass = stepStatus === 'current' ? 'step-status-current' : 
+                                   stepStatus === 'done' ? 'step-status-done' : 'step-status-locked';
+                const statusText = stepStatus === 'current' ? 'In Progress' : 
+                                  stepStatus === 'done' ? 'Done' : 'Locked';
+                const iconMap = {
+                    1: 'ri-file-list-3-line',
+                    2: 'ri-user-2-line',
+                    3: 'ri-building-line',
+                    4: 'ri-ship-2-line',
+                    5: 'ri-package-line',
+                    6: 'ri-truck-line',
+                    7: 'ri-attachment-line',
+                    8: 'ri-robot-line',
+                    9: 'ri-fileText-line'
+                };
+
+                return `
+                    <a href="${step.page}${state.applicationId ? '?id=' + state.applicationId : ''}" class="step-card">
+                        <div class="flex items-center gap-3">
+                            <div class="step-icon"><i class="${iconMap[step.id]}"></i></div>
+                            <div>
+                                <div class="step-title">Step ${step.id}: ${step.name}</div>
+                                <div class="step-desc">${step.fields.slice(0, 3).join(', ')}</div>
+                            </div>
+                        </div>
+                        <span class="step-status ${statusClass}">${statusText}</span>
+                    </a>
+                `;
+            }).join('');
+        }
+
+        function updateProgress(state) {
+            const progress = state.progress || Math.round((state.currentStep / 9) * 100);
+            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 9`;
+            document.getElementById('progressPercent').textContent = `${progress}% Complete`;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        // Initialize
+        initWorkflow();
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

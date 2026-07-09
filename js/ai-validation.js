@@ -31,6 +31,39 @@ export async function comprehensiveApplicationValidation(applicationId) {
         if (fetchError) throw fetchError;
         if (!application) throw new Error('Application not found');
 
+        // Log activity for AI validation start
+        const payload = {
+            user_id: application.user_id,
+            activity_type: 'ai_validation_started',
+            description: 'AI validation started for application',
+            metadata: JSON.stringify({
+                application_id: applicationId,
+                application_number: application.application_number
+            }),
+            ip_address: null,
+            created_at: new Date().toISOString()
+        };
+
+        console.log("=== BEFORE ACTIVITY INSERT ===");
+        console.log(payload);
+
+        const { data: activityData, error: activityError } = await supabase
+            .from('activity_logs')
+            .insert(payload)
+            .select()
+            .single();
+
+        console.log("=== AFTER ACTIVITY INSERT ===");
+        console.log(activityData);
+        console.log(activityError);
+
+        if (activityError) {
+            console.error(activityError.code);
+            console.error(activityError.message);
+            console.error(activityError.details);
+            console.error(activityError.hint);
+        }
+
         const validationResults = {
             applicationId: applicationId,
             applicationNumber: application.application_number,

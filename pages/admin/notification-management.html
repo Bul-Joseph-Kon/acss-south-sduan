@@ -24,9 +24,8 @@
         .notif-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; transition: all 0.2s ease; }
         .notif-card:hover { border-color: #1e3a5f; background: #f8fafc; }
         .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
-        .status-sent { background: #d1fae5; color: #065f46; }
-        .status-draft { background: #f3f4f6; color: #4b5563; }
-        .status-scheduled { background: #fef3c7; color: #92400e; }
+        .status-unread { background: #fee2e2; color: #991b1b; }
+        .status-read { background: #d1fae5; color: #065f46; }
     </style>
 </head>
 <body>
@@ -39,8 +38,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Administrator</h3>
-                            <p class="text-gray-500 text-sm">System Admin</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -57,7 +56,7 @@
                             <a href="ai-configuration.html" class="sidebar-link"><i class="ri-robot-line"></i><span>AI Configuration</span></a>
                             <a href="system-settings.html" class="sidebar-link"><i class="ri-settings-3-line"></i><span>System Settings</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -67,7 +66,7 @@
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
                             <h2 class="text-2xl font-bold tracking-tight">🔔 Notification Management</h2>
-                            <p class="opacity-90 text-sm">Manage system notifications and alerts</p>
+                            <p class="opacity-90 text-sm" id="unreadCounter">Unread notifications: Loading...</p>
                         </div>
                         <div class="relative">
                             <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
@@ -76,74 +75,22 @@
                                 <i class="ri-arrow-down-s-line text-sm"></i>
                             </button>
                             <div class="profile-dropdown" id="profileDropdown">
-                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
-                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <a href="profile.html"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="profile.html?edit=true"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-2" onclick="alert('➕ Creating new notification')">
-                            <i class="ri-add-line"></i> New Notification
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex gap-3">
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="markAllNotificationsAsRead()">
+                            Mark All Read
                         </button>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="notif-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold">System Update</h4>
-                                    <p class="text-sm text-gray-500">System maintenance scheduled for June 25, 2026</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-sent">✓ Sent</span>
-                                        <span class="text-xs text-gray-400">Sent: Jun 22, 2026</span>
-                                        <span class="text-xs text-gray-400">Recipients: All Users</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing notification')">Edit</button>
-                                    <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="alert('🗑️ Deleting notification')">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notif-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold">New Service Launch</h4>
-                                    <p class="text-sm text-gray-500">Direct Assessment service launched</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-scheduled">⏳ Scheduled</span>
-                                        <span class="text-xs text-gray-400">Scheduled: Jun 25, 2026</span>
-                                        <span class="text-xs text-gray-400">Recipients: Traders, Agents</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing notification')">Edit</button>
-                                    <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="alert('🗑️ Deleting notification')">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notif-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold">License Renewal Reminder</h4>
-                                    <p class="text-sm text-gray-500">Agent license renewal reminder</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-draft">📝 Draft</span>
-                                        <span class="text-xs text-gray-400">Created: Jun 21, 2026</span>
-                                        <span class="text-xs text-gray-400">Recipients: Agents</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing notification')">Edit</button>
-                                    <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="alert('🗑️ Deleting notification')">Delete</button>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="space-y-3" id="notificationsList">
+                        <!-- Notifications will be loaded dynamically -->
                     </div>
                 </main>
             </div>
@@ -158,50 +105,62 @@
     </script>
     <script type="module">
         import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
-        import { fetchTable } from '../../js/database.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import supabase from '../../js/supabase.js';
 
-        let currentPage = 1;
-        let notificationsPerPage = 10;
         let allNotifications = [];
+        let realtimeChannel = null;
 
         async function loadPage() {
             const isAuthenticated = await checkAuth();
+
+            const { user, profile } = await loadCurrentUserProfile();
             if (!isAuthenticated) {
                 window.location.href = '../../auth/login.html';
                 return;
             }
 
-            const hasAccess = await verifyRoleAccess('administrator');
+            const hasAccess = await verifyRoleAccess('admin');
             if (!hasAccess) {
                 alert('You do not have permission to access this page.');
                 window.location.href = '../../auth/login.html';
                 return;
             }
 
-            const user = await getCurrentUser();
-            const profile = user ? await getUserProfile(user.id) : null;
-            
             if (profile) {
-                document.querySelector('h3').textContent = profile.full_name || 'Administrator';
-                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'System Admin';
+                const nameElem = document.getElementById('profileName');
+                if (nameElem) nameElem.textContent = profile.full_name || 'Administrator';
+                const roleElem = document.getElementById('profileRole');
+                if (roleElem) roleElem.textContent = profile.role || 'System Admin';
             }
 
             await loadNotifications();
+            setupRealtime();
         }
 
         async function loadNotifications() {
-            const result = await fetchTable('notifications', { orderBy: { column: 'created_at', ascending: false }, limit: 100 });
-            if (result.success) {
-                allNotifications = result.data;
+            try {
+                const { data, error } = await supabase
+                    .from('notifications')
+                    .select('*, profiles!notifications_user_id_fkey(full_name, email)')
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                if (error) throw error;
+                allNotifications = data || [];
                 renderNotifications();
-            } else {
-                console.error('Error loading notifications:', result.error);
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                document.getElementById('notificationsList').innerHTML = '<div class="text-center py-8 text-red-500">Error loading notifications: ' + error.message + '</div>';
             }
         }
 
         function renderNotifications() {
-            const container = document.querySelector('.space-y-3');
+            const container = document.getElementById('notificationsList');
             if (!container) return;
+
+            const unreadCount = allNotifications.filter(n => !n.read).length;
+            document.getElementById('unreadCounter').textContent = `Unread notifications: ${unreadCount}`;
 
             if (allNotifications.length === 0) {
                 container.innerHTML = '<div class="text-center py-8 text-gray-500">No notifications found</div>';
@@ -210,25 +169,27 @@
 
             let html = '';
             allNotifications.forEach(notif => {
-                const statusClass = notif.status === 'sent' ? 'status-sent' : (notif.status === 'scheduled' ? 'status-scheduled' : 'status-draft');
-                const statusIcon = notif.status === 'sent' ? '✓' : (notif.status === 'scheduled' ? '⏳' : '📝');
-                const statusText = notif.status || 'Unknown';
+                const statusClass = notif.read ? 'status-read' : 'status-unread';
+                const statusText = notif.read ? '✓ Read' : '✉ Unread';
+                const recipientName = notif.profiles?.full_name || notif.profiles?.email || 'System / All';
 
                 html += `
-                    <div class="notif-card">
+                    <div class="notif-card bg-white p-4 rounded-xl border border-gray-200">
                         <div class="flex flex-wrap justify-between items-start gap-2">
                             <div>
-                                <h4 class="font-bold">${notif.title || 'Notification'}</h4>
-                                <p class="text-sm text-gray-500">${notif.message || 'No message'}</p>
-                                <div class="flex items-center gap-4 mt-2">
-                                    <span class="status-badge ${statusClass}">${statusIcon} ${statusText}</span>
-                                    <span class="text-xs text-gray-400">Created: ${new Date(notif.created_at).toLocaleDateString()}</span>
-                                    <span class="text-xs text-gray-400">Recipients: ${notif.recipient_type || 'All Users'}</span>
+                                <h4 class="font-bold text-gray-800">${notif.title || 'Notification'}</h4>
+                                <p class="text-sm text-gray-600 mt-1">${notif.message || 'No message'}</p>
+                                <div class="flex flex-wrap items-center gap-4 mt-2 text-xs text-gray-500">
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
+                                    <span>Recipient: <strong>${recipientName}</strong></span>
+                                    <span>Ref Type: ${notif.reference_type || 'N/A'}</span>
+                                    <span>Ref ID: ${notif.reference_id || 'N/A'}</span>
+                                    <span>Created: ${new Date(notif.created_at).toLocaleString()}</span>
                                 </div>
                             </div>
                             <div class="flex gap-2">
-                                <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editNotification('${notif.id}')">Edit</button>
-                                <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteNotification('${notif.id}')">Delete</button>
+                                ${!notif.read ? `<button class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green-700 transition" onclick="markAsRead('${notif.id}')">Mark Read</button>` : ''}
+                                <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-xs hover:bg-red-50 transition" onclick="deleteNotification('${notif.id}')">Delete</button>
                             </div>
                         </div>
                     </div>
@@ -238,26 +199,77 @@
             container.innerHTML = html;
         }
 
-        window.editNotification = function(id) {
-            alert('Edit notification - ID: ' + id);
+        window.markAsRead = async function(id) {
+            try {
+                const { error } = await supabase
+                    .from('notifications')
+                    .update({ read: true, read_at: new Date().toISOString() })
+                    .eq('id', id);
+
+                if (error) throw error;
+                await loadNotifications();
+            } catch (error) {
+                alert('Error marking read: ' + error.message);
+            }
         };
 
-        window.deleteNotification = function(id) {
-            alert('Delete notification - ID: ' + id);
+        window.markAllNotificationsAsRead = async function() {
+            try {
+                const { error } = await supabase
+                    .from('notifications')
+                    .update({ read: true, read_at: new Date().toISOString() })
+                    .eq('read', false);
+
+                if (error) throw error;
+                await loadNotifications();
+            } catch (error) {
+                alert('Error marking all read: ' + error.message);
+            }
         };
+
+        window.deleteNotification = async function(id) {
+            if (!confirm('Are you sure you want to delete this notification?')) return;
+            try {
+                const { error } = await supabase
+                    .from('notifications')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+                await loadNotifications();
+            } catch (error) {
+                alert('Error deleting notification: ' + error.message);
+            }
+        };
+
+        function setupRealtime() {
+            realtimeChannel = supabase.channel('realtime-notifications')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
+                    loadNotifications();
+                })
+                .subscribe();
+        }
+
+        // Cleanup on unload
+        window.addEventListener('unload', () => {
+            if (realtimeChannel) {
+                supabase.removeChannel(realtimeChannel);
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', loadPage);
 
         // Sign out functionality
-        const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
-        if (signOutBtn) {
-            signOutBtn.onclick = async function() {
-                const result = await signOut();
-                if (result.success) {
-                    window.location.href = '../../auth/login.html';
-                }
-            };
-        }
+        const handleLogout = async (e) => {
+            if (e) e.preventDefault();
+            const result = await signOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            }
+        };
+
+        document.getElementById('signOutBtn').addEventListener('click', handleLogout);
+        document.getElementById('dropdownSignOut').addEventListener('click', handleLogout);
     </script>
 </body>
 </html>

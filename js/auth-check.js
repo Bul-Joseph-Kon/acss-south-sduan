@@ -5,8 +5,11 @@
 // for all sub-pages across the application
 // ================================================================
 
-import { checkAuth, verifyRoleAccess, redirectToDashboard, getCurrentUser, getUserProfile } from './auth.js';
+import { checkAuth, verifyRoleAccess, redirectToDashboard, signOut } from './auth.js';
 import supabase from './supabase.js';
+import { getProfile, getCurrentUser } from './profile-store.js';
+
+export { signOut };
 
 // ================================================================
 // PAGE AUTHENTICATION CHECK
@@ -43,7 +46,7 @@ export async function checkPageAuth(requiredRole) {
     const user = sessionData.session.user;
     console.log('User ID from session:', user.id);
 
-    const profile = await getUserProfile(user.id);
+    const profile = await getProfile();
     console.log('=== PROFILE FROM DATABASE ===');
     console.log('Profile:', profile);
     console.log('Profile role:', profile?.role);
@@ -96,13 +99,13 @@ export async function loadUserProfile() {
     const user = await getCurrentUser();
     if (!user) return null;
 
-    const profile = await getUserProfile(user.id);
+    const profile = await getProfile();
     return profile;
 }
 
 async function updatePageProfileUI(requiredRole) {
     const user = await getCurrentUser();
-    const profile = user ? await getUserProfile(user.id) : null;
+    const profile = user ? await getProfile() : null;
     const displayName = profile?.full_name || localStorage.getItem('userName') || user?.email || 'User';
     const displayRole = formatRole(profile?.role || localStorage.getItem('userRole') || requiredRole);
 

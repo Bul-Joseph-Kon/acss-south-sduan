@@ -28,6 +28,7 @@
         .status-pending { background: #fef3c7; color: #92400e; }
         .status-failed { background: #fee2e2; color: #991b1b; }
         .status-refunded { background: #dbeafe; color: #1e40af; }
+        .stat-card { background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; }
     </style>
 </head>
 <body>
@@ -40,8 +41,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Administrator</h3>
-                            <p class="text-gray-500 text-sm">System Admin</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -58,7 +59,7 @@
                             <a href="ai-configuration.html" class="sidebar-link"><i class="ri-robot-line"></i><span>AI Configuration</span></a>
                             <a href="system-settings.html" class="sidebar-link"><i class="ri-settings-3-line"></i><span>System Settings</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -77,94 +78,55 @@
                                 <i class="ri-arrow-down-s-line text-sm"></i>
                             </button>
                             <div class="profile-dropdown" id="profileDropdown">
-                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
-                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <a href="profile.html"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="profile.html?edit=true"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div class="stat-card">
+                            <p class="text-xs text-gray-500">Total Revenue</p>
+                            <p class="text-xl font-bold text-gray-800" id="totalRevenue">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-xs text-gray-500">Today's Revenue</p>
+                            <p class="text-xl font-bold text-green-600" id="todayRevenue">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-xs text-gray-500">Pending</p>
+                            <p class="text-xl font-bold text-yellow-600" id="pendingPayments">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-xs text-gray-500">Successful</p>
+                            <p class="text-xl font-bold text-green-600" id="successfulPayments">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-xs text-gray-500">Failed</p>
+                            <p class="text-xl font-bold text-red-600" id="failedPayments">Loading...</p>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex flex-wrap gap-3">
-                            <select class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                                <option>All Status</option>
-                                <option>Completed</option>
-                                <option>Pending</option>
-                                <option>Failed</option>
-                                <option>Refunded</option>
+                            <select id="statusFilter" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                                <option value="">All Status</option>
+                                <option value="completed">Completed</option>
+                                <option value="pending">Pending</option>
+                                <option value="failed">Failed</option>
+                                <option value="refunded">Refunded</option>
                             </select>
-                            <input type="date" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" />
-                            <input type="date" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" />
-                            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Filter</button>
-                            <button class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition">Clear</button>
+                            <input type="date" id="dateFrom" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" />
+                            <input type="date" id="dateTo" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" />
+                            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="applyFilters()">Filter</button>
+                            <button class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition" onclick="clearFilters()">Clear</button>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="payment-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold">PAY-2026-0042</h4>
-                                    <p class="text-sm text-gray-500">John Trading Co. · CV-2026-0042 · $7,850</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-completed">✓ Completed</span>
-                                        <span class="text-xs text-gray-400">Date: Jun 22, 2026</span>
-                                        <span class="text-xs text-gray-400">Method: Mobile Money</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('📄 Viewing payment')">View</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('🧾 Downloading receipt')">Receipt</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="payment-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold">PAY-2026-0038</h4>
-                                    <p class="text-sm text-gray-500">Sarah Exporters · DA-2026-0018 · $15,650</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-pending">⏳ Pending</span>
-                                        <span class="text-xs text-gray-400">Date: Jun 20, 2026</span>
-                                        <span class="text-xs text-gray-400">Method: Bank Transfer</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('📄 Viewing payment')">View</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📩 Sending reminder')">Remind</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="payment-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold">PAY-2026-0035</h4>
-                                    <p class="text-sm text-gray-500">Peter Imports · CV-2026-0040 · $2,580</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-failed">✗ Failed</span>
-                                        <span class="text-xs text-gray-400">Date: Jun 18, 2026</span>
-                                        <span class="text-xs text-gray-400">Method: Cash</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('📄 Viewing payment')">View</button>
-                                    <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="alert('🔄 Retrying payment')">Retry</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                        <span class="text-sm text-gray-500">Showing 1-3 of 42 payments</span>
-                        <div class="flex gap-2">
-                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">Previous</button>
-                            <button class="px-3 py-1 border rounded-lg text-sm bg-blue-600 text-white">1</button>
-                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">2</button>
-                            <button class="px-3 py-1 border rounded-lg text-sm hover:bg-gray-50">Next</button>
-                        </div>
+                    <div class="space-y-3" id="paymentsList">
+                        <!-- Payments will be loaded dynamically -->
                     </div>
                 </main>
             </div>
@@ -179,49 +141,59 @@
     </script>
     <script type="module">
         import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
-        import { fetchTable } from '../../js/database.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import supabase from '../../js/supabase.js';
 
-        let currentPage = 1;
-        let paymentsPerPage = 10;
         let allPayments = [];
+        let realtimeChannel = null;
 
         async function loadPage() {
             const isAuthenticated = await checkAuth();
+            const hasAccess = await verifyRoleAccess('administrator');
+
+            const { user, profile } = await loadCurrentUserProfile();
             if (!isAuthenticated) {
                 window.location.href = '../../auth/login.html';
                 return;
             }
 
-            const hasAccess = await verifyRoleAccess('administrator');
             if (!hasAccess) {
                 alert('You do not have permission to access this page.');
                 window.location.href = '../../auth/login.html';
                 return;
             }
 
-            const user = await getCurrentUser();
-            const profile = user ? await getUserProfile(user.id) : null;
-            
             if (profile) {
-                document.querySelector('h3').textContent = profile.full_name || 'Administrator';
-                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'System Admin';
+                const nameElem = document.getElementById('profileName');
+                if (nameElem) nameElem.textContent = profile.full_name || 'Administrator';
+                const roleElem = document.getElementById('profileRole');
+                if (roleElem) roleElem.textContent = profile.role || 'System Admin';
             }
 
             await loadPayments();
+            setupRealtime();
         }
 
         async function loadPayments() {
-            const result = await fetchTable('payments', { orderBy: { column: 'created_at', ascending: false }, limit: 100 });
-            if (result.success) {
-                allPayments = result.data;
+            try {
+                const { data, error } = await supabase
+                    .from('payments')
+                    .select(`*, applications(application_number), profiles!payments_user_id_fkey(full_name, email)`)
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+
+                if (error) throw error;
+                allPayments = data || [];
                 renderPayments();
-            } else {
-                console.error('Error loading payments:', result.error);
+                updateStatistics();
+            } catch (error) {
+                console.error('Error loading payments:', error);
+                document.getElementById('paymentsList').innerHTML = '<div class="text-center py-8 text-red-500">Error loading payments: ' + error.message + '</div>';
             }
         }
 
         function renderPayments() {
-            const container = document.querySelector('.space-y-3');
+            const container = document.getElementById('paymentsList');
             if (!container) return;
 
             if (allPayments.length === 0) {
@@ -234,13 +206,15 @@
                 const statusClass = payment.status === 'completed' ? 'status-completed' : (payment.status === 'pending' ? 'status-pending' : (payment.status === 'failed' ? 'status-failed' : 'status-refunded'));
                 const statusIcon = payment.status === 'completed' ? '✓' : (payment.status === 'pending' ? '⏳' : (payment.status === 'failed' ? '✗' : '↩'));
                 const statusText = payment.status || 'Unknown';
+                const appName = payment.applications?.application_number || 'N/A';
+                const payerName = payment.profiles?.full_name || payment.profiles?.email || 'Unknown';
 
                 html += `
                     <div class="payment-card">
                         <div class="flex flex-wrap justify-between items-start gap-2">
                             <div>
                                 <h4 class="font-bold">${payment.payment_number || 'PAY-XXXX'}</h4>
-                                <p class="text-sm text-gray-500">${payment.payer_name || 'Unknown'} · ${payment.application_id || 'N/A'} · $${payment.amount || 0}</p>
+                                <p class="text-sm text-gray-500">${payerName} · ${appName} · ${payment.currency || 'SSP'} ${payment.amount || 0}</p>
                                 <div class="flex items-center gap-4 mt-2">
                                     <span class="status-badge ${statusClass}">${statusIcon} ${statusText}</span>
                                     <span class="text-xs text-gray-400">Date: ${new Date(payment.created_at).toLocaleDateString()}</span>
@@ -249,7 +223,7 @@
                             </div>
                             <div class="flex gap-2">
                                 <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="viewPayment('${payment.id}')">View</button>
-                                <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="downloadReceipt('${payment.id}')">Receipt</button>
+                                ${payment.status === 'completed' ? `<button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="downloadReceipt('${payment.id}')">Receipt</button>` : ''}
                             </div>
                         </div>
                     </div>
@@ -259,26 +233,103 @@
             container.innerHTML = html;
         }
 
-        window.viewPayment = function(id) {
-            alert('View payment - ID: ' + id);
+        function updateStatistics() {
+            const totalRevenue = allPayments
+                .filter(p => p.status === 'completed')
+                .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+            
+            const today = new Date().toISOString().split('T')[0];
+            const todayRevenue = allPayments
+                .filter(p => p.status === 'completed' && p.created_at.startsWith(today))
+                .reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+
+            const pendingCount = allPayments.filter(p => p.status === 'pending').length;
+            const successfulCount = allPayments.filter(p => p.status === 'completed').length;
+            const failedCount = allPayments.filter(p => p.status === 'failed').length;
+
+            document.getElementById('totalRevenue').textContent = `SSP ${totalRevenue.toLocaleString()}`;
+            document.getElementById('todayRevenue').textContent = `SSP ${todayRevenue.toLocaleString()}`;
+            document.getElementById('pendingPayments').textContent = pendingCount;
+            document.getElementById('successfulPayments').textContent = successfulCount;
+            document.getElementById('failedPayments').textContent = failedCount;
+        }
+
+        function setupRealtime() {
+            realtimeChannel = supabase.channel('realtime-payments')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, () => {
+                    loadPayments();
+                })
+                .subscribe();
+        }
+
+        // Cleanup on unload
+        window.addEventListener('unload', () => {
+            if (realtimeChannel) {
+                supabase.removeChannel(realtimeChannel);
+            }
+        });
+
+        window.viewPayment = async function(id) {
+            try {
+                const payment = allPayments.find(p => p.id === id);
+                alert(`Payment Details:\n\nNumber: ${payment.payment_number}\nAmount: ${payment.currency} ${payment.amount}\nStatus: ${payment.status}\nMethod: ${payment.payment_method}\nTransaction ID: ${payment.transaction_id || 'N/A'}`);
+            } catch (error) {
+                alert('Error viewing payment: ' + error.message);
+            }
         };
 
-        window.downloadReceipt = function(id) {
-            alert('Download receipt - ID: ' + id);
+        window.downloadReceipt = async function(id) {
+            try {
+                const payment = allPayments.find(p => p.id === id);
+                alert(`Receipt for Payment ${payment.payment_number}\n\nAmount: ${payment.currency} ${payment.amount}\nReceipt Number: ${payment.receipt_number || 'N/A'}\nPaid At: ${payment.paid_at ? new Date(payment.paid_at).toLocaleString() : 'N/A'}`);
+            } catch (error) {
+                alert('Error downloading receipt: ' + error.message);
+            }
+        };
+
+        window.applyFilters = function() {
+            const status = document.getElementById('statusFilter').value;
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+
+            let filtered = allPayments;
+
+            if (status) {
+                filtered = filtered.filter(p => p.status === status);
+            }
+
+            if (dateFrom) {
+                filtered = filtered.filter(p => p.created_at >= dateFrom);
+            }
+
+            if (dateTo) {
+                filtered = filtered.filter(p => p.created_at <= dateTo + 'T23:59:59');
+            }
+
+            allPayments = filtered;
+            renderPayments();
+        };
+
+        window.clearFilters = function() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('dateFrom').value = '';
+            document.getElementById('dateTo').value = '';
+            loadPayments();
         };
 
         document.addEventListener('DOMContentLoaded', loadPage);
 
         // Sign out functionality
-        const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
-        if (signOutBtn) {
-            signOutBtn.onclick = async function() {
-                const result = await signOut();
-                if (result.success) {
-                    window.location.href = '../../auth/login.html';
-                }
-            };
-        }
+        const handleLogout = async (e) => {
+            if (e) e.preventDefault();
+            const result = await signOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            }
+        };
+
+        document.getElementById('signOutBtn').addEventListener('click', handleLogout);
+        document.getElementById('dropdownSignOut').addEventListener('click', handleLogout);
     </script>
 </body>
 </html>

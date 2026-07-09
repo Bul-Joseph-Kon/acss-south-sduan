@@ -42,8 +42,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Supervisor</h3>
-                            <p class="text-gray-500 text-sm">Supervisor</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -81,89 +81,206 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm" id="escalationSummary">
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">3 escalated cases requiring attention</span>
-                            <span class="text-sm text-red-600">⚠️ Action required</span>
+                            <span class="text-sm text-gray-500">Loading escalated cases...</span>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="escalated-card high">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-red-600">CV-2026-0040</h4>
-                                    <p class="text-sm text-gray-500">Peter Imports · Textiles · $8,000</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-rejected">Escalated</span>
-                                        <span class="text-xs text-gray-400">Escalated: Jun 20, 2026</span>
-                                        <span class="text-xs text-gray-400">Priority: High</span>
-                                    </div>
-                                    <div class="mt-2 p-2 bg-red-50 rounded-lg text-sm">
-                                        <p class="text-red-700">⚠️ Duty discrepancy, missing documentation, classification error</p>
-                                        <p class="text-xs text-gray-500 mt-1">Escalated by: Officer Peter · Reason: Complex case requiring supervisor review</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-red-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition" onclick="alert('🔍 Reviewing escalated case')">Review Case</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing details')">Details</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="escalated-card medium">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-yellow-600">DA-2026-0018</h4>
-                                    <p class="text-sm text-gray-500">Sarah Exporters · Machinery · $50,000</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-review">Escalated</span>
-                                        <span class="text-xs text-gray-400">Escalated: Jun 19, 2026</span>
-                                        <span class="text-xs text-gray-400">Priority: Medium</span>
-                                    </div>
-                                    <div class="mt-2 p-2 bg-yellow-50 rounded-lg text-sm">
-                                        <p class="text-yellow-700">⚠️ Discrepancy in customs valuation</p>
-                                        <p class="text-xs text-gray-500 mt-1">Escalated by: Officer Sarah · Reason: Valuation dispute</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-yellow-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition" onclick="alert('🔍 Reviewing escalated case')">Review Case</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing details')">Details</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="escalated-card medium">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-yellow-600">LIC-2026-0010</h4>
-                                    <p class="text-sm text-gray-500">Peter Imports · License Upgrade</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-review">Escalated</span>
-                                        <span class="text-xs text-gray-400">Escalated: Jun 18, 2026</span>
-                                        <span class="text-xs text-gray-400">Priority: Medium</span>
-                                    </div>
-                                    <div class="mt-2 p-2 bg-yellow-50 rounded-lg text-sm">
-                                        <p class="text-yellow-700">⚠️ Incomplete verification documents</p>
-                                        <p class="text-xs text-gray-500 mt-1">Escalated by: Officer Michael · Reason: Missing verification</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-yellow-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition" onclick="alert('🔍 Reviewing escalated case')">Review Case</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing details')">Details</button>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="space-y-3" id="escalatedList">
+                        <div class="text-sm text-gray-500 text-center py-8">Loading escalated cases...</div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
+        import { subscribeToEscalatedCases, unsubscribeFromEscalatedCases } from '../../js/escalation-service.js';
+
+
+        const PAGE_KEY = 'escalated-cases';
+        let currentRole = null;
+        let currentUserId = null;
+        let escalationChannel = null;
+
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profileDropdown')) {
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+
+        async function init() {
+            console.log('=== LOADING ESCALATED CASES ===');
+
+            const isAuthenticated = await checkAuth();
+
+        // Load user profile
+        await loadCurrentUserProfile();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const hasAccess = await verifyRoleAccess('supervisor');
+            if (!hasAccess) {
+                
+                if (user) {
+                    
+                    if (profile && profile.role) {
+                        const dashboardUrl = redirectToDashboard(profile.role);
+                        window.location.href = dashboardUrl;
+                        return;
+                    }
+                }
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            
+            
+
+            if (profile) {
+                document.querySelector('h3').textContent = profile.full_name || 'Supervisor';
+                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Supervisor';
+                currentRole = profile.role || 'supervisor';
+                currentUserId = profile.id;
+            } else {
+                currentRole = 'supervisor';
+                currentUserId = user?.id;
+            }
+
+            await loadEscalatedCases();
+
+            // Subscribe to Realtime updates for escalated cases
+            escalationChannel = subscribeToEscalatedCases((payload) => {
+                console.log('Realtime escalation update:', payload);
+                // Reload the list when changes occur
+                loadEscalatedCases();
+            });
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (escalationChannel) {
+                unsubscribeFromEscalatedCases(escalationChannel);
+            }
+        });
+
+        async function loadEscalatedCases() {
+            console.log('=== LOADING ESCALATED CASES ===');
+
+            try {
+                const { data: escalatedCases, error } = await supabase
+                    .from('escalated_cases')
+                    .select(`
+                        *,
+                        applications (*)
+                    `)
+                    .in('status', ['open', 'in_progress'])
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+
+                if (error) throw error;
+
+                const applications = escalatedCases.map(ec => ({
+                    ...ec.applications,
+                    escalated_case_id: ec.id,
+                    escalation_reason: ec.reason,
+                    priority: ec.priority,
+                    escalated_at: ec.created_at,
+                    escalation_status: ec.status,
+                    resolution: ec.resolution,
+                    resolved_at: ec.resolved_at,
+                    notes: ec.notes
+                }));
+
+                console.log('Escalated cases loaded:', applications);
+                renderEscalatedList(applications);
+            } catch (error) {
+                console.error('Failed to load escalated cases:', error);
+                document.getElementById('escalatedList').innerHTML = `
+                    <div class="text-sm text-red-500 text-center py-8">
+                        Failed to load escalated cases: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function renderEscalatedList(applications) {
+            const container = document.getElementById('escalatedList');
+            const summaryContainer = document.getElementById('escalationSummary');
+
+            if (!applications || applications.length === 0) {
+                container.innerHTML = `
+                    <div class="text-sm text-gray-500 text-center py-8">
+                        No escalated cases
+                    </div>
+                `;
+                summaryContainer.innerHTML = '<span class="text-sm text-gray-500">0 escalated cases</span>';
+                return;
+            }
+
+            const highPriority = applications.filter(app => app.priority === 'high').length;
+            const mediumPriority = applications.filter(app => app.priority === 'medium').length;
+
+            summaryContainer.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span class="text-sm text-gray-500">${applications.length} escalated cases requiring attention</span>
+                    ${highPriority > 0 ? '<span class="text-sm text-red-600">⚠️ Action required</span>' : ''}
+                </div>
+            `;
+
+            container.innerHTML = applications.map(app => {
+                const priority = app.priority || 'medium';
+                const priorityClass = priority === 'high' ? 'high' : 'medium';
+                const priorityColor = priority === 'high' ? 'red' : 'yellow';
+                const escalationReason = app.escalation_reason || 'No escalation reason provided';
+
+                return `
+                    <div class="escalated-card ${priorityClass}">
+                        <div class="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-bold text-${priorityColor}-600">${app.application_number || 'N/A'}</h4>
+                                <p class="text-sm text-gray-500">${app.applicant_name || app.company_name || 'Unknown'} · ${app.goods_description || app.vehicle_description || 'N/A'} · ${formatCurrency(app.declared_value)}</p>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="status-badge status-review">Escalated</span>
+                                    <span class="text-xs text-gray-400">Escalated: ${formatDate(app.escalated_at || app.updated_at)}</span>
+                                    <span class="text-xs text-gray-400">Priority: ${priority.charAt(0).toUpperCase() + priority.slice(1)}</span>
+                                </div>
+                                <div class="mt-2 p-2 bg-${priority === 'high' ? 'red' : 'yellow'}-50 rounded-lg text-sm">
+                                    <p class="text-${priority === 'high' ? 'red' : 'yellow'}-700">⚠️ ${escalationReason}</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="../officer/review-application.html?id=${app.id}" class="bg-${priority === 'high' ? 'red' : 'yellow'}-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-${priority === 'high' ? 'red' : 'yellow'}-700 transition">Review Case</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatCurrency(value) {
+            if (!value) return '$0';
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        init();
     </script>
 </body></html>
+
+
+
+

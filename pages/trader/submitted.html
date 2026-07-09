@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Submitted Applications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%);
+        }
+
+        .sidebar-link {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background-color: #ecfdf5;
+            color: #0a4d3e;
+        }
+
+        .sidebar-link i {
+            font-size: 1.2rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .status-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-review {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem);
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            min-width: 200px;
+            z-index: 50;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .profile-dropdown.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .profile-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            color: #374151;
+            transition: background 0.15s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .profile-dropdown a:hover {
+            background: #ecfdf5;
+            color: #0a4d3e;
+        }
+
+        .profile-dropdown .divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+
+        .profile-dropdown .danger {
+            color: #dc2626;
+        }
+
+        .profile-dropdown .danger:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .header-profile-btn {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.75rem 0.3rem 0.5rem;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.2);
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-profile-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .header-profile-btn .avatar-sm {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a4d3e;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.75rem;
+            top: 0.25rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #e5e7eb;
+            border: 2px solid white;
+        }
+
+        .timeline-item.completed::before {
+            background: #10b981;
+        }
+
+        .timeline-item.in-progress::before {
+            background: #3b82f6;
+        }
+
+        .timeline-item.pending::before {
+            background: #d1d5db;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1rem;
+            max-width: 2xl;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">📤 Submitted Applications</h2>
+                            <p class="opacity-90 text-sm">Track your submitted applications</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')"
+                                class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign
+                                    Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex flex-wrap gap-3">
+                            <select id="filterService"
+                                class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
+                                <option value="">All Services</option>
+                                <option value="cvet">CVET</option>
+                                <option value="assessment">Direct Assessment</option>
+                                <option value="vehicle">Vehicle Query</option>
+                            </select>
+                            <select id="filterStatus"
+                                class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="review">Under Review</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                            <input type="date" id="filterDateFrom"
+                                class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none" />
+                            <input type="date" id="filterDateTo"
+                                class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 outline-none" />
+                            <button
+                                class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">Filter</button>
+                            <button onclick="clearFilters()"
+                                class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition">Clear</button>
+                        </div>
+                    </div>
+
+                    <!-- Applications Table -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm overflow-x-auto"
+                        id="applicationsList">
+                        <table class="w-full text-sm">
+                            <thead class="border-b">
+                                <tr class="text-left text-gray-500">
+                                    <th class="py-2 px-3">Ref No</th>
+                                    <th class="py-2 px-3">Service</th>
+                                    <th class="py-2 px-3">Goods/Vehicle</th>
+                                    <th class="py-2 px-3">Value</th>
+                                    <th class="py-2 px-3">Status</th>
+                                    <th class="py-2 px-3">Date</th>
+                                    <th class="py-2 px-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" class="py-8 text-center text-gray-500">
+                                        <div
+                                            class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-2">
+                                        </div>
+                                        Loading applications...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex justify-between items-center bg-white rounded-xl border border-gray-200 p-4 shadow-sm"
+                        id="pagination">
+                        <span class="text-sm text-gray-500">Loading...</span>
+                        <div class="flex gap-2">
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Timeline Modal -->
+    <div id="workflowModal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">Application Workflow Timeline</h3>
+                <button onclick="closeWorkflowModal()"
+                    class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            </div>
+            <div id="workflowContent" class="timeline">
+                <!-- Timeline content will be dynamically inserted -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { ApplicationListManager } from '../../js/trader-applications-list.js';
+
+        import { getApplicationTimeline } from '../../js/trader-service.js';
+
+        import { getUserProfile, getCurrentUser } from '../../js/auth.js';
+
+        import { getUnreadCount } from '../../js/notifications.js';
+
+        import toastManager from '../../js/toast.js';
+
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Initialize application list manager
+        const listManager = new ApplicationListManager({
+            status: ['submitted', 'pending_review', 'under_review', 'under_inspection', 'awaiting_payment', 'approved', 'paid', 'completed', 'returned', 'rejected'],
+            pageKey: 'trader-submitted',
+            containerId: 'applicationsList',
+            paginationContainerId: 'pagination',
+            searchInputId: 'searchInput',
+            filterServiceId: 'filterService',
+            filterDateFromId: 'filterDateFrom',
+            filterDateToId: 'filterDateTo'
+        });
+
+        // Overrides to prevent destroying the table layout
+        listManager.showLoading = function() {
+            console.log("Step 3: Loading applications indicator shown...");
+            const container = document.getElementById(this.containerId);
+            const tbody = container?.querySelector('tbody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-gray-500">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-2"></div>
+                            Loading applications...
+                        </td>
+                    </tr>
+                `;
+            }
+        };
+
+        listManager.showError = function() {
+            console.log("Step 5 (Error/Exception): Loading applications failed");
+            const container = document.getElementById(this.containerId);
+            const tbody = container?.querySelector('tbody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-red-500">
+                            <i class="ri-error-warning-line text-2xl block mb-2"></i>
+                            Error loading applications. Please try again.
+                        </td>
+                    </tr>
+                `;
+            }
+        };
+
+        // Fully instrumented execution trace for loadApplications
+        listManager.loadApplications = async function() {
+            if (this.isLoading) return;
+            this.isLoading = true;
+            this.showLoading();
+            
+            console.log("Step 1: loadApplications() started");
+            
+            try {
+                // Get auth and profile
+                const user = await getCurrentUser();
+                console.log("Step 2: Authenticated user:", user);
+                const profile = user ? await getUserProfile(user.id) : null;
+                console.log("Step 2: Trader profile loaded:", profile);
+                
+                if (!profile) {
+                    console.error("Step 2: Profile not found!");
+                    this.showError();
+                    return;
+                }
+
+                // Query database
+                console.log("Step 3: Query starting... filters.status:", this.status);
+                console.log("profile.id (Primary Key):", profile.id);
+                console.log("auth.uid() (Auth Key):", user.id);
+
+                // Perform query
+                let query = supabase
+                    .from('applications')
+                    .select('*', { count: 'exact' })
+                    .eq('user_id', profile.id);
+
+                if (this.status) {
+                    if (Array.isArray(this.status)) {
+                        query = query.in('status', this.status);
+                    } else {
+                        query = query.eq('status', this.status);
+                    }
+                }
+
+                query = query.order('created_at', { ascending: false });
+
+                const { data, error, count } = await query;
+                console.log("Step 4: Query finished");
+                console.log("Returned rows (data):", data);
+                console.log("Returned error:", error);
+                console.log("Returned count:", count);
+
+                if (error) {
+                    console.error("Query failed with error:", error);
+                    this.showError();
+                    return;
+                }
+
+                this.applications = data || [];
+                this.totalCount = count || 0;
+
+                // Trace length
+                console.log(`Step 5: Query results count: ${this.applications.length}`);
+
+                // Step 6: Temporarily remove ALL status filters if empty to check other records
+                if (this.applications.length === 0) {
+                    console.log("Step 5 (Empty Result): Query returned 0 rows. Checking if any other status exists...");
+                    const { data: allApps, error: allAppsErr } = await supabase
+                        .from('applications')
+                        .select('id, status, application_number')
+                        .eq('user_id', profile.id);
+                    console.log("Total applications in database without status filter:", allApps);
+                    if (allAppsErr) console.error("Error fetching all applications:", allAppsErr);
+                }
+
+                console.log("Step 6: Rendering applications...");
+                this.renderApplications();
+                console.log("Step 7: Rendering pagination...");
+                this.renderPagination();
+                
+            } catch (err) {
+                console.error("Step 5 (Exception): Exception caught during execution trace:", err);
+                this.showError();
+            } finally {
+                this.isLoading = false;
+                console.log("Step 8: loadApplications() finished, isLoading reset to false");
+            }
+        };
+
+        // Override render method to use table format
+        listManager.renderApplications = function () {
+            const container = document.getElementById(this.containerId);
+            const tbody = container?.querySelector('tbody');
+
+            if (!tbody) {
+                console.error("renderApplications: tbody element not found under container ID", this.containerId);
+                return;
+            }
+
+            if (this.applications.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-gray-500">
+                            <i class="ri-file-list-3-line text-gray-400 text-4xl mb-2 block"></i>
+                            No submitted applications found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = this.applications.map(app => this.renderTableRow(app)).join('');
+        };
+
+        listManager.renderTableRow = function (app) {
+            const statusBadge = this.getStatusBadgeClass(app.status);
+            const statusLabel = this.formatStatus(app.status);
+            const refColor = app.application_type === 'CVET' ? 'text-emerald-600' :
+                app.application_type === 'Direct Assessment' ? 'text-blue-600' : 'text-purple-600';
+
+            return `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-2 px-3 font-mono ${refColor}">${app.application_number || 'N/A'}</td>
+                    <td class="py-2 px-3">${app.application_type || 'Unknown'}</td>
+                    <td class="py-2 px-3">${app.goods_description || app.vehicle_description || 'N/A'}</td>
+                    <td class="py-2 px-3">${formatCurrency(app.declared_value)}</td>
+                    <td class="py-2 px-3"><span class="status-badge ${statusBadge}">${statusLabel}</span></td>
+                    <td class="py-2 px-3">${formatDate(app.created_at)}</td>
+                    <td class="py-2 px-3">
+                        <button onclick="showWorkflowTimeline('${app.id}')" class="text-emerald-600 hover:underline">Track</button>
+                    </td>
+                </tr>
+            `;
+        };
+
+        function formatCurrency(value) {
+            if (!value) return '-';
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Initialize
+        await listManager.initialize();
+
+        // Expose functions for inline handlers
+        window.showWorkflowTimeline = async function (applicationId) {
+            const modal = document.getElementById('workflowModal');
+            const content = document.getElementById('workflowContent');
+
+            try {
+                const result = await getApplicationTimeline(applicationId);
+
+                if (result.success && result.data) {
+                    let html = '';
+                    result.data.forEach(step => {
+                        const statusClass = step.status === 'Completed' ? 'completed' :
+                            step.status === 'Submitted' || step.status === 'Approved' ? 'completed' :
+                                step.status === 'Rejected' ? 'completed' : 'pending';
+                        html += `
+                            <div class="timeline-item ${statusClass}">
+                                <div class="font-semibold text-gray-800">${step.status}</div>
+                                <div class="text-sm text-gray-500">${step.description}</div>
+                                <div class="text-xs text-gray-400">${formatDate(step.date)}</div>
+                            </div>
+                        `;
+                    });
+                    content.innerHTML = html;
+                } else {
+                    content.innerHTML = '<p class="text-gray-500">No workflow data available</p>';
+                }
+            } catch (error) {
+                console.error('Error fetching timeline:', error);
+                content.innerHTML = '<p class="text-red-500">Error loading workflow data</p>';
+                toastManager.error('Error loading workflow data');
+            }
+
+            modal.classList.add('open');
+        };
+
+        window.closeWorkflowModal = function () {
+            document.getElementById('workflowModal').classList.remove('open');
+        };
+
+        window.clearFilters = function () {
+            document.getElementById('filterService').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterDateFrom').value = '';
+            document.getElementById('filterDateTo').value = '';
+            listManager.currentFilters = {};
+            listManager.currentSearch = '';
+            listManager.currentPage = 1;
+            listManager.loadApplications();
+            toastManager.info('Filters cleared');
+        };
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            listManager.cleanup();
+        });
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+    </script>
+    <script
+        type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+            import { checkPageAuth } from '../../js/auth-check.js'; import { signOut as authSignOut } from '../../js/auth.js';
+            await checkPageAuth('trader');
+
+            // Load trader profile
+            await loadCurrentUserProfile();
+
+            // Load trader profile
+            await loadCurrentUserProfile(); const signOutBtn = document.getElementById('signOutBtn'); if (signOutBtn) { signOutBtn.addEventListener('click', async () => { const result = await authSignOut(); if (result.success) { window.location.href = '../../auth/login.html'; } }); }</script>
+</body>
+
+</html>

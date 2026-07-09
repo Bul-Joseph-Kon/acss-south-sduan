@@ -1,0 +1,182 @@
+[
+  {
+    "file": "js/ai-validation.js",
+    "line": 850,
+    "type": "missing_column_write",
+    "details": "Column \"ai_validation_results\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/ai-validation.js",
+    "line": 850,
+    "type": "missing_column_write",
+    "details": "Column \"ai_validation_passed\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/ai-validation.js",
+    "line": 850,
+    "type": "missing_column_write",
+    "details": "Column \"returned_at\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/ai-validation.js",
+    "line": 891,
+    "type": "missing_column_write",
+    "details": "Column \"ai_validation_results\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/ai-validation.js",
+    "line": 891,
+    "type": "missing_column_write",
+    "details": "Column \"ai_validation_passed\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/ai-validation.js",
+    "line": 891,
+    "type": "missing_column_write",
+    "details": "Column \"validated_at\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/ai-validation.js",
+    "line": 1097,
+    "type": "missing_column_write",
+    "details": "Column \"validation\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/ai-validation.js",
+    "line": 1097,
+    "type": "missing_column_write",
+    "details": "Column \"returned_at\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/applications.js",
+    "line": 227,
+    "type": "missing_column_write",
+    "details": "Column \"application_id\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/auth.js",
+    "line": 735,
+    "type": "missing_table",
+    "details": "Table \"admin_users\" is queried but not defined in the system schema."
+  },
+  {
+    "file": "js/payments.js",
+    "line": 192,
+    "type": "missing_column_write",
+    "details": "Column \"payment_details\" is written to table \"payments\" but does not exist in schema."
+  },
+  {
+    "file": "js/payments.js",
+    "line": 211,
+    "type": "missing_column_write",
+    "details": "Column \"failed_at\" is written to table \"payments\" but does not exist in schema."
+  },
+  {
+    "file": "js/payments.js",
+    "line": 211,
+    "type": "missing_column_write",
+    "details": "Column \"failure_reason\" is written to table \"payments\" but does not exist in schema."
+  },
+  {
+    "file": "js/payments.js",
+    "line": 257,
+    "type": "missing_column_write",
+    "details": "Column \"refunded_at\" is written to table \"payments\" but does not exist in schema."
+  },
+  {
+    "file": "js/payments.js",
+    "line": 257,
+    "type": "missing_column_write",
+    "details": "Column \"refund_reason\" is written to table \"payments\" but does not exist in schema."
+  },
+  {
+    "file": "js/system-settings.js",
+    "line": 62,
+    "type": "missing_column_write",
+    "details": "Column \"updated_by\" is written to table \"system_settings\" but does not exist in schema."
+  },
+  {
+    "file": "js/tax-calculation.js",
+    "line": 273,
+    "type": "missing_table",
+    "details": "Table \"tax_calculations\" is queried but not defined in the system schema."
+  },
+  {
+    "file": "js/tax-calculation.js",
+    "line": 300,
+    "type": "missing_table",
+    "details": "Table \"tax_calculations\" is queried but not defined in the system schema."
+  },
+  {
+    "file": "js/tax-calculation.js",
+    "line": 423,
+    "type": "missing_table",
+    "details": "Table \"invoices\" is queried but not defined in the system schema."
+  },
+  {
+    "file": "js/tax-calculation.js",
+    "line": 364,
+    "type": "missing_column_write",
+    "details": "Column \"tax_calculation_verified\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/tax-calculation.js",
+    "line": 364,
+    "type": "missing_column_write",
+    "details": "Column \"tax_calculation_verified_at\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/tax-calculation.js",
+    "line": 364,
+    "type": "missing_column_write",
+    "details": "Column \"total_payable\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/tax-calculation.js",
+    "line": 433,
+    "type": "missing_column_write",
+    "details": "Column \"invoice_id\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/tax-calculation.js",
+    "line": 433,
+    "type": "missing_column_write",
+    "details": "Column \"invoice_number\" is written to table \"applications\" but does not exist in schema."
+  },
+  {
+    "file": "js/trader-service.js",
+    "line": 274,
+    "type": "missing_table",
+    "details": "Table \"vehicles\" is queried but not defined in the system schema."
+  },
+  {
+    "file": "js/trader-service.js",
+    "line": 296,
+    "type": "missing_table",
+    "details": "Table \"vehicles\" is queried but not defined in the system schema."
+  },
+  {
+    "file": "js/vehicle-service.js",
+    "line": 41,
+    "type": "missing_table",
+    "details": "Table \"vehicles\" is queried but not defined in the system schema."
+  },
+  {
+    "file": "js/vehicle-service.js",
+    "line": 104,
+    "type": "missing_table",
+    "details": "Table \"vehicle_verifications\" is queried but not defined in the system schema."
+  },
+  {
+    "file": "js/vehicle-service.js",
+    "line": 136,
+    "type": "missing_table",
+    "details": "Table \"vehicle_verifications\" is queried but not defined in the system schema."
+  },
+  {
+    "file": "js/vehicle-service.js",
+    "line": 245,
+    "type": "missing_table",
+    "details": "Table \"vehicles\" is queried but not defined in the system schema."
+  }
+]

@@ -39,8 +39,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Inspector</h3>
-                            <p class="text-gray-500 text-sm">Customs Inspector</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -49,9 +49,9 @@
                             <a href="cargo-inspection.html" class="sidebar-link"><i class="ri-truck-line"></i><span>Cargo Inspection</span></a>
                             <a href="vehicle-inspection.html" class="sidebar-link"><i class="ri-car-line"></i><span>Vehicle Inspection</span></a>
                             <a href="inspection-reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Inspection Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">4</span></a>
+                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -64,7 +64,7 @@
                             <p class="opacity-90 text-sm">Auto-assigned applications requiring Inspector Review</p>
                         </div>
                         <div class="relative">
-                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                            <button id="profileDropdownBtn" class="header-profile-btn">
                                 <span class="avatar-sm"><i class="ri-user-line"></i></span>
                                 <span class="text-sm font-medium hidden sm:inline">Inspector</span>
                                 <i class="ri-arrow-down-s-line text-sm"></i>
@@ -105,9 +105,21 @@
     </div>
     <script type="module">
         import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { checkPageAuth } from '../../js/auth-check.js';
+        
         import { fetchApplicationsForRole } from '../../js/applications.js';
+        
+        import { fetchUnreadNotifications } from '../../js/notifications.js';
+        
         import { signOut as authSignOut } from '../../js/auth.js';
+        
+        import { realtimeManager } from '../../js/realtime.js';
+
+        
+        const PAGE_KEY = 'inspection-queue';
+        let currentRole = null;
+        let currentUserId = null;
 
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
@@ -118,17 +130,22 @@
 
         async function init() {
             const hasAuth = await checkPageAuth('inspector');
+
+        // Load user profile
+        await loadCurrentUserProfile();
             if (!hasAuth) return;
 
             // Load profile name in dashboard
-            const { data: { user } } = await supabase.auth.getUser();
+            
             if (user) {
                 const { data: profile } = await supabase
                     .from('profiles')
-                    .select('full_name')
+                    .select('*')
                     .eq('user_id', user.id)
                     .single();
-                if (profile && profile.full_name) {
+                if (profile) {
+                    currentRole = profile.role;
+                    currentUserId = profile.id;
                     document.querySelectorAll('.text-center h3, .header-profile-btn span.hidden').forEach(el => {
                         el.textContent = profile.full_name;
                     });
@@ -136,62 +153,97 @@
             }
 
             await loadInspectionQueue();
+            await loadNotificationBadge();
+            await initializeRealtime();
 
             // Set up Sign Out
             const signOutBtn = document.getElementById('signOutBtn');
             if (signOutBtn) {
                 signOutBtn.addEventListener('click', handleSignOut);
             }
+
+            document.getElementById('profileDropdownBtn')?.addEventListener('click', () => {
+                document.getElementById('profileDropdown')?.classList.toggle('open');
+            });
         }
 
         async function handleSignOut() {
+            realtimeManager.unregisterPage(PAGE_KEY);
             const result = await authSignOut();
             if (result.success) {
                 window.location.href = '../../auth/login.html';
             } else {
-                alert('Sign out failed: ' + result.error);
+                console.error('Sign out failed:', result.error);
+            }
+        }
+
+        async function initializeRealtime() {
+            await realtimeManager.initialize();
+
+            realtimeManager.registerPage(PAGE_KEY, currentRole, currentUserId, {
+                onApplicationChange: async () => {
+                    await loadInspectionQueue();
+                }
+            });
+        }
+
+        window.addEventListener('beforeunload', () => {
+            realtimeManager.unregisterPage(PAGE_KEY);
+        });
+
+        async function loadNotificationBadge() {
+            try {
+                const result = await fetchUnreadNotifications();
+                const badge = document.getElementById('notificationBadge');
+                if (badge && result.success) {
+                    badge.textContent = result.data?.length || 0;
+                    badge.style.display = result.data?.length > 0 ? 'inline' : 'none';
+                }
+            } catch (error) {
+                console.error('Error loading notification badge:', error);
             }
         }
 
         async function loadInspectionQueue() {
-            const result = await fetchApplicationsForRole('inspector', { includeAll: true });
-            const queueEl = document.getElementById('queueContainer');
-            if (!queueEl) return;
+            try {
+                const result = await fetchApplicationsForRole('inspector', { includeAll: true });
+                const queueEl = document.getElementById('queueContainer');
+                if (!queueEl) return;
 
-            if (result.success && result.data && result.data.length > 0) {
-                const applications = result.data;
-                let html = '';
-                applications.forEach(app => {
-                    let badgeClass = 'status-pending';
-                    let badgeText = 'Pending';
-                    if (app.status === 'in_progress') {
-                        badgeClass = 'status-in-progress';
-                        badgeText = 'In Progress';
-                    } else if (app.status === 'completed' || app.status === 'cleared') {
-                        badgeClass = 'status-approved';
-                        badgeText = 'Completed';
-                    }
+                if (result.success && result.data && result.data.length > 0) {
+                    const applications = result.data;
+                    let html = '';
+                    applications.forEach(app => {
+                        let badgeClass = 'status-pending';
+                        let badgeText = 'Pending';
+                        if (app.status === 'in_progress') {
+                            badgeClass = 'status-in-progress';
+                            badgeText = 'In Progress';
+                        } else if (app.status === 'completed' || app.status === 'cleared') {
+                            badgeClass = 'status-approved';
+                            badgeText = 'Completed';
+                        }
 
-                    const desc = app.goods_data?.item_description || app.declaration_data?.product_description || 'General Cargo';
-                    const location = app.declaration_data?.port_of_entry || 'Juba Port';
-                    const type = app.application_type || 'Cargo';
+                        const desc = app.goods_data?.item_description || app.declaration_data?.product_description || 'General Cargo';
+                        const location = app.declaration_data?.port_of_entry || 'Juba Port';
+                        const type = app.application_type || 'Cargo';
 
-                    html += `
-                        <div class="inspection-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-blue-600">${app.application_number}</h4>
-                                    <p class="text-sm text-gray-500">${(type || '').replace('_', ' ').toUpperCase()} · ${location} · ${desc}</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge ${badgeClass}">${badgeText}</span>
-                                        <span class="text-xs text-gray-400">Assigned: ${new Date(app.created_at).toLocaleDateString()}</span>
+                        html += `
+                            <div class="inspection-card bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                                <div class="flex flex-wrap justify-between items-start gap-2">
+                                    <div>
+                                        <h4 class="font-bold text-blue-600">${app.application_number}</h4>
+                                        <p class="text-sm text-gray-500">${(type || '').replace('_', ' ').toUpperCase()} · ${location} · ${desc}</p>
+                                        <div class="flex items-center gap-4 mt-2">
+                                            <span class="status-badge ${badgeClass}">${badgeText}</span>
+                                            <span class="text-xs text-gray-400">Assigned: ${new Date(app.created_at).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <a href="inspection-details.html?id=${app.id}" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Start Inspection</a>
+                                        <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition details-btn" data-app-id="${app.id}">Details</button>
                                     </div>
                                 </div>
-                                <div class="flex gap-2">
-                                    <a href="inspection-details.html?id=${app.id}" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Start Inspection</a>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('Viewing application number: ${app.application_number}')">Details</button>
-                                </div>
-                            </div>
                         </div>
                     `;
                 });
@@ -204,9 +256,26 @@
                     </div>
                 `;
             }
+            } catch (error) {
+                console.error('Error loading inspection queue:', error);
+            }
         }
+
+        document.getElementById('queueContainer')?.addEventListener('click', (e) => {
+            if (e.target.classList.contains('details-btn')) {
+                const appId = e.target.getAttribute('data-app-id');
+                if (appId) {
+                    window.location.href = `inspection-details.html?id=${appId}`;
+                }
+            }
+        });
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
+
+
+
+
+

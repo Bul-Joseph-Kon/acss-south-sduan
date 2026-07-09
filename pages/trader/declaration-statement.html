@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Declaration Statement</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+        .signature-pad { border: 2px dashed #d1d5db; border-radius: 0.5rem; background: #f9fafb; cursor: crosshair; }
+        .signature-pad.signed { border-color: #0a4d3e; border-style: solid; background: white; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">📝 Step 9: Declaration Statement</h2>
+                            <p class="opacity-90 text-sm">Legal binding confirmation and electronic signature</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+                            <span id="progressText">Step 9 of 9</span>
+                            <span id="progressPercent">100% Complete</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:100%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Declaration Statement</h3>
+                        
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                            <div class="flex items-start gap-3">
+                                <i class="ri-alert-line text-amber-600 text-xl mt-0.5"></i>
+                                <div>
+                                    <h4 class="font-semibold text-amber-800 mb-1">Legal Declaration</h4>
+                                    <p class="text-sm text-amber-700">By signing this declaration, you confirm that all information provided is true, accurate, and complete. False declarations may result in penalties, fines, or legal action under South Sudan Customs laws.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-semibold text-blue-800 flex items-center gap-2">
+                                    <i class="ri-file-list-3-line"></i>
+                                    Declaration Review
+                                </h4>
+                                <button onclick="toggleReview()" class="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                                    <span id="toggleText">Show Details</span>
+                                    <i class="ri-arrow-down-s-line" id="toggleIcon"></i>
+                                </button>
+                            </div>
+                            <div id="reviewContent" class="hidden space-y-4">
+                                <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-gray-500">Declaration Date:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewDeclarationDate">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Declaration Type:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewDeclarationType">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Customs Office:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewCustomsOffice">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Port of Entry:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewPortOfEntry">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Declarant Name:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewDeclarantName">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Company Name:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewCompanyName">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Importer Name:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewImporterName">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Exporter Name:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewExporterName">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Goods Description:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewGoodsDescription">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">HS Code:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewHSCode">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Quantity:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewQuantity">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Customs Value:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewCustomsValue">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Transport Mode:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewTransportMode">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Vehicle Registration:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewVehicleReg">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-500">Documents Uploaded:</span>
+                                        <span class="text-gray-800 ml-2" id="reviewDocuments">-</span>
+                                    </div>
+                                </div>
+                                <div class="pt-3 border-t border-blue-200">
+                                    <p class="text-xs text-blue-700"><i class="ri-information-line"></i> Please review all information above carefully. If any details are incorrect, go back to the respective step to make corrections before signing.</p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
+                            <a href="ai-validation.html" id="backBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                <i class="ri-arrow-left-line"></i> Previous
+                            </a>
+                            <button id="submitDeclarationBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                Submit Declaration <i class="ri-send-plane-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        function toggleReview() {
+            const content = document.getElementById('reviewContent');
+            const toggleText = document.getElementById('toggleText');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                toggleText.textContent = 'Hide Details';
+                toggleIcon.classList.remove('ri-arrow-down-s-line');
+                toggleIcon.classList.add('ri-arrow-up-s-line');
+            } else {
+                content.classList.add('hidden');
+                toggleText.textContent = 'Show Details';
+                toggleIcon.classList.remove('ri-arrow-up-s-line');
+                toggleIcon.classList.add('ri-arrow-down-s-line');
+            }
+        }
+
+        function loadReviewData(draftData) {
+            if (draftData) {
+                if (draftData.declaration_date) document.getElementById('reviewDeclarationDate').textContent = draftData.declaration_date;
+                if (draftData.declaration_type) document.getElementById('reviewDeclarationType').textContent = draftData.declaration_type;
+                if (draftData.customs_office) document.getElementById('reviewCustomsOffice').textContent = draftData.customs_office;
+                if (draftData.port_of_entry) document.getElementById('reviewPortOfEntry').textContent = draftData.port_of_entry;
+                if (draftData.full_name) document.getElementById('reviewDeclarantName').textContent = draftData.full_name;
+                if (draftData.company_name) document.getElementById('reviewCompanyName').textContent = draftData.company_name;
+                if (draftData.importer_name) document.getElementById('reviewImporterName').textContent = draftData.importer_name;
+                if (draftData.exporter_name) document.getElementById('reviewExporterName').textContent = draftData.exporter_name;
+                if (draftData.goods_description) document.getElementById('reviewGoodsDescription').textContent = draftData.goods_description;
+                if (draftData.hs_code) document.getElementById('reviewHSCode').textContent = draftData.hs_code;
+                if (draftData.quantity) document.getElementById('reviewQuantity').textContent = draftData.quantity + ' ' + (draftData.unit_of_measurement || 'units');
+                if (draftData.declared_value) document.getElementById('reviewCustomsValue').textContent = draftData.declared_value;
+                if (draftData.transport_mode) document.getElementById('reviewTransportMode').textContent = draftData.transport_mode;
+                if (draftData.vehicle_registration) document.getElementById('reviewVehicleReg').textContent = draftData.vehicle_registration;
+                
+                let docCount = 0;
+                if (draftData.packing_list) docCount++;
+                if (draftData.bill_of_lading) docCount++;
+                if (draftData.certificate_of_origin) docCount++;
+                if (draftData.import_permit) docCount++;
+                document.getElementById('reviewDocuments').textContent = docCount + ' document(s) uploaded';
+            }
+        }
+
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let hasSignature = false;
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            ctx.strokeStyle = '#0a4d3e';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            ctx.beginPath();
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            ctx.moveTo(x, y);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            hasSignature = true;
+            canvas.classList.add('signed');
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function clearSignature() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSignature = false;
+            canvas.classList.remove('signed');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data will be loaded by workflow manager
+        });
+    </script>
+    <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        import { getWorkflow, initializeWorkflowFromURL } from '../../js/cvet-workflow-manager.js';
+        
+        import { signOut } from '../../js/auth.js';
+        
+        import { checkPageAuth } from '../../js/auth-check.js';
+        
+        import { getUnreadCount } from '../../js/notifications.js';
+        
+        import toastManager from '../../js/toast.js';
+
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Check authentication
+        await checkPageAuth('trader');
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Sign out handler
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await signOut();
+                if (result.success) {
+                    toastManager.success('Signed out successfully');
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        // Initialize workflow
+        const workflow = getWorkflow();
+        const state = await initializeWorkflowFromURL();
+
+        // Update progress
+        function updateProgress() {
+            const progress = Math.round((state.currentStep / 9) * 100);
+            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 9`;
+            document.getElementById('progressPercent').textContent = `${progress}% Complete`;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+        updateProgress();
+
+        // Update back button URL
+        if (state.applicationId) {
+            document.getElementById('backBtn').href = 'ai-validation.html?id=' + state.applicationId;
+        }
+
+        // Load review data
+        loadReviewData(state.draftData);
+
+        // Submit declaration
+        document.getElementById('submitDeclarationBtn').addEventListener('click', async function() {
+            const stepData = {
+                declaration_confirmed: true,
+                declaration_statement: 'I hereby declare that all information provided is true, accurate, and complete.'
+            };
+
+            // Validate
+            const validation = workflow.validateStep(9, stepData);
+            if (!validation.success) {
+                toastManager.warning('Please confirm the declaration statement: ' + validation.missingFields.join(', '));
+                return;
+            }
+
+            // Submit final application
+            const submitResult = await workflow.submitDeclaration();
+            if (!submitResult.success) {
+                toastManager.error('Error submitting: ' + submitResult.error);
+                return;
+            }
+
+            toastManager.success('Declaration submitted successfully! Application Number: ' + submitResult.applicationNumber);
+            window.location.href = 'dashboard-trader.html';
+        });
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

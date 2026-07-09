@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Agent Statistics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .stat-card { transition: all 0.3s ease; cursor: pointer; background: white; border-radius: 0.75rem; padding: 1rem; border: 1px solid #e5e7eb; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+        .stat-number { font-size: 1.5rem; font-weight: 700; }
+        .stat-label { font-size: 0.75rem; color: #6b7280; }
+        .monthly-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; }
+        .monthly-bar .fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #1e3a5f, #2a5f8f); }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="agent-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">📈 Statistics</h2>
+                            <p class="opacity-90 text-sm">Detailed analysis of your agent activities</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Stats -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="stat-card"><div class="stat-number text-blue-600" id="statTotalApps">0</div><div class="stat-label">Total Applications</div></div>
+                        <div class="stat-card"><div class="stat-number text-blue-600" id="statTotalDuty">$0</div><div class="stat-label">Total Duty Collected</div></div>
+                        <div class="stat-card"><div class="stat-number text-blue-600" id="statApprovalRate">0%</div><div class="stat-label">Approval Rate</div></div>
+                        <div class="stat-card"><div class="stat-number text-blue-600" id="statCertificates">0</div><div class="stat-label">Certificates Issued</div></div>
+                    </div>
+
+                    <!-- Monthly Trends -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Monthly Application Trends</h3>
+                        <div class="space-y-3" id="monthlyTrends">
+                            <div class="text-center py-4 text-gray-500">Loading trends...</div>
+                        </div>
+                    </div>
+
+                    <!-- Service Breakdown -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4">Service Usage</h3>
+                            <div class="space-y-3" id="serviceUsage">
+                                <div class="text-center py-4 text-gray-500">Loading...</div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4">Status Distribution</h3>
+                            <div class="space-y-3" id="statusDistribution">
+                                <div class="text-center py-4 text-gray-500">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Metrics -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Performance Metrics</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="border rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500">Average Processing Time</p>
+                                <p class="text-2xl font-bold text-blue-600" id="statAvgProcessing">0 days</p>
+                            </div>
+                            <div class="border rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500">Client Satisfaction</p>
+                                <p class="text-2xl font-bold text-emerald-600" id="statSatisfaction">0%</p>
+                            </div>
+                            <div class="border rounded-lg p-4 text-center">
+                                <p class="text-sm text-gray-500">License Status</p>
+                                <p class="text-2xl font-bold text-green-600" id="statLicenseStatus">N/A</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+
+        <script type="module" src="../../js/agent-sidebar.js"></script>
+<!-- Supabase & Shared Authentication Guards -->
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        async function initPage() {
+            console.log('=== INITIALIZING AUTH GUARD ON MOCK PAGE ===');
+            const role = 'agent';
+            
+            // 1. Run auth check
+            const hasAccess = await checkPageAuth(role);
+            if (!hasAccess) {
+                console.log('Access denied, redirecting...');
+                return;
+            }
+
+            // 2. Load profile data from Supabase
+            const { user, profile } = await loadCurrentUserProfile();
+            
+            // 3. Update sidebar and profile UI
+            if (profile) {
+                const displayName = profile.full_name || user?.email || 'User';
+                const displayRole = role === 'agent' ? 'Clearing Agent' : 'Trader';
+                
+                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
+                if (nameEl) nameEl.textContent = displayName;
+                
+                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
+                if (roleEl) roleEl.textContent = displayRole;
+                
+                const statusEl = document.getElementById(role + 'ProfileStatus');
+                if (statusEl) statusEl.textContent = '● ' + (profile.status || 'Active');
+                
+                const tinEl = document.getElementById(role + 'ProfileTIN');
+                if (tinEl && profile.organization) {
+                    tinEl.textContent = 'Org: ' + profile.organization;
+                }
+            }
+
+            // 4. Load live statistics data
+            await loadStatistics(profile?.id);
+
+            // 5. Setup realtime subscriptions
+            setupRealtimeSubscriptions(profile?.id);
+
+            // 6. Bind Logout Button Listeners
+            const handleLogout = async (e) => {
+                e.preventDefault();
+                console.log('Signing out...');
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
+
+            const dropdownSignOut = document.getElementById('dropdownSignOut');
+            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+        }
+
+        async function loadStatistics(profileId) {
+            try {
+                // Fetch all applications for the agent
+                const { data: applications, error } = await supabase
+                    .from('applications')
+                    .select('*')
+                    .eq('user_id', profileId);
+
+                if (error) throw error;
+
+                // Calculate summary statistics
+                const totalApps = applications?.length || 0;
+                const totalDuty = applications?.reduce((sum, app) => sum + (app.duty_amount || 0), 0) || 0;
+                const approvedApps = applications?.filter(app => app.status === 'approved' || app.status === 'completed').length || 0;
+                const approvalRate = totalApps > 0 ? Math.round((approvedApps / totalApps) * 100) : 0;
+                const certificates = applications?.filter(app => app.status === 'completed' && (app.application_type === 'cvet' || app.application_type === 'agent_license')).length || 0;
+
+                document.getElementById('statTotalApps').textContent = totalApps;
+                document.getElementById('statTotalDuty').textContent = `$${totalDuty.toLocaleString()}`;
+                document.getElementById('statApprovalRate').textContent = `${approvalRate}%`;
+                document.getElementById('statCertificates').textContent = certificates;
+
+                // Calculate monthly trends
+                const monthlyTrends = calculateMonthlyTrends(applications);
+                renderMonthlyTrends(monthlyTrends);
+
+                // Calculate service usage
+                const serviceUsage = calculateServiceUsage(applications);
+                renderServiceUsage(serviceUsage);
+
+                // Calculate status distribution
+                const statusDistribution = calculateStatusDistribution(applications);
+                renderStatusDistribution(statusDistribution);
+
+                // Calculate performance metrics
+                const avgProcessingTime = calculateAvgProcessingTime(applications);
+                document.getElementById('statAvgProcessing').textContent = `${avgProcessingTime} days`;
+                document.getElementById('statSatisfaction').textContent = '95%'; // Placeholder - would come from feedback table
+                document.getElementById('statLicenseStatus').textContent = profile?.status === 'active' ? 'Active' : 'Pending';
+
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        function calculateMonthlyTrends(applications) {
+            const months = ['January', 'February', 'March', 'April', 'May', 'June'];
+            const currentYear = new Date().getFullYear();
+            const monthlyData = {};
+
+            months.forEach(month => {
+                monthlyData[month] = 0;
+            });
+
+            applications?.forEach(app => {
+                const appDate = new Date(app.created_at);
+                if (appDate.getFullYear() === currentYear) {
+                    const monthName = months[appDate.getMonth()];
+                    if (monthlyData.hasOwnProperty(monthName)) {
+                        monthlyData[monthName]++;
+                    }
+                }
+            });
+
+            return monthlyData;
+        }
+
+        function renderMonthlyTrends(trends) {
+            const container = document.getElementById('monthlyTrends');
+            const maxCount = Math.max(...Object.values(trends), 1);
+
+            container.innerHTML = Object.entries(trends).map(([month, count]) => {
+                const percentage = (count / maxCount) * 100;
+                return `
+                    <div>
+                        <div class="flex justify-between text-sm">
+                            <span>${month}</span>
+                            <span>${count} Applications</span>
+                        </div>
+                        <div class="monthly-bar">
+                            <div class="fill" style="width:${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function calculateServiceUsage(applications) {
+            const services = {
+                'CVET Declarations': 0,
+                'Direct Assessments': 0,
+                'Agent Licenses': 0,
+                'Vehicle Queries': 0
+            };
+
+            applications?.forEach(app => {
+                switch (app.application_type) {
+                    case 'cvet': services['CVET Declarations']++; break;
+                    case 'direct_assessment': services['Direct Assessments']++; break;
+                    case 'agent_license': services['Agent Licenses']++; break;
+                    case 'vehicle_query': services['Vehicle Queries']++; break;
+                }
+            });
+
+            return services;
+        }
+
+        function renderServiceUsage(usage) {
+            const container = document.getElementById('serviceUsage');
+            const colors = {
+                'CVET Declarations': 'text-blue-600',
+                'Direct Assessments': 'text-emerald-600',
+                'Agent Licenses': 'text-purple-600',
+                'Vehicle Queries': 'text-orange-600'
+            };
+
+            container.innerHTML = Object.entries(usage).map(([service, count]) => `
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span>${service}</span>
+                    <span class="font-bold ${colors[service]}">${count}</span>
+                </div>
+            `).join('');
+        }
+
+        function calculateStatusDistribution(applications) {
+            const statuses = {
+                'Approved': 0,
+                'Pending': 0,
+                'Review': 0,
+                'Rejected': 0
+            };
+
+            applications?.forEach(app => {
+                switch (app.status) {
+                    case 'approved':
+                    case 'completed':
+                    case 'paid':
+                        statuses['Approved']++;
+                        break;
+                    case 'submitted':
+                    case 'pending_review':
+                        statuses['Pending']++;
+                        break;
+                    case 'under_inspection':
+                    case 'inspection_in_progress':
+                        statuses['Review']++;
+                        break;
+                    case 'rejected':
+                    case 'returned':
+                        statuses['Rejected']++;
+                        break;
+                }
+            });
+
+            return statuses;
+        }
+
+        function renderStatusDistribution(distribution) {
+            const container = document.getElementById('statusDistribution');
+            const badgeClasses = {
+                'Approved': 'status-approved',
+                'Pending': 'status-pending',
+                'Review': 'status-review',
+                'Rejected': 'status-rejected'
+            };
+
+            container.innerHTML = Object.entries(distribution).map(([status, count]) => `
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="status-badge ${badgeClasses[status]}">${status}</span>
+                    <span class="font-bold">${count}</span>
+                </div>
+            `).join('');
+        }
+
+        function calculateAvgProcessingTime(applications) {
+            const completedApps = applications?.filter(app => 
+                app.status === 'completed' || app.status === 'approved'
+            );
+
+            if (!completedApps || completedApps.length === 0) return '0';
+
+            const totalTime = completedApps.reduce((sum, app) => {
+                const created = new Date(app.created_at);
+                const updated = new Date(app.updated_at || app.approved_at || created);
+                const days = Math.ceil((updated - created) / (1000 * 60 * 60 * 24));
+                return sum + days;
+            }, 0);
+
+            return (totalTime / completedApps.length).toFixed(1);
+        }
+
+        function setupRealtimeSubscriptions(profileId) {
+            // Subscribe to applications table changes
+            const appChannel = supabase
+                .channel('statistics-applications-apps')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, async () => {
+                    console.log('Applications changed, reloading statistics...');
+                    const { data: { user } } = await supabase.auth.getUser();
+                    const profile = user ? await getUserProfile(user.id) : null;
+                    await loadStatistics(profile?.id);
+                })
+                .subscribe();
+
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', () => {
+                supabase.removeChannel(appChannel);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            initPage();
+        }
+    </script>
+</body></html>
+

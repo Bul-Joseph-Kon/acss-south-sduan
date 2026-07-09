@@ -1,0 +1,14 @@
+[
+  {
+    "file": "pages\\admin\\ai-configuration.html",
+    "line": 25,
+    "varName": "settings",
+    "snippet": "const settings = [\r\n                { key: 'ai_model_version', value: modelVersion },\r\n                { key: 'ai_confidence_threshold', value: confidenceThreshold }\r\n            ];"
+  },
+  {
+    "file": "pages\\trader\\tracking.html",
+    "line": 20,
+    "varName": "workflowStages",
+    "snippet": "const workflowStages = [\r\n            { id: 'declarant_info', title: 'Declarant Information', order: 1 },\r\n            { id: 'shipment_info', title: 'Shipment Information', order: 2 },\r\n            { id: 'goods_info', title: 'Goods Information', order: 3 },\r\n            { id: 'documents', title: 'Supporting Documents', order: 4 },\r\n            { id: 'ai_validation', title: 'AI Validation', order: 5 },\r\n            { id: 'duty_assessment', title: 'Duty Assessment', order: 6 },\r\n            { id: 'payment', title: 'Payment Processing', order: 7 },\r\n            { id: 'certificate', title: 'Certificate Generation', order: 8 }\r\n        ];"
+  }
+]

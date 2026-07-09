@@ -6,6 +6,7 @@
     <title>SSRA Customs · Vehicle Inspection</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -42,8 +43,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Inspector</h3>
-                            <p class="text-gray-500 text-sm">Customs Inspector</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -52,9 +53,9 @@
                             <a href="cargo-inspection.html" class="sidebar-link"><i class="ri-truck-line"></i><span>Cargo Inspection</span></a>
                             <a href="vehicle-inspection.html" class="sidebar-link active"><i class="ri-car-line"></i><span>Vehicle Inspection</span></a>
                             <a href="inspection-reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Inspection Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">4</span></a>
+                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -67,7 +68,7 @@
                             <p class="opacity-90 text-sm">Inspect vehicle and record findings</p>
                         </div>
                         <div class="relative">
-                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                            <button id="profileDropdownBtn" class="header-profile-btn">
                                 <span class="avatar-sm"><i class="ri-user-line"></i></span>
                                 <span class="text-sm font-medium hidden sm:inline">Inspector</span>
                                 <i class="ri-arrow-down-s-line text-sm"></i>
@@ -86,31 +87,31 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div class="form-group">
                                 <label>VIN / Chassis</label>
-                                <input type="text" class="form-input" value="JH4DA9360LS123456" disabled />
+                                <input type="text" id="vinChassis" class="form-input" disabled />
                             </div>
                             <div class="form-group">
                                 <label>Registration Number</label>
-                                <input type="text" class="form-input" value="SSR 123A" disabled />
+                                <input type="text" id="registrationNumber" class="form-input" disabled />
                             </div>
                             <div class="form-group">
                                 <label>Make/Model</label>
-                                <input type="text" class="form-input" value="Toyota Hilux" disabled />
+                                <input type="text" id="makeModel" class="form-input" disabled />
                             </div>
                             <div class="form-group">
                                 <label>Year</label>
-                                <input type="text" class="form-input" value="2023" disabled />
+                                <input type="text" id="vehicleYear" class="form-input" disabled />
                             </div>
                             <div class="form-group">
                                 <label>Inspection Date</label>
-                                <input type="date" class="form-input" value="2026-06-23" />
+                                <input type="date" id="inspectionDate" class="form-input" />
                             </div>
                             <div class="form-group">
                                 <label>Inspector Name</label>
-                                <input type="text" class="form-input" value="Officer David" disabled />
+                                <input type="text" id="inspectorName" class="form-input" disabled />
                             </div>
                             <div class="form-group">
                                 <label>Status</label>
-                                <span class="status-badge status-in-progress">In Progress</span>
+                                <span id="statusBadge" class="status-badge status-in-progress">In Progress</span>
                             </div>
                         </div>
 
@@ -130,17 +131,17 @@
 
                         <div class="form-group mt-4">
                             <label>Inspection Findings</label>
-                            <textarea class="form-textarea" placeholder="Enter detailed inspection findings...">Vehicle inspected. VIN matches registration. Physical condition good. Engine number verified. Documentation complete.</textarea>
+                            <textarea id="inspectionFindings" class="form-textarea" placeholder="Enter detailed inspection findings..."></textarea>
                         </div>
 
                         <div class="flex gap-3 mt-4">
-                            <button class="bg-green-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition flex items-center gap-2" onclick="alert('✅ Vehicle inspection passed')">
+                            <button id="passBtn" class="bg-green-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition flex items-center gap-2">
                                 <i class="ri-check-line"></i> Pass Inspection
                             </button>
-                            <button class="bg-red-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition flex items-center gap-2" onclick="alert('❌ Vehicle inspection failed')">
+                            <button id="failBtn" class="bg-red-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition flex items-center gap-2">
                                 <i class="ri-close-line"></i> Fail Inspection
                             </button>
-                            <button class="bg-yellow-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition flex items-center gap-2" onclick="alert('📝 Save and continue later')">
+                            <button id="draftBtn" class="bg-yellow-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition flex items-center gap-2">
                                 <i class="ri-save-line"></i> Save Draft
                             </button>
                         </div>
@@ -158,11 +159,296 @@
             </div>
         </div>
     </div>
-    <script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        
+        import { fetchApplicationById, updateApplication, logInspectionActivity, logAuditAction } from '../../js/applications.js';
+        
+        import { fetchUnreadNotifications, sendInspectionPassedNotification, sendInspectionFailedNotification } from '../../js/notifications.js';
+        
+        import { signOut as authSignOut } from '../../js/auth.js';
+        
+        import { realtimeManager } from '../../js/realtime.js';
+
+        
+        const PAGE_KEY = 'vehicle-inspection';
+        let currentRole = null;
+        let currentUserId = null;
+        let applicationId = null;
+        let application = null;
+
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profileDropdown')) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown) dropdown.classList.remove('open');
             }
         });
+
+        async function init() {
+            const hasAuth = await checkPageAuth('inspector');
+
+        // Load user profile
+        await loadCurrentUserProfile();
+            if (!hasAuth) return;
+
+            
+            if (!user) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const profile = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
+            if (profile.data) {
+                currentRole = profile.data.role;
+                currentUserId = profile.data.id;
+                document.querySelectorAll('.text-center h3, .header-profile-btn span.hidden').forEach(el => {
+                    el.textContent = profile.data.full_name || 'Inspector';
+                });
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            applicationId = urlParams.get('id');
+
+            if (!applicationId) {
+                const { data: apps } = await supabase
+                    .from('applications')
+                    .select('id')
+                    .eq('status', 'under_inspection')
+                    .eq('inspector_id', currentUserId)
+                    .limit(1);
+                if (apps && apps.length > 0) {
+                    applicationId = apps[0].id;
+                    window.history.replaceState({}, '', `?id=${applicationId}`);
+                }
+            }
+
+            if (applicationId) {
+                await loadApplicationData(applicationId);
+            } else {
+                document.getElementById('vinChassis').value = 'No application assigned';
+            }
+
+            await initializeRealtime();
+            await loadNotificationBadge();
+
+            document.getElementById('passBtn').addEventListener('click', () => submitInspection('passed'));
+            document.getElementById('failBtn').addEventListener('click', () => submitInspection('failed'));
+            document.getElementById('draftBtn').addEventListener('click', saveDraft);
+            document.getElementById('profileDropdownBtn')?.addEventListener('click', () => {
+                document.getElementById('profileDropdown')?.classList.toggle('open');
+            });
+        }
+
+        async function loadApplicationData(appId) {
+            try {
+                const result = await fetchApplicationById(appId);
+                if (result.success && result.data) {
+                    application = result.data;
+                    populateForm(application);
+                } else {
+                    console.error('Failed to load application:', result.error);
+                    document.getElementById('vinChassis').value = 'Error loading application';
+                }
+            } catch (error) {
+                console.error('Error loading application:', error);
+                document.getElementById('vinChassis').value = 'Error loading application';
+            }
+        }
+
+        function populateForm(app) {
+            const vehicleData = app.vehicle_data || app.goods_data || {};
+            
+            document.getElementById('vinChassis').value = vehicleData.vin || vehicleData.chassis_number || '';
+            document.getElementById('registrationNumber').value = vehicleData.registration_number || '';
+            document.getElementById('makeModel').value = vehicleData.make_model || vehicleData.make || '';
+            document.getElementById('vehicleYear').value = vehicleData.year || '';
+            document.getElementById('inspectionDate').value = new Date().toISOString().split('T')[0];
+
+            document.getElementById('inspectorName').value = currentUserId ? 'Loading...' : 'Inspector';
+
+            if (currentUserId) {
+                supabase.from('profiles').select('full_name').eq('id', currentUserId).single().then(({ data }) => {
+                    if (data) document.getElementById('inspectorName').value = data.full_name;
+                }).catch(() => {
+                    document.getElementById('inspectorName').value = 'Inspector';
+                });
+            }
+
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.textContent = app.status?.replace('_', ' ').toUpperCase() || 'IN PROGRESS';
+            statusBadge.className = 'status-badge ' + getStatusBadgeClass(app.status);
+
+            if (app.inspection_report) {
+                document.getElementById('inspectionFindings').value = app.inspection_report.findings || '';
+            }
+        }
+
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'passed':
+                case 'completed':
+                case 'cleared':
+                    return 'status-approved';
+                case 'failed':
+                case 'rejected':
+                    return 'status-pending';
+                case 'in_progress':
+                case 'under_inspection':
+                    return 'status-in-progress';
+                default:
+                    return 'status-pending';
+            }
+        }
+
+        async function submitInspection(result) {
+            try {
+                if (!applicationId) {
+                    console.error('No application selected');
+                    return;
+                }
+
+                const findings = document.getElementById('inspectionFindings').value;
+                const inspectionDate = document.getElementById('inspectionDate').value;
+
+                if (!findings.trim()) {
+                    console.error('Please enter inspection findings');
+                    return;
+                }
+
+                const inspectionReport = {
+                    findings,
+                    inspection_date: inspectionDate,
+                    inspector_id: currentUserId,
+                    result,
+                    submitted_at: new Date().toISOString()
+                };
+
+                const updates = {
+                    inspection_report: inspectionReport,
+                    status: result === 'passed' ? 'pending_review' : 'returned',
+                    inspection_completed_at: new Date().toISOString()
+                };
+
+                const oldStatus = application?.status || 'unknown';
+                const newStatus = updates.status;
+
+                const updateResult = await updateApplication(applicationId, updates);
+                if (updateResult.success) {
+                    console.log(`Vehicle inspection ${result === 'passed' ? 'passed' : 'failed'} successfully`);
+
+                    // Log inspection activity
+                    await logInspectionActivity(
+                        result === 'passed' ? 'inspection_passed' : 'inspection_failed',
+                        applicationId,
+                        `Vehicle inspection ${result === 'passed' ? 'passed' : 'failed'}`,
+                        { inspection_type: 'vehicle', findings },
+                        currentUserId
+                    );
+
+                    // Log audit action
+                    await logAuditAction(
+                        'UPDATE',
+                        'applications',
+                        applicationId,
+                        { status: oldStatus },
+                        { status: newStatus, inspection_report: inspectionReport },
+                        currentUserId
+                    );
+
+                    // Send notification to application owner
+                    if (application?.user_id) {
+                        if (result === 'passed') {
+                            await sendInspectionPassedNotification(application.user_id, applicationId);
+                        } else {
+                            await sendInspectionFailedNotification(application.user_id, applicationId, findings);
+                        }
+                    }
+
+                    window.location.href = 'inspection-queue.html';
+                } else {
+                    console.error('Failed to submit inspection:', updateResult.error);
+                }
+            } catch (error) {
+                console.error('Error submitting inspection:', error);
+            }
+        }
+
+        async function saveDraft() {
+            try {
+                if (!applicationId) {
+                    console.error('No application selected');
+                    return;
+                }
+
+                const findings = document.getElementById('inspectionFindings').value;
+                const inspectionDate = document.getElementById('inspectionDate').value;
+
+                const inspectionReport = {
+                    findings,
+                    inspection_date: inspectionDate,
+                    inspector_id: currentUserId,
+                    result: 'draft',
+                    saved_at: new Date().toISOString()
+                };
+
+                const updates = {
+                    inspection_report: inspectionReport
+                };
+
+                const updateResult = await updateApplication(applicationId, updates);
+                if (updateResult.success) {
+                    console.log('Draft saved successfully');
+                } else {
+                    console.error('Failed to save draft:', updateResult.error);
+                }
+            } catch (error) {
+                console.error('Error saving draft:', error);
+            }
+        }
+
+        async function initializeRealtime() {
+            await realtimeManager.initialize();
+            
+            realtimeManager.registerPage(PAGE_KEY, currentRole, currentUserId, {
+                onApplicationChange: async (payload) => {
+                    if (applicationId && payload.new?.id === applicationId) {
+                        await loadApplicationData(applicationId);
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('beforeunload', () => {
+            realtimeManager.unregisterPage(PAGE_KEY);
+        });
+
+        async function handleSignOut() {
+            realtimeManager.unregisterPage(PAGE_KEY);
+            const result = await authSignOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            } else {
+                console.error('Sign out failed:', result.error);
+            }
+        }
+
+        async function loadNotificationBadge() {
+            const result = await fetchUnreadNotifications();
+            const badge = document.getElementById('notificationBadge');
+            if (badge && result.success) {
+                badge.textContent = result.data?.length || 0;
+                badge.style.display = result.data?.length > 0 ? 'inline' : 'none';
+            }
+        }
+
+        document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body></html>
+
+
+
+

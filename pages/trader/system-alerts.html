@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · System Alerts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .notification-item { padding: 1rem; border-radius: 0.75rem; border: 1px solid #e5e7eb; transition: all 0.2s ease; }
+        .notification-item:hover { background: #f9fafb; }
+        .notification-item.unread { background: #dbeafe; border-color: #3b82f6; }
+        .notification-item .notif-time { font-size: 0.75rem; color: #6b7280; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🖥️ System Alerts</h2>
+                            <p class="opacity-90 text-sm">System status and important announcements</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🖥️ System Alerts</h2>
+                            <p class="opacity-90 text-sm">System status and important announcements</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-3 items-center justify-between">
+                        <div class="flex flex-wrap gap-2" id="filterTabs">
+                            <button class="px-4 py-1.5 rounded-full text-sm bg-emerald-600 text-white" data-filter="all">All</button>
+                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50" data-filter="unread">Unread</button>
+                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50" data-filter="read">Read</button>
+                        </div>
+                        <button id="markAllReadBtn" class="text-sm text-emerald-600 hover:underline">Mark all as read</button>
+                    </div>
+
+                    <div class="space-y-3" id="alertsList">
+                        <div class="text-center py-8 text-gray-500" id="loadingState">Loading system alerts...</div>
+                    </div>
+
+                    <div class="bg-yellow-50 rounded-xl border border-yellow-200 p-5">
+                        <h3 class="font-bold text-yellow-800 mb-2"><i class="ri-information-line mr-2"></i>System Status</h3>
+                        <div class="grid md:grid-cols-3 gap-3 text-sm">
+                            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-green-700">All Systems Operational</span></div>
+                            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-green-700">API Status: Online</span></div>
+                            <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span><span class="text-green-700">Last Synced: Just Now</span></div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+
+    <!-- Supabase & Shared Authentication Guards -->
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { fetchNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '../../js/notifications.js';
+
+        let currentFilter = 'all';
+        let alerts = [];
+        let realtimeSubscription = null;
+
+        async function initPage() {
+            const role = 'trader';
+            
+            // 1. Run auth check
+            const hasAccess = await checkPageAuth(role);
+            if (!hasAccess) {
+                return;
+            }
+
+            // 2. Load profile data from Supabase
+            const { user, profile } = await loadCurrentUserProfile();
+            
+            // 3. Update sidebar and profile UI
+            if (profile) {
+                const displayName = profile.full_name || user?.email || 'User';
+                const displayRole = 'Trader';
+                
+                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
+                if (nameEl) nameEl.textContent = displayName;
+                
+                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
+                if (roleEl) roleEl.textContent = displayRole;
+            }
+
+            // 4. Bind Logout Button Listeners
+            const handleLogout = async (e) => {
+                e.preventDefault();
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+
+            const dropdownSignOut = document.getElementById('dropdownSignOut');
+            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+
+            // Load alerts
+            await loadSystemAlerts();
+            setupRealtimeSubscription();
+            setupEventListeners();
+        }
+
+        async function loadSystemAlerts() {
+            try {
+                // Load general/system alerts
+                const result = await fetchNotifications({ orderBy: { column: 'created_at', ascending: false } });
+                if (result.success) {
+                    // Filter system alerts
+                    alerts = (result.data || []).filter(n => {
+                        const title = (n.title || '').toLowerCase();
+                        const msg = (n.message || '').toLowerCase();
+                        const type = (n.type || '').toLowerCase();
+                        
+                        return !title.includes('payment') && !title.includes('invoice') && 
+                               !title.includes('application') && !title.includes('inspect') &&
+                               !msg.includes('payment') && !msg.includes('application') &&
+                               type !== 'payment_required' && type !== 'payment_confirmed' && 
+                               type !== 'ai_validation_error' && type !== 'application_status_update';
+                    });
+                    renderAlerts();
+                } else {
+                    document.getElementById('alertsList').innerHTML = '<div class="text-center py-8 text-red-500">Error loading alerts</div>';
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('alertsList').innerHTML = '<div class="text-center py-8 text-red-500">Error: ' + err.message + '</div>';
+            }
+        }
+
+        function renderAlerts() {
+            const container = document.getElementById('alertsList');
+            if (!container) return;
+
+            const filtered = alerts.filter(n => {
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'unread') return !n.read;
+                if (currentFilter === 'read') return n.read;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No system alerts found</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(notif => {
+                const itemClass = notif.read ? '' : 'unread border-l-4 border-amber-500';
+                const timeAgo = getTimeAgo(notif.created_at);
+                const badge = notif.read ? '' : '<span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">New</span>';
+                
+                return `
+                    <div class="notification-item ${itemClass} bg-white p-4 rounded-xl border border-gray-200" data-id="${notif.id}">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                <i class="ri-information-line text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-semibold text-sm text-gray-800">${notif.title || 'System Alert'}</h4>
+                                    ${badge}
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">${notif.message}</p>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="notif-time text-xs text-gray-400"><i class="ri-time-line mr-1"></i>${timeAgo}</span>
+                                    ${!notif.read ? `<button onclick="window.markAlertAsRead('${notif.id}')" class="text-xs text-emerald-600 hover:underline">Mark as read</button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.markAlertAsRead = async function(id) {
+            const { error } = await supabase
+                .from('notifications')
+                .update({ read: true, read_at: new Date().toISOString() })
+                .eq('id', id);
+            if (error) {
+                alert('Error updating: ' + error.message);
+            } else {
+                await loadSystemAlerts();
+            }
+        };
+
+        function setupEventListeners() {
+            document.querySelectorAll('#filterTabs button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('#filterTabs button').forEach(b => {
+                        b.classList.remove('bg-emerald-600', 'text-white');
+                        b.classList.add('border', 'hover:bg-gray-50');
+                    });
+                    this.classList.add('bg-emerald-600', 'text-white');
+                    this.classList.remove('border', 'hover:bg-gray-50');
+                    currentFilter = this.dataset.filter;
+                    renderAlerts();
+                });
+            });
+
+            document.getElementById('markAllReadBtn').addEventListener('click', async () => {
+                const { error } = await supabase
+                    .from('notifications')
+                    .update({ read: true, read_at: new Date().toISOString() })
+                    .eq('read', false);
+                if (error) {
+                    alert('Error updating: ' + error.message);
+                } else {
+                    await loadSystemAlerts();
+                }
+            });
+        }
+
+        function setupRealtimeSubscription() {
+            realtimeSubscription = supabase
+                .channel('system-alerts-trader')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
+                    loadSystemAlerts();
+                })
+                .subscribe();
+        }
+
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+            return Math.floor(seconds / 86400) + ' days ago';
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (realtimeSubscription) supabase.removeChannel(realtimeSubscription);
+        });
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPage);
+        } else {
+            initPage();
+        }
+    </script>
+

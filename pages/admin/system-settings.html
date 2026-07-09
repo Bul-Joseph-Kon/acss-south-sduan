@@ -21,9 +21,11 @@
         .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
         .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
         .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
-        .setting-group { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; }
-        .setting-group .setting-label { font-size: 0.75rem; font-weight: 500; color: #374151; }
-        .setting-group .setting-value { font-size: 0.85rem; }
+        .setting-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; transition: all 0.2s ease; }
+        .setting-card:hover { border-color: #1e3a5f; background: #f8fafc; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-enabled { background: #d1fae5; color: #065f46; }
+        .status-disabled { background: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body>
@@ -36,8 +38,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Administrator</h3>
-                            <p class="text-gray-500 text-sm">System Admin</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -54,7 +56,7 @@
                             <a href="ai-configuration.html" class="sidebar-link"><i class="ri-robot-line"></i><span>AI Configuration</span></a>
                             <a href="system-settings.html" class="sidebar-link active"><i class="ri-settings-3-line"></i><span>System Settings</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -64,7 +66,7 @@
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
                             <h2 class="text-2xl font-bold tracking-tight">⚙️ System Settings</h2>
-                            <p class="opacity-90 text-sm">Configure system parameters</p>
+                            <p class="opacity-90 text-sm">Configure system parameters - changes apply system-wide</p>
                         </div>
                         <div class="relative">
                             <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
@@ -73,89 +75,59 @@
                                 <i class="ri-arrow-down-s-line text-sm"></i>
                             </button>
                             <div class="profile-dropdown" id="profileDropdown">
-                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
-                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <a href="profile.html"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="profile.html?edit=true"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
                         </div>
                     </div>
 
-                    <div class="setting-group">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <div class="setting-label">System Name</div>
-                                <div class="setting-value">SSRA Customs Management System</div>
-                            </div>
-                            <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing system name')">Edit</button>
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-sm mb-3">System Settings</h3>
+                        <p class="text-xs text-gray-500 mb-4">Settings are stored in the database and apply system-wide. Changes are reflected in real-time across all connected clients.</p>
+                        
+                        <div class="space-y-4" id="systemSettingsList">
+                            <!-- System settings will be loaded dynamically -->
                         </div>
                     </div>
 
-                    <div class="setting-group">
-                        <div class="flex justify-between items-center">
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-sm mb-3">Add New Setting</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
                             <div>
-                                <div class="setting-label">System Version</div>
-                                <div class="setting-value">2.4.0</div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Setting Key</label>
+                                <input type="text" id="newSettingKey" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="system_name">
                             </div>
-                            <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('🔄 Checking for updates')">Check for Updates</button>
-                        </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <div class="flex justify-between items-center">
                             <div>
-                                <div class="setting-label">Environment</div>
-                                <div class="setting-value">Production</div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Setting Value</label>
+                                <input type="text" id="newSettingValue" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="SSRA Customs">
                             </div>
-                            <button class="bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition" onclick="alert('🔄 Changing environment')">Change</button>
                         </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <div class="setting-label">Maintenance Mode</div>
-                                <div class="setting-value text-green-600">Disabled</div>
-                            </div>
-                            <button class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition" onclick="alert('🔧 Enabling maintenance mode')">Enable</button>
+                        <div class="mt-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                            <select id="newSettingCategory" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+                                <option value="general">General</option>
+                                <option value="security">Security</option>
+                                <option value="email">Email</option>
+                                <option value="backup">Backup</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
                         </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <div class="setting-label">Session Timeout</div>
-                                <div class="setting-value">30 minutes</div>
-                            </div>
-                            <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing session timeout')">Edit</button>
+                        <div class="mt-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <input type="text" id="newSettingDescription" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Setting description">
                         </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <div class="setting-label">Backup Schedule</div>
-                                <div class="setting-value">Daily at 2:00 AM</div>
-                            </div>
-                            <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing backup schedule')">Edit</button>
-                        </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <div class="setting-label">Email Notifications</div>
-                                <div class="setting-value text-green-600">Enabled</div>
-                            </div>
-                            <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing email settings')">Configure</button>
-                        </div>
+                        <button class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1" onclick="addSystemSetting()">
+                            <i class="ri-add-line"></i> Add Setting
+                        </button>
                     </div>
 
                     <div class="flex gap-3">
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1" onclick="alert('💾 System settings saved')">
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1" onclick="saveAllSettings()">
                             <i class="ri-save-line"></i> Save All Settings
                         </button>
-                        <button class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-1" onclick="alert('↩️ Resetting to default settings')">
+                        <button class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-1" onclick="resetToDefaults()">
                             <i class="ri-restart-line"></i> Reset to Default
                         </button>
                     </div>
@@ -172,104 +144,226 @@
     </script>
     <script type="module">
         import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
-        import { fetchSystemSettings, updateSystemSetting, setMaintenanceMode, updateSystemName, getSystemInfo } from '../../js/system-settings.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import supabase from '../../js/supabase.js';
+
+        let allSettings = [];
+        let realtimeChannel = null;
 
         async function loadPage() {
             const isAuthenticated = await checkAuth();
+            const hasAccess = await verifyRoleAccess('administrator');
+
+            const { user, profile } = await loadCurrentUserProfile();
             if (!isAuthenticated) {
                 window.location.href = '../../auth/login.html';
                 return;
             }
 
-            const hasAccess = await verifyRoleAccess('administrator');
             if (!hasAccess) {
                 alert('You do not have permission to access this page.');
                 window.location.href = '../../auth/login.html';
                 return;
             }
 
-            const user = await getCurrentUser();
-            const profile = user ? await getUserProfile(user.id) : null;
-            
             if (profile) {
-                document.querySelector('h3').textContent = profile.full_name || 'Administrator';
-                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'System Admin';
+                const nameElem = document.getElementById('profileName');
+                if (nameElem) nameElem.textContent = profile.full_name || 'Administrator';
+                const roleElem = document.getElementById('profileRole');
+                if (roleElem) roleElem.textContent = profile.role || 'System Admin';
             }
 
             await loadSystemSettings();
+            setupRealtime();
         }
 
-        // Load system settings
         async function loadSystemSettings() {
-            const result = await fetchSystemSettings();
-            if (result.success) {
-                const settings = result.data;
+            try {
+                const { data, error } = await supabase
+                    .from('system_settings')
+                    .select('*')
+                    .order('category, key');
+
+                if (error) throw error;
+                allSettings = data || [];
+                renderSystemSettings();
+            } catch (error) {
+                console.error('Error loading system settings:', error);
+                document.getElementById('systemSettingsList').innerHTML = '<div class="text-center py-4 text-red-500">Error loading system settings: ' + error.message + '</div>';
+            }
+        }
+
+        function renderSystemSettings() {
+            const container = document.getElementById('systemSettingsList');
+            if (!container) return;
+
+            if (allSettings.length === 0) {
+                container.innerHTML = '<div class="text-center py-4 text-gray-500">No system settings found. Add settings using the form below.</div>';
+                return;
+            }
+
+            // Group by category
+            const grouped = {};
+            allSettings.forEach(setting => {
+                const category = setting.category || 'general';
+                if (!grouped[category]) grouped[category] = [];
+                grouped[category].push(setting);
+            });
+
+            let html = '';
+            for (const [category, settings] of Object.entries(grouped)) {
+                html += `<div class="mb-6"><h4 class="font-semibold text-sm text-gray-700 mb-3 capitalize">${category}</h4>`;
+                
                 settings.forEach(setting => {
-                    const settingElement = document.querySelector(`[data-setting="${setting.key}"]`);
-                    if (settingElement) {
-                        if (settingElement.tagName === 'INPUT' || settingElement.tagName === 'SELECT') {
-                            settingElement.value = setting.value;
-                        } else {
-                            settingElement.textContent = setting.value;
-                        }
-                    }
+                    const isBoolean = setting.value === 'true' || setting.value === 'false' || setting.value === '1' || setting.value === '0';
+                    const isEnabled = setting.value === 'true' || setting.value === 'enabled' || setting.value === '1';
+                    const statusClass = isEnabled ? 'status-enabled' : 'status-disabled';
+                    const statusText = isEnabled ? 'Enabled' : 'Disabled';
+
+                    html += `
+                        <div class="setting-card mb-3">
+                            <div class="flex flex-wrap justify-between items-start gap-2">
+                                <div>
+                                    <h5 class="font-medium text-sm">${setting.key}</h5>
+                                    <p class="text-xs text-gray-500">${setting.description || 'No description'}</p>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        ${isBoolean 
+                                            ? `<span class="status-badge ${statusClass}">${statusText}</span>`
+                                            : `<span class="text-xs text-gray-600">Value: <strong>${setting.value}</strong></span>`
+                                        }
+                                        <span class="text-xs text-gray-400">Updated: ${new Date(setting.updated_at).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="editSetting('${setting.id}', '${setting.key}', '${setting.value}', '${setting.category || ''}')">Edit</button>
+                                    <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteSetting('${setting.id}')">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 });
+                
+                html += '</div>';
             }
+
+            container.innerHTML = html;
         }
 
-        // Save system setting
-        async function saveSetting(key, value) {
-            const result = await updateSystemSetting(key, value);
-            if (result.success) {
-                alert('Setting saved successfully');
-            } else {
-                alert('Error saving setting: ' + result.error);
-            }
-        }
-
-        // Toggle maintenance mode
-        async function toggleMaintenanceMode() {
-            const currentMode = document.querySelector('[data-setting="maintenance_mode"]').textContent.trim() === 'Enabled';
-            const result = await setMaintenanceMode(!currentMode);
-            if (result.success) {
-                loadSystemSettings();
-                alert('Maintenance mode ' + (!currentMode ? 'enabled' : 'disabled'));
-            } else {
-                alert('Error updating maintenance mode: ' + result.error);
-            }
-        }
-
-        // Update system name
-        async function updateSystemNameSetting() {
-            const newName = prompt('Enter new system name:');
-            if (newName) {
-                const result = await updateSystemName(newName);
-                if (result.success) {
+        function setupRealtime() {
+            realtimeChannel = supabase.channel('realtime-system-settings')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'system_settings' }, () => {
                     loadSystemSettings();
-                    alert('System name updated successfully');
-                } else {
-                    alert('Error updating system name: ' + result.error);
-                }
-            }
+                })
+                .subscribe();
         }
 
-        // Initialize
+        // Cleanup on unload
+        window.addEventListener('unload', () => {
+            if (realtimeChannel) {
+                supabase.removeChannel(realtimeChannel);
+            }
+        });
+
+        window.addSystemSetting = async function() {
+            const key = document.getElementById('newSettingKey').value.trim();
+            const value = document.getElementById('newSettingValue').value.trim();
+            const category = document.getElementById('newSettingCategory').value;
+            const description = document.getElementById('newSettingDescription').value.trim();
+
+            if (!key || !value) {
+                alert('Please fill in the key and value fields');
+                return;
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('system_settings')
+                    .insert({
+                        key: key,
+                        value: value,
+                        category: category,
+                        description: description || null
+                    });
+
+                if (error) throw error;
+                
+                document.getElementById('newSettingKey').value = '';
+                document.getElementById('newSettingValue').value = '';
+                document.getElementById('newSettingDescription').value = '';
+                
+                await loadSystemSettings();
+                alert('System setting added successfully. Changes apply system-wide.');
+            } catch (error) {
+                alert('Error adding system setting: ' + error.message);
+            }
+        };
+
+        window.editSetting = async function(id, key, value, category) {
+            const newValue = prompt('Enter new value:', value);
+            if (newValue === null) return;
+
+            const newCategory = prompt('Enter category (general, security, email, backup, maintenance):', category);
+            if (newCategory === null) return;
+
+            const newDescription = prompt('Enter description:');
+            if (newDescription === null) return;
+
+            try {
+                const { error } = await supabase
+                    .from('system_settings')
+                    .update({
+                        value: newValue,
+                        category: newCategory,
+                        description: newDescription
+                    })
+                    .eq('id', id);
+
+                if (error) throw error;
+                await loadSystemSettings();
+                alert('Setting updated successfully. Changes apply system-wide.');
+            } catch (error) {
+                alert('Error updating setting: ' + error.message);
+            }
+        };
+
+        window.deleteSetting = async function(id) {
+            if (!confirm('Are you sure you want to delete this setting? This will affect system-wide behavior.')) return;
+            try {
+                const { error } = await supabase
+                    .from('system_settings')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+                await loadSystemSettings();
+                alert('Setting deleted successfully. Changes apply system-wide.');
+            } catch (error) {
+                alert('Error deleting setting: ' + error.message);
+            }
+        };
+
+        window.saveAllSettings = async function() {
+            alert('All settings are automatically saved to the database when modified. Changes apply system-wide in real-time.');
+        };
+
+        window.resetToDefaults = async function() {
+            if (!confirm('Are you sure you want to reset all settings to default values? This will affect system-wide behavior.')) return;
+            alert('Reset to defaults functionality would restore default settings from a predefined configuration.');
+        };
+
         document.addEventListener('DOMContentLoaded', loadPage);
 
-        // Expose functions to window for onclick handlers
-        window.toggleMaintenanceMode = toggleMaintenanceMode;
-        window.updateSystemNameSetting = updateSystemNameSetting;
-
         // Sign out functionality
-        const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
-        if (signOutBtn) {
-            signOutBtn.onclick = async function() {
-                const result = await signOut();
-                if (result.success) {
-                    window.location.href = '../../auth/login.html';
-                }
-            };
-        }
+        const handleLogout = async (e) => {
+            if (e) e.preventDefault();
+            const result = await signOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            }
+        };
+
+        document.getElementById('signOutBtn').addEventListener('click', handleLogout);
+        document.getElementById('dropdownSignOut').addEventListener('click', handleLogout);
     </script>
 </body>
 </html>

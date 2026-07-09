@@ -65,7 +65,8 @@ export async function sendAIValidationNotification(userId, applicationId, errors
             type: 'ai_validation_error',
             title: 'Application Validation Failed',
             message,
-            application_id: applicationId,
+            reference_id: applicationId,
+            reference_type: 'application',
             priority: 'high',
             read: false,
             created_at: new Date().toISOString()
@@ -97,7 +98,8 @@ export async function sendAIMonitoringNotification(userId, applicationId, issues
             type: 'ai_monitoring_alert',
             title: 'AI Monitoring Alert',
             message,
-            application_id: applicationId,
+            reference_id: applicationId,
+            reference_type: 'application',
             priority: 'high',
             read: false,
             created_at: new Date().toISOString()
@@ -128,7 +130,8 @@ export async function sendApplicationStatusNotification(userId, applicationId, n
             type: 'application_status_update',
             title: 'Application Status Updated',
             message,
-            application_id: applicationId,
+            reference_id: applicationId,
+            reference_type: 'application',
             priority: 'medium',
             read: false,
             created_at: new Date().toISOString()
@@ -158,7 +161,8 @@ export async function sendPaymentRequiredNotification(userId, applicationId, amo
             type: 'payment_required',
             title: 'Payment Required',
             message,
-            application_id: applicationId,
+            reference_id: applicationId,
+            reference_type: 'application',
             priority: 'high',
             read: false,
             created_at: new Date().toISOString()
@@ -175,6 +179,220 @@ export async function sendPaymentRequiredNotification(userId, applicationId, amo
         return { success: true, data };
     } catch (error) {
         console.error('Send payment notification error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ================================================================
+// INSPECTOR NOTIFICATIONS
+// ================================================================
+
+export async function sendInspectionStartedNotification(userId, applicationId, inspectionType) {
+    try {
+        const message = `Inspection started for application #${applicationId}. Type: ${inspectionType}`;
+
+        const notification = {
+            user_id: userId,
+            title: 'Inspection Started',
+            message,
+            reference_id: applicationId,
+            reference_type: 'application',
+            read: false,
+            created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+            .from('notifications')
+            .insert(notification)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        console.log('Inspection started notification sent:', notification);
+        return { success: true, data };
+    } catch (error) {
+        console.error('Send inspection started notification error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendInspectionPassedNotification(userId, applicationId) {
+    try {
+        const message = `Inspection passed for application #${applicationId}. Application routed for review.`;
+
+        const notification = {
+            user_id: userId,
+            title: 'Inspection Passed',
+            message,
+            reference_id: applicationId,
+            reference_type: 'application',
+            read: false,
+            created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+            .from('notifications')
+            .insert(notification)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        console.log('Inspection passed notification sent:', notification);
+        return { success: true, data };
+    } catch (error) {
+        console.error('Send inspection passed notification error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendInspectionFailedNotification(userId, applicationId, reason) {
+    try {
+        const message = `Inspection failed for application #${applicationId}. Reason: ${reason}. Application returned for correction.`;
+
+        const notification = {
+            user_id: userId,
+            title: 'Inspection Failed',
+            message,
+            reference_id: applicationId,
+            reference_type: 'application',
+            read: false,
+            created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+            .from('notifications')
+            .insert(notification)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        console.log('Inspection failed notification sent:', notification);
+        return { success: true, data };
+    } catch (error) {
+        console.error('Send inspection failed notification error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendInspectionReturnedNotification(userId, applicationId, reason) {
+    try {
+        const message = `Application #${applicationId} returned for correction. Reason: ${reason}`;
+
+        const notification = {
+            user_id: userId,
+            title: 'Application Returned',
+            message,
+            reference_id: applicationId,
+            reference_type: 'application',
+            read: false,
+            created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+            .from('notifications')
+            .insert(notification)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        console.log('Inspection returned notification sent:', notification);
+        return { success: true, data };
+    } catch (error) {
+        console.error('Send inspection returned notification error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendInspectionCompletedNotification(userId, applicationId) {
+    try {
+        const message = `Inspection completed for application #${applicationId}. Final report submitted.`;
+
+        const notification = {
+            user_id: userId,
+            title: 'Inspection Completed',
+            message,
+            reference_id: applicationId,
+            reference_type: 'application',
+            read: false,
+            created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+            .from('notifications')
+            .insert(notification)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        console.log('Inspection completed notification sent:', notification);
+        return { success: true, data };
+    } catch (error) {
+        console.error('Send inspection completed notification error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendInspectionEscalatedNotification(userId, applicationId, reason) {
+    try {
+        const message = `Application #${applicationId} escalated to supervisor. Reason: ${reason}`;
+
+        const notification = {
+            user_id: userId,
+            title: 'Application Escalated',
+            message,
+            reference_id: applicationId,
+            reference_type: 'application',
+            read: false,
+            created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+            .from('notifications')
+            .insert(notification)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        console.log('Inspection escalated notification sent:', notification);
+        return { success: true, data };
+    } catch (error) {
+        console.error('Send inspection escalated notification error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendReinspectionRequestedNotification(userId, applicationId, reason) {
+    try {
+        const message = `Reinspection requested for application #${applicationId}. Reason: ${reason}`;
+
+        const notification = {
+            user_id: userId,
+            title: 'Reinspection Requested',
+            message,
+            reference_id: applicationId,
+            reference_type: 'application',
+            read: false,
+            created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+            .from('notifications')
+            .insert(notification)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        console.log('Reinspection requested notification sent:', notification);
+        return { success: true, data };
+    } catch (error) {
+        console.error('Send reinspection requested notification error:', error);
         return { success: false, error: error.message };
     }
 }

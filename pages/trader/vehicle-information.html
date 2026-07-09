@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Vehicle Information</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .info-card { background: #f8fafc; border-radius: 0.75rem; padding: 1rem; border: 1px solid #e5e7eb; }
+        .info-card .info-label { font-size: 0.7rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.3px; }
+        .info-card .info-value { font-weight: 600; font-size: 0.95rem; }
+        .qr-container { display: inline-block; padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; }
+        #qrcode { width: 100px; height: 100px; }
+        #qrcode img { width: 100% !important; height: 100% !important; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🚗 Vehicle Information</h2>
+                            <p class="opacity-90 text-sm">Detailed vehicle registration and customs information</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Summary -->
+                    <div id="vehicleLoading" class="text-center py-8 hidden">
+                        <i class="ri-loader-4-line animate-spin text-2xl text-emerald-600"></i>
+                        <p class="text-gray-500 mt-2">Loading vehicle information...</p>
+                    </div>
+                    <div id="vehicleEmpty" class="hidden text-center py-8">
+                        <i class="ri-car-line text-4xl text-gray-300"></i>
+                        <p class="text-gray-500 mt-2">No vehicle information found</p>
+                    </div>
+                    <div id="vehicleError" class="hidden bg-red-50 border border-red-200 rounded-lg p-4">
+                        <p class="text-red-700" id="errorMessage">Error loading vehicle information</p>
+                        <button onclick="loadVehicle()" class="mt-2 text-sm text-red-600 hover:underline">Retry</button>
+                    </div>
+                    <div id="vehicleData" class="hidden">
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h3 class="text-xl font-bold" id="vehicleName">-</h3>
+                                    <p class="text-gray-500" id="vehicleDetails">-</p>
+                                    <div class="flex gap-2 mt-2" id="vehicleBadges">
+                                    </div>
+                                </div>
+                                <div class="qr-container">
+                                    <div id="qrcode"></div>
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-4 gap-3 mt-4">
+                                <div class="info-card">
+                                    <div class="info-label">VIN / Chassis</div>
+                                    <div class="info-value" id="vehicleVin">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Registration Number</div>
+                                    <div class="info-value" id="vehicleReg">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Engine Number</div>
+                                    <div class="info-value" id="vehicleEngine">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Color</div>
+                                    <div class="info-value" id="vehicleColor">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Year of Manufacture</div>
+                                    <div class="info-value" id="vehicleYear">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Country of Origin</div>
+                                    <div class="info-value" id="vehicleOrigin">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Fuel Type</div>
+                                    <div class="info-value" id="vehicleFuel">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Seating Capacity</div>
+                                    <div class="info-value" id="vehicleSeats">-</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Navigation to other sections -->
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <a href="customs-information.html" class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-emerald-400 transition text-center">
+                                <i class="ri-file-search-line text-2xl text-emerald-600"></i>
+                                <p class="font-semibold mt-2">Customs Information</p>
+                                <p class="text-xs text-gray-500">Import status and duties</p>
+                            </a>
+                            <a href="tax-information.html" class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-emerald-400 transition text-center">
+                                <i class="ri-money-dollar-circle-line text-2xl text-emerald-600"></i>
+                                <p class="font-semibold mt-2">Tax Information</p>
+                                <p class="text-xs text-gray-500">Tax assessment and payments</p>
+                            </a>
+                            <a href="verification-result.html" class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:border-emerald-400 transition text-center">
+                                <i class="ri-check-double-line text-2xl text-emerald-600"></i>
+                                <p class="font-semibold mt-2">Verification Result</p>
+                                <p class="text-xs text-gray-500">Full verification report</p>
+                            </a>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3">Actions</h3>
+                            <div class="flex flex-wrap gap-3">
+                                <button id="downloadBtn" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition flex items-center gap-2">
+                                    <i class="ri-file-pdf-line"></i> Download Report
+                                </button>
+                                <button id="printBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-2">
+                                    <i class="ri-printer-line"></i> Print
+                                </button>
+                                <button id="shareBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition flex items-center gap-2">
+                                    <i class="ri-share-line"></i> Share
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <a href="search-vehicle.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <i class="ri-arrow-left-line"></i> New Search
+                        </a>
+                        <a href="customs-information.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            View Customs Information <i class="ri-arrow-right-line"></i>
+                        </a>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import { checkPageAuth, signOut } from '../../js/auth-check.js';
+        import { signOut as authSignOut } from '../../js/auth.js';
+        import { getUnreadCount } from '../../js/notifications.js';
+        import toastManager from '../../js/toast.js';
+        import { fetchVehicleById } from '../../js/vehicle-service.js';
+        import supabase from '../../js/supabase.js';
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Check authentication
+        await checkPageAuth('trader');
+
+        // Sign out handler
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await authSignOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        let currentVehicle = null;
+
+        async function loadVehicle() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const vehicleId = urlParams.get('id');
+
+            if (!vehicleId) {
+                document.getElementById('vehicleEmpty').classList.remove('hidden');
+                document.getElementById('vehicleEmpty').querySelector('p').textContent = 'No vehicle ID provided';
+                toastManager.error('No vehicle ID provided');
+                return;
+            }
+
+            document.getElementById('vehicleLoading').classList.remove('hidden');
+            document.getElementById('vehicleEmpty').classList.add('hidden');
+            document.getElementById('vehicleError').classList.add('hidden');
+            document.getElementById('vehicleData').classList.add('hidden');
+
+            try {
+                const result = await fetchVehicleById(vehicleId);
+                
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+                
+                if (!result.data) {
+                    document.getElementById('vehicleLoading').classList.add('hidden');
+                    document.getElementById('vehicleEmpty').classList.remove('hidden');
+                    toastManager.info('Vehicle not found');
+                    return;
+                }
+
+                currentVehicle = result.data;
+                displayVehicle(result.data);
+                toastManager.success('Vehicle loaded successfully');
+
+            } catch (error) {
+                console.error('Load vehicle error:', error);
+                document.getElementById('vehicleLoading').classList.add('hidden');
+                document.getElementById('vehicleError').classList.remove('hidden');
+                document.getElementById('errorMessage').textContent = 'Error loading vehicle: ' + error.message;
+                toastManager.error('Error loading vehicle: ' + error.message);
+            }
+        }
+
+        function displayVehicle(vehicle) {
+            document.getElementById('vehicleLoading').classList.add('hidden');
+            document.getElementById('vehicleData').classList.remove('hidden');
+
+            document.getElementById('vehicleName').textContent = `${vehicle.make} ${vehicle.model}`;
+            document.getElementById('vehicleDetails').textContent = `${vehicle.year} · ${vehicle.body_type || 'N/A'} · ${vehicle.engine_size || 'N/A'} ${vehicle.fuel_type || ''}`;
+            
+            // Badges
+            const badgesContainer = document.getElementById('vehicleBadges');
+            badgesContainer.innerHTML = '';
+            if (vehicle.verified) {
+                badgesContainer.innerHTML += '<span class="status-badge status-approved">✓ Verified</span>';
+            }
+            if (vehicle.registered) {
+                badgesContainer.innerHTML += '<span class="status-badge bg-blue-100 text-blue-700">Registered</span>';
+            }
+
+            // Info cards
+            document.getElementById('vehicleVin').textContent = vehicle.vin;
+            document.getElementById('vehicleReg').textContent = vehicle.registration_number;
+            document.getElementById('vehicleEngine').textContent = vehicle.engine_number;
+            document.getElementById('vehicleColor').textContent = vehicle.color;
+            document.getElementById('vehicleYear').textContent = vehicle.year;
+            document.getElementById('vehicleOrigin').textContent = vehicle.country_of_origin;
+            document.getElementById('vehicleFuel').textContent = vehicle.fuel_type;
+            document.getElementById('vehicleSeats').textContent = vehicle.seating_capacity;
+
+            // Generate QR code
+            generateQRCode(vehicle);
+        }
+
+        function generateQRCode(vehicle) {
+            const qrData = JSON.stringify({
+                vin: vehicle.vin,
+                registration: vehicle.registration_number,
+                make: vehicle.make,
+                model: vehicle.model,
+                year: vehicle.year,
+                color: vehicle.color,
+                engine: vehicle.engine_number,
+                status: vehicle.verified ? 'Verified' : 'Pending'
+            });
+            
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrContainer, {
+                    text: qrData,
+                    width: 100,
+                    height: 100,
+                    colorDark: '#0a4d3e',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        }
+
+        function shareVehicle() {
+            if (!currentVehicle) return;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Vehicle Information',
+                    text: `${currentVehicle.make} ${currentVehicle.model} · ${currentVehicle.registration_number} · VIN: ${currentVehicle.vin}`,
+                    url: window.location.href
+                }).catch(() => {});
+            } else {
+                toastManager.info('Share vehicle information via email or messaging apps');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            toastManager.info('Downloading Vehicle Report');
+        });
+        document.getElementById('printBtn').addEventListener('click', () => {
+            toastManager.info('Printing Vehicle Information');
+        });
+        document.getElementById('shareBtn').addEventListener('click', shareVehicle);
+
+        // Expose functions
+        window.loadVehicle = loadVehicle;
+
+        // Load on page load
+        loadVehicle();
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+    </script>
+</body></html>

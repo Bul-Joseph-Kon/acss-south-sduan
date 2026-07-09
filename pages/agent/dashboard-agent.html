@@ -8,8 +8,10 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="../../js/auth.js"></script>
+    <script type="module" src="../../js/auth-check.js"></script>
     <script type="module" src="../../js/dashboard.js"></script>
     <script type="module" src="../../js/realtime.js"></script>
+    <script type="module" src="../../js/agent-sidebar.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -42,16 +44,7 @@
         .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
         .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
         .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
-        .badge { background: #dc2626; color: white; font-size: 0.6rem; padding: 0.1rem 0.4rem; border-radius: 9999px; }
-        /* Sidebar category toggle styles */
-        .category-toggle { cursor: pointer; }
-        .category-toggle .arrow { transition: transform 0.3s ease; }
-        .category-toggle .arrow.open { transform: rotate(180deg); }
-        .category-submenu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding-left: 1.5rem; }
-        .category-submenu.open { max-height: 1000px; }
-        .category-submenu .sidebar-link { font-size: 0.8rem; padding: 0.4rem 1rem; }
-        .category-submenu .sidebar-link i { font-size: 1rem; width: 1.2rem; }
-        .flow-badge { font-size: 0.55rem; padding: 0.1rem 0.4rem; border-radius: 9999px; font-weight: 600; }
+        .badge { background: #dc2626; color: white; font-size: 0.6rem; padding: 0.1rem 0.4rem; border-radius: 9999px; }.flow-badge { font-size: 0.55rem; padding: 0.1rem 0.4rem; border-radius: 9999px; font-weight: 600; }
         .flow-badge-ai { background: #dbeafe; color: #1e40af; }
         .flow-badge-officer { background: #fef3c7; color: #92400e; }
         .flow-badge-inspector { background: #fee2e2; color: #991b1b; }
@@ -71,80 +64,7 @@
             <div class="flex flex-col lg:flex-row gap-6">
                 <!-- Sidebar -->
                 <aside class="lg:w-72 flex-shrink-0">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
-                        <div class="text-center mb-5">
-                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
-                                <i class="ri-user-line text-white text-3xl"></i>
-                            </div>
-                            <h3 id="agentProfileName" class="text-lg font-bold text-gray-800">Loading...</h3>
-                            <p id="agentProfileRole" class="text-gray-500 text-sm">Loading...</p>
-                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
-                            <div class="mt-1 text-xs text-gray-400">License: LIC-2026-0008</div>
-                        </div>
-
-                        <nav class="space-y-1">
-                            <!-- Dashboard -->
-                            <a href="dashboard-agent.html" class="sidebar-link active"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
-
-                            <!-- Services Category -->
-                            <div class="category-toggle" onclick="toggleCategory('services')">
-                                <div class="sidebar-link">
-                                    <i class="ri-service-line"></i>
-                                    <span>Services</span>
-                                    <span class="ml-auto arrow" id="servicesArrow"><i class="ri-arrow-down-s-line"></i></span>
-                                </div>
-                            </div>
-                            <div class="category-submenu" id="servicesSubmenu">
-                                <a href="services/agent-license/dashboard.html" class="sidebar-link"><i class="ri-id-card-line"></i><span>Agent License</span></a>
-                                <a href="services/cvet/create-declaration.html" class="sidebar-link"><i class="ri-file-invoice-line"></i><span>CVET</span></a>
-                                <a href="services/direct-assessment/create-assessment.html" class="sidebar-link"><i class="ri-file-search-line"></i><span>Direct Assessment</span></a>
-                                <a href="services/vehicle-query/search-vehicle.html" class="sidebar-link"><i class="ri-car-line"></i><span>Vehicle Query</span></a>
-                            </div>
-
-                            <!-- Applications Category -->
-                            <div class="category-toggle" onclick="toggleCategory('applications')">
-                                <div class="sidebar-link">
-                                    <i class="ri-file-copy-line"></i>
-                                    <span>Applications</span>
-                                    <span class="ml-auto arrow" id="applicationsArrow"><i class="ri-arrow-down-s-line"></i></span>
-                                </div>
-                            </div>
-                            <div class="category-submenu" id="applicationsSubmenu">
-                                <a href="applications/draft.html" class="sidebar-link"><i class="ri-pen-line"></i><span>Drafts</span></a>
-                                <a href="applications/submitted.html" class="sidebar-link"><i class="ri-paper-plane-line"></i><span>Submitted</span></a>
-                                <a href="applications/under-review.html" class="sidebar-link"><i class="ri-search-line"></i><span>Under Review</span></a>
-                                <a href="applications/pending-payment.html" class="sidebar-link"><i class="ri-bank-card-line"></i><span>Pending Payment</span></a>
-                                <a href="applications/approved.html" class="sidebar-link"><i class="ri-check-circle-line"></i><span>Approved</span></a>
-                                <a href="applications/rejected.html" class="sidebar-link"><i class="ri-close-circle-line"></i><span>Rejected</span></a>
-                                <a href="applications/completed.html" class="sidebar-link"><i class="ri-flag-checkered-line"></i><span>Completed</span></a>
-                            </div>
-
-                            <!-- Notifications Category -->
-                            <div class="category-toggle" onclick="toggleCategory('notifications')">
-                                <div class="sidebar-link">
-                                    <i class="ri-notification-3-line"></i>
-                                    <span>Notifications</span>
-                                    <span class="ml-auto arrow" id="notificationsArrow"><i class="ri-arrow-down-s-line"></i></span>
-                                    <span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span>
-                                </div>
-                            </div>
-                            <div class="category-submenu" id="notificationsSubmenu">
-                                <a href="notifications/submitted.html" class="sidebar-link"><i class="ri-paper-plane-line"></i><span>Submitted</span></a>
-                                <a href="notifications/under-review.html" class="sidebar-link"><i class="ri-search-line"></i><span>Under Review</span></a>
-                                <a href="notifications/payment-required.html" class="sidebar-link"><i class="ri-bank-card-line"></i><span>Payment Required</span></a>
-                                <a href="notifications/approved.html" class="sidebar-link"><i class="ri-check-circle-line"></i><span>Approved</span></a>
-                                <a href="notifications/rejected.html" class="sidebar-link"><i class="ri-close-circle-line"></i><span>Rejected</span></a>
-                                <a href="notifications/license-issued.html" class="sidebar-link"><i class="ri-id-card-line"></i><span>License Issued</span></a>
-                                <a href="notifications/cvet-ready.html" class="sidebar-link"><i class="ri-file-invoice-line"></i><span>CVET Ready</span></a>
-                                <a href="notifications/cargo-released.html" class="sidebar-link"><i class="ri-truck-line"></i><span>Cargo Released</span></a>
-                                <a href="notifications/system-alerts.html" class="sidebar-link"><i class="ri-server-line"></i><span>System Alerts</span></a>
-                            </div>
-                        </nav>
-
-                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
-                            <i class="ri-logout-box-line"></i> Sign Out
-                        </button>
-                    </div>
+                    <div id="agent-sidebar"></div>
                 </aside>
 
                 <!-- Main Content -->
@@ -191,32 +111,32 @@
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-flashlight-line text-blue-500 mr-2"></i>Quick Actions</h3>
                         <div class="flex flex-wrap gap-2">
-                            <a href="services/cvet/create-declaration.html" class="quick-action-btn"><i class="ri-file-add-line text-blue-500"></i> New CVET</a>
-                            <a href="services/direct-assessment/create-assessment.html" class="quick-action-btn"><i class="ri-file-search-line text-blue-500"></i> Direct Assessment</a>
-                            <a href="services/agent-license/new-license.html" class="quick-action-btn"><i class="ri-id-card-line text-blue-500"></i> New License</a>
-                            <a href="services/vehicle-query/search-vehicle.html" class="quick-action-btn"><i class="ri-search-line text-blue-500"></i> Vehicle Query</a>
-                            <a href="applications/draft.html" class="quick-action-btn"><i class="ri-pen-line text-blue-500"></i> Drafts</a>
+                            <a href="create-declaration.html" class="quick-action-btn"><i class="ri-file-add-line text-blue-500"></i> New CVET</a>
+                            <a href="create-assessment.html" class="quick-action-btn"><i class="ri-file-search-line text-blue-500"></i> Direct Assessment</a>
+                            <a href="new-license.html" class="quick-action-btn"><i class="ri-id-card-line text-blue-500"></i> New License</a>
+                            <a href="search-vehicle.html" class="quick-action-btn"><i class="ri-search-line text-blue-500"></i> Vehicle Query</a>
+                            <a href="draft.html" class="quick-action-btn"><i class="ri-pen-line text-blue-500"></i> Drafts</a>
                         </div>
                     </div>
 
                     <!-- Services Cards -->
                     <div class="grid md:grid-cols-4 gap-3">
-                        <a href="services/agent-license/dashboard.html" class="service-card">
+                        <a href="dashboard.html" class="service-card">
                             <div class="service-icon"><i class="ri-id-card-line"></i></div>
                             <h4 class="font-semibold text-sm mt-2">Agent License</h4>
                             <p class="text-xs text-gray-500">License applications</p>
                         </a>
-                        <a href="services/cvet/create-declaration.html" class="service-card">
+                        <a href="create-declaration.html" class="service-card">
                             <div class="service-icon"><i class="ri-file-invoice-line"></i></div>
                             <h4 class="font-semibold text-sm mt-2">CVET</h4>
                             <p class="text-xs text-gray-500">Customs Valuation</p>
                         </a>
-                        <a href="services/direct-assessment/create-assessment.html" class="service-card">
+                        <a href="create-assessment.html" class="service-card">
                             <div class="service-icon"><i class="ri-file-search-line"></i></div>
                             <h4 class="font-semibold text-sm mt-2">Direct Assessment</h4>
                             <p class="text-xs text-gray-500">Customs clearance</p>
                         </a>
-                        <a href="services/vehicle-query/search-vehicle.html" class="service-card">
+                        <a href="search-vehicle.html" class="service-card">
                             <div class="service-icon"><i class="ri-car-line"></i></div>
                             <h4 class="font-semibold text-sm mt-2">Vehicle Query</h4>
                             <p class="text-xs text-gray-500">Vehicle registration</p>
@@ -230,7 +150,7 @@
                             <div class="space-y-2" id="recentApplicationsList">
                                 <div class="text-sm text-gray-500 text-center py-4">Loading applications...</div>
                             </div>
-                            <a href="applications/submitted.html" class="mt-3 text-sm text-blue-600 hover:underline inline-block">View All →</a>
+                            <a href="submitted.html" class="mt-3 text-sm text-blue-600 hover:underline inline-block">View All →</a>
                         </div>
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-user-line text-blue-500 mr-2"></i>Clients</h3>
@@ -273,10 +193,14 @@
     </div>
     <script type="module">
         import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
+        
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
+        
         import { realtimeManager } from '../../js/realtime.js';
 
+        
         const PAGE_KEY = 'agent-dashboard';
         let currentRole = null;
         let currentUserId = null;
@@ -297,6 +221,9 @@
         async function loadDashboard() {
             console.log('=== LOADING AGENT DASHBOARD ===');
             const isAuthenticated = await checkAuth();
+
+        // Load user profile
+        await loadCurrentUserProfile();
             if (!isAuthenticated) {
                 window.location.href = '../../auth/login.html';
                 return;
@@ -306,9 +233,9 @@
             const hasAccess = await verifyRoleAccess('agent');
             if (!hasAccess) {
                 // Get user's actual role and redirect to their dashboard
-                const user = await getCurrentUser();
+                
                 if (user) {
-                    const profile = await getUserProfile(user.id);
+                    
                     if (profile && profile.role) {
                         const dashboardUrl = redirectToDashboard(profile.role);
                         window.location.href = dashboardUrl;
@@ -319,24 +246,32 @@
                 return;
             }
 
-            const user = await getCurrentUser();
-            const profile = user ? await getUserProfile(user.id) : null;
+            
+            
             
             if (profile) {
                 const displayName = profile.full_name || localStorage.getItem('userName') || user.email || 'Agent';
                 const displayRole = formatRole(profile.role || localStorage.getItem('userRole') || 'agent');
 
-                document.getElementById('agentProfileName').textContent = displayName;
-                document.getElementById('agentProfileRole').textContent = displayRole;
-                document.getElementById('agentHeaderRole').textContent = displayRole;
-                document.getElementById('agentWelcomeTitle').textContent = `Welcome back, ${displayName}!`;
+                const nameEl = document.getElementById('agentProfileName');
+                if (nameEl) nameEl.textContent = displayName;
+                const roleEl = document.getElementById('agentProfileRole');
+                if (roleEl) roleEl.textContent = displayRole;
+                const headerRoleEl = document.getElementById('agentHeaderRole');
+                if (headerRoleEl) headerRoleEl.textContent = displayRole;
+                const welcomeEl = document.getElementById('agentWelcomeTitle');
+                if (welcomeEl) welcomeEl.textContent = `Welcome back, ${displayName}!`;
                 currentRole = profile.role || 'agent';
                 currentUserId = profile.id;
             } else {
-                document.getElementById('agentProfileName').textContent = 'Agent';
-                document.getElementById('agentProfileRole').textContent = 'Agent';
-                document.getElementById('agentHeaderRole').textContent = 'Agent';
-                document.getElementById('agentWelcomeTitle').textContent = 'Welcome back!';
+                const nameEl = document.getElementById('agentProfileName');
+                if (nameEl) nameEl.textContent = 'Agent';
+                const roleEl = document.getElementById('agentProfileRole');
+                if (roleEl) roleEl.textContent = 'Agent';
+                const headerRoleEl = document.getElementById('agentHeaderRole');
+                if (headerRoleEl) headerRoleEl.textContent = 'Agent';
+                const welcomeEl = document.getElementById('agentWelcomeTitle');
+                if (welcomeEl) welcomeEl.textContent = 'Welcome back!';
                 currentRole = 'agent';
                 currentUserId = user?.id;
             }
@@ -347,26 +282,38 @@
 
             // Update statistics
             if (data.applications) {
-                document.getElementById('statTotal').textContent = data.applications.total || 0;
-                document.getElementById('statPending').textContent = data.applications.pending || 0;
-                document.getElementById('statAIValidated').textContent = data.applications.pending_review || 0;
-                document.getElementById('statApproved').textContent = data.applications.approved || 0;
-                document.getElementById('statRejected').textContent = data.applications.rejected || 0;
+                const statTotal = document.getElementById('statTotal');
+                if (statTotal) statTotal.textContent = data.applications.total || 0;
+                const statPending = document.getElementById('statPending');
+                if (statPending) statPending.textContent = data.applications.pending || 0;
+                const statAIValidated = document.getElementById('statAIValidated');
+                if (statAIValidated) statAIValidated.textContent = data.applications.pending_review || 0;
+                const statApproved = document.getElementById('statApproved');
+                if (statApproved) statApproved.textContent = data.applications.approved || 0;
+                const statRejected = document.getElementById('statRejected');
+                if (statRejected) statRejected.textContent = data.applications.rejected || 0;
             }
 
             // Update notification badge
             if (data.notifications) {
                 const unreadCount = data.notifications.unread || 0;
-                document.getElementById('notificationBadge').textContent = unreadCount;
-                document.getElementById('notificationBadge').style.display = unreadCount > 0 ? 'inline-block' : 'none';
+                const notifBadge = document.getElementById('notificationBadge');
+                if (notifBadge) {
+                    notifBadge.textContent = unreadCount;
+                    notifBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+                }
             }
 
             // Update flow status
             if (data.applications) {
-                document.getElementById('flowDeclarations').textContent = data.applications.submitted || 0;
-                document.getElementById('flowAIValidated').textContent = data.applications.pending_review || 0;
-                document.getElementById('flowOfficerReview').textContent = data.applications.under_inspection || 0;
-                document.getElementById('flowCompleted').textContent = data.applications.completed || 0;
+                const flowDeclarations = document.getElementById('flowDeclarations');
+                if (flowDeclarations) flowDeclarations.textContent = data.applications.submitted || 0;
+                const flowAIValidated = document.getElementById('flowAIValidated');
+                if (flowAIValidated) flowAIValidated.textContent = data.applications.pending_review || 0;
+                const flowOfficerReview = document.getElementById('flowOfficerReview');
+                if (flowOfficerReview) flowOfficerReview.textContent = data.applications.under_inspection || 0;
+                const flowCompleted = document.getElementById('flowCompleted');
+                if (flowCompleted) flowCompleted.textContent = data.applications.completed || 0;
             }
 
             // Update recent applications list
@@ -391,10 +338,60 @@
 
             // Load clients (for agents, this would be traders they represent)
             // For now, show placeholder since client management is a separate feature
-            document.getElementById('clientsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Client management coming soon</div>';
+            await loadClients(profile?.id);
 
             // Initialize realtime monitoring
             await initializeRealtimeMonitoring(profile?.id);
+        }
+
+        async function loadClients(agentId) {
+            try {
+                // For agents, load unique traders from applications they've processed
+                const { data: applications, error } = await supabase
+                    .from('applications')
+                    .select('user_id, application_number, created_at')
+                    .eq('agent_id', agentId)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error) throw error;
+
+                if (!applications || applications.length === 0) {
+                    document.getElementById('clientsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No clients yet</div>';
+                    return;
+                }
+
+                // Get unique user_ids and fetch their profiles
+                const uniqueUserIds = [...new Set(applications.map(app => app.user_id))];
+                const { data: profiles, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, email, organization')
+                    .in('id', uniqueUserIds);
+
+                if (profileError) throw profileError;
+
+                const clientsList = document.getElementById('clientsList');
+                if (profiles && profiles.length > 0) {
+                    clientsList.innerHTML = profiles.map(client => `
+                        <div class="client-card">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="ri-user-line text-blue-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-sm">${client.full_name || 'Unknown'}</h4>
+                                    <p class="text-xs text-gray-500">${client.organization || client.email || 'No organization'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    clientsList.innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No clients found</div>';
+                }
+            } catch (error) {
+                console.error('Error loading clients:', error);
+                document.getElementById('clientsList').innerHTML = '<div class="text-sm text-red-500 text-center py-4">Error loading clients</div>';
+            }
         }
 
         async function initializeRealtimeMonitoring() {
@@ -523,10 +520,20 @@
             }
         }
 
-        document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
-        document.getElementById('dropdownSignOut').addEventListener('click', handleSignOut);
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) signOutBtn.addEventListener('click', handleSignOut);
+        
+        const dropdownSignOut = document.getElementById('dropdownSignOut');
+        if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleSignOut);
 
         window.toggleCategory = toggleCategory;
     </script>
 </body>
 </html>
+
+
+
+
+
+
+

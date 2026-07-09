@@ -178,14 +178,20 @@ CREATE TABLE applications (
     declaration_data JSONB DEFAULT '{}',
     goods_data JSONB DEFAULT '{}',
     vehicle_data JSONB DEFAULT '{}',
-    
+
+    -- Inspection fields
+    inspection_report JSONB DEFAULT '{}',
+    inspection_completed_at TIMESTAMP WITH TIME ZONE,
+    declared_value NUMERIC,
+    inspection_type TEXT CHECK (inspection_type IN ('cargo', 'vehicle', 'warehouse', 'general')),
+
     -- Tracking
     submitted_at TIMESTAMP WITH TIME ZONE,
     reviewed_at TIMESTAMP WITH TIME ZONE,
     inspected_at TIMESTAMP WITH TIME ZONE,
     approved_at TIMESTAMP WITH TIME ZONE,
     completed_at TIMESTAMP WITH TIME ZONE,
-    
+
     -- Notes
     notes TEXT,
     rejection_reason TEXT,
@@ -209,6 +215,9 @@ CREATE INDEX idx_applications_status ON applications(status);
 CREATE INDEX idx_applications_application_number ON applications(application_number);
 CREATE INDEX idx_applications_application_type ON applications(application_type);
 CREATE INDEX idx_applications_created_at ON applications(created_at DESC);
+CREATE INDEX idx_applications_inspection_type ON applications(inspection_type);
+CREATE INDEX idx_applications_declared_value ON applications(declared_value);
+CREATE INDEX idx_applications_inspection_completed_at ON applications(inspection_completed_at DESC);
 
 -- ================================================================
 -- APPLICATION ITEMS TABLE

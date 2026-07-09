@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Track CVET Declaration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .track-timeline { position: relative; padding-left: 1.5rem; }
+        .track-timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #e5e7eb; }
+        .track-item { position: relative; padding: 0.5rem 0 0.5rem 1rem; }
+        .track-item::before { content: ''; position: absolute; left: -0.45rem; top: 0.8rem; width: 0.8rem; height: 0.8rem; border-radius: 50%; background: #d1d5db; border: 2px solid white; }
+        .track-item.completed::before { background: #0a4d3e; }
+        .track-item.current::before { background: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.2); }
+        .track-item .track-status { font-size: 0.7rem; font-weight: 600; color: #6b7280; }
+        .track-item .track-title { font-weight: 500; font-size: 0.85rem; }
+        .track-item .track-date { font-size: 0.7rem; color: #9ca3af; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-review { background: #dbeafe; color: #1e40af; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🔍 Track Declaration</h2>
+                            <p class="opacity-90 text-sm">Monitor the status of your CVET declaration</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex flex-wrap gap-3">
+                            <input type="text" id="searchInput" class="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-400 outline-none" placeholder="Enter declaration reference number..." />
+                            <button id="trackBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition">Track</button>
+                        </div>
+                    </div>
+
+                    <div id="trackingLoading" class="text-center py-8 hidden">
+                        <i class="ri-loader-4-line animate-spin text-2xl text-emerald-600"></i>
+                        <p class="text-gray-500 mt-2">Loading declaration status...</p>
+                    </div>
+                    <div id="trackingEmpty" class="hidden text-center py-8">
+                        <i class="ri-search-line text-4xl text-gray-300"></i>
+                        <p class="text-gray-500 mt-2">Enter a declaration reference number to track</p>
+                    </div>
+                    <div id="trackingError" class="hidden bg-red-50 border border-red-200 rounded-lg p-4">
+                        <p class="text-red-700" id="errorMessage">Error loading declaration status</p>
+                        <button onclick="trackDeclaration()" class="mt-2 text-sm text-red-600 hover:underline">Retry</button>
+                    </div>
+                    <div id="trackingResult" class="hidden">
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-xl font-bold" id="declarationNumber">-</h3>
+                                    <p class="text-sm text-gray-500" id="declarationInfo">-</p>
+                                </div>
+                                <span class="status-badge" id="declarationStatus">-</span>
+                            </div>
+
+                            <div class="mt-4">
+                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                    <span>Progress</span>
+                                    <span id="progressPercent">0%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:0%"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 track-timeline" id="timelineContainer">
+                                <!-- Timeline items will be rendered here -->
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3">Declaration Summary</h3>
+                            <div class="grid md:grid-cols-4 gap-3">
+                                <div><span class="text-xs text-gray-500">Reference</span><p class="font-semibold text-sm" id="summaryRef">-</p></div>
+                                <div><span class="text-xs text-gray-500">Total Value</span><p class="font-semibold text-sm" id="summaryValue">-</p></div>
+                                <div><span class="text-xs text-gray-500">Total Duty</span><p class="font-semibold text-sm" id="summaryDuty">-</p></div>
+                                <div><span class="text-xs text-gray-500">Status</span><p class="font-semibold text-sm" id="summaryStatus">-</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        import { fetchById } from '../../js/database.js';
+        
+        import { checkPageAuth, signOut } from '../../js/auth-check.js';
+        
+        import { signOut as authSignOut } from '../../js/auth.js';
+        
+        import { getUnreadCount } from '../../js/notifications.js';
+        
+        import toastManager from '../../js/toast.js';
+        
+        import supabase from '../../js/supabase.js';
+
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Check authentication
+        await checkPageAuth('trader');
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Sign out handler
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await authSignOut();
+                if (result.success) {
+                    toastManager.success('Signed out successfully');
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        let realtimeSubscription = null;
+
+        // Workflow stages for timeline
+        const workflowStages = [
+            { id: 'declarant_info', title: 'Declarant Information', order: 1 },
+            { id: 'shipment_info', title: 'Shipment Information', order: 2 },
+            { id: 'goods_info', title: 'Goods Information', order: 3 },
+            { id: 'documents', title: 'Supporting Documents', order: 4 },
+            { id: 'ai_validation', title: 'AI Validation', order: 5 },
+            { id: 'duty_assessment', title: 'Duty Assessment', order: 6 },
+            { id: 'payment', title: 'Payment Processing', order: 7 },
+            { id: 'certificate', title: 'Certificate Generation', order: 8 }
+        ];
+
+        async function trackDeclaration() {
+            const searchValue = document.getElementById('searchInput').value.trim();
+            if (!searchValue) {
+                toastManager.warning('Please enter a declaration reference number');
+                return;
+            }
+
+            document.getElementById('trackingLoading').classList.remove('hidden');
+            document.getElementById('trackingEmpty').classList.add('hidden');
+            document.getElementById('trackingError').classList.add('hidden');
+            document.getElementById('trackingResult').classList.add('hidden');
+
+            // Cleanup previous subscription
+            if (realtimeSubscription) {
+                supabase.removeChannel(realtimeSubscription);
+                realtimeSubscription = null;
+            }
+
+            try {
+                // Search by application number
+                const { data: applications, error } = await supabase
+                    .from('applications')
+                    .select('*')
+                    .or(`application_number.ilike.%${searchValue}%,id.ilike.%${searchValue}%`)
+                    .limit(1);
+
+                if (error) throw error;
+
+                if (!applications || applications.length === 0) {
+                    document.getElementById('trackingLoading').classList.add('hidden');
+                    document.getElementById('trackingEmpty').classList.remove('hidden');
+                    document.getElementById('trackingEmpty').querySelector('p').textContent = 'No declaration found with reference: ' + searchValue;
+                    toastManager.info('No declaration found with reference: ' + searchValue);
+                    return;
+                }
+
+                const application = applications[0];
+                displayDeclaration(application);
+                setupRealtimeSubscription(application.id);
+                toastManager.success('Declaration found');
+
+            } catch (error) {
+                console.error('Track declaration error:', error);
+                document.getElementById('trackingLoading').classList.add('hidden');
+                document.getElementById('trackingError').classList.remove('hidden');
+                document.getElementById('errorMessage').textContent = 'Error loading declaration: ' + error.message;
+                toastManager.error('Error loading declaration: ' + error.message);
+            }
+        }
+
+        function displayDeclaration(application) {
+            document.getElementById('trackingLoading').classList.add('hidden');
+            document.getElementById('trackingResult').classList.remove('hidden');
+
+            document.getElementById('declarationNumber').textContent = application.application_number || application.id;
+            document.getElementById('declarationInfo').textContent = `${application.importer_name || 'N/A'} · ${application.goods_description || 'N/A'} · ${formatCurrency(application.declared_value || 0)}`;
+            
+            const statusBadge = document.getElementById('declarationStatus');
+            statusBadge.textContent = application.status;
+            statusBadge.className = 'status-badge';
+            if (application.status === 'draft') statusBadge.classList.add('bg-gray-100', 'text-gray-700');
+            else if (application.status === 'submitted') statusBadge.classList.add('bg-blue-100', 'text-blue-700');
+            else if (application.status === 'under_review') statusBadge.classList.add('status-review');
+            else if (application.status === 'approved') statusBadge.classList.add('bg-green-100', 'text-green-700');
+            else if (application.status === 'rejected') statusBadge.classList.add('bg-red-100', 'text-red-700');
+            else if (application.status === 'completed') statusBadge.classList.add('bg-emerald-100', 'text-emerald-700');
+
+            // Calculate progress based on workflow stage
+            const progress = calculateProgress(application.workflow_stage);
+            document.getElementById('progressPercent').textContent = progress + '%';
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Render timeline
+            renderTimeline(application);
+
+            // Summary
+            document.getElementById('summaryRef').textContent = application.application_number || application.id;
+            document.getElementById('summaryValue').textContent = formatCurrency(application.declared_value || 0);
+            document.getElementById('summaryDuty').textContent = formatCurrency(application.total_duty || 0);
+            document.getElementById('summaryStatus').textContent = application.status;
+        }
+
+        function calculateProgress(workflowStage) {
+            const stageMap = {
+                'draft': 10,
+                'declarant_info': 20,
+                'shipment_info': 30,
+                'goods_info': 40,
+                'documents': 50,
+                'ai_validation': 60,
+                'duty_assessment': 75,
+                'payment': 90,
+                'certificate': 100
+            };
+            return stageMap[workflowStage] || 0;
+        }
+
+        function renderTimeline(application) {
+            const container = document.getElementById('timelineContainer');
+            const currentStage = application.workflow_stage || 'draft';
+            const currentOrder = workflowStages.find(s => s.id === currentStage)?.order || 0;
+
+            container.innerHTML = workflowStages.map(stage => {
+                const isCompleted = stage.order < currentOrder;
+                const isCurrent = stage.id === currentStage;
+                const isPending = stage.order > currentOrder;
+
+                let statusClass = '';
+                let statusText = '';
+                let dateText = '';
+
+                if (isCompleted) {
+                    statusClass = 'completed';
+                    statusText = '✓ Completed';
+                    dateText = formatDate(application.created_at);
+                } else if (isCurrent) {
+                    statusClass = 'current';
+                    statusText = '● In Progress';
+                    dateText = 'Started: ' + formatDate(application.updated_at);
+                } else {
+                    statusText = '○ Pending';
+                    dateText = 'Awaiting';
+                }
+
+                return `
+                    <div class="track-item ${statusClass}">
+                        <div class="track-status">${statusText}</div>
+                        <div class="track-title">${stage.title}</div>
+                        <div class="track-date">${dateText}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        }
+
+        function setupRealtimeSubscription(applicationId) {
+            realtimeSubscription = supabase
+                .channel(`application-tracking-${applicationId}`)
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'applications',
+                    filter: `id=eq.${applicationId}`
+                }, (payload) => {
+                    console.log('Application updated:', payload);
+                    displayDeclaration(payload.new);
+                })
+                .subscribe((status) => {
+                    console.log('Realtime subscription status:', status);
+                });
+        }
+
+        // Event listeners
+        document.getElementById('trackBtn').addEventListener('click', trackDeclaration);
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') trackDeclaration();
+        });
+
+        // Expose function
+        window.trackDeclaration = trackDeclaration;
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (realtimeSubscription) {
+                supabase.removeChannel(realtimeSubscription);
+            }
+        });
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+    </script>
+</body></html>
+
+
+
+
+
+
+

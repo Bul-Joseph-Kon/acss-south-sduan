@@ -11,8 +11,8 @@
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
         .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
         .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
-        .report-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; transition: all 0.2s ease; cursor: pointer; }
-        .report-card:hover { border-color: #1e3a5f; background: #e8f0fe; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .stat-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.25rem; transition: all 0.2s ease; }
+        .stat-card:hover { border-color: #1e3a5f; background: #f8fafc; }
         .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
         .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
         .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
@@ -35,8 +35,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Supervisor</h3>
-                            <p class="text-gray-500 text-sm">Supervisor</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -45,9 +45,9 @@
                             <a href="compliance-monitoring.html" class="sidebar-link"><i class="ri-shield-line"></i><span>Compliance Monitoring</span></a>
                             <a href="escalated-cases.html" class="sidebar-link"><i class="ri-alert-line"></i><span>Escalated Cases</span></a>
                             <a href="reports.html" class="sidebar-link active"><i class="ri-file-chart-line"></i><span>Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">6</span></a>
+                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -57,7 +57,7 @@
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
                             <h2 class="text-2xl font-bold tracking-tight">📊 Supervisor Reports</h2>
-                            <p class="opacity-90 text-sm">Generate and view supervisory reports</p>
+                            <p class="opacity-90 text-sm">Live statistics and analytics from database</p>
                         </div>
                         <div class="relative">
                             <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
@@ -69,91 +69,544 @@
                                 <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
                                 <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="report-card" onclick="alert('📊 Generating Performance Report')">
-                            <div class="flex items-start gap-3">
+                    <!-- Statistics Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="statsGrid">
+                        <div class="stat-card bg-white shadow-sm">
+                            <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                    <i class="ri-line-chart-line text-blue-600 text-xl"></i>
+                                    <i class="ri-file-list-3-line text-blue-600 text-xl"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold">Performance Report</h4>
-                                    <p class="text-sm text-gray-500">Team performance and metrics</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 20, 2026</span>
+                                    <p class="text-xs text-gray-500">Total Applications</p>
+                                    <p class="text-xl font-bold text-gray-800" id="statTotalApps">-</p>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="report-card" onclick="alert('📊 Generating Compliance Summary')">
-                            <div class="flex items-start gap-3">
+                        <div class="stat-card bg-white shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                                    <i class="ri-time-line text-yellow-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Pending</p>
+                                    <p class="text-xl font-bold text-gray-800" id="statPending">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card bg-white shadow-sm">
+                            <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                                    <i class="ri-shield-line text-green-600 text-xl"></i>
+                                    <i class="ri-check-line text-green-600 text-xl"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold">Compliance Summary</h4>
-                                    <p class="text-sm text-gray-500">Compliance statistics and trends</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 18, 2026</span>
+                                    <p class="text-xs text-gray-500">Approved</p>
+                                    <p class="text-xl font-bold text-gray-800" id="statApproved">-</p>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="report-card" onclick="alert('📊 Generating Escalation Report')">
-                            <div class="flex items-start gap-3">
+                        <div class="stat-card bg-white shadow-sm">
+                            <div class="flex items-center gap-3">
                                 <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                                    <i class="ri-alert-line text-red-600 text-xl"></i>
+                                    <i class="ri-close-line text-red-600 text-xl"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold">Escalation Report</h4>
-                                    <p class="text-sm text-gray-500">Escalated cases analysis</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 15, 2026</span>
+                                    <p class="text-xs text-gray-500">Rejected</p>
+                                    <p class="text-xl font-bold text-gray-800" id="statRejected">-</p>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="report-card" onclick="alert('📊 Generating Approval Summary')">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                                    <i class="ri-check-double-line text-purple-600 text-xl"></i>
+                        <div class="stat-card bg-white shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                                    <i class="ri-reply-line text-orange-600 text-xl"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold">Approval Summary</h4>
-                                    <p class="text-sm text-gray-500">Final approvals and decisions</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 12, 2026</span>
+                                    <p class="text-xs text-gray-500">Returned</p>
+                                    <p class="text-xl font-bold text-gray-800" id="statReturned">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card bg-white shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <i class="ri-task-line text-purple-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Completed</p>
+                                    <p class="text-xl font-bold text-gray-800" id="statCompleted">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card bg-white shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                                    <i class="ri-money-dollar-circle-line text-emerald-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Revenue</p>
+                                    <p class="text-xl font-bold text-gray-800" id="statRevenue">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stat-card bg-white shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                    <i class="ri-percent-line text-indigo-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-500">Approval Rate</p>
+                                    <p class="text-xl font-bold text-gray-800" id="statApprovalRate">-</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                        <h3 class="font-bold text-sm mb-3">Generate Custom Report</h3>
-                        <div class="grid md:grid-cols-3 gap-3">
-                            <select class="p-2 border rounded-lg text-sm">
-                                <option>Report Type</option>
-                                <option>Performance</option>
-                                <option>Compliance</option>
-                                <option>Escalation</option>
-                                <option>Approval Summary</option>
-                            </select>
-                            <input type="date" class="p-2 border rounded-lg text-sm" />
-                            <input type="date" class="p-2 border rounded-lg text-sm" />
+                    <!-- Detailed Reports -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- Top Services -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3">Top Services</h3>
+                            <div id="topServices" class="space-y-2">
+                                <div class="text-center py-4"><i class="ri-loader-4-line animate-spin text-blue-500"></i></div>
+                            </div>
                         </div>
-                        <button class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1">
-                            <i class="ri-file-chart-line"></i> Generate Report
-                        </button>
+
+                        <!-- Officer Workload -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3">Officer Workload</h3>
+                            <div id="officerWorkload" class="space-y-2">
+                                <div class="text-center py-4"><i class="ri-loader-4-line animate-spin text-blue-500"></i></div>
+                            </div>
+                        </div>
+
+                        <!-- Inspector Workload -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3">Inspector Workload</h3>
+                            <div id="inspectorWorkload" class="space-y-2">
+                                <div class="text-center py-4"><i class="ri-loader-4-line animate-spin text-blue-500"></i></div>
+                            </div>
+                        </div>
+
+                        <!-- Supervisor Approvals -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3">Supervisor Approvals</h3>
+                            <div id="supervisorApprovals" class="space-y-2">
+                                <div class="text-center py-4"><i class="ri-loader-4-line animate-spin text-blue-500"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Processing Times -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-sm mb-3">Average Processing Times</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="processingTimes">
+                            <div class="text-center py-4"><i class="ri-loader-4-line animate-spin text-blue-500"></i></div>
+                        </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
+
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut as authSignOut } from '../../js/auth.js';
+
+        let realtimeChannels = [];
+
+        async function init() {
+            const hasAuth = await checkPageAuth('supervisor');
+            if (!hasAuth) return;
+
+            await loadCurrentUserProfile();
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('full_name')
+                    .eq('user_id', user.id)
+                    .single();
+                if (profile && profile.full_name) {
+                    document.getElementById('profileName').textContent = profile.full_name;
+                    document.getElementById('profileRole').textContent = 'Supervisor';
+                }
             }
+
+            await loadAllReports();
+            setupRealtime();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
+            document.getElementById('dropdownSignOut').addEventListener('click', handleSignOut);
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profileDropdown')) {
+                    document.getElementById('profileDropdown').classList.remove('open');
+                }
+            });
+        }
+
+        async function handleSignOut() {
+            const result = await authSignOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            } else {
+                console.error('Sign out failed:', result.error);
+            }
+        }
+
+        async function loadAllReports() {
+            await Promise.all([
+                loadApplicationStats(),
+                loadRevenueStats(),
+                loadTopServices(),
+                loadOfficerWorkload(),
+                loadInspectorWorkload(),
+                loadSupervisorApprovals(),
+                loadProcessingTimes()
+            ]);
+        }
+
+        async function loadApplicationStats() {
+            const { data, error } = await supabase
+                .from('applications')
+                .select('status');
+
+            if (error) {
+                console.error('Load application stats error:', error.code, error.message, error.details, error.hint);
+                return;
+            }
+
+            const stats = {
+                total: data?.length || 0,
+                pending: data?.filter(a => a.status === 'pending' || a.status === 'under_review' || a.status === 'pending_review').length || 0,
+                approved: data?.filter(a => a.status === 'approved' || a.status === 'completed').length || 0,
+                rejected: data?.filter(a => a.status === 'rejected').length || 0,
+                returned: data?.filter(a => a.status === 'returned').length || 0,
+                completed: data?.filter(a => a.status === 'completed').length || 0
+            };
+
+            const approvalRate = stats.total > 0 ? ((stats.approved / stats.total) * 100).toFixed(1) : 0;
+
+            document.getElementById('statTotalApps').textContent = stats.total;
+            document.getElementById('statPending').textContent = stats.pending;
+            document.getElementById('statApproved').textContent = stats.approved;
+            document.getElementById('statRejected').textContent = stats.rejected;
+            document.getElementById('statReturned').textContent = stats.returned;
+            document.getElementById('statCompleted').textContent = stats.completed;
+            document.getElementById('statApprovalRate').textContent = approvalRate + '%';
+        }
+
+        async function loadRevenueStats() {
+            const { data, error } = await supabase
+                .from('payments')
+                .select('amount, currency')
+                .eq('status', 'paid');
+
+            if (error) {
+                console.error('Load revenue stats error:', error.code, error.message, error.details, error.hint);
+                document.getElementById('statRevenue').textContent = 'Error';
+                return;
+            }
+
+            const totalRevenue = data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0;
+            document.getElementById('statRevenue').textContent = '$' + totalRevenue.toLocaleString();
+        }
+
+        async function loadTopServices() {
+            const { data, error } = await supabase
+                .from('applications')
+                .select('service_type')
+                .not('service_type', 'is', null);
+
+            if (error) {
+                console.error('Load top services error:', error.code, error.message, error.details, error.hint);
+                return;
+            }
+
+            const serviceCounts = {};
+            data?.forEach(app => {
+                const service = app.service_type || 'Unknown';
+                serviceCounts[service] = (serviceCounts[service] || 0) + 1;
+            });
+
+            const sorted = Object.entries(serviceCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const container = document.getElementById('topServices');
+            if (sorted.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-sm text-center">No data available</p>';
+                return;
+            }
+
+            const maxCount = sorted[0][1];
+            container.innerHTML = sorted.map(([service, count]) => `
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="font-medium">${service}</span>
+                        <span class="text-gray-500">${count}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-600 h-2 rounded-full" style="width: ${(count / maxCount) * 100}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadOfficerWorkload() {
+            const { data, error } = await supabase
+                .from('applications')
+                .select('officer_id')
+                .not('officer_id', 'is', null);
+
+            if (error) {
+                console.error('Load officer workload error:', error.code, error.message, error.details, error.hint);
+                return;
+            }
+
+            const officerCounts = {};
+            data?.forEach(app => {
+                if (app.officer_id) {
+                    officerCounts[app.officer_id] = (officerCounts[app.officer_id] || 0) + 1;
+                }
+            });
+
+            const officerIds = Object.keys(officerCounts);
+            if (officerIds.length === 0) {
+                document.getElementById('officerWorkload').innerHTML = '<p class="text-gray-500 text-sm text-center">No data available</p>';
+                return;
+            }
+
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, full_name')
+                .in('id', officerIds);
+
+            const profileMap = {};
+            profiles?.forEach(p => profileMap[p.id] = p.full_name);
+
+            const sorted = Object.entries(officerCounts)
+                .map(([id, count]) => ({ name: profileMap[id] || 'Unknown', count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+
+            const container = document.getElementById('officerWorkload');
+            const maxCount = sorted[0]?.count || 1;
+            container.innerHTML = sorted.map(({ name, count }) => `
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="font-medium">${name}</span>
+                        <span class="text-gray-500">${count}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-green-600 h-2 rounded-full" style="width: ${(count / maxCount) * 100}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadInspectorWorkload() {
+            const { data, error } = await supabase
+                .from('applications')
+                .select('inspector_id')
+                .not('inspector_id', 'is', null);
+
+            if (error) {
+                console.error('Load inspector workload error:', error.code, error.message, error.details, error.hint);
+                return;
+            }
+
+            const inspectorCounts = {};
+            data?.forEach(app => {
+                if (app.inspector_id) {
+                    inspectorCounts[app.inspector_id] = (inspectorCounts[app.inspector_id] || 0) + 1;
+                }
+            });
+
+            const inspectorIds = Object.keys(inspectorCounts);
+            if (inspectorIds.length === 0) {
+                document.getElementById('inspectorWorkload').innerHTML = '<p class="text-gray-500 text-sm text-center">No data available</p>';
+                return;
+            }
+
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, full_name')
+                .in('id', inspectorIds);
+
+            const profileMap = {};
+            profiles?.forEach(p => profileMap[p.id] = p.full_name);
+
+            const sorted = Object.entries(inspectorCounts)
+                .map(([id, count]) => ({ name: profileMap[id] || 'Unknown', count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+
+            const container = document.getElementById('inspectorWorkload');
+            const maxCount = sorted[0]?.count || 1;
+            container.innerHTML = sorted.map(({ name, count }) => `
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="font-medium">${name}</span>
+                        <span class="text-gray-500">${count}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-purple-600 h-2 rounded-full" style="width: ${(count / maxCount) * 100}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadSupervisorApprovals() {
+            const { data, error } = await supabase
+                .from('applications')
+                .select('supervisor_id, approved_at')
+                .not('supervisor_id', 'is', null)
+                .not('approved_at', 'is', null);
+
+            if (error) {
+                console.error('Load supervisor approvals error:', error.code, error.message, error.details, error.hint);
+                return;
+            }
+
+            const supervisorCounts = {};
+            data?.forEach(app => {
+                if (app.supervisor_id) {
+                    supervisorCounts[app.supervisor_id] = (supervisorCounts[app.supervisor_id] || 0) + 1;
+                }
+            });
+
+            const supervisorIds = Object.keys(supervisorCounts);
+            if (supervisorIds.length === 0) {
+                document.getElementById('supervisorApprovals').innerHTML = '<p class="text-gray-500 text-sm text-center">No data available</p>';
+                return;
+            }
+
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, full_name')
+                .in('id', supervisorIds);
+
+            const profileMap = {};
+            profiles?.forEach(p => profileMap[p.id] = p.full_name);
+
+            const sorted = Object.entries(supervisorCounts)
+                .map(([id, count]) => ({ name: profileMap[id] || 'Unknown', count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+
+            const container = document.getElementById('supervisorApprovals');
+            const maxCount = sorted[0]?.count || 1;
+            container.innerHTML = sorted.map(({ name, count }) => `
+                <div class="space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="font-medium">${name}</span>
+                        <span class="text-gray-500">${count}</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-indigo-600 h-2 rounded-full" style="width: ${(count / maxCount) * 100}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadProcessingTimes() {
+            const { data, error } = await supabase
+                .from('applications')
+                .select('submitted_at, reviewed_at, inspected_at, approved_at, completed_at');
+
+            if (error) {
+                console.error('Load processing times error:', error.code, error.message, error.details, error.hint);
+                return;
+            }
+
+            const times = {
+                review: [],
+                inspection: [],
+                approval: [],
+                completion: []
+            };
+
+            data?.forEach(app => {
+                if (app.submitted_at && app.reviewed_at) {
+                    const diff = new Date(app.reviewed_at) - new Date(app.submitted_at);
+                    times.review.push(diff / (1000 * 60 * 60)); // hours
+                }
+                if (app.reviewed_at && app.inspected_at) {
+                    const diff = new Date(app.inspected_at) - new Date(app.reviewed_at);
+                    times.inspection.push(diff / (1000 * 60 * 60));
+                }
+                if (app.inspected_at && app.approved_at) {
+                    const diff = new Date(app.approved_at) - new Date(app.inspected_at);
+                    times.approval.push(diff / (1000 * 60 * 60));
+                }
+                if (app.approved_at && app.completed_at) {
+                    const diff = new Date(app.completed_at) - new Date(app.approved_at);
+                    times.completion.push(diff / (1000 * 60 * 60));
+                }
+            });
+
+            const avg = (arr) => arr.length > 0 ? (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(1) : 0;
+
+            const container = document.getElementById('processingTimes');
+            container.innerHTML = `
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-gray-800">${avg(times.review)}h</p>
+                    <p class="text-xs text-gray-500">Review Time</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-gray-800">${avg(times.inspection)}h</p>
+                    <p class="text-xs text-gray-500">Inspection Time</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-gray-800">${avg(times.approval)}h</p>
+                    <p class="text-xs text-gray-500">Approval Time</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-gray-800">${avg(times.completion)}h</p>
+                    <p class="text-xs text-gray-500">Completion Time</p>
+                </div>
+            `;
+        }
+
+        function setupRealtime() {
+            const tables = ['applications', 'payments'];
+            tables.forEach(table => {
+                const channel = supabase
+                    .channel(`${table}_changes`)
+                    .on(
+                        'postgres_changes',
+                        {
+                            event: '*',
+                            schema: 'public',
+                            table: table
+                        },
+                        () => {
+                            console.log(`${table} changed, reloading reports`);
+                            loadAllReports();
+                        }
+                    )
+                    .subscribe();
+                realtimeChannels.push(channel);
+            });
+        }
+
+        window.addEventListener('beforeunload', () => {
+            realtimeChannels.forEach(channel => supabase.removeChannel(channel));
         });
+
+        init();
     </script>
-</body></html>
+</body>
+</html>

@@ -10,6 +10,7 @@
     <script type="module" src="../../js/auth.js"></script>
     <script type="module" src="../../js/dashboard.js"></script>
     <script type="module" src="../../js/realtime.js"></script>
+    <script type="module" src="../../js/revenue-sidebar.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -44,27 +45,7 @@
         <div class="max-w-7xl mx-auto px-4 py-5">
             <div class="flex flex-col lg:flex-row gap-6">
                 <aside class="lg:w-72 flex-shrink-0">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
-                        <div class="text-center mb-5">
-                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
-                                <i class="ri-user-line text-white text-3xl"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-800">Revenue Officer</h3>
-                            <p class="text-gray-500 text-sm">Revenue Management</p>
-                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
-                        </div>
-                        <nav class="space-y-1 mb-4">
-                            <a href="dashboard-revenue.html" class="sidebar-link active"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
-                            <a href="duty-verification.html" class="sidebar-link"><i class="ri-calculator-line"></i><span>Duty Verification</span></a>
-                            <a href="payment-verification.html" class="sidebar-link"><i class="ri-bank-card-line"></i><span>Payment Verification</span></a>
-                            <a href="revenue-monitoring.html" class="sidebar-link"><i class="ri-line-chart-line"></i><span>Revenue Monitoring</span></a>
-                            <a href="tax-reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Tax Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span></a>
-                        </nav>
-                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
-                            <i class="ri-logout-box-line"></i> Sign Out
-                        </button>
-                    </div>
+                    <div id="revenue-sidebar"></div>
                 </aside>
 
                 <main class="flex-1 space-y-5">
@@ -124,7 +105,7 @@
         </div>
     </div>
     <script type="module">
-        import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
         import { fetchApplicationsForRole } from '../../js/applications.js';
@@ -144,6 +125,9 @@
         async function loadDashboard() {
             console.log('=== LOADING REVENUE DASHBOARD ===');
             const isAuthenticated = await checkAuth();
+
+            // Load user profile
+            await loadCurrentUserProfile();
             if (!isAuthenticated) {
                 window.location.href = '../../auth/login.html';
                 return;
@@ -152,7 +136,6 @@
             // Verify role access
             const hasAccess = await verifyRoleAccess('revenue');
             if (!hasAccess) {
-                // Get user's actual role and redirect to their dashboard
                 const user = await getCurrentUser();
                 if (user) {
                     const profile = await getUserProfile(user.id);
@@ -168,10 +151,7 @@
 
             const user = await getCurrentUser();
             const profile = user ? await getUserProfile(user.id) : null;
-            
             if (profile) {
-                document.querySelector('h3').textContent = profile.full_name || 'Revenue Officer';
-                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Revenue';
                 currentRole = profile.role || 'revenue';
                 currentUserId = profile.id;
             } else {
@@ -204,11 +184,6 @@
 
         // Cleanup realtime subscriptions when leaving page
         window.addEventListener('beforeunload', () => {
-            realtimeManager.unregisterPage(PAGE_KEY);
-        });
-
-        // Cleanup on sign out
-        document.getElementById('signOutBtn')?.addEventListener('click', () => {
             realtimeManager.unregisterPage(PAGE_KEY);
         });
 
@@ -300,11 +275,6 @@
             try {
                 const result = await fetchUnreadNotifications();
                 if (result.success && result.data) {
-                    // Update notification badge
-                    document.getElementById('notificationBadge').textContent = result.data.length;
-                    document.getElementById('notificationBadge').style.display = result.data.length > 0 ? 'inline-block' : 'none';
-
-                    // Update recent notifications list
                     const notifContainer = document.getElementById('recentNotifications');
                     if (notifContainer) {
                         notifContainer.innerHTML = result.data.slice(0, 3).map(notif => `
@@ -315,7 +285,6 @@
                         `).join('');
                     }
                 } else {
-                    document.getElementById('notificationBadge').style.display = 'none';
                     document.getElementById('recentNotifications').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No notifications</div>';
                 }
             } catch (error) {
@@ -336,26 +305,11 @@
             return date.toLocaleDateString();
         }
 
-        function getAIStatusBadge(aiValidationPassed, aiMonitoringResults) {
-            if (!aiValidationPassed && aiMonitoringResults) {
-                if (aiMonitoringResults.hasIssues) {
-                    return `<span class="status-badge status-rejected">🤖 AI Issues</span>`;
-                }
-            }
-            
-            if (aiValidationPassed === true) {
-                return `<span class="status-badge status-approved">✓ AI Validated</span>`;
-            } else if (aiValidationPassed === false) {
-                return `<span class="status-badge status-rejected">✗ AI Failed</span>`;
-            } else {
-                return `<span class="status-badge status-pending">⏳ AI Pending</span>`;
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', loadDashboard);
 
         // Sign out functionality
         async function handleSignOut() {
+            realtimeManager.unregisterPage(PAGE_KEY);
             const result = await signOut();
             if (result.success) {
                 window.location.href = '../../auth/login.html';
@@ -364,8 +318,7 @@
             }
         }
 
-        document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
-        document.getElementById('dropdownSignOut').addEventListener('click', handleSignOut);
+        document.getElementById('dropdownSignOut')?.addEventListener('click', handleSignOut);
     </script>
 </body>
 </html>

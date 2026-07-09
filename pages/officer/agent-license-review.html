@@ -6,6 +6,8 @@
     <title>SSRA Customs · Agent License Review</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="../../js/officer-sidebar.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -34,30 +36,9 @@
     <div class="min-h-screen bg-gray-100">
         <div class="max-w-7xl mx-auto px-4 py-5">
             <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Sidebar -->
                 <aside class="lg:w-72 flex-shrink-0">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
-                        <div class="text-center mb-5">
-                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
-                                <i class="ri-user-line text-white text-3xl"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-800">Officer</h3>
-                            <p class="text-gray-500 text-sm">Customs Officer</p>
-                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
-                        </div>
-                        <nav class="space-y-1 mb-4">
-                            <a href="dashboard-officer.html" class="sidebar-link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
-                            <a href="cvet-review-queue.html" class="sidebar-link"><i class="ri-file-invoice-line"></i><span>CVET Review Queue</span></a>
-                            <a href="direct-assessment-queue.html" class="sidebar-link"><i class="ri-file-search-line"></i><span>Direct Assessment Queue</span></a>
-                            <a href="agent-license-review.html" class="sidebar-link active"><i class="ri-id-card-line"></i><span>Agent License Review</span></a>
-                            <a href="risk-assessment-queue.html" class="sidebar-link"><i class="ri-shield-line"></i><span>Risk Assessment Queue</span></a>
-                            <a href="inspection-requests.html" class="sidebar-link"><i class="ri-clipboard-line"></i><span>Inspection Requests</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">8</span></a>
-                            <a href="reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Reports</span></a>
-                        </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
-                            <i class="ri-logout-box-line"></i> Sign Out
-                        </button>
-                    </div>
+                    <div id="officer-sidebar"></div>
                 </aside>
 
                 <main class="flex-1 space-y-5">
@@ -81,70 +62,179 @@
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="review-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-purple-600">LIC-2026-0010</h4>
-                                    <p class="text-sm text-gray-500">Peter Imports · Class A Upgrade</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-review">Under Review</span>
-                                        <span class="text-xs text-gray-400">Submitted: Jun 18, 2026</span>
-                                        <span class="text-xs text-gray-400">Current Class: B</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('📋 Opening LIC-2026-0010 for review')">Review</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Downloading application details')">Download</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="review-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-purple-600">LIC-2026-0008</h4>
-                                    <p class="text-sm text-gray-500">SSRA Customs Agency · License Renewal</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-pending">Pending</span>
-                                        <span class="text-xs text-gray-400">Submitted: Jun 15, 2026</span>
-                                        <span class="text-xs text-gray-400">Expiring: Jun 30, 2026</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('📋 Opening LIC-2026-0008 for review')">Review</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Downloading application details')">Download</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="review-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-purple-600">LIC-2026-0005</h4>
-                                    <p class="text-sm text-gray-500">Clearway Customs · New License</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-approved">✓ Approved</span>
-                                        <span class="text-xs text-gray-400">Approved: Jun 5, 2026</span>
-                                        <span class="text-xs text-gray-400">Class: A</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="alert('📄 Viewing approved application')">View</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Downloading application details')">Download</button>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="space-y-3" id="reviewList">
+                        <div class="text-sm text-gray-500 text-center py-8">Loading Agent License queue...</div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
+        
+        import { fetchApplicationsForRole } from '../../js/applications.js';
+
+        
+        const PAGE_KEY = 'agent-license-review';
+        let currentRole = null;
+        let currentUserId = null;
+
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profileDropdown')) {
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+
+        async function init() {
+            console.log('=== LOADING AGENT LICENSE REVIEW ===');
+
+            const isAuthenticated = await checkAuth();
+
+        // Load user profile
+        await loadCurrentUserProfile();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const hasAccess = await verifyRoleAccess('officer');
+            if (!hasAccess) {
+                
+                if (user) {
+                    
+                    if (profile && profile.role) {
+                        const dashboardUrl = redirectToDashboard(profile.role);
+                        window.location.href = dashboardUrl;
+                        return;
+                    }
+                }
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            
+            
+
+            if (profile) {
+                currentRole = profile.role || 'officer';
+                currentUserId = profile.id;
+            } else {
+                currentRole = 'officer';
+                currentUserId = user?.id;
+            }
+
+            await loadAgentLicenseQueue();
+            setupRealtime();
+        }
+
+        let realtimeChannel = null;
+        function setupRealtime() {
+            realtimeChannel = supabase
+                .channel('agent-license-updates')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, async () => {
+                    await loadAgentLicenseQueue();
+                })
+                .subscribe();
+        }
+
+        async function loadAgentLicenseQueue() {
+            console.log('=== LOADING AGENT LICENSE QUEUE ===');
+
+            const result = await fetchApplicationsForRole('officer', {
+                filters: { application_type: 'Agent License' },
+                limit: 20
+            });
+
+            if (result.success && result.data) {
+                const applications = result.data;
+                console.log('Agent License applications loaded:', applications);
+
+                renderReviewList(applications);
+            } else {
+                console.error('Failed to load Agent License queue:', result.error);
+                document.getElementById('reviewList').innerHTML = `
+                    <div class="text-sm text-red-500 text-center py-8">
+                        Failed to load Agent License queue: ${result.error}
+                    </div>
+                `;
+            }
+        }
+
+        function renderReviewList(applications) {
+            const container = document.getElementById('reviewList');
+
+            if (!applications || applications.length === 0) {
+                container.innerHTML = `
+                    <div class="text-sm text-gray-500 text-center py-8">
+                        No Agent License applications in queue
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = applications.map(app => {
+                const statusClass = getStatusClass(app.status);
+                const statusLabel = getStatusLabel(app.status);
+
+                return `
+                    <div class="review-card">
+                        <div class="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-bold text-purple-600">${app.application_number || 'N/A'}</h4>
+                                <p class="text-sm text-gray-500">${app.applicant_name || app.company_name || 'Unknown'} · ${app.license_type || app.license_class || 'N/A'}</p>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="status-badge ${statusClass}">${statusLabel}</span>
+                                    <span class="text-xs text-gray-400">Submitted: ${formatDate(app.submitted_at || app.created_at)}</span>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="review-application.html?id=${app.id}" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Review</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'pending': 'status-pending',
+                'submitted': 'status-pending',
+                'under_review': 'status-review',
+                'approved': 'status-approved',
+                'rejected': 'status-rejected',
+                'returned': 'status-rejected'
+            };
+            return statusMap[status] || 'status-pending';
+        }
+
+        function getStatusLabel(status) {
+            const statusMap = {
+                'pending': 'Pending',
+                'submitted': 'Submitted',
+                'under_review': 'Under Review',
+                'approved': '✓ Approved',
+                'rejected': 'Rejected',
+                'returned': 'Returned'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        init();
     </script>
 </body></html>
+
+
+
+

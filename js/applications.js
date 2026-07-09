@@ -112,6 +112,44 @@ export async function submitApplication(id) {
 
         if (!statusUpdate.success) {
             console.log('AI validation failed:', validationResults.errors);
+
+            // Log activity for failed submission
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const payload = {
+                    user_id: user.id,
+                    activity_type: 'application_submission_failed',
+                    description: 'Application submission failed AI validation',
+                    metadata: JSON.stringify({
+                        application_id: id,
+                        errors: validationResults.errors,
+                        warnings: validationResults.warnings
+                    }),
+                    ip_address: null,
+                    created_at: new Date().toISOString()
+                };
+
+                console.log("=== BEFORE ACTIVITY INSERT ===");
+                console.log(payload);
+
+                const { data: activityData, error: activityError } = await supabase
+                    .from('activity_logs')
+                    .insert(payload)
+                    .select()
+                    .single();
+
+                console.log("=== AFTER ACTIVITY INSERT ===");
+                console.log(activityData);
+                console.log(activityError);
+
+                if (activityError) {
+                    console.error(activityError.code);
+                    console.error(activityError.message);
+                    console.error(activityError.details);
+                    console.error(activityError.hint);
+                }
+            }
+
             return {
                 success: false,
                 error: statusUpdate.error || 'AI validation failed',
@@ -119,6 +157,43 @@ export async function submitApplication(id) {
                 warnings: validationResults.warnings,
                 validationResults: validationResults
             };
+        }
+
+        // Log activity for successful submission
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const payload = {
+                user_id: user.id,
+                activity_type: 'application_submitted',
+                description: 'Application submitted successfully',
+                metadata: JSON.stringify({
+                    application_id: id,
+                    status: statusUpdate.status,
+                    validation_warnings: validationResults.warnings
+                }),
+                ip_address: null,
+                created_at: new Date().toISOString()
+            };
+
+            console.log("=== BEFORE ACTIVITY INSERT ===");
+            console.log(payload);
+
+            const { data: activityData, error: activityError } = await supabase
+                .from('activity_logs')
+                .insert(payload)
+                .select()
+                .single();
+
+            console.log("=== AFTER ACTIVITY INSERT ===");
+            console.log(activityData);
+            console.log(activityError);
+
+            if (activityError) {
+                console.error(activityError.code);
+                console.error(activityError.message);
+                console.error(activityError.details);
+                console.error(activityError.hint);
+            }
         }
 
         console.log('Application submitted successfully. Status:', statusUpdate.status);
@@ -540,37 +615,44 @@ export async function fetchApplicationsForRole(role, options = {}) {
     
     let filters = options.filters || {};
 
-    // Filter based on role and workflow
-    switch (role) {
-        case 'trader':
-        case 'agent':
-            // See their own applications
-            if (profile && !options.includeAll) {
-                filters.user_id = profile.id;
-            }
-            break;
-        case 'officer':
-            // See submitted applications awaiting review
-            filters.status = ['submitted', 'pending_review'];
-            break;
-        case 'inspector':
-            // See applications assigned to them for inspection
-            filters.status = 'under_inspection';
-            if (profile && !options.includeAll) {
-                filters.inspector_id = profile.id;
-            }
-            break;
-        case 'supervisor':
-            // See applications pending final approval
-            filters.status = 'pending_review';
-            break;
-        case 'revenue':
-            // See approved applications awaiting payment
-            filters.status = ['approved', 'awaiting_payment', 'paid'];
-            break;
-        case 'administrator':
-            // See all applications
-            break;
+    // Filter based on role and workflow if status is not already filtered
+    if (!filters.status) {
+        switch (role) {
+            case 'trader':
+            case 'agent':
+                // See their own applications
+                if (profile && !options.includeAll) {
+                    filters.user_id = profile.id;
+                }
+                break;
+            case 'officer':
+                // See submitted applications awaiting review
+                filters.status = ['submitted', 'pending_review'];
+                break;
+            case 'inspector':
+                // See applications assigned to them for inspection
+                filters.status = 'under_inspection';
+                if (profile && !options.includeAll) {
+                    filters.inspector_id = profile.id;
+                }
+                break;
+            case 'supervisor':
+                // See applications pending final approval
+                filters.status = 'pending_review';
+                break;
+            case 'revenue':
+                // See approved applications awaiting payment
+                filters.status = ['approved', 'awaiting_payment', 'paid'];
+                break;
+            case 'administrator':
+                // See all applications
+                break;
+        }
+    } else {
+        // Still apply user ownership filter for trader/agent if requested
+        if ((role === 'trader' || role === 'agent') && profile && !options.includeAll) {
+            filters.user_id = profile.id;
+        }
     }
 
     return fetchTable('applications', {
@@ -910,6 +992,100 @@ export async function logAIAction(actionType, applicationId, details, userId = n
         return { success: true, data };
     } catch (error) {
         console.error('Log AI action error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ================================================================
+// INSPECTOR ACTIVITY LOGGING
+// ================================================================
+
+export async function logInspectionActivity(activityType, applicationId, description, metadata = {}, userId = null) {
+    try {
+        console.log('=== LOGGING INSPECTION ACTIVITY ===');
+        console.log('Activity Type:', activityType);
+        console.log('Application ID:', applicationId);
+
+        const { data: { user } } = await supabase.auth.getUser();
+        const actorUserId = userId || user?.id;
+
+        const activityLog = {
+            user_id: actorUserId,
+            activity_type: activityType,
+            description: description,
+            metadata: JSON.stringify({
+                application_id: applicationId,
+                ...metadata
+            }),
+            ip_address: null,
+            created_at: new Date().toISOString()
+        };
+
+        console.log("=== BEFORE ACTIVITY INSERT ===");
+        console.log(activityLog);
+
+        const { data, error } = await supabase
+            .from('activity_logs')
+            .insert(activityLog)
+            .select()
+            .single();
+
+        console.log("=== AFTER ACTIVITY INSERT ===");
+        console.log(data);
+        console.log(error);
+
+        if (error) {
+            console.error(error.code);
+            console.error(error.message);
+            console.error(error.details);
+            console.error(error.hint);
+            throw error;
+        }
+
+        console.log('Inspection activity logged:', activityLog);
+        return { success: true, data };
+    } catch (error) {
+        console.error('Log inspection activity error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function logAuditAction(action, tableName, recordId, oldValues = null, newValues = null, userId = null) {
+    try {
+        console.log('=== LOGGING AUDIT ACTION ===');
+        console.log('Action:', action);
+        console.log('Table:', tableName);
+        console.log('Record ID:', recordId);
+
+        const { data: { user } } = await supabase.auth.getUser();
+        const actorUserId = userId || user?.id;
+
+        const auditLog = {
+            user_id: actorUserId,
+            action: action,
+            table_name: tableName,
+            record_id: recordId,
+            old_values: oldValues ? JSON.stringify(oldValues) : null,
+            new_values: newValues ? JSON.stringify(newValues) : null,
+            ip_address: null,
+            user_agent: null,
+            status: 'success',
+            error_message: null,
+            created_at: new Date().toISOString()
+        };
+
+        const { data, error } = await supabase
+            .from('audit_logs')
+            .insert(auditLog)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        console.log('Audit action logged:', auditLog);
+        return { success: true, data };
+    } catch (error) {
+        console.error('Log audit action error:', error);
         return { success: false, error: error.message };
     }
 }

@@ -6,6 +6,7 @@
     <title>SSRA Customs · Revenue Monitoring</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/revenue-sidebar.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -34,27 +35,7 @@
         <div class="max-w-7xl mx-auto px-4 py-5">
             <div class="flex flex-col lg:flex-row gap-6">
                 <aside class="lg:w-72 flex-shrink-0">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
-                        <div class="text-center mb-5">
-                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
-                                <i class="ri-user-line text-white text-3xl"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-800">Revenue Officer</h3>
-                            <p class="text-gray-500 text-sm">Revenue Management</p>
-                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
-                        </div>
-                        <nav class="space-y-1 mb-4">
-                            <a href="dashboard-revenue.html" class="sidebar-link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
-                            <a href="duty-verification.html" class="sidebar-link"><i class="ri-calculator-line"></i><span>Duty Verification</span></a>
-                            <a href="payment-verification.html" class="sidebar-link"><i class="ri-bank-card-line"></i><span>Payment Verification</span></a>
-                            <a href="revenue-monitoring.html" class="sidebar-link active"><i class="ri-line-chart-line"></i><span>Revenue Monitoring</span></a>
-                            <a href="tax-reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Tax Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">3</span></a>
-                        </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
-                            <i class="ri-logout-box-line"></i> Sign Out
-                        </button>
-                    </div>
+                    <div id="revenue-sidebar"></div>
                 </aside>
 
                 <main class="flex-1 space-y-5">
@@ -78,42 +59,31 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="stat-card"><div class="stat-number text-blue-600">$1,245,000</div><div class="stat-label">Total Revenue</div></div>
-                        <div class="stat-card"><div class="stat-number text-emerald-600">$985,000</div><div class="stat-label">Collected</div></div>
-                        <div class="stat-card"><div class="stat-number text-yellow-600">$260,000</div><div class="stat-label">Pending</div></div>
-                        <div class="stat-card"><div class="stat-number text-green-600">92%</div><div class="stat-label">Collection Rate</div></div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="revenueStats">
+                        <div class="stat-card"><div class="stat-number text-blue-600">-</div><div class="stat-label">Total Revenue</div></div>
+                        <div class="stat-card"><div class="stat-number text-emerald-600">-</div><div class="stat-label">Collected</div></div>
+                        <div class="stat-card"><div class="stat-number text-yellow-600">-</div><div class="stat-label">Pending</div></div>
+                        <div class="stat-card"><div class="stat-number text-green-600">-</div><div class="stat-label">Collection Rate</div></div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                         <h3 class="font-bold text-lg mb-4">Monthly Revenue Trends</h3>
-                        <div class="space-y-3">
-                            <div><div class="flex justify-between text-sm"><span>January</span><span>$85,000</span></div><div class="monthly-bar"><div class="fill" style="width:60%"></div></div></div>
-                            <div><div class="flex justify-between text-sm"><span>February</span><span>$72,000</span></div><div class="monthly-bar"><div class="fill" style="width:50%"></div></div></div>
-                            <div><div class="flex justify-between text-sm"><span>March</span><span>$98,000</span></div><div class="monthly-bar"><div class="fill" style="width:70%"></div></div></div>
-                            <div><div class="flex justify-between text-sm"><span>April</span><span>$65,000</span></div><div class="monthly-bar"><div class="fill" style="width:45%"></div></div></div>
-                            <div><div class="flex justify-between text-sm"><span>May</span><span>$92,000</span></div><div class="monthly-bar"><div class="fill" style="width:65%"></div></div></div>
-                            <div><div class="flex justify-between text-sm"><span>June</span><span>$112,000</span></div><div class="monthly-bar"><div class="fill" style="width:80%"></div></div></div>
+                        <div class="space-y-3" id="monthlyTrends">
+                            <div class="text-sm text-gray-500 text-center py-4">Loading monthly trends...</div>
                         </div>
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-4">
                         <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                             <h3 class="font-bold text-lg mb-4">Revenue by Service</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center border-b pb-2"><span>CVET</span><span class="font-bold">$425,000</span></div>
-                                <div class="flex justify-between items-center border-b pb-2"><span>Direct Assessment</span><span class="font-bold">$380,000</span></div>
-                                <div class="flex justify-between items-center border-b pb-2"><span>Agent License</span><span class="font-bold">$85,000</span></div>
-                                <div class="flex justify-between items-center"><span>Vehicle Query</span><span class="font-bold">$45,000</span></div>
+                            <div class="space-y-3" id="revenueByService">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading revenue by service...</div>
                             </div>
                         </div>
                         <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                             <h3 class="font-bold text-lg mb-4">Revenue by Tax Type</h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center border-b pb-2"><span>Import Duty</span><span class="font-bold">$845,000</span></div>
-                                <div class="flex justify-between items-center border-b pb-2"><span>VAT</span><span class="font-bold">$320,000</span></div>
-                                <div class="flex justify-between items-center border-b pb-2"><span>Excise Duty</span><span class="font-bold">$65,000</span></div>
-                                <div class="flex justify-between items-center"><span>Service Charges</span><span class="font-bold">$15,000</span></div>
+                            <div class="space-y-3" id="revenueByTaxType">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading revenue by tax type...</div>
                             </div>
                         </div>
                     </div>
@@ -121,11 +91,215 @@
             </div>
         </div>
     </div>
-    <script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
+        
+        import { fetchApplicationsForRole } from '../../js/applications.js';
+
+        
+        const PAGE_KEY = 'revenue-monitoring';
+        let currentRole = null;
+        let currentUserId = null;
+
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profileDropdown')) {
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+
+        async function init() {
+            console.log('=== LOADING REVENUE MONITORING ===');
+
+            const isAuthenticated = await checkAuth();
+
+        // Load user profile
+        await loadCurrentUserProfile();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const hasAccess = await verifyRoleAccess('revenue');
+            if (!hasAccess) {
+                
+                if (user) {
+                    
+                    if (profile && profile.role) {
+                        const dashboardUrl = redirectToDashboard(profile.role);
+                        window.location.href = dashboardUrl;
+                        return;
+                    }
+                }
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            
+            
+
+            if (profile) {
+                document.querySelector('h3').textContent = profile.full_name || 'Revenue Officer';
+                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Revenue Management';
+                currentRole = profile.role || 'revenue';
+                currentUserId = profile.id;
+            } else {
+                currentRole = 'revenue';
+                currentUserId = user?.id;
+            }
+
+            await loadRevenueData();
+        }
+
+        async function loadRevenueData() {
+            console.log('=== LOADING REVENUE DATA ===');
+
+            const result = await fetchApplicationsForRole('revenue', {
+                limit: 1000
+            });
+
+            if (result.success && result.data) {
+                const applications = result.data;
+                console.log('Revenue data loaded:', applications);
+
+                renderRevenueStats(applications);
+                renderMonthlyTrends(applications);
+                renderRevenueByService(applications);
+                renderRevenueByTaxType(applications);
+            } else {
+                console.error('Failed to load revenue data:', result.error);
+                document.getElementById('monthlyTrends').innerHTML = `
+                    <div class="text-sm text-red-500 text-center py-4">
+                        Failed to load revenue data: ${result.error}
+                    </div>
+                `;
+            }
+        }
+
+        function renderRevenueStats(applications) {
+            const totalRevenue = applications.reduce((sum, app) => sum + (app.total_amount || 0), 0);
+            const collected = applications.filter(app => app.status === 'paid' || app.status === 'cleared').reduce((sum, app) => sum + (app.total_amount || 0), 0);
+            const pending = applications.filter(app => app.status === 'awaiting_payment' || app.status === 'approved').reduce((sum, app) => sum + (app.total_amount || 0), 0);
+            const collectionRate = totalRevenue > 0 ? Math.round((collected / totalRevenue) * 100) : 0;
+
+            const statsContainer = document.getElementById('revenueStats');
+            statsContainer.innerHTML = `
+                <div class="stat-card"><div class="stat-number text-blue-600">${formatCurrency(totalRevenue)}</div><div class="stat-label">Total Revenue</div></div>
+                <div class="stat-card"><div class="stat-number text-emerald-600">${formatCurrency(collected)}</div><div class="stat-label">Collected</div></div>
+                <div class="stat-card"><div class="stat-number text-yellow-600">${formatCurrency(pending)}</div><div class="stat-label">Pending</div></div>
+                <div class="stat-card"><div class="stat-number text-green-600">${collectionRate}%</div><div class="stat-label">Collection Rate</div></div>
+            `;
+        }
+
+        function renderMonthlyTrends(applications) {
+            const monthlyData = {};
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const currentYear = new Date().getFullYear();
+
+            applications.forEach(app => {
+                if (app.created_at) {
+                    const date = new Date(app.created_at);
+                    if (date.getFullYear() === currentYear) {
+                        const month = months[date.getMonth()];
+                        if (!monthlyData[month]) {
+                            monthlyData[month] = 0;
+                        }
+                        monthlyData[month] += app.total_amount || 0;
+                    }
+                }
+            });
+
+            const maxValue = Math.max(...Object.values(monthalData), 1);
+
+            const container = document.getElementById('monthlyTrends');
+            container.innerHTML = months.slice(0, 6).map(month => {
+                const value = monthlyData[month] || 0;
+                const percentage = (value / maxValue) * 100;
+                return `
+                    <div>
+                        <div class="flex justify-between text-sm">
+                            <span>${month}</span>
+                            <span>${formatCurrency(value)}</span>
+                        </div>
+                        <div class="monthly-bar">
+                            <div class="fill" style="width:${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRevenueByService(applications) {
+            const serviceData = {};
+            const serviceNames = {
+                'cvet': 'CVET',
+                'direct_assessment': 'Direct Assessment',
+                'agent_license': 'Agent License',
+                'vehicle_query': 'Vehicle Query'
+            };
+
+            applications.forEach(app => {
+                const service = app.service_type || 'other';
+                if (!serviceData[service]) {
+                    serviceData[service] = 0;
+                }
+                serviceData[service] += app.total_amount || 0;
+            });
+
+            const container = document.getElementById('revenueByService');
+            container.innerHTML = Object.entries(serviceData).map(([service, value]) => `
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span>${serviceNames[service] || service}</span>
+                    <span class="font-bold">${formatCurrency(value)}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderRevenueByTaxType(applications) {
+            const taxTypeData = {};
+            const taxTypeNames = {
+                'import_duty': 'Import Duty',
+                'vat': 'VAT',
+                'excise_duty': 'Excise Duty',
+                'service_charge': 'Service Charges'
+            };
+
+            applications.forEach(app => {
+                if (app.tax_data) {
+                    Object.entries(app.tax_data).forEach(([taxType, value]) => {
+                        if (!taxTypeData[taxType]) {
+                            taxTypeData[taxType] = 0;
+                        }
+                        taxTypeData[taxType] += value || 0;
+                    });
+                }
+            });
+
+            const container = document.getElementById('revenueByTaxType');
+            if (Object.keys(taxTypeData).length === 0) {
+                container.innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No tax data available</div>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(taxTypeData).map(([taxType, value]) => `
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span>${taxTypeNames[taxType] || taxType}</span>
+                    <span class="font-bold">${formatCurrency(value)}</span>
+                </div>
+            `).join('');
+        }
+
+        function formatCurrency(value) {
+            if (!value) return '$0';
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+        }
+
+        init();
     </script>
 </body></html>
+
+
+
+
+

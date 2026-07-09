@@ -6,6 +6,7 @@
     <title>SSRA Customs · Inspection Reports</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -35,8 +36,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Inspector</h3>
-                            <p class="text-gray-500 text-sm">Customs Inspector</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -45,9 +46,9 @@
                             <a href="cargo-inspection.html" class="sidebar-link"><i class="ri-truck-line"></i><span>Cargo Inspection</span></a>
                             <a href="vehicle-inspection.html" class="sidebar-link"><i class="ri-car-line"></i><span>Vehicle Inspection</span></a>
                             <a href="inspection-reports.html" class="sidebar-link active"><i class="ri-file-chart-line"></i><span>Inspection Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">4</span></a>
+                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -60,7 +61,7 @@
                             <p class="opacity-90 text-sm">View and download inspection reports</p>
                         </div>
                         <div class="relative">
-                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                            <button id="profileDropdownBtn" class="header-profile-btn">
                                 <span class="avatar-sm"><i class="ri-user-line"></i></span>
                                 <span class="text-sm font-medium hidden sm:inline">Inspector</span>
                                 <i class="ri-arrow-down-s-line text-sm"></i>
@@ -74,55 +75,55 @@
                         </div>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="report-card" onclick="alert('📊 Generating Cargo Inspection Report')">
+                    <div class="grid md:grid-cols-2 gap-4" id="reportCards">
+                        <div class="report-card" data-report-type="cargo">
                             <div class="flex items-start gap-3">
                                 <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                                     <i class="ri-truck-line text-blue-600 text-xl"></i>
                                 </div>
                                 <div>
                                     <h4 class="font-semibold">Cargo Inspection Report</h4>
-                                    <p class="text-sm text-gray-500">15 inspections completed</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 22, 2026</span>
+                                    <p class="text-sm text-gray-500" id="cargoCount">Loading...</p>
+                                    <span class="text-xs text-gray-400" id="cargoLastGenerated">-</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="report-card" onclick="alert('📊 Generating Vehicle Inspection Report')">
+                        <div class="report-card" data-report-type="vehicle">
                             <div class="flex items-start gap-3">
                                 <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
                                     <i class="ri-car-line text-orange-600 text-xl"></i>
                                 </div>
                                 <div>
                                     <h4 class="font-semibold">Vehicle Inspection Report</h4>
-                                    <p class="text-sm text-gray-500">8 inspections completed</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 20, 2026</span>
+                                    <p class="text-sm text-gray-500" id="vehicleCount">Loading...</p>
+                                    <span class="text-xs text-gray-400" id="vehicleLastGenerated">-</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="report-card" onclick="alert('📊 Generating Summary Report')">
+                        <div class="report-card" data-report-type="summary">
                             <div class="flex items-start gap-3">
                                 <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
                                     <i class="ri-file-chart-line text-purple-600 text-xl"></i>
                                 </div>
                                 <div>
                                     <h4 class="font-semibold">Inspection Summary Report</h4>
-                                    <p class="text-sm text-gray-500">Monthly inspection statistics</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 15, 2026</span>
+                                    <p class="text-sm text-gray-500" id="summaryCount">Loading...</p>
+                                    <span class="text-xs text-gray-400" id="summaryLastGenerated">-</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="report-card" onclick="alert('📊 Generating Compliance Report')">
+                        <div class="report-card" data-report-type="compliance">
                             <div class="flex items-start gap-3">
                                 <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
                                     <i class="ri-check-double-line text-green-600 text-xl"></i>
                                 </div>
                                 <div>
                                     <h4 class="font-semibold">Compliance Report</h4>
-                                    <p class="text-sm text-gray-500">Compliance and discrepancy analysis</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 12, 2026</span>
+                                    <p class="text-sm text-gray-500" id="complianceCount">Loading...</p>
+                                    <span class="text-xs text-gray-400" id="complianceLastGenerated">-</span>
                                 </div>
                             </div>
                         </div>
@@ -131,17 +132,17 @@
                     <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                         <h3 class="font-bold text-sm mb-3">Generate Custom Report</h3>
                         <div class="grid md:grid-cols-3 gap-3">
-                            <select class="p-2 border rounded-lg text-sm">
-                                <option>Report Type</option>
-                                <option>Cargo Inspection</option>
-                                <option>Vehicle Inspection</option>
-                                <option>Summary</option>
-                                <option>Compliance</option>
+                            <select id="reportType" class="p-2 border rounded-lg text-sm">
+                                <option value="">Report Type</option>
+                                <option value="cargo">Cargo Inspection</option>
+                                <option value="vehicle">Vehicle Inspection</option>
+                                <option value="summary">Summary</option>
+                                <option value="compliance">Compliance</option>
                             </select>
-                            <input type="date" class="p-2 border rounded-lg text-sm" />
-                            <input type="date" class="p-2 border rounded-lg text-sm" />
+                            <input type="date" id="startDate" class="p-2 border rounded-lg text-sm" />
+                            <input type="date" id="endDate" class="p-2 border rounded-lg text-sm" />
                         </div>
-                        <button class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1">
+                        <button id="generateCustomBtn" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1">
                             <i class="ri-file-chart-line"></i> Generate Report
                         </button>
                     </div>
@@ -149,11 +150,276 @@
             </div>
         </div>
     </div>
-    <script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        
+        import { fetchApplicationsForRole } from '../../js/applications.js';
+        
+        import { fetchUnreadNotifications } from '../../js/notifications.js';
+        
+        import { signOut as authSignOut } from '../../js/auth.js';
+        
+        import { realtimeManager } from '../../js/realtime.js';
+
+        
+        const PAGE_KEY = 'inspection-reports';
+        let currentRole = null;
+        let currentUserId = null;
+
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profileDropdown')) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown) dropdown.classList.remove('open');
             }
         });
+
+        async function init() {
+            const hasAuth = await checkPageAuth('inspector');
+
+        // Load user profile
+        await loadCurrentUserProfile();
+            if (!hasAuth) return;
+
+            
+            if (!user) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const profile = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
+            if (profile.data) {
+                currentRole = profile.data.role;
+                currentUserId = profile.data.id;
+                document.querySelectorAll('.text-center h3, .header-profile-btn span.hidden').forEach(el => {
+                    el.textContent = profile.data.full_name || 'Inspector';
+                });
+            }
+
+            await loadReportStatistics();
+            await initializeRealtime();
+            await loadNotificationBadge();
+
+            document.getElementById('generateCustomBtn').addEventListener('click', generateCustomReport);
+
+            document.getElementById('reportCards')?.addEventListener('click', (e) => {
+                const card = e.target.closest('.report-card');
+                if (card) {
+                    const reportType = card.getAttribute('data-report-type');
+                    if (reportType) generateReport(reportType);
+                }
+            });
+
+            document.getElementById('profileDropdownBtn')?.addEventListener('click', () => {
+                document.getElementById('profileDropdown')?.classList.toggle('open');
+            });
+        }
+
+        async function loadReportStatistics() {
+            try {
+                const result = await fetchApplicationsForRole('inspector', { includeAll: true });
+
+                if (result.success && result.data) {
+                    const applications = result.data;
+
+                    const cargoInspections = applications.filter(app =>
+                        app.inspection_type === 'cargo' || app.application_type === 'cargo'
+                    ).length;
+
+                    const vehicleInspections = applications.filter(app =>
+                        app.inspection_type === 'vehicle' || app.application_type === 'vehicle'
+                    ).length;
+
+                    const completedInspections = applications.filter(app =>
+                        app.status === 'completed' || app.status === 'cleared' || app.status === 'passed'
+                    ).length;
+
+                    const complianceIssues = applications.filter(app =>
+                        app.inspection_report?.result === 'failed' || app.status === 'returned'
+                    ).length;
+
+                    document.getElementById('cargoCount').textContent = `${cargoInspections} inspections completed`;
+                    document.getElementById('vehicleCount').textContent = `${vehicleInspections} inspections completed`;
+                    document.getElementById('summaryCount').textContent = `${completedInspections} total inspections`;
+                    document.getElementById('complianceCount').textContent = `${complianceIssues} compliance issues`;
+
+                    const now = new Date();
+                    const dateStr = now.toLocaleDateString();
+                    document.getElementById('cargoLastGenerated').textContent = `Last updated: ${dateStr}`;
+                    document.getElementById('vehicleLastGenerated').textContent = `Last updated: ${dateStr}`;
+                    document.getElementById('summaryLastGenerated').textContent = `Last updated: ${dateStr}`;
+                    document.getElementById('complianceLastGenerated').textContent = `Last updated: ${dateStr}`;
+                }
+            } catch (error) {
+                console.error('Error loading report statistics:', error);
+            }
+        }
+
+        async function generateReport(type) {
+            try {
+                const result = await fetchApplicationsForRole('inspector', { includeAll: true });
+
+                if (result.success && result.data) {
+                    const applications = result.data;
+                    let filteredApps = applications;
+                    let reportTitle = '';
+                    let reportContent = '';
+
+                    switch (type) {
+                        case 'cargo':
+                            filteredApps = applications.filter(app =>
+                                app.inspection_type === 'cargo' || app.application_type === 'cargo'
+                            );
+                            reportTitle = 'Cargo Inspection Report';
+                            break;
+                        case 'vehicle':
+                            filteredApps = applications.filter(app =>
+                                app.inspection_type === 'vehicle' || app.application_type === 'vehicle'
+                            );
+                            reportTitle = 'Vehicle Inspection Report';
+                            break;
+                        case 'summary':
+                            reportTitle = 'Inspection Summary Report';
+                            break;
+                        case 'compliance':
+                            filteredApps = applications.filter(app =>
+                                app.inspection_report?.result === 'failed' || app.status === 'returned'
+                            );
+                            reportTitle = 'Compliance Report';
+                            break;
+                    }
+
+                    reportContent = generateReportContent(filteredApps, type);
+                    console.log(`${reportTitle}\n\n${reportContent}`);
+                } else {
+                    console.error('Failed to load data for report:', result.error);
+                }
+            } catch (error) {
+                console.error('Error generating report:', error);
+            }
+        }
+
+        function generateReportContent(applications, type) {
+            if (applications.length === 0) {
+                return 'No data available for this report.';
+            }
+
+            let content = `Total Records: ${applications.length}\n`;
+            
+            const passed = applications.filter(app => 
+                app.inspection_report?.result === 'passed' || app.status === 'completed' || app.status === 'cleared'
+            ).length;
+            
+            const failed = applications.filter(app => 
+                app.inspection_report?.result === 'failed' || app.status === 'rejected'
+            ).length;
+            
+            const pending = applications.filter(app => 
+                app.status === 'under_inspection' || app.status === 'in_progress'
+            ).length;
+
+            content += `Passed: ${passed}\n`;
+            content += `Failed: ${failed}\n`;
+            content += `Pending: ${pending}\n`;
+
+            if (type === 'compliance') {
+                content += '\nCompliance Issues:\n';
+                applications.forEach(app => {
+                    content += `- ${app.application_number}: ${app.inspection_report?.findings || 'No details'}\n`;
+                });
+            }
+
+            return content;
+        }
+
+        async function generateCustomReport() {
+            try {
+                const reportType = document.getElementById('reportType').value;
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+
+                if (!reportType) {
+                    console.error('Please select a report type');
+                    return;
+                }
+
+                let query = supabase
+                    .from('applications')
+                    .select('*');
+
+                if (currentUserId) {
+                    query = query.eq('inspector_id', currentUserId);
+                }
+
+                if (startDate) {
+                    query = query.gte('created_at', startDate);
+                }
+
+                if (endDate) {
+                    query = query.lte('created_at', endDate + 'T23:59:59');
+                }
+
+                const { data: applications, error } = await query.order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error('Failed to generate report:', error.message);
+                    return;
+                }
+
+                let filteredApps = applications;
+                if (reportType === 'cargo') {
+                    filteredApps = applications.filter(app => app.inspection_type === 'cargo' || app.application_type === 'cargo');
+                } else if (reportType === 'vehicle') {
+                    filteredApps = applications.filter(app => app.inspection_type === 'vehicle' || app.application_type === 'vehicle');
+                }
+
+                const reportContent = generateReportContent(filteredApps, reportType);
+                console.log(`Custom ${reportType.toUpperCase()} Report\n\n${reportContent}`);
+            } catch (error) {
+                console.error('Error generating custom report:', error);
+            }
+        }
+
+        async function initializeRealtime() {
+            await realtimeManager.initialize();
+            
+            realtimeManager.registerPage(PAGE_KEY, currentRole, currentUserId, {
+                onApplicationChange: async () => {
+                    await loadReportStatistics();
+                }
+            });
+        }
+
+        window.addEventListener('beforeunload', () => {
+            realtimeManager.unregisterPage(PAGE_KEY);
+        });
+
+        async function handleSignOut() {
+            realtimeManager.unregisterPage(PAGE_KEY);
+            const result = await authSignOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            } else {
+                console.error('Sign out failed:', result.error);
+            }
+        }
+
+        async function loadNotificationBadge() {
+            const result = await fetchUnreadNotifications();
+            const badge = document.getElementById('notificationBadge');
+            if (badge && result.success) {
+                badge.textContent = result.data?.length || 0;
+                badge.style.display = result.data?.length > 0 ? 'inline' : 'none';
+            }
+        }
+
+        document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
+
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body></html>
+
+
+
+

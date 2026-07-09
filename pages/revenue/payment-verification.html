@@ -6,6 +6,8 @@
     <title>SSRA Customs · Payment Verification</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="../../js/revenue-sidebar.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -15,6 +17,7 @@
         .status-approved { background: #d1fae5; color: #065f46; }
         .status-pending { background: #fef3c7; color: #92400e; }
         .status-review { background: #dbeafe; color: #1e40af; }
+        .status-failed { background: #fee2e2; color: #991b1b; }
         .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
         .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
         .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
@@ -25,7 +28,7 @@
         .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
         .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
         .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
-        .payment-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; transition: all 0.2s ease; }
+        .payment-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; transition: all 0.2s ease; background: white; }
         .payment-card:hover { border-color: #1e3a5f; background: #f8fafc; }
         .payment-details { background: #f8fafc; border-radius: 0.5rem; padding: 0.75rem; }
     </style>
@@ -35,27 +38,7 @@
         <div class="max-w-7xl mx-auto px-4 py-5">
             <div class="flex flex-col lg:flex-row gap-6">
                 <aside class="lg:w-72 flex-shrink-0">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
-                        <div class="text-center mb-5">
-                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
-                                <i class="ri-user-line text-white text-3xl"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-800">Revenue Officer</h3>
-                            <p class="text-gray-500 text-sm">Revenue Management</p>
-                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
-                        </div>
-                        <nav class="space-y-1 mb-4">
-                            <a href="dashboard-revenue.html" class="sidebar-link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
-                            <a href="duty-verification.html" class="sidebar-link"><i class="ri-calculator-line"></i><span>Duty Verification</span></a>
-                            <a href="payment-verification.html" class="sidebar-link active"><i class="ri-bank-card-line"></i><span>Payment Verification</span></a>
-                            <a href="revenue-monitoring.html" class="sidebar-link"><i class="ri-line-chart-line"></i><span>Revenue Monitoring</span></a>
-                            <a href="tax-reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Tax Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">3</span></a>
-                        </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
-                            <i class="ri-logout-box-line"></i> Sign Out
-                        </button>
-                    </div>
+                    <div id="revenue-sidebar"></div>
                 </aside>
 
                 <main class="flex-1 space-y-5">
@@ -74,74 +57,13 @@
                                 <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
                                 <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" class="danger" id="dropdownSignOut"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
                         </div>
                     </div>
 
                     <div class="space-y-3">
-                        <div class="payment-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-blue-600">PAY-2026-0042</h4>
-                                    <p class="text-sm text-gray-500">John Trading Co. · CV-2026-0042 · $7,850.00</p>
-                                    <div class="payment-details mt-2">
-                                        <div class="grid grid-cols-2 gap-2 text-sm">
-                                            <div><span class="text-gray-500">Payment Method:</span> Mobile Money</div>
-                                            <div><span class="text-gray-500">Transaction ID:</span> TXN-2026-0042</div>
-                                            <div><span class="text-gray-500">Payment Date:</span> Jun 22, 2026</div>
-                                            <div><span class="text-gray-500">Status:</span> <span class="status-badge status-review">Pending Verification</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✅ Payment verified successfully')">Verify</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing receipt')">Receipt</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="payment-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-emerald-600">PAY-2026-0038</h4>
-                                    <p class="text-sm text-gray-500">Sarah Exporters · DA-2026-0018 · $15,650.00</p>
-                                    <div class="payment-details mt-2">
-                                        <div class="grid grid-cols-2 gap-2 text-sm">
-                                            <div><span class="text-gray-500">Payment Method:</span> Bank Transfer</div>
-                                            <div><span class="text-gray-500">Transaction ID:</span> TXN-2026-0038</div>
-                                            <div><span class="text-gray-500">Payment Date:</span> Jun 20, 2026</div>
-                                            <div><span class="text-gray-500">Status:</span> <span class="status-badge status-approved">✓ Verified</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="alert('📄 Viewing verified payment')">View</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing receipt')">Receipt</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="payment-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-yellow-600">PAY-2026-0035</h4>
-                                    <p class="text-sm text-gray-500">Peter Imports · CV-2026-0040 · $2,580.00</p>
-                                    <div class="payment-details mt-2">
-                                        <div class="grid grid-cols-2 gap-2 text-sm">
-                                            <div><span class="text-gray-500">Payment Method:</span> Cash</div>
-                                            <div><span class="text-gray-500">Transaction ID:</span> TXN-2026-0035</div>
-                                            <div><span class="text-gray-500">Payment Date:</span> Jun 18, 2026</div>
-                                            <div><span class="text-gray-500">Status:</span> <span class="status-badge status-pending">Pending</span></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✅ Payment verified successfully')">Verify</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Viewing receipt')">Receipt</button>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="text-center py-8 text-gray-500">Loading payments...</div>
                     </div>
                 </main>
             </div>
@@ -154,4 +76,102 @@
             }
         });
     </script>
-</body></html>
+    <script type="module">
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { signOut as authSignOut } from '../../js/auth.js';
+        import { fetchPayments, updatePaymentStatus } from '../../js/payments.js';
+
+        async function initPage() {
+            await checkPageAuth('revenue');
+            await loadCurrentUserProfile();
+            await loadPayments();
+        }
+
+        async function loadPayments() {
+            console.log('=== LOADING PAYMENTS FOR VERIFICATION ===');
+            const result = await fetchPayments({ includeAll: true });
+            if (result.success && result.data) {
+                renderPayments(result.data);
+            } else {
+                console.error('Failed to load payments:', result.error);
+            }
+        }
+
+        function renderPayments(payments) {
+            const container = document.querySelector('.space-y-3');
+            if (!container) return;
+
+            let html = '';
+            payments.forEach(payment => {
+                let badgeClass = 'status-pending';
+                let displayStatus = payment.status;
+
+                if (payment.status === 'completed') {
+                    badgeClass = 'status-approved';
+                    displayStatus = 'Verified';
+                } else if (payment.status === 'pending') {
+                    badgeClass = 'status-review';
+                    displayStatus = 'Pending Verification';
+                } else if (payment.status === 'failed') {
+                    badgeClass = 'status-failed';
+                }
+
+                html += `
+                    <div class="payment-card" data-payment-id="${payment.id}">
+                        <div class="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-bold ${payment.status === 'completed' ? 'text-emerald-600' : 'text-blue-600'}">${payment.payment_number || 'N/A'}</h4>
+                                <p class="text-sm text-gray-500">Transaction: ${payment.transaction_id || 'N/A'} · SSP ${(payment.amount || 0).toLocaleString()}</p>
+                                <div class="payment-details mt-2">
+                                    <div class="grid grid-cols-2 gap-2 text-sm">
+                                        <div><span class="text-gray-500">Payment Method:</span> ${payment.payment_method || 'Mobile Money'}</div>
+                                        <div><span class="text-gray-500">Receipt Number:</span> ${payment.receipt_number || 'N/A'}</div>
+                                        <div><span class="text-gray-500">Payment Date:</span> ${payment.paid_at ? new Date(payment.paid_at).toLocaleDateString() : new Date(payment.created_at).toLocaleDateString()}</div>
+                                        <div><span class="text-gray-500">Status:</span> <span class="status-badge ${badgeClass}">${displayStatus}</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                ${payment.status === 'pending' ? `
+                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="verifyPayment('${payment.id}')">Verify</button>
+                                ` : ''}
+                                <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="viewReceipt('${payment.id}')">Receipt</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html || '<p class="text-gray-500 text-center py-8">No payments pending verification</p>';
+        }
+
+        window.verifyPayment = async function(paymentId) {
+            if (confirm('Verify this payment receipt?')) {
+                const result = await updatePaymentStatus(paymentId, 'completed');
+                if (result.success) {
+                    alert('✓ Payment verified successfully');
+                    await loadPayments();
+                } else {
+                    alert('Verification failed: ' + result.error);
+                }
+            }
+        };
+
+        window.viewReceipt = function(paymentId) {
+            alert('Receipt viewer - Feature coming soon');
+        };
+
+        async function handleSignOut() {
+            const result = await authSignOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            }
+        }
+
+        document.getElementById('dropdownSignOut')?.addEventListener('click', handleSignOut);
+
+        initPage();
+    </script>
+</body>
+</html>

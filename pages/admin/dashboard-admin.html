@@ -288,7 +288,7 @@
             // Fetch applications count and status breakdown
             const { data: applications, error: appsError } = await supabase
                 .from('applications')
-                .select('status, ai_validation_status');
+                .select('status, ai_validation_passed');
             
             if (!appsError && applications) {
                 document.getElementById('statTotalDeclarations').textContent = applications.length;
@@ -317,9 +317,9 @@
                         statusCounts.returned++;
                     }
                     
-                    if (app.ai_validation_status === 'passed') {
+                    if (app.ai_validation_passed === true) {
                         aiCounts.validated++;
-                    } else if (app.ai_validation_status === 'flagged') {
+                    } else {
                         aiCounts.flagged++;
                     }
                 });

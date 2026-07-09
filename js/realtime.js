@@ -39,20 +39,32 @@ class RealtimeManager {
         }
         
         // Listen to connection state changes
-        supabase.realtime.onStateChange((state) => {
+        supabase.realtime.stateChangeCallbacks.open.push(() => {
             if (this.logEnabled()) {
-                console.log('Realtime connection state:', state);
+                console.log('Realtime connection state: open');
             }
-            this.connectionStatus = state;
-            this.notifySubscribers('connection', { status: state });
-            
-            // Handle reconnection
-            if (state === 'CLOSED' || state === 'CHANNEL_ERROR') {
-                this.handleReconnection();
-            } else if (state === 'SUBSCRIBED') {
-                this.reconnectAttempts = 0;
-                this.hideReconnectingIndicator();
+            this.connectionStatus = 'connected';
+            this.notifySubscribers('connection', { status: 'connected' });
+            this.reconnectAttempts = 0;
+            this.hideReconnectingIndicator();
+        });
+
+        supabase.realtime.stateChangeCallbacks.close.push(() => {
+            if (this.logEnabled()) {
+                console.log('Realtime connection state: closed');
             }
+            this.connectionStatus = 'disconnected';
+            this.notifySubscribers('connection', { status: 'disconnected' });
+            this.handleReconnection();
+        });
+
+        supabase.realtime.stateChangeCallbacks.error.push((err) => {
+            if (this.logEnabled()) {
+                console.error('Realtime connection error:', err);
+            }
+            this.connectionStatus = 'error';
+            this.notifySubscribers('connection', { status: 'error' });
+            this.handleReconnection();
         });
 
         this.lastSyncTime = new Date();
@@ -65,10 +77,13 @@ class RealtimeManager {
             console.log('=== DISCONNECTING REALTIME MANAGER ===');
         }
         
-        // Clear all channels
-        this.channels.forEach((channel, key) => {
-            supabase.removeChannel(channel);
-        });
+        // Clear all channels safely using removeAllChannels
+        try {
+            await supabase.removeAllChannels();
+        } catch (err) {
+            console.error('Error removing all channels:', err);
+        }
+        
         this.channels.clear();
         this.activeSubscriptions.clear();
         this.connectionStatus = 'disconnected';
@@ -236,9 +251,13 @@ class RealtimeManager {
 
         const subscription = this.activeSubscriptions.get(pageKey);
         if (subscription) {
-            // Remove all channels for this page
+            // Remove all channels for this page safely
             Object.values(subscription.channels).forEach(channel => {
-                supabase.removeChannel(channel);
+                try {
+                    supabase.removeChannel(channel);
+                } catch (err) {
+                    console.error(`Error removing channel for page ${pageKey}:`, err);
+                }
             });
             this.activeSubscriptions.delete(pageKey);
         }
@@ -675,7 +694,7 @@ class RealtimeManager {
 
     subscribeToInspectorDashboard(userId, callbacks, pageKey = 'inspector') {
         this.log('=== SUBSCRIBING TO INSPECTOR DASHBOARD REALTIME ===');
-        
+
         // Subscribe to applications assigned for inspection
         const applicationsChannel = this.subscribeToTable('applications', (payload) => {
             const record = payload.new || payload.old;
@@ -687,8 +706,32 @@ class RealtimeManager {
             }
         }, null, pageKey);
 
+        // Subscribe to notifications for this inspector
+        const notificationsChannel = this.subscribeToTable('notifications', (payload) => {
+            const record = payload.new || payload.old;
+            if (record.user_id === userId) {
+                if (callbacks.onNotificationChange) {
+                    this.debounce(pageKey, () => callbacks.onNotificationChange(payload));
+                }
+                this.addActivityFeedItem(this.createActivityFromPayload(payload, 'notification'));
+            }
+        }, null, pageKey);
+
+        // Subscribe to activity logs for this inspector
+        const activityLogsChannel = this.subscribeToTable('activity_logs', (payload) => {
+            const record = payload.new || payload.old;
+            if (record.user_id === userId) {
+                if (callbacks.onActivityChange) {
+                    this.debounce(pageKey, () => callbacks.onActivityChange(payload));
+                }
+                this.addActivityFeedItem(this.createActivityFromPayload(payload, 'activity'));
+            }
+        }, null, pageKey);
+
         return {
-            applications: applicationsChannel
+            applications: applicationsChannel,
+            notifications: notificationsChannel,
+            activity_logs: activityLogsChannel
         };
     }
 

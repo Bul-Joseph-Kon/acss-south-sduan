@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Payment Alerts</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .notification-item { padding: 1rem; border-radius: 0.75rem; border: 1px solid #e5e7eb; transition: all 0.2s ease; }
+        .notification-item:hover { background: #f9fafb; }
+        .notification-item.unread { background: #fef3c7; border-color: #f59e0b; }
+        .notification-item .notif-time { font-size: 0.75rem; color: #6b7280; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">💳 Payment Alerts</h2>
+                            <p class="opacity-90 text-sm">Payment status and transaction notifications</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-3 items-center justify-between">
+                        <div class="flex flex-wrap gap-2">
+                            <button class="filter-btn px-4 py-1.5 rounded-full text-sm bg-emerald-600 text-white" data-filter="all">All</button>
+                            <button class="filter-btn px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50" data-filter="unread">Unread</button>
+                            <button class="filter-btn px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50" data-filter="read">Read</button>
+                        </div>
+                        <button id="markAllReadBtn" class="text-sm text-emerald-600 hover:underline">Mark all as read</button>
+                    </div>
+
+                    <div id="notificationsLoading" class="text-center py-8">
+                        <i class="ri-loader-4-line animate-spin text-2xl text-emerald-600"></i>
+                        <p class="text-gray-500 mt-2">Loading payment alerts...</p>
+                    </div>
+                    <div id="notificationsEmpty" class="hidden text-center py-8">
+                        <i class="ri-bank-card-line text-4xl text-gray-300"></i>
+                        <p class="text-gray-500 mt-2">No payment alerts</p>
+                    </div>
+                    <div id="notificationsError" class="hidden bg-red-50 border border-red-200 rounded-lg p-4">
+                        <p class="text-red-700" id="errorMessage">Error loading payment alerts</p>
+                        <button onclick="loadPaymentAlerts()" class="mt-2 text-sm text-red-600 hover:underline">Retry</button>
+                    </div>
+                    <div id="notificationsList" class="space-y-3 hidden"></div>
+
+                    <div id="paymentSummary" class="bg-blue-50 rounded-xl border border-blue-200 p-5 hidden">
+                        <h3 class="font-bold text-blue-800 mb-2"><i class="ri-information-line mr-2"></i>Payment Summary</h3>
+                        <div class="grid md:grid-cols-4 gap-3 text-sm">
+                            <div><span class="text-blue-700">Total Due:</span> <span class="font-bold" id="summaryTotalDue">$0.00</span></div>
+                            <div><span class="text-blue-700">Paid:</span> <span class="font-bold" id="summaryPaid">$0.00</span></div>
+                            <div><span class="text-blue-700">Pending:</span> <span class="font-bold text-red-600" id="summaryPending">$0.00</span></div>
+                            <div><span class="text-blue-700">Overdue:</span> <span class="font-bold text-red-600" id="summaryOverdue">$0.00</span></div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        import { fetchPayments, calculateTotalPayments } from '../../js/payments.js';
+        
+        import { fetchNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount } from '../../js/notifications.js';
+        
+        import { checkPageAuth, signOut } from '../../js/auth-check.js';
+        
+        import { signOut as authSignOut } from '../../js/auth.js';
+        
+        import toastManager from '../../js/toast.js';
+        import supabase from '../../js/supabase.js';
+
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Check authentication
+        await checkPageAuth('trader');
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Sign out handler
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await authSignOut();
+                if (result.success) {
+                    toastManager.success('Signed out successfully');
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        const dropdownSignOut = document.getElementById('dropdownSignOut');
+        if (dropdownSignOut) {
+            dropdownSignOut.addEventListener('click', async () => {
+                const result = await authSignOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        let currentFilter = 'all';
+        let paymentNotifications = [];
+        let realtimeSubscription = null;
+
+        // Load payment alerts
+        async function loadPaymentAlerts() {
+            document.getElementById('notificationsLoading').classList.remove('hidden');
+            document.getElementById('notificationsEmpty').classList.add('hidden');
+            document.getElementById('notificationsError').classList.add('hidden');
+            document.getElementById('notificationsList').classList.add('hidden');
+
+            try {
+                // Fetch all notifications and filter for payment-related ones
+                const result = await fetchNotifications({ orderBy: { column: 'created_at', ascending: false } });
+                
+                if (result.success) {
+                    paymentNotifications = (result.data || []).filter(n => {
+                        const title = (n.title || '').toLowerCase();
+                        const msg = (n.message || '').toLowerCase();
+                        const type = (n.type || '').toLowerCase();
+                        
+                        return title.includes('payment') || title.includes('invoice') || title.includes('fee') ||
+                               msg.includes('payment') || msg.includes('invoice') || msg.includes('fee') ||
+                               type === 'payment_required' || type === 'payment_confirmed';
+                    });
+
+                    if (paymentNotifications.length > 0) {
+                        renderNotifications(paymentNotifications);
+                        await loadPaymentSummary();
+                        await updateNotificationBadge();
+                    } else {
+                        document.getElementById('notificationsLoading').classList.add('hidden');
+                        document.getElementById('notificationsEmpty').classList.remove('hidden');
+                    }
+                } else {
+                    document.getElementById('notificationsLoading').classList.add('hidden');
+                    document.getElementById('notificationsEmpty').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Load payment alerts error:', error);
+                document.getElementById('notificationsLoading').classList.add('hidden');
+                document.getElementById('notificationsError').classList.remove('hidden');
+                document.getElementById('errorMessage').textContent = 'Error loading payment alerts: ' + error.message;
+            }
+        }
+
+        function renderNotifications(notifications) {
+            document.getElementById('notificationsLoading').classList.add('hidden');
+            document.getElementById('notificationsList').classList.remove('hidden');
+
+            const filtered = notifications.filter(n => {
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'unread') return !n.read;
+                if (currentFilter === 'read') return n.read;
+                return true;
+            });
+
+            const container = document.getElementById('notificationsList');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No payment alerts found</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(notification => {
+                const iconColor = notification.read ? 'bg-gray-100' : 'bg-yellow-100';
+                const iconBg = notification.read ? 'text-gray-600' : 'text-yellow-600';
+                const itemClass = notification.read ? '' : 'unread';
+                const timeAgo = getTimeAgo(notification.created_at);
+                
+                return `
+                    <div class="notification-item ${itemClass}" data-id="${notification.id}">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-full ${iconColor} flex items-center justify-center flex-shrink-0">
+                                <i class="ri-bank-card-line ${iconBg} text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-semibold text-sm">${notification.title}</h4>
+                                    ${!notification.read ? '<span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">Urgent</span>' : ''}
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">${notification.message}</p>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="notif-time text-xs text-gray-400"><i class="ri-time-line mr-1"></i>${timeAgo}</span>
+                                    <a href="payment.html" class="text-emerald-600 text-xs hover:underline font-semibold">Pay Now</a>
+                                    ${!notification.read ? `<button onclick="window.markAsRead('${notification.id}')" class="text-xs text-gray-500 hover:text-gray-700">Mark as read</button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadPaymentSummary() {
+            try {
+                const [pendingResult, paidResult, failedResult] = await Promise.all([
+                    calculateTotalPayments({ status: 'pending' }),
+                    calculateTotalPayments({ status: 'paid' }),
+                    calculateTotalPayments({ status: 'failed' })
+                ]);
+
+                const pending = pendingResult.success ? pendingResult.total : 0;
+                const paid = paidResult.success ? paidResult.total : 0;
+                const failed = failedResult.success ? failedResult.total : 0;
+                const total = pending + paid + failed;
+
+                document.getElementById('summaryTotalDue').textContent = formatCurrency(total);
+                document.getElementById('summaryPaid').textContent = formatCurrency(paid);
+                document.getElementById('summaryPending').textContent = formatCurrency(pending);
+                document.getElementById('summaryOverdue').textContent = formatCurrency(failed);
+                document.getElementById('paymentSummary').classList.remove('hidden');
+            } catch (error) {
+                console.error('Load payment summary error:', error);
+            }
+        }
+
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                if (badge) {
+                    badge.textContent = result.count;
+                    badge.classList.remove('hidden');
+                }
+            }
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        }
+
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+            return Math.floor(seconds / 86400) + ' days ago';
+        }
+
+        window.markAsRead = async function(id) {
+            await markNotificationAsRead(id);
+            await loadPaymentAlerts();
+        };
+
+        function setupRealtimeSubscription() {
+            realtimeSubscription = supabase
+                .channel('payment-alerts-trader')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => {
+                    loadPaymentAlerts();
+                })
+                .subscribe();
+        }
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('bg-emerald-600', 'text-white');
+                    b.classList.add('border', 'hover:bg-gray-50');
+                });
+                this.classList.add('bg-emerald-600', 'text-white');
+                this.classList.remove('border', 'hover:bg-gray-50');
+                currentFilter = this.dataset.filter;
+                renderNotifications(paymentNotifications);
+            });
+        });
+
+        // Mark all as read
+        document.getElementById('markAllReadBtn').addEventListener('click', async function() {
+            await markAllNotificationsAsRead();
+            await loadPaymentAlerts();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (realtimeSubscription) {
+                supabase.removeChannel(realtimeSubscription);
+            }
+        });
+
+        // Load on page load
+        setupRealtimeSubscription();
+        loadPaymentAlerts();
+    </script>
+</body></html>

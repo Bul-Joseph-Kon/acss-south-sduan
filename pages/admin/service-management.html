@@ -39,8 +39,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Administrator</h3>
-                            <p class="text-gray-500 text-sm">System Admin</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -57,7 +57,7 @@
                             <a href="ai-configuration.html" class="sidebar-link"><i class="ri-robot-line"></i><span>AI Configuration</span></a>
                             <a href="system-settings.html" class="sidebar-link"><i class="ri-settings-3-line"></i><span>System Settings</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -79,7 +79,7 @@
                                 <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
                                 <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
                         </div>
                     </div>
@@ -90,110 +90,8 @@
                         </button>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="service-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                            <i class="ri-file-invoice-line text-blue-600 text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-bold">CVET</h4>
-                                            <p class="text-sm text-gray-500">Customs Valuation and Export Tax</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-active">✓ Active</span>
-                                        <span class="text-xs text-gray-400">Version: 2.4.0</span>
-                                        <span class="text-xs text-gray-400">Last Updated: Jun 20, 2026</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing service')">Edit</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('🔒 Toggling service status')">Toggle Status</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('⚙️ Configuring service')">Configure</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="service-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                                            <i class="ri-file-search-line text-emerald-600 text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-bold">Direct Assessment</h4>
-                                            <p class="text-sm text-gray-500">Direct customs assessment service</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-active">✓ Active</span>
-                                        <span class="text-xs text-gray-400">Version: 2.4.0</span>
-                                        <span class="text-xs text-gray-400">Last Updated: Jun 18, 2026</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing service')">Edit</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('🔒 Toggling service status')">Toggle Status</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('⚙️ Configuring service')">Configure</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="service-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                                            <i class="ri-id-card-line text-purple-600 text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-bold">Agent License</h4>
-                                            <p class="text-sm text-gray-500">Agent licensing and renewal service</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-active">✓ Active</span>
-                                        <span class="text-xs text-gray-400">Version: 2.3.0</span>
-                                        <span class="text-xs text-gray-400">Last Updated: Jun 15, 2026</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing service')">Edit</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('🔒 Toggling service status')">Toggle Status</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('⚙️ Configuring service')">Configure</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="service-card">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                                            <i class="ri-car-line text-orange-600 text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-bold">Vehicle Query</h4>
-                                            <p class="text-sm text-gray-500">Vehicle registration and customs query</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-maintenance">🔧 Maintenance</span>
-                                        <span class="text-xs text-gray-400">Version: 2.2.0</span>
-                                        <span class="text-xs text-gray-400">Last Updated: Jun 12, 2026</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('✏️ Editing service')">Edit</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('🔒 Toggling service status')">Toggle Status</button>
-                                    <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('⚙️ Configuring service')">Configure</button>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="space-y-3" id="servicesList">
+                        <!-- Services will be loaded dynamically -->
                     </div>
                 </main>
             </div>
@@ -208,6 +106,7 @@
     </script>
     <script type="module">
         import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { fetchServices } from '../../js/services.js';
 
         let currentPage = 1;
@@ -216,24 +115,26 @@
 
         async function loadPage() {
             const isAuthenticated = await checkAuth();
+
+            // Load user profile
+            const { user, profile } = await loadCurrentUserProfile();
             if (!isAuthenticated) {
                 window.location.href = '../../auth/login.html';
                 return;
             }
 
-            const hasAccess = await verifyRoleAccess('administrator');
+            const hasAccess = await verifyRoleAccess('admin');
             if (!hasAccess) {
                 alert('You do not have permission to access this page.');
                 window.location.href = '../../auth/login.html';
                 return;
             }
 
-            const user = await getCurrentUser();
-            const profile = user ? await getUserProfile(user.id) : null;
-            
             if (profile) {
-                document.querySelector('h3').textContent = profile.full_name || 'Administrator';
-                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'System Admin';
+                const nameElem = document.getElementById('profileName');
+                if (nameElem) nameElem.textContent = profile.full_name || 'Administrator';
+                const roleElem = document.getElementById('profileRole');
+                if (roleElem) roleElem.textContent = profile.role || 'System Admin';
             }
 
             await loadServices();
@@ -246,11 +147,12 @@
                 renderServices();
             } else {
                 console.error('Error loading services:', result.error);
+                document.getElementById('servicesList').innerHTML = '<div class="text-center py-8 text-red-500">Error loading services: ' + result.error + '</div>';
             }
         }
 
         function renderServices() {
-            const container = document.querySelector('.space-y-3');
+            const container = document.getElementById('servicesList');
             if (!container) return;
 
             if (allServices.length === 0) {
@@ -306,15 +208,16 @@
         document.addEventListener('DOMContentLoaded', loadPage);
 
         // Sign out functionality
-        const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
-        if (signOutBtn) {
-            signOutBtn.onclick = async function() {
-                const result = await signOut();
-                if (result.success) {
-                    window.location.href = '../../auth/login.html';
-                }
-            };
-        }
+        const handleLogout = async (e) => {
+            if (e) e.preventDefault();
+            const result = await signOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            }
+        };
+
+        document.getElementById('signOutBtn').addEventListener('click', handleLogout);
+        document.getElementById('dropdownSignOut').addEventListener('click', handleLogout);
     </script>
 </body>
 </html>

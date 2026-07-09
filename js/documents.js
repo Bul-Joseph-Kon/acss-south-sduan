@@ -104,7 +104,7 @@ export async function uploadDocument(file, applicationId = null, documentType = 
             user_id: profile.id,
             application_id: applicationId,
             document_type: documentType || 'other',
-            file_name: file.name,
+            document_name: file.name,
             file_path: filePath,
             file_url: urlResult.url,
             file_size: file.size,
@@ -120,6 +120,41 @@ export async function uploadDocument(file, applicationId = null, documentType = 
             .single();
 
         if (dbError) throw dbError;
+
+        // Log activity for successful document upload
+        const payload = {
+            user_id: profile.id,
+            activity_type: 'document_uploaded',
+            description: `Document uploaded: ${file.name}`,
+            metadata: JSON.stringify({
+                document_id: document.id,
+                application_id: applicationId,
+                document_type: documentType,
+                file_size: file.size
+            }),
+            ip_address: null,
+            created_at: new Date().toISOString()
+        };
+
+        console.log("=== BEFORE ACTIVITY INSERT ===");
+        console.log(payload);
+
+        const { data: activityData, error: activityError } = await supabase
+            .from('activity_logs')
+            .insert(payload)
+            .select()
+            .single();
+
+        console.log("=== AFTER ACTIVITY INSERT ===");
+        console.log(activityData);
+        console.log(activityError);
+
+        if (activityError) {
+            console.error(activityError.code);
+            console.error(activityError.message);
+            console.error(activityError.details);
+            console.error(activityError.hint);
+        }
 
         console.log('Document uploaded successfully:', document);
         return { success: true, data: document };
@@ -309,7 +344,7 @@ export async function searchDocuments(searchTerm) {
         const { data, error } = await supabase
             .from('documents')
             .select('*')
-            .or(`file_name.ilike.%${searchTerm}%,document_type.ilike.%${searchTerm}%`);
+            .or(`document_name.ilike.%${searchTerm}%,document_type.ilike.%${searchTerm}%`);
 
         if (error) throw error;
 

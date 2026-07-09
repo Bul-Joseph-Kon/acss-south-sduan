@@ -37,8 +37,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Supervisor</h3>
-                            <p class="text-gray-500 text-sm">Supervisor</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -47,9 +47,9 @@
                             <a href="compliance-monitoring.html" class="sidebar-link"><i class="ri-shield-line"></i><span>Compliance Monitoring</span></a>
                             <a href="escalated-cases.html" class="sidebar-link"><i class="ri-alert-line"></i><span>Escalated Cases</span></a>
                             <a href="reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link active"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">6</span></a>
+                            <a href="notifications.html" class="sidebar-link active"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -71,119 +71,318 @@
                                 <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
                                 <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-3 items-center justify-between">
                         <div class="flex flex-wrap gap-2">
-                            <button class="px-4 py-1.5 rounded-full text-sm bg-blue-600 text-white">All</button>
-                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Unread</button>
-                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Read</button>
+                            <button id="filterAll" class="px-4 py-1.5 rounded-full text-sm bg-blue-600 text-white">All</button>
+                            <button id="filterUnread" class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Unread</button>
+                            <button id="filterRead" class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Read</button>
                         </div>
-                        <button onclick="document.querySelectorAll('.notification-item.unread').forEach(el=>el.classList.remove('unread')); alert('✅ All notifications marked as read')" class="text-sm text-blue-600 hover:underline">Mark all as read</button>
+                        <button id="markAllRead" class="text-sm text-blue-600 hover:underline">Mark all as read</button>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="notification-item unread">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-check-double-line text-blue-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-start">
-                                        <h4 class="font-semibold text-sm">Approval Request</h4>
-                                        <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">New</span>
-                                    </div>
-                                    <p class="text-sm text-gray-600 mt-1">CV-2026-0042 awaiting final approval from John Trading Co.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>1 hour ago</span>
-                                        <a href="final-approvals.html" class="text-blue-600 text-sm hover:underline">Review Now</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notification-item unread">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-alert-line text-red-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-start">
-                                        <h4 class="font-semibold text-sm">Case Escalated</h4>
-                                        <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">New</span>
-                                    </div>
-                                    <p class="text-sm text-gray-600 mt-1">CV-2026-0040 escalated by Officer Peter. Requires supervisor review.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>3 hours ago</span>
-                                        <a href="escalated-cases.html" class="text-blue-600 text-sm hover:underline">Review Case</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notification-item unread">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-shield-line text-yellow-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-start">
-                                        <h4 class="font-semibold text-sm">Compliance Alert</h4>
-                                        <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">New</span>
-                                    </div>
-                                    <p class="text-sm text-gray-600 mt-1">Non-compliance detected in DA-2026-0018. Immediate action required.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>4 hours ago</span>
-                                        <a href="compliance-monitoring.html" class="text-blue-600 text-sm hover:underline">View Alert</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notification-item">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-check-double-line text-green-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-sm">Approval Completed</h4>
-                                    <p class="text-sm text-gray-600 mt-1">LIC-2026-0008 approved by Supervisor.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>1 day ago</span>
-                                        <a href="final-approvals.html" class="text-blue-600 text-sm hover:underline">View Details</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notification-item">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-file-chart-line text-purple-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-sm">Report Generated</h4>
-                                    <p class="text-sm text-gray-600 mt-1">Monthly performance report for June 2026 is ready.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>2 days ago</span>
-                                        <a href="reports.html" class="text-blue-600 text-sm hover:underline">View Report</a>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="space-y-3" id="notificationsList">
+                        <div class="text-center py-10 bg-white rounded-xl border border-gray-200 shadow-sm">
+                            <i class="ri-loader-4-line text-4xl text-blue-500 animate-spin block mb-2 mx-auto"></i>
+                            <p class="text-gray-500">Loading notifications...</p>
                         </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
+
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut as authSignOut } from '../../js/auth.js';
+
+        let currentFilter = 'all';
+        let notifications = [];
+        let notificationChannel = null;
+        let currentUserId = null;
+
+        async function init() {
+            const hasAuth = await checkPageAuth('supervisor');
+            if (!hasAuth) return;
+
+            await loadCurrentUserProfile();
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                currentUserId = user.id;
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('full_name')
+                    .eq('user_id', user.id)
+                    .single();
+                if (profile && profile.full_name) {
+                    document.getElementById('profileName').textContent = profile.full_name;
+                    document.getElementById('profileRole').textContent = 'Supervisor';
+                }
+            }
+
+            await loadNotifications();
+            setupRealtime();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
+            document.getElementById('dropdownSignOut').addEventListener('click', handleSignOut);
+            document.getElementById('filterAll').addEventListener('click', () => setFilter('all'));
+            document.getElementById('filterUnread').addEventListener('click', () => setFilter('unread'));
+            document.getElementById('filterRead').addEventListener('click', () => setFilter('read'));
+            document.getElementById('markAllRead').addEventListener('click', markAllAsRead);
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profileDropdown')) {
+                    document.getElementById('profileDropdown').classList.remove('open');
+                }
+            });
+        }
+
+        async function handleSignOut() {
+            const result = await authSignOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            } else {
+                console.error('Sign out failed:', result.error);
+            }
+        }
+
+        async function loadNotifications() {
+            const listEl = document.getElementById('notificationsList');
+            if (!listEl) return;
+
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            let query = supabase
+                .from('notifications')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (currentFilter === 'unread') {
+                query = query.eq('read', false);
+            } else if (currentFilter === 'read') {
+                query = query.eq('read', true);
+            }
+
+            const { data, error } = await query;
+
+            if (error) {
+                console.error('Load notifications error:', error.code, error.message, error.details, error.hint);
+                listEl.innerHTML = `<div class="text-center py-10 bg-white rounded-xl border border-gray-200 shadow-sm"><p class="text-red-500">Failed to load notifications: ${error.message}</p></div>`;
+                return;
+            }
+
+            notifications = data || [];
+            renderNotifications();
+            updateBadge();
+        }
+
+        function renderNotifications() {
+            const listEl = document.getElementById('notificationsList');
+            if (!listEl) return;
+
+            if (notifications.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-10 bg-white rounded-xl border border-gray-200 shadow-sm">
+                        <i class="ri-notification-off-line text-4xl text-gray-300 block mb-2 mx-auto"></i>
+                        <p class="text-gray-500">No notifications found.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            notifications.forEach(notif => {
+                const isUnread = !notif.read;
+                const icon = getNotificationIcon(notif.type || notif.title);
+                const timeAgo = formatTimeAgo(notif.created_at);
+                const link = getNotificationLink(notif.reference_type, notif.reference_id);
+
+                html += `
+                    <div class="notification-item ${isUnread ? 'unread' : ''}" data-id="${notif.id}">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-full ${icon.bg} flex items-center justify-center flex-shrink-0">
+                                <i class="${icon.icon} ${icon.color} text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-semibold text-sm">${escapeHTML(notif.title)}</h4>
+                                    ${isUnread ? '<span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">New</span>' : ''}
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">${escapeHTML(notif.message)}</p>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="notif-time"><i class="ri-time-line mr-1"></i>${timeAgo}</span>
+                                    ${link ? `<a href="${link}" class="text-blue-600 text-sm hover:underline">View</a>` : ''}
+                                    <button onclick="window.deleteNotification('${notif.id}')" class="text-red-500 text-sm hover:underline">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            listEl.innerHTML = html;
+        }
+
+        function getNotificationIcon(type) {
+            const iconMap = {
+                'approval': { icon: 'ri-check-double-line', bg: 'bg-blue-100', color: 'text-blue-600' },
+                'escalation': { icon: 'ri-alert-line', bg: 'bg-red-100', color: 'text-red-600' },
+                'compliance': { icon: 'ri-shield-line', bg: 'bg-yellow-100', color: 'text-yellow-600' },
+                'payment': { icon: 'ri-money-dollar-circle-line', bg: 'bg-green-100', color: 'text-green-600' },
+                'inspection': { icon: 'ri-survey-line', bg: 'bg-purple-100', color: 'text-purple-600' },
+                'report': { icon: 'ri-file-chart-line', bg: 'bg-purple-100', color: 'text-purple-600' },
+                'default': { icon: 'ri-notification-3-line', bg: 'bg-gray-100', color: 'text-gray-600' }
+            };
+            return iconMap[type] || iconMap['default'];
+        }
+
+        function getNotificationLink(referenceType, referenceId) {
+            const linkMap = {
+                'application': 'final-approvals.html',
+                'escalation': 'escalated-cases.html',
+                'compliance': 'compliance-monitoring.html',
+                'payment': 'payment-management.html'
+            };
+            return linkMap[referenceType] || null;
+        }
+
+        function formatTimeAgo(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const seconds = Math.floor((now - date) / 1000);
+
+            if (seconds < 60) return 'Just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+            return date.toLocaleDateString();
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag]));
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.getElementById('filterAll').className = `px-4 py-1.5 rounded-full text-sm ${filter === 'all' ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`;
+            document.getElementById('filterUnread').className = `px-4 py-1.5 rounded-full text-sm ${filter === 'unread' ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`;
+            document.getElementById('filterRead').className = `px-4 py-1.5 rounded-full text-sm ${filter === 'read' ? 'bg-blue-600 text-white' : 'border hover:bg-gray-50'}`;
+            loadNotifications();
+        }
+
+        async function markAllAsRead() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { error } = await supabase
+                .from('notifications')
+                .update({ read: true, read_at: new Date().toISOString() })
+                .eq('user_id', user.id)
+                .eq('read', false);
+
+            if (error) {
+                console.error('Mark all as read error:', error.code, error.message, error.details, error.hint);
+                return;
+            }
+
+            await loadNotifications();
+        }
+
+        async function markAsRead(notificationId) {
+            const { error } = await supabase
+                .from('notifications')
+                .update({ read: true, read_at: new Date().toISOString() })
+                .eq('id', notificationId);
+
+            if (error) {
+                console.error('Mark as read error:', error.code, error.message, error.details, error.hint);
+                return;
+            }
+
+            await loadNotifications();
+        }
+
+        async function deleteNotification(notificationId) {
+            const { error } = await supabase
+                .from('notifications')
+                .delete()
+                .eq('id', notificationId);
+
+            if (error) {
+                console.error('Delete notification error:', error.code, error.message, error.details, error.hint);
+                return;
+            }
+
+            await loadNotifications();
+        }
+
+        async function updateBadge() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const { data, error } = await supabase
+                .from('notifications')
+                .select('id', { count: 'exact' })
+                .eq('user_id', user.id)
+                .eq('read', false);
+
+            if (error) {
+                console.error('Update badge error:', error.code, error.message, error.details, error.hint);
+                return;
+            }
+
+            const badge = document.getElementById('notificationBadge');
+            if (badge) {
+                badge.textContent = data?.length || 0;
+                badge.style.display = data?.length > 0 ? 'inline-block' : 'none';
+            }
+        }
+
+        function setupRealtime() {
+            notificationChannel = supabase
+                .channel('notifications_changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'notifications'
+                    },
+                    (payload) => {
+                        console.log('Notification change:', payload);
+                        loadNotifications();
+                    }
+                )
+                .subscribe();
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (notificationChannel) {
+                supabase.removeChannel(notificationChannel);
             }
         });
+
+        window.deleteNotification = deleteNotification;
+
+        init();
     </script>
-</body></html>
+</body>
+</html>

@@ -54,8 +54,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Supervisor</h3>
-                            <p class="text-gray-500 text-sm">Supervisor</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -233,19 +233,27 @@
     <!-- Script Block -->
     <script type="module">
         import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { checkPageAuth } from '../../js/auth-check.js';
+
         import { fetchApplicationsForRole } from '../../js/applications.js';
+
         import { signOut as authSignOut } from '../../js/auth.js';
+
 
         let loadedApplications = [];
         let selectedAppId = null;
+        let applicationsChannel = null;
 
         async function init() {
             const hasAuth = await checkPageAuth('supervisor');
+
+        // Load user profile
+        await loadCurrentUserProfile();
             if (!hasAuth) return;
 
             // Load supervisor profile name
-            const { data: { user } } = await supabase.auth.getUser();
+            
             if (user) {
                 const { data: profile } = await supabase
                     .from('profiles')
@@ -260,6 +268,7 @@
             }
 
             await loadApprovals();
+            setupRealtime();
 
             // Set up Sign Out
             const signOutBtn = document.getElementById('signOutBtn');
@@ -271,6 +280,30 @@
                 dropdownSignOut.addEventListener('click', handleSignOut);
             }
         }
+
+        function setupRealtime() {
+            applicationsChannel = supabase
+                .channel('applications_changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'applications'
+                    },
+                    (payload) => {
+                        console.log('Applications change:', payload);
+                        loadApprovals();
+                    }
+                )
+                .subscribe();
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (applicationsChannel) {
+                supabase.removeChannel(applicationsChannel);
+            }
+        });
 
         async function handleSignOut() {
             const result = await authSignOut();
@@ -750,6 +783,14 @@
             btn.disabled = true;
             btn.innerHTML = `<i class="ri-loader-4-line animate-spin text-base"></i> Processing...`;
 
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                alert('Authentication required');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                return;
+            }
+
             const updates = {
                 status: status,
                 updated_at: new Date().toISOString()
@@ -767,12 +808,101 @@
             }
 
             try {
-                const { error } = await supabase
+                // Get application details for logging
+                const { data: app, error: appError } = await supabase
+                    .from('applications')
+                    .select('user_id, application_number')
+                    .eq('id', selectedAppId)
+                    .single();
+
+                if (appError) {
+                    console.error('Fetch application error:', appError.code, appError.message, appError.details, appError.hint);
+                    throw appError;
+                }
+
+                // Update application status
+                const { error: updateError } = await supabase
                     .from('applications')
                     .update(updates)
                     .eq('id', selectedAppId);
 
-                if (error) throw error;
+                if (updateError) {
+                    console.error('Update application error:', updateError.code, updateError.message, updateError.details, updateError.hint);
+                    throw updateError;
+                }
+
+                // Create activity log
+                const payload = {
+                    user_id: user.id,
+                    activity_type: `application_${status}`,
+                    description: comments || `Application ${status} by supervisor`,
+                    metadata: JSON.stringify({ application_id: selectedAppId }),
+                    ip_address: null,
+                    created_at: new Date().toISOString()
+                };
+
+                console.log("=== BEFORE ACTIVITY INSERT ===");
+                console.log(payload);
+
+                const { data: activityData, error: activityError } = await supabase
+                    .from('activity_logs')
+                    .insert(payload)
+                    .select()
+                    .single();
+
+                console.log("=== AFTER ACTIVITY INSERT ===");
+                console.log(activityData);
+                console.log(activityError);
+
+                if (activityError) {
+                    console.error(activityError.code);
+                    console.error(activityError.message);
+                    console.error(activityError.details);
+                    console.error(activityError.hint);
+                }
+
+                // Create audit log
+                const { error: auditError } = await supabase
+                    .from('audit_logs')
+                    .insert({
+                        user_id: user.id,
+                        action: `application_${status}`,
+                        table_name: 'applications',
+                        record_id: selectedAppId,
+                        old_values: { status: 'pending_review' },
+                        new_values: updates,
+                        timestamp: new Date().toISOString()
+                    });
+
+                if (auditError) {
+                    console.error('Create audit log error:', auditError.code, auditError.message, auditError.details, auditError.hint);
+                }
+
+                // Create notification for trader
+                if (app && app.user_id) {
+                    const notificationTitle = status === 'approved' ? 'Application Approved' : 
+                                             status === 'returned' ? 'Application Returned' : 'Application Rejected';
+                    const notificationMessage = status === 'approved' ? 
+                        `Your application #${app.application_number} has been approved.` :
+                        `Your application #${app.application_number} has been ${status}. Reason: ${comments}`;
+
+                    const { error: notifError } = await supabase
+                        .from('notifications')
+                        .insert({
+                            user_id: app.user_id,
+                            title: notificationTitle,
+                            message: notificationMessage,
+                            type: 'approval',
+                            reference_id: selectedAppId,
+                            reference_type: 'application',
+                            read: false,
+                            created_at: new Date().toISOString()
+                        });
+
+                    if (notifError) {
+                        console.error('Create notification error:', notifError.code, notifError.message, notifError.details, notifError.hint);
+                    }
+                }
 
                 alert(`Application has been successfully ${status.toUpperCase()}.`);
                 closeDecisionModal(decisionModal);
@@ -780,6 +910,7 @@
                 selectedAppId = null;
                 await loadApprovals();
             } catch (err) {
+                console.error('Execute decision error:', err.code, err.message, err.details, err.hint);
                 alert(`Operation failed: ${err.message}`);
             } finally {
                 btn.disabled = false;
@@ -813,3 +944,6 @@
     </script>
 </body>
 </html>
+
+
+

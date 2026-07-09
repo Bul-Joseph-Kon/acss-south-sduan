@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,32 +12,183 @@
     <script type="module" src="../../js/dashboard.js"></script>
     <script type="module" src="../../js/realtime.js"></script>
     <style>
-        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
-        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
-        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
-        .stat-card { transition: all 0.3s ease; cursor: pointer; background: white; border-radius: 0.75rem; padding: 1rem; border: 1px solid #e5e7eb; }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
-        .stat-number { font-size: 1.5rem; font-weight: 700; }
-        .stat-label { font-size: 0.75rem; color: #6b7280; }
-        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
-        .status-pending { background: #fef3c7; color: #92400e; }
-        .status-in-progress { background: #dbeafe; color: #1e40af; }
-        .status-approved { background: #d1fae5; color: #065f46; }
-        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
-        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
-        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
-        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
-        .profile-dropdown .danger { color: #dc2626; }
-        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
-        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
-        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
-        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
-        .quick-action-btn { transition: all 0.2s ease; cursor: pointer; padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; background: white; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
-        .quick-action-btn:hover { border-color: #1e3a5f; background: #e8f0fe; transform: translateY(-2px); }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%);
+        }
+
+        .sidebar-link {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+
+        .sidebar-link:hover,
+        .sidebar-link.active {
+            background-color: #e8f0fe;
+            color: #1e3a5f;
+        }
+
+        .sidebar-link i {
+            font-size: 1.2rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .status-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-in-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .profile-dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 0.5rem);
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            min-width: 200px;
+            z-index: 50;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .profile-dropdown.open {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .profile-dropdown a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+            color: #374151;
+            transition: background 0.15s;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .profile-dropdown a:hover {
+            background: #e8f0fe;
+            color: #1e3a5f;
+        }
+
+        .profile-dropdown .divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 0.25rem 0;
+        }
+
+        .profile-dropdown .danger {
+            color: #dc2626;
+        }
+
+        .profile-dropdown .danger:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .header-profile-btn {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0.75rem 0.3rem 0.5rem;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.2);
+            transition: background 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .header-profile-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .header-profile-btn .avatar-sm {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1e3a5f;
+        }
+
+        .quick-action-btn {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            background: white;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-action-btn:hover {
+            border-color: #1e3a5f;
+            background: #e8f0fe;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
+
 <body>
     <div class="min-h-screen bg-gray-100">
         <div class="max-w-7xl mx-auto px-4 py-5">
@@ -44,22 +196,34 @@
                 <aside class="lg:w-72 flex-shrink-0">
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
                         <div class="text-center mb-5">
-                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
+                            <div
+                                class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Inspector</h3>
-                            <p class="text-gray-500 text-sm">Customs Inspector</p>
-                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
+                            <span
+                                class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">●
+                                Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
-                            <a href="dashboard-inspector.html" class="sidebar-link active"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
-                            <a href="inspection-queue.html" class="sidebar-link"><i class="ri-clipboard-line"></i><span>Inspection Queue</span></a>
-                            <a href="cargo-inspection.html" class="sidebar-link"><i class="ri-truck-line"></i><span>Cargo Inspection</span></a>
-                            <a href="vehicle-inspection.html" class="sidebar-link"><i class="ri-car-line"></i><span>Vehicle Inspection</span></a>
-                            <a href="inspection-reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Inspection Reports</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span></a>
+                            <a href="dashboard-inspector.html" class="sidebar-link active"><i
+                                    class="ri-dashboard-line"></i><span>Dashboard</span></a>
+                            <a href="inspection-queue.html" class="sidebar-link"><i
+                                    class="ri-clipboard-line"></i><span>Inspection Queue</span></a>
+                            <a href="cargo-inspection.html" class="sidebar-link"><i
+                                    class="ri-truck-line"></i><span>Cargo Inspection</span></a>
+                            <a href="vehicle-inspection.html" class="sidebar-link"><i
+                                    class="ri-car-line"></i><span>Vehicle Inspection</span></a>
+                            <a href="inspection-reports.html" class="sidebar-link"><i
+                                    class="ri-file-chart-line"></i><span>Inspection Reports</span></a>
+                            <a href="notifications.html" class="sidebar-link"><i
+                                    class="ri-notification-3-line"></i><span>Notifications</span><span
+                                    class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                                    id="notificationBadge">0</span></a>
                         </nav>
-                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn"
+                            class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -72,7 +236,7 @@
                             <p class="opacity-90 text-sm">Manage cargo and vehicle inspections</p>
                         </div>
                         <div class="relative">
-                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                            <button id="profileDropdownBtn" class="header-profile-btn">
                                 <span class="avatar-sm"><i class="ri-user-line"></i></span>
                                 <span class="text-sm font-medium hidden sm:inline">Inspector</span>
                                 <i class="ri-arrow-down-s-line text-sm"></i>
@@ -81,37 +245,57 @@
                                 <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
                                 <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign
+                                    Out</a>
                             </div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="stat-card"><div class="stat-number text-blue-600" id="statPendingInspections">0</div><div class="stat-label">Pending Inspections</div></div>
-                        <div class="stat-card"><div class="stat-number text-yellow-600" id="statInProgress">0</div><div class="stat-label">In Progress</div></div>
-                        <div class="stat-card"><div class="stat-number text-green-600" id="statCompleted">0</div><div class="stat-label">Completed</div></div>
-                        <div class="stat-card"><div class="stat-number text-red-600" id="statFailed">0</div><div class="stat-label">Failed</div></div>
+                        <div class="stat-card">
+                            <div class="stat-number text-blue-600" id="statPendingInspections">0</div>
+                            <div class="stat-label">Pending Inspections</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number text-yellow-600" id="statInProgress">0</div>
+                            <div class="stat-label">In Progress</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number text-green-600" id="statCompleted">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number text-red-600" id="statFailed">0</div>
+                            <div class="stat-label">Failed</div>
+                        </div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                        <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-flashlight-line text-blue-500 mr-2"></i>Quick Actions</h3>
+                        <h3 class="font-bold text-sm mb-3 flex items-center"><i
+                                class="ri-flashlight-line text-blue-500 mr-2"></i>Quick Actions</h3>
                         <div class="flex flex-wrap gap-2">
-                            <a href="inspection-queue.html" class="quick-action-btn"><i class="ri-clipboard-line text-blue-500"></i> View Queue</a>
-                            <a href="cargo-inspection.html" class="quick-action-btn"><i class="ri-truck-line text-blue-500"></i> New Cargo Inspection</a>
-                            <a href="vehicle-inspection.html" class="quick-action-btn"><i class="ri-car-line text-blue-500"></i> New Vehicle Inspection</a>
-                            <a href="inspection-reports.html" class="quick-action-btn"><i class="ri-file-chart-line text-blue-500"></i> View Reports</a>
+                            <a href="inspection-queue.html" class="quick-action-btn"><i
+                                    class="ri-clipboard-line text-blue-500"></i> View Queue</a>
+                            <a href="cargo-inspection.html" class="quick-action-btn"><i
+                                    class="ri-truck-line text-blue-500"></i> New Cargo Inspection</a>
+                            <a href="vehicle-inspection.html" class="quick-action-btn"><i
+                                    class="ri-car-line text-blue-500"></i> New Vehicle Inspection</a>
+                            <a href="inspection-reports.html" class="quick-action-btn"><i
+                                    class="ri-file-chart-line text-blue-500"></i> View Reports</a>
                         </div>
                     </div>
 
                     <div class="grid lg:grid-cols-2 gap-4">
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-clipboard-line text-blue-500 mr-2"></i>Inspection Queue</h3>
+                            <h3 class="font-bold text-sm mb-3 flex items-center"><i
+                                    class="ri-clipboard-line text-blue-500 mr-2"></i>Inspection Queue</h3>
                             <div class="space-y-2" id="inspectionQueue">
                                 <div class="text-sm text-gray-500 text-center py-4">Loading queue...</div>
                             </div>
                         </div>
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-notification-3-line text-blue-500 mr-2"></i>Recent Notifications</h3>
+                            <h3 class="font-bold text-sm mb-3 flex items-center"><i
+                                    class="ri-notification-3-line text-blue-500 mr-2"></i>Recent Notifications</h3>
                             <div class="space-y-2" id="recentNotifications">
                                 <div class="text-sm text-gray-500 text-center py-4">Loading notifications...</div>
                             </div>
@@ -123,17 +307,23 @@
     </div>
     <script type="module">
         import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
+
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
+
         import { fetchApplicationsForRole } from '../../js/applications.js';
+
         import { fetchUnreadNotifications } from '../../js/notifications.js';
+
         import { realtimeManager } from '../../js/realtime.js';
+
 
         const PAGE_KEY = 'inspector-dashboard';
         let currentRole = null;
         let currentUserId = null;
 
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
                 document.getElementById('profileDropdown').classList.remove('open');
             }
@@ -142,6 +332,9 @@
         async function loadDashboard() {
             console.log('=== LOADING INSPECTOR DASHBOARD ===');
             const isAuthenticated = await checkAuth();
+
+            // Load user profile
+            await loadCurrentUserProfile();
             if (!isAuthenticated) {
                 window.location.href = '../../auth/login.html';
                 return;
@@ -151,9 +344,9 @@
             const hasAccess = await verifyRoleAccess('inspector');
             if (!hasAccess) {
                 // Get user's actual role and redirect to their dashboard
-                const user = await getCurrentUser();
+
                 if (user) {
-                    const profile = await getUserProfile(user.id);
+
                     if (profile && profile.role) {
                         const dashboardUrl = redirectToDashboard(profile.role);
                         window.location.href = dashboardUrl;
@@ -164,9 +357,9 @@
                 return;
             }
 
-            const user = await getCurrentUser();
-            const profile = user ? await getUserProfile(user.id) : null;
-            
+
+
+
             if (profile) {
                 document.querySelector('h3').textContent = profile.full_name || 'Inspector';
                 document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Inspector';
@@ -179,7 +372,7 @@
 
             // Load workflow-based applications
             await loadWorkflowApplications();
-            
+
             // Load notifications
             await loadNotifications();
 
@@ -189,9 +382,15 @@
 
         async function initializeRealtimeMonitoring() {
             await realtimeManager.initialize();
-            
+
             realtimeManager.registerPage(PAGE_KEY, currentRole, currentUserId, {
                 onApplicationChange: async () => {
+                    await loadWorkflowApplications();
+                },
+                onNotificationChange: async () => {
+                    await loadNotifications();
+                },
+                onActivityChange: async () => {
                     await loadWorkflowApplications();
                 }
             });
@@ -209,16 +408,16 @@
 
         async function loadWorkflowApplications() {
             console.log('=== LOADING WORKFLOW APPLICATIONS FOR INSPECTOR ===');
-            
+
             const result = await fetchApplicationsForRole('inspector', { limit: 10 });
-            
+
             if (result.success && result.data) {
                 const applications = result.data;
                 console.log('Applications loaded:', applications);
-                
+
                 // Update stats
                 updateWorkflowStats(applications);
-                
+
                 // Update inspection queues
                 updateInspectionQueues(applications);
             } else {
@@ -305,7 +504,7 @@
             const date = new Date(dateString);
             const now = new Date();
             const seconds = Math.floor((now - date) / 1000);
-            
+
             if (seconds < 60) return 'Just now';
             if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
             if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
@@ -319,7 +518,7 @@
                     return `<span class="status-badge status-rejected">🤖 AI Issues</span>`;
                 }
             }
-            
+
             if (aiValidationPassed === true) {
                 return `<span class="status-badge status-approved">✓ AI Validated</span>`;
             } else if (aiValidationPassed === false) {
@@ -333,11 +532,12 @@
 
         // Sign out functionality
         async function handleSignOut() {
+            realtimeManager.unregisterPage(PAGE_KEY);
             const result = await signOut();
             if (result.success) {
                 window.location.href = '../../auth/login.html';
             } else {
-                alert('Sign out failed: ' + result.error);
+                console.error('Sign out failed:', result.error);
             }
         }
 
@@ -345,4 +545,5 @@
         document.getElementById('dropdownSignOut').addEventListener('click', handleSignOut);
     </script>
 </body>
+
 </html>

@@ -57,7 +57,7 @@
                             <a href="ai-configuration.html" class="sidebar-link"><i class="ri-robot-line"></i><span>AI Configuration</span></a>
                             <a href="system-settings.html" class="sidebar-link"><i class="ri-settings-3-line"></i><span>System Settings</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -79,7 +79,7 @@
                                 <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
                                 <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
                         </div>
                     </div>
@@ -105,7 +105,7 @@
         });
     </script>
     <script type="module">
-        import { checkPageAuth, signOut } from '../../js/auth-check.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
         import { signOut as authSignOut } from '../../js/auth.js';
         import { fetchRoles, createRole, updateRole, deleteRole, updateRoleStatus, getRoleUserCount } from '../../js/roles.js';
 
@@ -115,15 +115,19 @@
 
         await checkPageAuth('administrator');
 
+        const handleLogout = async (e) => {
+            if (e) e.preventDefault();
+            const result = await authSignOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            }
+        };
+
         const signOutBtn = document.getElementById('signOutBtn');
-        if (signOutBtn) {
-            signOutBtn.addEventListener('click', async () => {
-                const result = await authSignOut();
-                if (result.success) {
-                    window.location.href = '../../auth/login.html';
-                }
-            });
-        }
+        if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
+
+        const dropdownSignOut = document.getElementById('dropdownSignOut');
+        if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
 
         async function loadRoles() {
             const result = await fetchRoles();

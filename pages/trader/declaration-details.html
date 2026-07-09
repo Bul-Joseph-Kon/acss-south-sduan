@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Declaration Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: #374151; margin-bottom: 0.2rem; }
+        .form-group .form-input { width: 100%; padding: 0.4rem 0.6rem; border-radius: 0.4rem; border: 1px solid #d1d5db; font-size: 0.85rem; transition: border-color 0.2s; }
+        .form-group .form-input:focus { outline: none; border-color: #0a4d3e; box-shadow: 0 0 0 3px rgba(10,77,62,0.1); }
+        .ai-badge-sm { font-size: 0.5rem; font-weight: 700; background: linear-gradient(135deg, #0a4d3e, #0a6b58); color: white; padding: 0.05rem 0.35rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.3px; display: inline-block; }
+        .form-input.ai-highlight { border-color: #0a4d3e; background: #ecfdf5; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">📋 Step 1: Declaration Details</h2>
+                            <p class="opacity-90 text-sm">Enter declaration number, type, customs office, and procedure</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+                            <span id="progressText">Step 1 of 9</span>
+                            <span id="progressPercent">11% Complete</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:11%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Declaration Details</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label>Declaration Number <span class="ai-badge-sm">Auto-Generated</span></label>
+                                <input type="text" id="declarationNumber" class="form-input ai-highlight" placeholder="Auto-generated on submission" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label>Declaration Date <span class="text-red-500">*</span></label>
+                                <input type="date" id="declarationDate" class="form-input" />
+                            </div>
+                            <div class="form-group">
+                                <label>Declaration Type <span class="text-red-500">*</span></label>
+                                <select id="declarationType" class="form-input">
+                                    <option value="">Select type</option>
+                                    <option value="Import">Import</option>
+                                    <option value="Export">Export</option>
+                                    <option value="Transit">Transit</option>
+                                    <option value="Temporary Import">Temporary Import</option>
+                                    <option value="Temporary Export">Temporary Export</option>
+                                    <option value="Re-export">Re-export</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Customs Office <span class="text-red-500">*</span></label>
+                                <select id="customsOffice" class="form-input">
+                                    <option value="">Select office</option>
+                                    <option value="Juba Customs Office">Juba Customs Office</option>
+                                    <option value="Nimule Customs Office">Nimule Customs Office</option>
+                                    <option value="Kaya Customs Office">Kaya Customs Office</option>
+                                    <option value="Renk Customs Office">Renk Customs Office</option>
+                                    <option value="Malakal Customs Office">Malakal Customs Office</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Port of Entry/Exit <span class="text-red-500">*</span></label>
+                                <select id="portOfEntry" class="form-input">
+                                    <option value="">Select port</option>
+                                    <option value="Juba International Airport">Juba International Airport</option>
+                                    <option value="Nimule Border Post">Nimule Border Post</option>
+                                    <option value="Kaya Border Post">Kaya Border Post</option>
+                                    <option value="Renk Border Post">Renk Border Post</option>
+                                    <option value="Malakal River Port">Malakal River Port</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Customs Procedure <span class="text-red-500">*</span></label>
+                                <select id="customsProcedure" class="form-input">
+                                    <option value="">Select procedure</option>
+                                    <option value="Normal Import">Normal Import</option>
+                                    <option value="Temporary Admission">Temporary Admission</option>
+                                    <option value="Inward Processing">Inward Processing</option>
+                                    <option value="Outward Processing">Outward Processing</option>
+                                    <option value="Customs Warehouse">Customs Warehouse</option>
+                                    <option value="Free Zone">Free Zone</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
+                            <a href="create-declaration.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                <i class="ri-arrow-left-line"></i> Back
+                            </a>
+                            <button id="saveAndContinueBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                Save & Continue <i class="ri-arrow-right-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        import { getWorkflow, initializeWorkflowFromURL } from '../../js/cvet-workflow-manager.js';
+        
+        import { signOut } from '../../js/auth.js';
+        
+        import { checkPageAuth } from '../../js/auth-check.js';
+        
+        import { getUnreadCount } from '../../js/notifications.js';
+        
+        import toastManager from '../../js/toast.js';
+
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Check authentication
+        await checkPageAuth('trader');
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Sign out handler
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await signOut();
+                if (result.success) {
+                    toastManager.success('Signed out successfully');
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        // Initialize workflow
+        const workflow = getWorkflow();
+        const state = await initializeWorkflowFromURL();
+
+        // Update progress
+        function updateProgress() {
+            const progress = Math.round((state.currentStep / 9) * 100);
+            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 9`;
+            document.getElementById('progressPercent').textContent = `${progress}% Complete`;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+        updateProgress();
+
+        // Load saved data
+        function loadFormData() {
+            if (state.draftData) {
+                if (state.draftData.declaration_date) document.getElementById('declarationDate').value = state.draftData.declaration_date;
+                if (state.draftData.declaration_type) document.getElementById('declarationType').value = state.draftData.declaration_type;
+                if (state.draftData.customs_office) document.getElementById('customsOffice').value = state.draftData.customs_office;
+                if (state.draftData.port_of_entry) document.getElementById('portOfEntry').value = state.draftData.port_of_entry;
+                if (state.draftData.customs_procedure) document.getElementById('customsProcedure').value = state.draftData.customs_procedure;
+                if (state.draftData.application_number) document.getElementById('declarationNumber').value = state.draftData.application_number;
+            } else {
+                // Set default date to today
+                document.getElementById('declarationDate').value = new Date().toISOString().split('T')[0];
+            }
+        }
+        loadFormData();
+
+        // Save and continue
+        document.getElementById('saveAndContinueBtn').addEventListener('click', async function() {
+            const stepData = {
+                declaration_date: document.getElementById('declarationDate').value,
+                declaration_type: document.getElementById('declarationType').value,
+                customs_office: document.getElementById('customsOffice').value,
+                port_of_entry: document.getElementById('portOfEntry').value,
+                customs_procedure: document.getElementById('customsProcedure').value
+            };
+
+            // Validate
+            const validation = workflow.validateStep(1, stepData);
+            if (!validation.success) {
+                toastManager.warning('Please fill in all required fields: ' + validation.missingFields.join(', '));
+                return;
+            }
+
+            // Save draft
+            const saveResult = await workflow.saveDraft(stepData);
+            if (!saveResult.success) {
+                toastManager.error('Error saving: ' + saveResult.error);
+                return;
+            }
+
+            // Move to next step
+            const nextResult = workflow.nextStep();
+            if (nextResult.success) {
+                toastManager.success('Step saved successfully');
+                window.location.href = nextResult.step.page + '?id=' + workflow.applicationId;
+            }
+        });
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

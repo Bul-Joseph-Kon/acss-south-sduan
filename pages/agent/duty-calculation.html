@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Agent Duty Calculation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .duty-summary { background: #f8fafc; border-radius: 0.75rem; padding: 1.25rem; border: 1px solid #e5e7eb; }
+        .duty-summary .duty-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb; }
+        .duty-summary .duty-row:last-child { border-bottom: none; }
+        .duty-summary .duty-label { color: #6b7280; font-size: 0.85rem; }
+        .duty-summary .duty-amount { font-weight: 600; font-size: 0.85rem; }
+        .duty-summary .duty-total { font-size: 1.1rem; font-weight: 700; color: #1e3a5f; padding-top: 0.5rem; border-top: 2px solid #1e3a5f; }
+        .ai-badge-sm { font-size: 0.5rem; font-weight: 700; background: linear-gradient(135deg, #1e3a5f, #2a5f8f); color: white; padding: 0.05rem 0.35rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.3px; display: inline-block; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-pending-payment { background: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="agent-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🧾 Step 6: Duty & Tax Calculation</h2>
+                            <p class="opacity-90 text-sm">Customs duty, VAT, excise, and total charges</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+                            <span>Step 6 of 8</span>
+                            <span>75% Complete</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width:75%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Duty & Tax Calculation</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <div class="duty-summary">
+                                    <div class="duty-row">
+                                        <span class="duty-label">CIF Value</span>
+                                        <span class="duty-amount">$55,000.00</span>
+                                    </div>
+                                    <div class="duty-row">
+                                        <span class="duty-label">Customs Duty (10%)</span>
+                                        <span class="duty-amount">$5,500.00</span>
+                                    </div>
+                                    <div class="duty-row">
+                                        <span class="duty-label">VAT (18%)</span>
+                                        <span class="duty-amount">$9,900.00</span>
+                                    </div>
+                                    <div class="duty-row">
+                                        <span class="duty-label">Excise Duty</span>
+                                        <span class="duty-amount">$0.00</span>
+                                    </div>
+                                    <div class="duty-row">
+                                        <span class="duty-label">Service Charges</span>
+                                        <span class="duty-amount">$250.00</span>
+                                    </div>
+                                    <div class="duty-row duty-total">
+                                        <span>Total Payable</span>
+                                        <span>$15,650.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                    <h4 class="font-semibold text-sm mb-3 flex items-center">AI Calculation Details <span class="ai-badge-sm ml-2">AI</span></h4>
+                                    <div class="space-y-2 text-sm">
+                                        <div class="flex justify-between"><span class="text-gray-600">Assessment Basis</span><span class="font-medium">CIF Value</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-600">Duty Rate Applied</span><span class="font-medium">10% (HS Code 8479.89)</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-600">VAT Rate</span><span class="font-medium">18%</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-600">Exchange Rate</span><span class="font-medium">1 USD = 1,200 SSP</span></div>
+                                        <div class="flex justify-between"><span class="text-gray-600">Payment Status</span><span class="status-badge status-pending-payment">Pending</span></div>
+                                    </div>
+                                </div>
+                                <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                    <div class="flex items-start gap-3">
+                                        <i class="ri-robot-line text-blue-600 text-xl"></i>
+                                        <div>
+                                            <p class="text-sm font-medium text-blue-800">AI Calculation Note</p>
+                                            <p class="text-sm text-blue-700">Duty and taxes calculated based on verified CIF value of $55,000.00. All rates applied correctly.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
+                            <a href="ai-assessment.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                <i class="ri-arrow-left-line"></i> Previous
+                            </a>
+                            <a href="payment.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                Continue to Payment <i class="ri-arrow-right-line"></i>
+                            </a>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+
+        <script type="module" src="../../js/agent-sidebar.js"></script>
+<!-- Supabase & Shared Authentication Guards -->
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        async function initPage() {
+            console.log('=== INITIALIZING AUTH GUARD ON MOCK PAGE ===');
+            const role = 'agent';
+            
+            // 1. Run auth check
+            const hasAccess = await checkPageAuth(role);
+            if (!hasAccess) {
+                console.log('Access denied, redirecting...');
+                return;
+            }
+
+            // 2. Load profile data from Supabase
+            const { user, profile } = await loadCurrentUserProfile();
+            
+            // 3. Update sidebar and profile UI
+            if (profile) {
+                const displayName = profile.full_name || user?.email || 'User';
+                const displayRole = role === 'agent' ? 'Clearing Agent' : 'Trader';
+                
+                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
+                if (nameEl) nameEl.textContent = displayName;
+                
+                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
+                if (roleEl) roleEl.textContent = displayRole;
+                
+                const statusEl = document.getElementById(role + 'ProfileStatus');
+                if (statusEl) statusEl.textContent = '● ' + (profile.status || 'Active');
+                
+                const tinEl = document.getElementById(role + 'ProfileTIN');
+                if (tinEl && profile.organization) {
+                    tinEl.textContent = 'Org: ' + profile.organization;
+                }
+            }
+
+            // 4. Bind Logout Button Listeners
+            const handleLogout = async (e) => {
+                e.preventDefault();
+                console.log('Signing out...');
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
+
+            const dropdownSignOut = document.getElementById('dropdownSignOut');
+            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            initPage();
+        }
+    </script>
+</body></html>
+

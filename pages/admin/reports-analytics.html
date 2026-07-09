@@ -25,6 +25,7 @@
         .report-analytics-card:hover { border-color: #1e3a5f; background: #e8f0fe; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .monthly-bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; }
         .monthly-bar .fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #1e3a5f, #2a5f8f); }
+        .stat-card { background: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; }
     </style>
 </head>
 <body>
@@ -37,8 +38,8 @@
                             <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Administrator</h3>
-                            <p class="text-gray-500 text-sm">System Admin</p>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -55,7 +56,7 @@
                             <a href="ai-configuration.html" class="sidebar-link"><i class="ri-robot-line"></i><span>AI Configuration</span></a>
                             <a href="system-settings.html" class="sidebar-link"><i class="ri-settings-3-line"></i><span>System Settings</span></a>
                         </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
                             <i class="ri-logout-box-line"></i> Sign Out
                         </button>
                     </div>
@@ -74,42 +75,48 @@
                                 <i class="ri-arrow-down-s-line text-sm"></i>
                             </button>
                             <div class="profile-dropdown" id="profileDropdown">
-                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
-                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <a href="profile.html"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="profile.html?edit=true"><i class="ri-edit-line"></i> Edit Profile</a>
                                 <div class="divider"></div>
-                                <a href="#" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
                             </div>
                         </div>
                     </div>
 
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="stat-card">
+                            <p class="text-xs text-gray-500">Total Applications</p>
+                            <p class="text-xl font-bold text-gray-800" id="totalApplications">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-xs text-gray-500">Approved</p>
+                            <p class="text-xl font-bold text-green-600" id="approvedApplications">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-xs text-gray-500">Pending</p>
+                            <p class="text-xl font-bold text-yellow-600" id="pendingApplications">Loading...</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-xs text-gray-500">Total Revenue</p>
+                            <p class="text-xl font-bold text-blue-600" id="totalRevenue">Loading...</p>
+                        </div>
+                    </div>
+
                     <div class="grid md:grid-cols-2 gap-4">
-                        <div class="report-analytics-card" onclick="alert('📊 Generating System Performance Report')">
+                        <div class="report-analytics-card" onclick="generateReport('applications')">
                             <div class="flex items-start gap-3">
                                 <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                                     <i class="ri-line-chart-line text-blue-600 text-xl"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold">System Performance</h4>
-                                    <p class="text-sm text-gray-500">Performance metrics and uptime</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 22, 2026</span>
+                                    <h4 class="font-semibold">Application Analytics</h4>
+                                    <p class="text-sm text-gray-500">Application trends and patterns</p>
+                                    <span class="text-xs text-gray-400">Live data from database</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="report-analytics-card" onclick="alert('📊 Generating User Analytics Report')">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                                    <i class="ri-user-line text-purple-600 text-xl"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold">User Analytics</h4>
-                                    <p class="text-sm text-gray-500">User activity and engagement</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 20, 2026</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="report-analytics-card" onclick="alert('📊 Generating Revenue Analytics Report')">
+                        <div class="report-analytics-card" onclick="generateReport('revenue')">
                             <div class="flex items-start gap-3">
                                 <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
                                     <i class="ri-money-dollar-circle-line text-emerald-600 text-xl"></i>
@@ -117,51 +124,58 @@
                                 <div>
                                     <h4 class="font-semibold">Revenue Analytics</h4>
                                     <p class="text-sm text-gray-500">Revenue trends and forecasts</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 18, 2026</span>
+                                    <span class="text-xs text-gray-400">Live data from database</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="report-analytics-card" onclick="alert('📊 Generating Application Analytics Report')">
+                        <div class="report-analytics-card" onclick="generateReport('users')">
                             <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                                    <i class="ri-file-copy-line text-orange-600 text-xl"></i>
+                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <i class="ri-user-line text-purple-600 text-xl"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold">Application Analytics</h4>
-                                    <p class="text-sm text-gray-500">Application trends and patterns</p>
-                                    <span class="text-xs text-gray-400">Last generated: Jun 15, 2026</span>
+                                    <h4 class="font-semibold">User Analytics</h4>
+                                    <p class="text-sm text-gray-500">User activity and engagement</p>
+                                    <span class="text-xs text-gray-400">Live data from database</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-analytics-card" onclick="generateReport('payments')">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                                    <i class="ri-bank-card-line text-orange-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">Payment Analytics</h4>
+                                    <p class="text-sm text-gray-500">Payment trends and status</p>
+                                    <span class="text-xs text-gray-400">Live data from database</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                        <h3 class="font-bold text-sm mb-3">Monthly Trends</h3>
-                        <div class="space-y-3">
-                            <div><div class="flex justify-between text-sm"><span>January</span><span>45 Applications</span></div><div class="monthly-bar"><div class="fill" style="width:60%"></div></div></div>
-                            <div><div class="flex justify-between text-sm"><span>February</span><span>38 Applications</span></div><div class="monthly-bar"><div class="fill" style="width:50%"></div></div></div>
-                            <div><div class="flex justify-between text-sm"><span>March</span><span>52 Applications</span></div><div class="monthly-bar"><div class="fill" style="width:70%"></div></div></div>
-                            <div><div class="flex justify-between text-sm"><span>April</span><span>41 Applications</span></div><div class="monthly-bar"><div class="fill" style="width:55%"></div></div></div>
-                            <div><div class="flex justify-between text-sm"><span>May</span><span>48 Applications</span></div><div class="monthly-bar"><div class="fill" style="width:65%"></div></div></div>
-                            <div><div class="flex justify-between text-sm"><span>June</span><span>56 Applications</span></div><div class="monthly-bar"><div class="fill" style="width:75%"></div></div></div>
+                        <h3 class="font-bold text-sm mb-3">Monthly Application Trends</h3>
+                        <div class="space-y-3" id="monthlyTrends">
+                            <!-- Monthly trends will be loaded dynamically -->
                         </div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                         <h3 class="font-bold text-sm mb-3">Generate Custom Report</h3>
                         <div class="grid md:grid-cols-3 gap-3">
-                            <select class="p-2 border rounded-lg text-sm">
-                                <option>Report Type</option>
-                                <option>System Performance</option>
-                                <option>User Analytics</option>
-                                <option>Revenue Analytics</option>
-                                <option>Application Analytics</option>
+                            <select id="reportType" class="p-2 border rounded-lg text-sm">
+                                <option value="applications">Application Analytics</option>
+                                <option value="revenue">Revenue Analytics</option>
+                                <option value="users">User Analytics</option>
+                                <option value="payments">Payment Analytics</option>
                             </select>
-                            <input type="date" class="p-2 border rounded-lg text-sm" />
-                            <input type="date" class="p-2 border rounded-lg text-sm" />
+                            <input type="date" id="reportDateFrom" class="p-2 border rounded-lg text-sm" />
+                            <input type="date" id="reportDateTo" class="p-2 border rounded-lg text-sm" />
                         </div>
-                        <button class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1">
+                        <button class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1" onclick="generateCustomReport()">
                             <i class="ri-file-chart-line"></i> Generate Report
                         </button>
                     </div>
@@ -178,42 +192,154 @@
     </script>
     <script type="module">
         import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import supabase from '../../js/supabase.js';
+
+        let realtimeChannel = null;
 
         async function loadPage() {
             const isAuthenticated = await checkAuth();
+            const hasAccess = await verifyRoleAccess('administrator');
+
+            const { user, profile } = await loadCurrentUserProfile();
             if (!isAuthenticated) {
                 window.location.href = '../../auth/login.html';
                 return;
             }
 
-            const hasAccess = await verifyRoleAccess('administrator');
             if (!hasAccess) {
                 alert('You do not have permission to access this page.');
                 window.location.href = '../../auth/login.html';
                 return;
             }
 
-            const user = await getCurrentUser();
-            const profile = user ? await getUserProfile(user.id) : null;
-            
             if (profile) {
-                document.querySelector('h3').textContent = profile.full_name || 'Administrator';
-                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'System Admin';
+                const nameElem = document.getElementById('profileName');
+                if (nameElem) nameElem.textContent = profile.full_name || 'Administrator';
+                const roleElem = document.getElementById('profileRole');
+                if (roleElem) roleElem.textContent = profile.role || 'System Admin';
+            }
+
+            await loadAnalytics();
+            setupRealtime();
+        }
+
+        async function loadAnalytics() {
+            try {
+                // Load applications statistics
+                const { data: applications, error: appError } = await supabase
+                    .from('applications')
+                    .select('status, created_at');
+                
+                if (appError) throw appError;
+
+                // Load payments statistics
+                const { data: payments, error: payError } = await supabase
+                    .from('payments')
+                    .select('amount, status, created_at');
+                
+                if (payError) throw payError;
+
+                // Calculate statistics
+                const totalApps = applications?.length || 0;
+                const approvedApps = applications?.filter(a => a.status === 'approved').length || 0;
+                const pendingApps = applications?.filter(a => a.status === 'pending' || a.status === 'pending_review').length || 0;
+                const totalRev = payments?.filter(p => p.status === 'completed').reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0) || 0;
+
+                document.getElementById('totalApplications').textContent = totalApps;
+                document.getElementById('approvedApplications').textContent = approvedApps;
+                document.getElementById('pendingApplications').textContent = pendingApps;
+                document.getElementById('totalRevenue').textContent = `SSP ${totalRev.toLocaleString()}`;
+
+                // Calculate monthly trends
+                renderMonthlyTrends(applications || []);
+            } catch (error) {
+                console.error('Error loading analytics:', error);
             }
         }
+
+        function renderMonthlyTrends(applications) {
+            const container = document.getElementById('monthlyTrends');
+            if (!container) return;
+
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            const currentYear = new Date().getFullYear();
+            
+            const monthlyData = months.map((month, index) => {
+                const monthApps = applications.filter(app => {
+                    const appDate = new Date(app.created_at);
+                    return appDate.getFullYear() === currentYear && appDate.getMonth() === index;
+                });
+                return {
+                    month,
+                    count: monthApps.length
+                };
+            });
+
+            const maxCount = Math.max(...monthlyData.map(d => d.count), 1);
+
+            let html = '';
+            monthlyData.forEach(data => {
+                const percentage = (data.count / maxCount) * 100;
+                html += `
+                    <div>
+                        <div class="flex justify-between text-sm">
+                            <span>${data.month}</span>
+                            <span>${data.count} Applications</span>
+                        </div>
+                        <div class="monthly-bar">
+                            <div class="fill" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function setupRealtime() {
+            realtimeChannel = supabase.channel('realtime-analytics')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, () => {
+                    loadAnalytics();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'payments' }, () => {
+                    loadAnalytics();
+                })
+                .subscribe();
+        }
+
+        // Cleanup on unload
+        window.addEventListener('unload', () => {
+            if (realtimeChannel) {
+                supabase.removeChannel(realtimeChannel);
+            }
+        });
+
+        window.generateReport = function(type) {
+            alert(`Generating ${type} report...\n\nThis would generate a detailed report based on live database data for ${type}.`);
+        };
+
+        window.generateCustomReport = function() {
+            const reportType = document.getElementById('reportType').value;
+            const dateFrom = document.getElementById('reportDateFrom').value;
+            const dateTo = document.getElementById('reportDateTo').value;
+            
+            alert(`Generating custom ${reportType} report...\n\nDate Range: ${dateFrom || 'All time'} to ${dateTo || 'Present'}\n\nThis would generate a detailed report based on live database data.`);
+        };
 
         document.addEventListener('DOMContentLoaded', loadPage);
 
         // Sign out functionality
-        const signOutBtn = document.querySelector('button[onclick*="Signed out"]');
-        if (signOutBtn) {
-            signOutBtn.onclick = async function() {
-                const result = await signOut();
-                if (result.success) {
-                    window.location.href = '../../auth/login.html';
-                }
-            };
-        }
+        const handleLogout = async (e) => {
+            if (e) e.preventDefault();
+            const result = await signOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            }
+        };
+
+        document.getElementById('signOutBtn').addEventListener('click', handleLogout);
+        document.getElementById('dropdownSignOut').addEventListener('click', handleLogout);
     </script>
 </body>
 </html>

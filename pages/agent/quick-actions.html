@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Agent Quick Actions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .action-card { transition: all 0.3s ease; cursor: pointer; background: white; border-radius: 0.75rem; padding: 1.5rem; border: 2px solid #e5e7eb; text-align: center; }
+        .action-card:hover { border-color: #1e3a5f; transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+        .action-card .action-icon { font-size: 2.5rem; color: #1e3a5f; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="agent-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">⚡ Quick Actions</h2>
+                            <p class="opacity-90 text-sm">Frequently used actions for your agent services</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <a href="create-declaration.html" class="action-card">
+                            <div class="action-icon"><i class="ri-file-invoice-line"></i></div>
+                            <h3 class="font-bold mt-3">New CVET Declaration</h3>
+                            <p class="text-sm text-gray-500">Create a new Customs Valuation declaration</p>
+                            <span class="inline-block mt-3 text-sm text-blue-600 font-semibold">Start Now →</span>
+                        </a>
+
+                        <a href="create-assessment.html" class="action-card">
+                            <div class="action-icon"><i class="ri-file-search-line"></i></div>
+                            <h3 class="font-bold mt-3">New Direct Assessment</h3>
+                            <p class="text-sm text-gray-500">Start a new direct assessment for customs clearance</p>
+                            <span class="inline-block mt-3 text-sm text-blue-600 font-semibold">Start Now →</span>
+                        </a>
+
+                        <a href="new-license.html" class="action-card">
+                            <div class="action-icon"><i class="ri-id-card-line"></i></div>
+                            <h3 class="font-bold mt-3">New Agent License</h3>
+                            <p class="text-sm text-gray-500">Apply for a new clearing agent license</p>
+                            <span class="inline-block mt-3 text-sm text-blue-600 font-semibold">Apply Now →</span>
+                        </a>
+
+                        <a href="search-vehicle.html" class="action-card">
+                            <div class="action-icon"><i class="ri-car-line"></i></div>
+                            <h3 class="font-bold mt-3">Vehicle Query</h3>
+                            <p class="text-sm text-gray-500">Search vehicle registration and customs information</p>
+                            <span class="inline-block mt-3 text-sm text-blue-600 font-semibold">Search Now →</span>
+                        </a>
+
+                        <a href="draft.html" class="action-card">
+                            <div class="action-icon"><i class="ri-pen-line"></i></div>
+                            <h3 class="font-bold mt-3">View Drafts</h3>
+                            <p class="text-sm text-gray-500">Continue working on your saved draft applications</p>
+                            <span class="inline-block mt-3 text-sm text-blue-600 font-semibold">View Drafts →</span>
+                        </a>
+
+                        <a href="renewal.html" class="action-card">
+                            <div class="action-icon"><i class="ri-loop-right-line"></i></div>
+                            <h3 class="font-bold mt-3">License Renewal</h3>
+                            <p class="text-sm text-gray-500">Renew your clearing agent license</p>
+                            <span class="inline-block mt-3 text-sm text-blue-600 font-semibold">Renew Now →</span>
+                        </a>
+                    </div>
+
+                    <!-- Recent Drafts -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Recent Drafts</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center border-b pb-3">
+                                <div><span class="font-medium">CVET Declaration</span><p class="text-sm text-gray-500">Draft saved on Jun 21, 2026</p></div>
+                                <a href="create-declaration.html" class="text-blue-600 text-sm hover:underline">Continue</a>
+                            </div>
+                            <div class="flex justify-between items-center border-b pb-3">
+                                <div><span class="font-medium">Direct Assessment</span><p class="text-sm text-gray-500">Draft saved on Jun 19, 2026</p></div>
+                                <a href="create-assessment.html" class="text-blue-600 text-sm hover:underline">Continue</a>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div><span class="font-medium">Agent License</span><p class="text-sm text-gray-500">Draft saved on Jun 17, 2026</p></div>
+                                <a href="new-license.html" class="text-blue-600 text-sm hover:underline">Continue</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Tips -->
+                    <div class="bg-blue-50 rounded-xl border border-blue-200 p-5">
+                        <h3 class="font-bold text-blue-800 mb-2"><i class="ri-lightbulb-line mr-2"></i>Pro Tips for Agents</h3>
+                        <ul class="text-sm text-blue-700 space-y-1">
+                            <li>• Always verify client documents before submission</li>
+                            <li>• Track application status regularly for timely updates</li>
+                            <li>• Renew your license at least 30 days before expiry</li>
+                            <li>• Contact support for complex clearance issues</li>
+                        </ul>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+
+        <script type="module" src="../../js/agent-sidebar.js"></script>
+<!-- Supabase & Shared Authentication Guards -->
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        async function initPage() {
+            console.log('=== INITIALIZING AUTH GUARD ON MOCK PAGE ===');
+            const role = 'agent';
+            
+            // 1. Run auth check
+            const hasAccess = await checkPageAuth(role);
+            if (!hasAccess) {
+                console.log('Access denied, redirecting...');
+                return;
+            }
+
+            // 2. Load profile data from Supabase
+            const { user, profile } = await loadCurrentUserProfile();
+            
+            // 3. Update sidebar and profile UI
+            if (profile) {
+                const displayName = profile.full_name || user?.email || 'User';
+                const displayRole = role === 'agent' ? 'Clearing Agent' : 'Trader';
+                
+                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
+                if (nameEl) nameEl.textContent = displayName;
+                
+                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
+                if (roleEl) roleEl.textContent = displayRole;
+                
+                const statusEl = document.getElementById(role + 'ProfileStatus');
+                if (statusEl) statusEl.textContent = '● ' + (profile.status || 'Active');
+                
+                const tinEl = document.getElementById(role + 'ProfileTIN');
+                if (tinEl && profile.organization) {
+                    tinEl.textContent = 'Org: ' + profile.organization;
+                }
+            }
+
+            // 4. Bind Logout Button Listeners
+            const handleLogout = async (e) => {
+                e.preventDefault();
+                console.log('Signing out...');
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
+
+            const dropdownSignOut = document.getElementById('dropdownSignOut');
+            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            initPage();
+        }
+    </script>
+</body></html>
+
+

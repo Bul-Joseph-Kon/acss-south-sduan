@@ -161,13 +161,13 @@ export const SUPABASE_CONFIG = {
     
     // Dashboard URLs by role
     dashboardUrls: {
-        trader: 'pages/trader/dashboard-trader.html',
-        agent: 'pages/agent/dashboard-agent.html',
-        officer: 'pages/officer/dashboard-officer.html',
-        inspector: 'pages/inspector/dashboard-inspector.html',
-        supervisor: 'pages/supervisor/dashboard-supervisor.html',
-        revenue: 'pages/revenue/dashboard-revenue.html',
-        administrator: 'pages/admin/dashboard-admin.html'
+        trader: '/pages/trader/dashboard-trader.html',
+        agent: '/pages/agent/dashboard-agent.html',
+        officer: '/pages/officer/dashboard-officer.html',
+        inspector: '/pages/inspector/dashboard-inspector.html',
+        supervisor: '/pages/supervisor/dashboard-supervisor.html',
+        revenue: '/pages/revenue/dashboard-revenue.html',
+        administrator: '/pages/admin/dashboard-admin.html'
     }
 };
 

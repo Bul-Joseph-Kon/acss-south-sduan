@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · My Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
+                        <div class="text-center mb-5">
+                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
+                                <i class="ri-user-line text-white text-3xl"></i>
+                            </div>
+                            <h3 id="profileName" class="text-lg font-bold text-gray-800">Loading...</h3>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
+                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
+                        </div>
+                        <nav class="space-y-1 mb-4">
+                            <a href="dashboard-admin.html" class="sidebar-link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
+                            <a href="user-management.html" class="sidebar-link"><i class="ri-user-line"></i><span>User Management</span></a>
+                            <a href="role-management.html" class="sidebar-link"><i class="ri-shield-line"></i><span>Role Management</span></a>
+                            <a href="service-management.html" class="sidebar-link"><i class="ri-service-line"></i><span>Service Management</span></a>
+                            <a href="application-management.html" class="sidebar-link"><i class="ri-file-copy-line"></i><span>Application Management</span></a>
+                            <a href="notification-management.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notification Management</span></a>
+                            <a href="document-management.html" class="sidebar-link"><i class="ri-file-pdf-line"></i><span>Document Management</span></a>
+                            <a href="payment-management.html" class="sidebar-link"><i class="ri-bank-card-line"></i><span>Payment Management</span></a>
+                            <a href="reports-analytics.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Reports & Analytics</span></a>
+                            <a href="audit-logs.html" class="sidebar-link"><i class="ri-history-line"></i><span>Audit Logs</span></a>
+                            <a href="ai-configuration.html" class="sidebar-link"><i class="ri-robot-line"></i><span>AI Configuration</span></a>
+                            <a href="system-settings.html" class="sidebar-link"><i class="ri-settings-3-line"></i><span>System Settings</span></a>
+                        </nav>
+                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                            <i class="ri-logout-box-line"></i> Sign Out
+                        </button>
+                    </div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">👤 My Profile</h2>
+                            <p class="opacity-90 text-sm">View and edit your profile information</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Admin</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="profile.html"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="profile.html?edit=true"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-sm">Profile Information</h3>
+                            <button id="editBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1" onclick="enableEditMode()">
+                                <i class="ri-edit-line"></i> Edit Profile
+                            </button>
+                        </div>
+
+                        <div id="viewMode" class="space-y-4">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                    <div id="viewFullName" class="text-sm text-gray-900 p-2 bg-gray-50 rounded-lg">Loading...</div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <div id="viewEmail" class="text-sm text-gray-900 p-2 bg-gray-50 rounded-lg">Loading...</div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                    <div id="viewPhone" class="text-sm text-gray-900 p-2 bg-gray-50 rounded-lg">Loading...</div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                                    <div id="viewRole" class="text-sm text-gray-900 p-2 bg-gray-50 rounded-lg">Loading...</div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                                    <div id="viewNationality" class="text-sm text-gray-900 p-2 bg-gray-50 rounded-lg">Loading...</div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Organization</label>
+                                    <div id="viewOrganization" class="text-sm text-gray-900 p-2 bg-gray-50 rounded-lg">Loading...</div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                                    <div id="viewCompany" class="text-sm text-gray-900 p-2 bg-gray-50 rounded-lg">Loading...</div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <div id="viewStatus" class="text-sm text-gray-900 p-2 bg-gray-50 rounded-lg">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="editMode" class="space-y-4 hidden">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                    <input type="text" id="editFullName" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Full Name">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input type="email" id="editEmail" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Email" disabled>
+                                    <p class="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                    <input type="text" id="editPhone" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Phone">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                                    <input type="text" id="editNationality" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Nationality">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Organization</label>
+                                    <input type="text" id="editOrganization" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Organization">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                                    <input type="text" id="editCompany" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Company">
+                                </div>
+                            </div>
+                            <div class="flex gap-3 mt-4">
+                                <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-1" onclick="saveProfile()">
+                                    <i class="ri-save-line"></i> Save Changes
+                                </button>
+                                <button class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition flex items-center gap-1" onclick="cancelEdit()">
+                                    <i class="ri-close-line"></i> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+    <script type="module">
+        import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile, updateUserProfile } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import supabase from '../../js/supabase.js';
+
+        let currentProfile = null;
+
+        async function loadPage() {
+            const isAuthenticated = await checkAuth();
+            const hasAccess = await verifyRoleAccess('administrator');
+
+            const { user, profile } = await loadCurrentUserProfile();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            if (!hasAccess) {
+                alert('You do not have permission to access this page.');
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            if (profile) {
+                currentProfile = profile;
+                const nameElem = document.getElementById('profileName');
+                if (nameElem) nameElem.textContent = profile.full_name || 'Administrator';
+                const roleElem = document.getElementById('profileRole');
+                if (roleElem) roleElem.textContent = profile.role || 'System Admin';
+
+                // Populate view mode
+                document.getElementById('viewFullName').textContent = profile.full_name || 'N/A';
+                document.getElementById('viewEmail').textContent = profile.email || 'N/A';
+                document.getElementById('viewPhone').textContent = profile.phone || 'N/A';
+                document.getElementById('viewRole').textContent = profile.role || 'N/A';
+                document.getElementById('viewNationality').textContent = profile.nationality || 'N/A';
+                document.getElementById('viewOrganization').textContent = profile.organization || 'N/A';
+                document.getElementById('viewCompany').textContent = profile.company || 'N/A';
+                document.getElementById('viewStatus').textContent = profile.status || 'N/A';
+
+                // Populate edit mode
+                document.getElementById('editFullName').value = profile.full_name || '';
+                document.getElementById('editEmail').value = profile.email || '';
+                document.getElementById('editPhone').value = profile.phone || '';
+                document.getElementById('editNationality').value = profile.nationality || '';
+                document.getElementById('editOrganization').value = profile.organization || '';
+                document.getElementById('editCompany').value = profile.company || '';
+            }
+
+            // Check if edit mode is requested via URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('edit') === 'true') {
+                enableEditMode();
+            }
+        }
+
+        window.enableEditMode = function() {
+            document.getElementById('viewMode').classList.add('hidden');
+            document.getElementById('editMode').classList.remove('hidden');
+            document.getElementById('editBtn').classList.add('hidden');
+        };
+
+        window.cancelEdit = function() {
+            document.getElementById('viewMode').classList.remove('hidden');
+            document.getElementById('editMode').classList.add('hidden');
+            document.getElementById('editBtn').classList.remove('hidden');
+        };
+
+        window.saveProfile = async function() {
+            const fullName = document.getElementById('editFullName').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const nationality = document.getElementById('editNationality').value.trim();
+            const organization = document.getElementById('editOrganization').value.trim();
+            const company = document.getElementById('editCompany').value.trim();
+
+            if (!fullName) {
+                alert('Full name is required');
+                return;
+            }
+
+            try {
+                const result = await updateUserProfile(currentProfile.id, {
+                    full_name: fullName,
+                    phone: phone || null,
+                    nationality: nationality || null,
+                    organization: organization || null,
+                    company: company || null
+                });
+
+                if (result.success) {
+                    alert('Profile updated successfully');
+                    currentProfile = { ...currentProfile, ...result.data[0] };
+                    await loadPage();
+                    cancelEdit();
+                } else {
+                    alert('Error updating profile: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error updating profile: ' + error.message);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', loadPage);
+
+        // Sign out functionality
+        const handleLogout = async (e) => {
+            if (e) e.preventDefault();
+            const result = await signOut();
+            if (result.success) {
+                window.location.href = '../../auth/login.html';
+            }
+        };
+
+        document.getElementById('signOutBtn').addEventListener('click', handleLogout);
+        document.getElementById('dropdownSignOut').addEventListener('click', handleLogout);
+    </script>
+</body>
+</html>

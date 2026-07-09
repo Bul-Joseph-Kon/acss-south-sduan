@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Verification Result</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .result-card { background: #d1fae5; border: 2px solid #0a4d3e; border-radius: 0.75rem; padding: 1.5rem; text-align: center; }
+        .result-card .icon { font-size: 4rem; color: #0a4d3e; }
+        .result-card .status-title { font-size: 1.25rem; font-weight: 700; margin-top: 0.5rem; color: #0a4d3e; }
+        .qr-container { display: inline-block; padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; }
+        #qrcode { width: 100px; height: 100px; }
+        #qrcode img { width: 100% !important; height: 100% !important; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+        .verify-footer { border-top: 2px solid #0a4d3e; padding-top: 1rem; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">✅ Verification Result</h2>
+                            <p class="opacity-90 text-sm">Vehicle verification and authentication status</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="verificationLoading" class="text-center py-8 hidden">
+                        <i class="ri-loader-4-line animate-spin text-2xl text-emerald-600"></i>
+                        <p class="text-gray-500 mt-2">Loading verification results...</p>
+                    </div>
+                    <div id="verificationEmpty" class="hidden text-center py-8">
+                        <i class="ri-check-double-line text-4xl text-gray-300"></i>
+                        <p class="text-gray-500 mt-2">No verification results found</p>
+                    </div>
+                    <div id="verificationError" class="hidden bg-red-50 border border-red-200 rounded-lg p-4">
+                        <p class="text-red-700" id="errorMessage">Error loading verification results</p>
+                        <button onclick="loadVerification()" class="mt-2 text-sm text-red-600 hover:underline">Retry</button>
+                    </div>
+                    <div id="verificationData" class="hidden">
+                        <div class="result-card">
+                            <div class="icon" id="verificationIcon">✅</div>
+                            <div class="status-title" id="verificationTitle">Vehicle Verified Successfully</div>
+                            <p class="text-gray-600" id="verificationMessage">All documents and vehicle details have been verified and authenticated.</p>
+                            <div class="mt-3 flex flex-wrap justify-center gap-2" id="verificationBadges">
+                            </div>
+                        </div>
+
+                        <!-- Verification Details -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <h3 class="font-bold text-lg mb-4">Verification Details</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="info-card">
+                                    <div class="info-label">Verification Reference</div>
+                                    <div class="info-value" id="verificationRef">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Verification Date</div>
+                                    <div class="info-value" id="verificationDate">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Verified By</div>
+                                    <div class="info-value" id="verifiedBy">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Verification Method</div>
+                                    <div class="info-value" id="verificationMethod">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">AI Confidence Score</div>
+                                    <div class="info-value" id="aiScore">-</div>
+                                </div>
+                                <div class="info-card">
+                                    <div class="info-label">Status</div>
+                                    <div class="info-value" id="verificationStatus">-</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QR Code Section -->
+                        <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                            <div class="verify-footer">
+                                <div class="flex items-center gap-4">
+                                    <div class="qr-container">
+                                        <div id="qrcode"></div>
+                                    </div>
+                                    <div class="text-left">
+                                        <p class="text-xs font-semibold text-gray-700">SCAN TO VERIFY</p>
+                                        <p class="text-xs text-gray-500">Scan this QR code to verify vehicle authenticity</p>
+                                        <p class="text-xs text-gray-400 mt-1" id="qrVin">VIN: -</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-gray-500">Verified by</p>
+                                    <p class="font-semibold text-sm">SSRA Customs</p>
+                                    <p class="text-xs text-gray-400">South Sudan Revenue Authority</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-3">
+                            <button id="downloadCertBtn" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition flex items-center gap-2">
+                                <i class="ri-file-pdf-line"></i> Download Certificate
+                            </button>
+                            <button id="downloadReportBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition flex items-center gap-2">
+                                <i class="ri-file-chart-line"></i> Download Full Report
+                            </button>
+                            <button id="shareBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700 transition flex items-center gap-2">
+                                <i class="ri-share-line"></i> Share
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between">
+                        <a href="tax-information.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <i class="ri-arrow-left-line"></i> Tax Info
+                        </a>
+                        <a href="submitted.html" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            View All Applications <i class="ri-arrow-right-line"></i>
+                        </a>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script type="module">
+        import { checkPageAuth, signOut } from '../../js/auth-check.js';
+        import { signOut as authSignOut } from '../../js/auth.js';
+        import { getUnreadCount } from '../../js/notifications.js';
+        import toastManager from '../../js/toast.js';
+        import { fetchLatestVehicleVerification } from '../../js/vehicle-service.js';
+        import supabase from '../../js/supabase.js';
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Check authentication
+        await checkPageAuth('trader');
+
+        // Sign out handler
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await authSignOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        let currentVerification = null;
+
+        async function loadVerification() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const vehicleId = urlParams.get('id');
+
+            if (!vehicleId) {
+                document.getElementById('verificationEmpty').classList.remove('hidden');
+                document.getElementById('verificationEmpty').querySelector('p').textContent = 'No vehicle ID provided';
+                toastManager.error('No vehicle ID provided');
+                return;
+            }
+
+            document.getElementById('verificationLoading').classList.remove('hidden');
+            document.getElementById('verificationEmpty').classList.add('hidden');
+            document.getElementById('verificationError').classList.add('hidden');
+            document.getElementById('verificationData').classList.add('hidden');
+
+            try {
+                const result = await fetchLatestVehicleVerification(vehicleId);
+                
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
+                
+                if (!result.data) {
+                    document.getElementById('verificationLoading').classList.add('hidden');
+                    document.getElementById('verificationEmpty').classList.remove('hidden');
+                    document.getElementById('verificationEmpty').querySelector('p').textContent = 'No verification found for this vehicle';
+                    toastManager.info('No verification found for this vehicle');
+                    return;
+                }
+
+                currentVerification = result.data;
+                displayVerification(result.data);
+                toastManager.success('Verification loaded successfully');
+
+            } catch (error) {
+                console.error('Load verification error:', error);
+                document.getElementById('verificationLoading').classList.add('hidden');
+                document.getElementById('verificationError').classList.remove('hidden');
+                document.getElementById('errorMessage').textContent = 'Error loading verification: ' + error.message;
+                toastManager.error('Error loading verification: ' + error.message);
+            }
+        }
+
+        function displayVerification(verification) {
+            document.getElementById('verificationLoading').classList.add('hidden');
+            document.getElementById('verificationData').classList.remove('hidden');
+
+            const isVerified = verification.status === 'verified';
+            
+            document.getElementById('verificationIcon').textContent = isVerified ? '✅' : '❌';
+            document.getElementById('verificationTitle').textContent = isVerified ? 'Vehicle Verified Successfully' : 'Verification Failed';
+            document.getElementById('verificationMessage').textContent = verification.notes || (isVerified ? 'All documents and vehicle details have been verified and authenticated.' : 'Verification failed. Please review the details and resubmit.');
+
+            // Badges
+            const badgesContainer = document.getElementById('verificationBadges');
+            badgesContainer.innerHTML = '';
+            if (verification.documents_verified) {
+                badgesContainer.innerHTML += '<span class="status-badge status-approved">✓ Documents Verified</span>';
+            }
+            if (verification.ownership_verified) {
+                badgesContainer.innerHTML += '<span class="status-badge status-approved">✓ Ownership Verified</span>';
+            }
+            if (verification.tax_paid) {
+                badgesContainer.innerHTML += '<span class="status-badge status-approved">✓ Tax Paid</span>';
+            }
+            if (verification.clearance_granted) {
+                badgesContainer.innerHTML += '<span class="status-badge status-approved">✓ Clearance Granted</span>';
+            }
+
+            // Details
+            document.getElementById('verificationRef').textContent = verification.verification_number;
+            document.getElementById('verificationDate').textContent = formatDate(verification.created_at);
+            document.getElementById('verifiedBy').textContent = verification.verified_by || 'N/A';
+            document.getElementById('verificationMethod').textContent = verification.verification_method || 'Manual + AI Review';
+            document.getElementById('aiScore').textContent = (verification.ai_confidence_score || 0) + '%';
+            
+            const statusEl = document.getElementById('verificationStatus');
+            statusEl.innerHTML = `<span class="status-badge ${isVerified ? 'status-approved' : 'bg-red-100 text-red-700'}">${isVerified ? '✓ Verified' : '✗ Failed'}</span>`;
+
+            // QR code
+            generateQRCode(verification);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        function generateQRCode(verification) {
+            const qrData = JSON.stringify({
+                verification: verification.verification_number,
+                status: verification.status,
+                verifiedBy: verification.verified_by,
+                date: verification.created_at,
+                issuer: 'SSRA Customs'
+            });
+            
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrContainer, {
+                    text: qrData,
+                    width: 100,
+                    height: 100,
+                    colorDark: '#0a4d3e',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        }
+
+        function shareVerification() {
+            if (!currentVerification) return;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Vehicle Verification',
+                    text: `Vehicle verification ${currentVerification.verification_number} ${currentVerification.status}`,
+                    url: window.location.href
+                }).catch(() => {});
+            } else {
+                toastManager.info('Share verification results via email or messaging apps');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('downloadCertBtn').addEventListener('click', () => {
+            toastManager.info('Downloading Verification Certificate');
+        });
+        document.getElementById('downloadReportBtn').addEventListener('click', () => {
+            toastManager.info('Downloading Full Report');
+        });
+        document.getElementById('shareBtn').addEventListener('click', shareVerification);
+
+        // Expose functions
+        window.loadVerification = loadVerification;
+
+        // Load on page load
+        loadVerification();
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+    </script>
+</body></html>
+

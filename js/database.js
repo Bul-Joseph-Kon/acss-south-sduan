@@ -17,7 +17,12 @@ export async function fetchTable(tableName, options = {}) {
 
         if (options.filters) {
             Object.keys(options.filters).forEach(key => {
-                query = query.eq(key, options.filters[key]);
+                const val = options.filters[key];
+                if (Array.isArray(val)) {
+                    query = query.in(key, val);
+                } else {
+                    query = query.eq(key, val);
+                }
             });
         }
 
@@ -185,7 +190,10 @@ export async function countRecords(tableName, filters = {}) {
 
         const { count, error } = await query;
 
-        if (error) throw error;
+        if (error) {
+            console.error(`Count ${tableName} error:`, JSON.stringify(error));
+            throw error;
+        }
 
         return { success: true, count };
     } catch (error) {
@@ -220,6 +228,9 @@ export async function searchRecords(tableName, searchTerm, columns) {
 
 export async function fetchWithJoin(tableName, joinTables, options = {}) {
     try {
+        // Note: This function uses ambiguous relationships. 
+        // For production use, replace with explicit foreign key syntax:
+        // e.g., profiles!table_column_fkey(*) instead of profiles(*)
         const selectColumns = joinTables.map(table => `${table}(*`).join(',');
         let query = supabase.from(tableName).select(`*,${selectColumns}`);
 

@@ -1,0 +1,2319 @@
+[
+  {
+    "sourceFile": "pages/admin/ai-configuration.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/application-management.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/audit-logs.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/dashboard-admin.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/dashboard-admin.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/department-management.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/document-management.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/notification-management.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/payment-management.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/reports-analytics.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/service-management.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/system-settings.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/admin/user-management.html",
+    "targetLink": "role-management.html",
+    "resolvedPath": "pages/admin/role-management.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": []
+  },
+  {
+    "sourceFile": "pages/agent/ai-assessment.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/ai-assessment.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/ai-assessment.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/ai-validation.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/ai-validation.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/ai-validation.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/ai-verification.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/ai-verification.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/ai-verification.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/approved.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/approved.html",
+    "targetLink": "../applications/submitted.html",
+    "resolvedPath": "pages/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/approved.html",
+    "targetLink": "../services/cvet/certificate.html",
+    "resolvedPath": "pages/services/cvet/certificate.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/certificate.html",
+      "pages/trader/certificate.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/approved.html",
+    "targetLink": "../services/agent-license/download-license.html",
+    "resolvedPath": "pages/services/agent-license/download-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/download-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/approved.html",
+    "targetLink": "../services/vehicle-query/verification-result.html",
+    "resolvedPath": "pages/services/vehicle-query/verification-result.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/verification-result.html",
+      "pages/trader/verification-result.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/approved.html",
+    "targetLink": "../services/direct-assessment/cargo-release.html",
+    "resolvedPath": "pages/services/direct-assessment/cargo-release.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/cargo-release.html",
+      "pages/trader/cargo-release.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cargo-release.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cargo-release.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cargo-release.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cargo-released.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cargo-released.html",
+    "targetLink": "../services/direct-assessment/cargo-release.html",
+    "resolvedPath": "pages/services/direct-assessment/cargo-release.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/cargo-release.html",
+      "pages/trader/cargo-release.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cargo-released.html",
+    "targetLink": "../applications/submitted.html",
+    "resolvedPath": "pages/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cargo-released.html",
+    "targetLink": "../services/direct-assessment/cargo-release.html",
+    "resolvedPath": "pages/services/direct-assessment/cargo-release.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/cargo-release.html",
+      "pages/trader/cargo-release.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cargo-released.html",
+    "targetLink": "../services/direct-assessment/cargo-release.html",
+    "resolvedPath": "pages/services/direct-assessment/cargo-release.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/cargo-release.html",
+      "pages/trader/cargo-release.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/certificate.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/certificate.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/certificate.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/clearance-documents.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/clearance-documents.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/clearance-documents.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/clearance-documents.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/completed.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/completed.html",
+    "targetLink": "../notifications/submitted.html",
+    "resolvedPath": "pages/notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/completed.html",
+    "targetLink": "../services/direct-assessment/clearance-documents.html",
+    "resolvedPath": "pages/services/direct-assessment/clearance-documents.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/clearance-documents.html",
+      "pages/trader/clearance-documents.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/completed.html",
+    "targetLink": "../services/cvet/certificate.html",
+    "resolvedPath": "pages/services/cvet/certificate.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/certificate.html",
+      "pages/trader/certificate.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/completed.html",
+    "targetLink": "../services/agent-license/download-license.html",
+    "resolvedPath": "pages/services/agent-license/download-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/download-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/create-assessment.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/create-assessment.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/create-assessment.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/create-declaration.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/create-declaration.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/create-declaration.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/customs-information.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/customs-information.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/customs-information.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cvet-ready.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cvet-ready.html",
+    "targetLink": "../services/cvet/certificate.html",
+    "resolvedPath": "pages/services/cvet/certificate.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/certificate.html",
+      "pages/trader/certificate.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cvet-ready.html",
+    "targetLink": "../applications/submitted.html",
+    "resolvedPath": "pages/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cvet-ready.html",
+    "targetLink": "../services/cvet/certificate.html",
+    "resolvedPath": "pages/services/cvet/certificate.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/certificate.html",
+      "pages/trader/certificate.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cvet-ready.html",
+    "targetLink": "../services/cvet/certificate.html",
+    "resolvedPath": "pages/services/cvet/certificate.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/certificate.html",
+      "pages/trader/certificate.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/cvet-ready.html",
+    "targetLink": "../services/cvet/certificate.html",
+    "resolvedPath": "pages/services/cvet/certificate.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/certificate.html",
+      "pages/trader/certificate.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/agent-license/dashboard.html",
+    "resolvedPath": "pages/agent/services/agent-license/dashboard.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard.html",
+      "pages/trader/dashboard.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/cvet/create-declaration.html",
+    "resolvedPath": "pages/agent/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/agent/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/vehicle-query/search-vehicle.html",
+    "resolvedPath": "pages/agent/services/vehicle-query/search-vehicle.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/search-vehicle.html",
+      "pages/trader/search-vehicle.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "applications/draft.html",
+    "resolvedPath": "pages/agent/applications/draft.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/draft.html",
+      "pages/trader/draft.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "applications/submitted.html",
+    "resolvedPath": "pages/agent/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "applications/under-review.html",
+    "resolvedPath": "pages/agent/applications/under-review.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/under-review.html",
+      "pages/trader/under-review.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "applications/pending-payment.html",
+    "resolvedPath": "pages/agent/applications/pending-payment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/pending-payment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "applications/approved.html",
+    "resolvedPath": "pages/agent/applications/approved.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/approved.html",
+      "pages/trader/approved.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "applications/rejected.html",
+    "resolvedPath": "pages/agent/applications/rejected.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/rejected.html",
+      "pages/trader/rejected.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "applications/completed.html",
+    "resolvedPath": "pages/agent/applications/completed.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/completed.html",
+      "pages/trader/completed.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "notifications/submitted.html",
+    "resolvedPath": "pages/agent/notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "notifications/under-review.html",
+    "resolvedPath": "pages/agent/notifications/under-review.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/under-review.html",
+      "pages/trader/under-review.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "notifications/payment-required.html",
+    "resolvedPath": "pages/agent/notifications/payment-required.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/payment-required.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "notifications/approved.html",
+    "resolvedPath": "pages/agent/notifications/approved.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/approved.html",
+      "pages/trader/approved.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "notifications/rejected.html",
+    "resolvedPath": "pages/agent/notifications/rejected.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/rejected.html",
+      "pages/trader/rejected.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "notifications/license-issued.html",
+    "resolvedPath": "pages/agent/notifications/license-issued.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/license-issued.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "notifications/cvet-ready.html",
+    "resolvedPath": "pages/agent/notifications/cvet-ready.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/cvet-ready.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "notifications/cargo-released.html",
+    "resolvedPath": "pages/agent/notifications/cargo-released.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/cargo-released.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "notifications/system-alerts.html",
+    "resolvedPath": "pages/agent/notifications/system-alerts.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/system-alerts.html",
+      "pages/trader/system-alerts.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/cvet/create-declaration.html",
+    "resolvedPath": "pages/agent/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/agent/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/agent-license/new-license.html",
+    "resolvedPath": "pages/agent/services/agent-license/new-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/new-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/vehicle-query/search-vehicle.html",
+    "resolvedPath": "pages/agent/services/vehicle-query/search-vehicle.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/search-vehicle.html",
+      "pages/trader/search-vehicle.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "applications/draft.html",
+    "resolvedPath": "pages/agent/applications/draft.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/draft.html",
+      "pages/trader/draft.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/agent-license/dashboard.html",
+    "resolvedPath": "pages/agent/services/agent-license/dashboard.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard.html",
+      "pages/trader/dashboard.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/cvet/create-declaration.html",
+    "resolvedPath": "pages/agent/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/agent/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "services/vehicle-query/search-vehicle.html",
+    "resolvedPath": "pages/agent/services/vehicle-query/search-vehicle.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/search-vehicle.html",
+      "pages/trader/search-vehicle.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard-agent.html",
+    "targetLink": "applications/submitted.html",
+    "resolvedPath": "pages/agent/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/dashboard.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/declarant-information.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/declarant-information.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/declarant-information.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/documents.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/documents.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/documents.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/download-license.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/download-license.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/download-license.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/download-license.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/draft.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/draft.html",
+    "targetLink": "../notifications/submitted.html",
+    "resolvedPath": "pages/notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/draft.html",
+    "targetLink": "../services/cvet/create-declaration.html",
+    "resolvedPath": "pages/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/draft.html",
+    "targetLink": "../services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/draft.html",
+    "targetLink": "../services/agent-license/new-license.html",
+    "resolvedPath": "pages/services/agent-license/new-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/new-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/duty-assessment.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/duty-assessment.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/duty-assessment.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/duty-calculation.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/duty-calculation.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/duty-calculation.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/generate-license.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/generate-license.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/generate-license.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/goods-information.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/goods-information.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/goods-information.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/license-issued.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/license-issued.html",
+    "targetLink": "../services/agent-license/download-license.html",
+    "resolvedPath": "pages/services/agent-license/download-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/download-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/license-issued.html",
+    "targetLink": "../applications/submitted.html",
+    "resolvedPath": "pages/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/license-issued.html",
+    "targetLink": "../services/agent-license/download-license.html",
+    "resolvedPath": "pages/services/agent-license/download-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/download-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/license-issued.html",
+    "targetLink": "../services/agent-license/download-license.html",
+    "resolvedPath": "pages/services/agent-license/download-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/download-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/license-issued.html",
+    "targetLink": "../services/agent-license/download-license.html",
+    "resolvedPath": "pages/services/agent-license/download-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/download-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/new-license.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/new-license.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/new-license.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/overview.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/overview.html",
+    "targetLink": "../services/agent-license/dashboard.html",
+    "resolvedPath": "pages/services/agent-license/dashboard.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard.html",
+      "pages/trader/dashboard.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/overview.html",
+    "targetLink": "../services/cvet/create-declaration.html",
+    "resolvedPath": "pages/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/overview.html",
+    "targetLink": "../services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/overview.html",
+    "targetLink": "../services/vehicle-query/search-vehicle.html",
+    "resolvedPath": "pages/services/vehicle-query/search-vehicle.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/search-vehicle.html",
+      "pages/trader/search-vehicle.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/owner-information.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/owner-information.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/owner-information.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/payment-required.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/payment-required.html",
+    "targetLink": "../applications/submitted.html",
+    "resolvedPath": "pages/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/payment-required.html",
+    "targetLink": "../services/direct-assessment/payment.html",
+    "resolvedPath": "pages/services/direct-assessment/payment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/payment.html",
+      "pages/trader/payment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/payment-required.html",
+    "targetLink": "../services/agent-license/payment.html",
+    "resolvedPath": "pages/services/agent-license/payment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/payment.html",
+      "pages/trader/payment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/payment-required.html",
+    "targetLink": "../services/cvet/payment.html",
+    "resolvedPath": "pages/services/cvet/payment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/payment.html",
+      "pages/trader/payment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/payment-required.html",
+    "targetLink": "../services/direct-assessment/payment.html",
+    "resolvedPath": "pages/services/direct-assessment/payment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/payment.html",
+      "pages/trader/payment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/payment.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/payment.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/payment.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/pending-payment.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/pending-payment.html",
+    "targetLink": "../notifications/submitted.html",
+    "resolvedPath": "pages/notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/pending-payment.html",
+    "targetLink": "../services/direct-assessment/payment.html",
+    "resolvedPath": "pages/services/direct-assessment/payment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/payment.html",
+      "pages/trader/payment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/pending-payment.html",
+    "targetLink": "../services/cvet/payment.html",
+    "resolvedPath": "pages/services/cvet/payment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/payment.html",
+      "pages/trader/payment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/agent-license/dashboard.html",
+    "resolvedPath": "pages/services/agent-license/dashboard.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard.html",
+      "pages/trader/dashboard.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/cvet/create-declaration.html",
+    "resolvedPath": "pages/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/vehicle-query/search-vehicle.html",
+    "resolvedPath": "pages/services/vehicle-query/search-vehicle.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/search-vehicle.html",
+      "pages/trader/search-vehicle.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/cvet/create-declaration.html",
+    "resolvedPath": "pages/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/agent-license/new-license.html",
+    "resolvedPath": "pages/services/agent-license/new-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/new-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/vehicle-query/search-vehicle.html",
+    "resolvedPath": "pages/services/vehicle-query/search-vehicle.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/search-vehicle.html",
+      "pages/trader/search-vehicle.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../applications/draft.html",
+    "resolvedPath": "pages/applications/draft.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/draft.html",
+      "pages/trader/draft.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/agent-license/renewal.html",
+    "resolvedPath": "pages/services/agent-license/renewal.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/renewal.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/cvet/create-declaration.html",
+    "resolvedPath": "pages/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/quick-actions.html",
+    "targetLink": "../services/agent-license/new-license.html",
+    "resolvedPath": "pages/services/agent-license/new-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/new-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-applications.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-applications.html",
+    "targetLink": "../services/agent-license/dashboard.html",
+    "resolvedPath": "pages/services/agent-license/dashboard.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard.html",
+      "pages/trader/dashboard.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-applications.html",
+    "targetLink": "../services/cvet/create-declaration.html",
+    "resolvedPath": "pages/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-applications.html",
+    "targetLink": "../services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-applications.html",
+    "targetLink": "../services/vehicle-query/search-vehicle.html",
+    "resolvedPath": "pages/services/vehicle-query/search-vehicle.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/search-vehicle.html",
+      "pages/trader/search-vehicle.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-applications.html",
+    "targetLink": "../services/cvet/tracking.html",
+    "resolvedPath": "pages/services/cvet/tracking.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/tracking.html",
+      "pages/trader/tracking.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-applications.html",
+    "targetLink": "../services/direct-assessment/payment.html",
+    "resolvedPath": "pages/services/direct-assessment/payment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/payment.html",
+      "pages/trader/payment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-applications.html",
+    "targetLink": "../services/agent-license/download-license.html",
+    "resolvedPath": "pages/services/agent-license/download-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/download-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-applications.html",
+    "targetLink": "../services/vehicle-query/verification-result.html",
+    "resolvedPath": "pages/services/vehicle-query/verification-result.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/verification-result.html",
+      "pages/trader/verification-result.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-notifications.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-notifications.html",
+    "targetLink": "../services/agent-license/dashboard.html",
+    "resolvedPath": "pages/services/agent-license/dashboard.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard.html",
+      "pages/trader/dashboard.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-notifications.html",
+    "targetLink": "../services/cvet/create-declaration.html",
+    "resolvedPath": "pages/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-notifications.html",
+    "targetLink": "../services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-notifications.html",
+    "targetLink": "../services/vehicle-query/search-vehicle.html",
+    "resolvedPath": "pages/services/vehicle-query/search-vehicle.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/search-vehicle.html",
+      "pages/trader/search-vehicle.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-notifications.html",
+    "targetLink": "../services/agent-license/renewal.html",
+    "resolvedPath": "pages/services/agent-license/renewal.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/renewal.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-notifications.html",
+    "targetLink": "../services/cvet/tracking.html",
+    "resolvedPath": "pages/services/cvet/tracking.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/tracking.html",
+      "pages/trader/tracking.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-notifications.html",
+    "targetLink": "../services/cvet/certificate.html",
+    "resolvedPath": "pages/services/cvet/certificate.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/certificate.html",
+      "pages/trader/certificate.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-notifications.html",
+    "targetLink": "../services/agent-license/download-license.html",
+    "resolvedPath": "pages/services/agent-license/download-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/download-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/recent-notifications.html",
+    "targetLink": "../services/direct-assessment/cargo-release.html",
+    "resolvedPath": "pages/services/direct-assessment/cargo-release.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/cargo-release.html",
+      "pages/trader/cargo-release.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/rejected.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/rejected.html",
+    "targetLink": "../applications/submitted.html",
+    "resolvedPath": "pages/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/rejected.html",
+    "targetLink": "../services/agent-license/new-license.html",
+    "resolvedPath": "pages/services/agent-license/new-license.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/new-license.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/renewal.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/renewal.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/renewal.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/replacement.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/replacement.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/replacement.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/risk-assessment.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/risk-assessment.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/risk-assessment.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/search-vehicle.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/search-vehicle.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/search-vehicle.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/shipment-information.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/shipment-information.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/shipment-information.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/statistics.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/statistics.html",
+    "targetLink": "../services/agent-license/dashboard.html",
+    "resolvedPath": "pages/services/agent-license/dashboard.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard.html",
+      "pages/trader/dashboard.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/statistics.html",
+    "targetLink": "../services/cvet/create-declaration.html",
+    "resolvedPath": "pages/services/cvet/create-declaration.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-declaration.html",
+      "pages/trader/create-declaration.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/statistics.html",
+    "targetLink": "../services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/statistics.html",
+    "targetLink": "../services/vehicle-query/search-vehicle.html",
+    "resolvedPath": "pages/services/vehicle-query/search-vehicle.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/search-vehicle.html",
+      "pages/trader/search-vehicle.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/submitted.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/submitted.html",
+    "targetLink": "../applications/submitted.html",
+    "resolvedPath": "pages/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/submitted.html",
+    "targetLink": "../services/cvet/tracking.html",
+    "resolvedPath": "pages/services/cvet/tracking.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/tracking.html",
+      "pages/trader/tracking.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/submitted.html",
+    "targetLink": "../services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/submitted.html",
+    "targetLink": "../services/agent-license/verification.html",
+    "resolvedPath": "pages/services/agent-license/verification.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/verification.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/submitted.html",
+    "targetLink": "../services/vehicle-query/search-vehicle.html",
+    "resolvedPath": "pages/services/vehicle-query/search-vehicle.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/search-vehicle.html",
+      "pages/trader/search-vehicle.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/system-alerts.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/system-alerts.html",
+    "targetLink": "../applications/submitted.html",
+    "resolvedPath": "pages/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/system-alerts.html",
+    "targetLink": "../services/direct-assessment/create-assessment.html",
+    "resolvedPath": "pages/services/direct-assessment/create-assessment.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/create-assessment.html",
+      "pages/trader/create-assessment.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/tax-information.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/tax-information.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/tax-information.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/tracking.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/tracking.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/tracking.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/under-review.html",
+    "targetLink": "../dashboard-agent.html",
+    "resolvedPath": "pages/dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/under-review.html",
+    "targetLink": "../applications/submitted.html",
+    "resolvedPath": "pages/applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/under-review.html",
+    "targetLink": "../services/cvet/tracking.html",
+    "resolvedPath": "pages/services/cvet/tracking.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/tracking.html",
+      "pages/trader/tracking.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/under-review.html",
+    "targetLink": "../services/agent-license/verification.html",
+    "resolvedPath": "pages/services/agent-license/verification.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/verification.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/under-review.html",
+    "targetLink": "../services/direct-assessment/documents.html",
+    "resolvedPath": "pages/services/direct-assessment/documents.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/documents.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/under-review.html",
+    "targetLink": "../services/vehicle-query/ai-verification.html",
+    "resolvedPath": "pages/services/vehicle-query/ai-verification.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/ai-verification.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/upgrade.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/upgrade.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/upgrade.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/vehicle-information.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/vehicle-information.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/vehicle-information.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/verification-result.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/verification-result.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/verification-result.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/verification-result.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/verification.html",
+    "targetLink": "../../dashboard-agent.html",
+    "resolvedPath": "dashboard-agent.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/dashboard-agent.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/verification.html",
+    "targetLink": "../../applications/submitted.html",
+    "resolvedPath": "applications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  },
+  {
+    "sourceFile": "pages/agent/verification.html",
+    "targetLink": "../../notifications/submitted.html",
+    "resolvedPath": "notifications/submitted.html",
+    "resolvedExistsOnDisk": false,
+    "alternativeMatches": [
+      "pages/agent/submitted.html",
+      "pages/trader/submitted.html"
+    ]
+  }
+]

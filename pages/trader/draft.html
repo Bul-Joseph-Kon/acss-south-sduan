@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Draft Applications</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+        .status-draft { background: #f3f4f6; color: #4b5563; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a, .profile-dropdown button { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; width: 100%; text-align: left; }
+        .profile-dropdown a:hover, .profile-dropdown button:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+        .draft-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; transition: all 0.2s ease; background: white; }
+        .draft-card:hover { border-color: #0a4d3e; background: #ecfdf5; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">📝 Draft Applications</h2>
+                            <p class="opacity-90 text-sm">Continue working on your saved applications</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline" data-user-name>Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="profile.html"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="settings.html"><i class="ri-edit-line"></i> Settings</a>
+                                <div class="divider"></div>
+                                <button id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
+                            <div class="text-2xl font-bold text-emerald-600" id="statTotalDrafts">0</div>
+                            <p class="text-xs text-gray-500">Total Drafts</p>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
+                            <div class="text-2xl font-bold text-yellow-600" id="statIncomplete">0</div>
+                            <p class="text-xs text-gray-500">Incomplete</p>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
+                            <div class="text-2xl font-bold text-blue-600" id="statReady">0</div>
+                            <p class="text-xs text-gray-500">Ready to Submit</p>
+                        </div>
+                    </div>
+
+                    <!-- Draft List -->
+                    <div class="space-y-3" id="draftsList">
+                        <div class="text-center py-8 text-gray-500">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-2"></div>
+                            Loading drafts...
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-3">
+                        <a href="create-declaration.html" class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">
+                            <i class="ri-add-line mr-1"></i> New Application
+                        </a>
+                        <button id="clearAllBtn" class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition">
+                            <i class="ri-delete-bin-line mr-1"></i> Clear All Drafts
+                        </button>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+
+    <script type="module">
+        import { ApplicationListManager } from '../../js/trader-applications-list.js';
+        import { deleteTraderApplication } from '../../js/trader-service.js';
+        import { getUserProfile, getCurrentUser, signOut } from '../../js/auth.js';
+        import { getUnreadCount } from '../../js/notifications.js';
+        import toastManager from '../../js/toast.js';
+
+        // Initialize application list manager for drafts
+        const listManager = new ApplicationListManager({
+            status: 'draft',
+            pageKey: 'trader-draft',
+            containerId: 'draftsList',
+            paginationContainerId: 'pagination'
+        });
+
+        // Override render method to use card format for drafts
+        listManager.renderApplications = function() {
+            const container = document.getElementById(this.containerId);
+            
+            if (!container) return;
+
+            if (this.applications.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 bg-white rounded-xl border border-gray-200">
+                        <i class="ri-file-list-3-line text-gray-400 text-4xl mb-2 block"></i>
+                        <p class="text-gray-500">No draft applications</p>
+                        <p class="text-sm text-gray-400 mt-1">Start a new application to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = this.applications.map(app => this.renderDraftCard(app)).join('');
+            
+            // Update stats
+            this.updateStats();
+        };
+
+        listManager.renderDraftCard = function(app) {
+            const continueUrl = app.application_type === 'CVET' ? 'create-declaration.html' : 
+                               app.application_type === 'Direct Assessment' ? 'create-assessment.html' : 
+                               'search-vehicle.html';
+            
+            return `
+                <div class="draft-card">
+                    <div class="flex flex-wrap justify-between items-start gap-2">
+                        <div>
+                            <h4 class="font-semibold text-gray-800">${app.application_type || 'Application'}</h4>
+                            <p class="text-sm text-gray-500">${app.goods_description || app.vehicle_description || 'No description'} · ${formatCurrency(app.declared_value)}</p>
+                            <p class="text-xs text-gray-400 mt-1">Last saved: ${formatDate(app.updated_at || app.created_at)}</p>
+                            <div class="flex gap-2 mt-2">
+                                <span class="status-badge status-draft">Draft</span>
+                                <span class="text-xs text-gray-400">Ref: ${app.application_number || 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="${continueUrl}?id=${app.id}" class="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">Continue</a>
+                            <button onclick="deleteDraft('${app.id}')" class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        listManager.updateStats = function() {
+            const total = this.applications.length;
+            const incomplete = this.applications.filter(app => !app.is_complete).length;
+            const ready = total - incomplete;
+
+            document.getElementById('statTotalDrafts').textContent = total;
+            document.getElementById('statIncomplete').textContent = incomplete;
+            document.getElementById('statReady').textContent = ready;
+        };
+
+        function formatCurrency(value) {
+            if (!value) return 'N/A';
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Initialize
+        await listManager.initialize();
+
+        // Expose functions for inline handlers
+        window.deleteDraft = async function(applicationId) {
+            if (!confirm('Are you sure you want to delete this draft?')) return;
+
+            try {
+                const result = await deleteTraderApplication(applicationId);
+                if (result.success) {
+                    toastManager.success('Draft deleted successfully');
+                    await listManager.loadApplications();
+                } else {
+                    toastManager.error('Failed to delete draft: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error deleting draft:', error);
+                toastManager.error('Error deleting draft');
+            }
+        };
+
+        document.getElementById('clearAllBtn').addEventListener('click', async function() {
+            if (!confirm('Are you sure you want to delete all drafts? This action cannot be undone.')) return;
+
+            try {
+                for (const app of listManager.applications) {
+                    await deleteTraderApplication(app.id);
+                }
+                toastManager.success('All drafts cleared');
+                await listManager.loadApplications();
+            } catch (error) {
+                console.error('Error clearing drafts:', error);
+                toastManager.error('Error clearing drafts');
+            }
+        });
+
+        // Sign out
+        const dropdownSignOut = document.getElementById('dropdownSignOut');
+        if (dropdownSignOut) {
+            dropdownSignOut.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            listManager.cleanup();
+        });
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+    </script>
+</body>
+</html>

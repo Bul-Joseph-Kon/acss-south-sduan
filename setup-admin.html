@@ -52,7 +52,7 @@
     <script>
         const SUPABASE_URL = 'https://avpoufxsjiecbsxvngip.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_XZ7BUTHNhF1ojqoxlJq7Bg_cqn9o8HE';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         document.getElementById('adminSetupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -74,7 +74,7 @@
                 console.log('Full Name:', fullName);
 
                 // Step 1: Create auth user
-                const { data: authData, error: authError } = await supabase.auth.signUp({
+                const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                     email,
                     password,
                     options: {
@@ -110,7 +110,7 @@
 
                 console.log('Creating profile with data:', profileData);
 
-                const { error: profileError } = await supabase
+                const { error: profileError } = await supabaseClient
                     .from('profiles')
                     .insert(profileData);
 

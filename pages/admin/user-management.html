@@ -46,7 +46,7 @@
                                 <i class="ri-user-line text-white text-3xl"></i>
                             </div>
                             <h3 class="text-lg font-bold text-gray-800" id="adminName">Administrator</h3>
-                            <p class="text-gray-500 text-sm">System Admin</p>
+                            <p id="profileRole" class="text-gray-500 text-sm">Loading...</p>
                             <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
                         </div>
                         <nav class="space-y-1 mb-4">
@@ -243,8 +243,12 @@
         console.log("Current Path:", window.location.pathname);
 
         import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile, createUser, updateUserRole, updateUserStatus, deleteUser, resetPassword, getAllUsers } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import supabase from '../../js/supabase.js';
 
+        
+        console.log("USER MANAGEMENT: Imports loaded");
+        console.log("USER MANAGEMENT: supabase client:", supabase);
         console.log("USER MANAGEMENT: Imports loaded");
         console.log("USER MANAGEMENT: supabase client:", supabase);
 
@@ -254,6 +258,7 @@
 
         async function initPage() {
             const isAuthenticated = await checkAuth();
+            const { user, profile } = await loadCurrentUserProfile();
             if (!isAuthenticated) {
                 window.location.href = '../../auth/login.html';
                 return;
@@ -266,11 +271,13 @@
                 return;
             }
 
-            const user = await getCurrentUser();
             if (user) {
-                const profile = await getUserProfile(user.id);
                 if (profile) {
                     document.getElementById('adminName').textContent = profile.full_name || 'Admin';
+                    const roleElem = document.getElementById('profileRole');
+                    if (roleElem) {
+                        roleElem.textContent = profile.role || 'Admin';
+                    }
                 }
             }
 
@@ -279,45 +286,12 @@
         }
 
         async function loadUsers() {
-            console.log('=== DIAGNOSTIC 1: Browser Session Verification ===');
-            const { data: { session } } = await supabase.auth.getSession();
-            const { data: { user } } = await supabase.auth.getUser();
-            console.log('SESSION:', session);
-            console.log('USER:', user);
-            console.log('JWT ROLE:', session?.user?.role);
-            console.log('JWT UID:', session?.user?.id);
-
-            console.log('=== DIAGNOSTIC 2: admin_users Visibility Test ===');
-            const adminTest = await supabase.from("admin_users").select("*");
-            console.log('admin_users query result:', adminTest);
-            console.log('admin_users data:', adminTest.data);
-            console.log('admin_users error:', adminTest.error);
-            console.log('admin_users count:', adminTest.data?.length);
-
-            console.log('=== DIAGNOSTIC 3: profiles Visibility Test ===');
-            const profilesTest = await supabase.from("profiles").select("*");
-            console.log('profiles query result:', profilesTest);
-            console.log('profiles data:', profilesTest.data);
-            console.log('profiles error:', profilesTest.error);
-            console.log('profiles count:', profilesTest.data?.length);
-
-            console.log('=== DEBUG: loadUsers START ===');
-
             const filters = {
                 role: document.getElementById('roleFilter').value,
                 status: document.getElementById('statusFilter').value,
                 search: document.getElementById('searchInput').value
             };
-
-            console.log('=== DEBUG: loadUsers - Filter values ===');
-            console.log('roleFilter DOM element value:', document.getElementById('roleFilter').value);
-            console.log('statusFilter DOM element value:', document.getElementById('statusFilter').value);
-            console.log('searchInput DOM element value:', document.getElementById('searchInput').value);
-            console.log('Filters object passed to getAllUsers:', JSON.stringify(filters));
-
             const result = await getAllUsers(filters);
-
-            console.log('=== DEBUG: loadUsers - Received from getAllUsers ===');
             console.log('result.success:', result.success);
             console.log('result.error:', result.error);
             console.log('result.data:', result.data);
@@ -743,3 +717,6 @@
         document.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body></html>
+
+
+

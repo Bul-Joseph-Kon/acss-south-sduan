@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Shipment Information</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: #374151; margin-bottom: 0.2rem; }
+        .form-group .form-input { width: 100%; padding: 0.4rem 0.6rem; border-radius: 0.4rem; border: 1px solid #d1d5db; font-size: 0.85rem; transition: border-color 0.2s; }
+        .form-group .form-input:focus { outline: none; border-color: #0a4d3e; box-shadow: 0 0 0 3px rgba(10,77,62,0.1); }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🚢 Step 4: Shipment Information</h2>
+                            <p class="opacity-90 text-sm">Enter consignment, manifest, and transport details</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+                            <span id="progressText">Step 4 of 9</span>
+                            <span id="progressPercent">44% Complete</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:44%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Shipment Information</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label>Consignment Number <span class="text-red-500">*</span></label>
+                                <input type="text" id="consignmentNumber" class="form-input" placeholder="Enter consignment number" />
+                            </div>
+                            <div class="form-group">
+                                <label>Manifest Number <span class="text-red-500">*</span></label>
+                                <input type="text" id="manifestNumber" class="form-input" placeholder="Enter manifest number" />
+                            </div>
+                            <div class="form-group">
+                                <label>Vessel Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="vesselName" class="form-input" placeholder="Enter vessel name" />
+                            </div>
+                            <div class="form-group">
+                                <label>Voyage Number <span class="text-red-500">*</span></label>
+                                <input type="text" id="voyageNumber" class="form-input" placeholder="Enter voyage number" />
+                            </div>
+                            <div class="form-group">
+                                <label>Port of Loading <span class="text-red-500">*</span></label>
+                                <select id="portOfLoading" class="form-input">
+                                    <option value="">Select port</option>
+                                    <option value="Juba">Juba</option>
+                                    <option value="Nimule">Nimule</option>
+                                    <option value="Kaya">Kaya</option>
+                                    <option value="Renk">Renk</option>
+                                    <option value="Malakal">Malakal</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Port of Discharge <span class="text-red-500">*</span></label>
+                                <select id="portOfDischarge" class="form-input">
+                                    <option value="">Select port</option>
+                                    <option value="Juba">Juba</option>
+                                    <option value="Nimule">Nimule</option>
+                                    <option value="Kaya">Kaya</option>
+                                    <option value="Renk">Renk</option>
+                                    <option value="Malakal">Malakal</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Country of Origin <span class="text-red-500">*</span></label>
+                                <input type="text" id="countryOfOrigin" class="form-input" placeholder="Enter country of origin" />
+                            </div>
+                            <div class="form-group">
+                                <label>Country of Destination <span class="text-red-500">*</span></label>
+                                <input type="text" id="countryOfDestination" class="form-input" placeholder="Enter country of destination" />
+                            </div>
+                            <div class="form-group">
+                                <label>Transport Mode <span class="text-red-500">*</span></label>
+                                <select id="transportMode" class="form-input">
+                                    <option value="">Select mode</option>
+                                    <option value="Road">Road</option>
+                                    <option value="Air">Air</option>
+                                    <option value="Rail">Rail</option>
+                                    <option value="Sea">Sea</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Expected Arrival Date <span class="text-red-500">*</span></label>
+                                <input type="date" id="expectedArrivalDate" class="form-input" />
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
+                            <a href="parties-information.html" id="backBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                <i class="ri-arrow-left-line"></i> Previous
+                            </a>
+                            <button id="saveAndContinueBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                                Save & Continue <i class="ri-arrow-right-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        import { getWorkflow, initializeWorkflowFromURL } from '../../js/cvet-workflow-manager.js';
+        
+        import { signOut } from '../../js/auth.js';
+        
+        import { checkPageAuth } from '../../js/auth-check.js';
+        
+        import { getUnreadCount } from '../../js/notifications.js';
+        
+        import toastManager from '../../js/toast.js';
+
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Check authentication
+        await checkPageAuth('trader');
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Sign out handler
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await signOut();
+                if (result.success) {
+                    toastManager.success('Signed out successfully');
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        // Initialize workflow
+        const workflow = getWorkflow();
+        const state = await initializeWorkflowFromURL();
+
+        // Update progress
+        function updateProgress() {
+            const progress = Math.round((state.currentStep / 9) * 100);
+            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 9`;
+            document.getElementById('progressPercent').textContent = `${progress}% Complete`;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+        updateProgress();
+
+        // Update back button URL
+        if (state.applicationId) {
+            document.getElementById('backBtn').href = 'parties-information.html?id=' + state.applicationId;
+        }
+
+        // Load saved data
+        function loadFormData() {
+            if (state.draftData) {
+                if (state.draftData.consignment_number) document.getElementById('consignmentNumber').value = state.draftData.consignment_number;
+                if (state.draftData.manifest_number) document.getElementById('manifestNumber').value = state.draftData.manifest_number;
+                if (state.draftData.vessel_name) document.getElementById('vesselName').value = state.draftData.vessel_name;
+                if (state.draftData.voyage_number) document.getElementById('voyageNumber').value = state.draftData.voyage_number;
+                if (state.draftData.port_of_loading) document.getElementById('portOfLoading').value = state.draftData.port_of_loading;
+                if (state.draftData.port_of_discharge) document.getElementById('portOfDischarge').value = state.draftData.port_of_discharge;
+                if (state.draftData.country_of_origin) document.getElementById('countryOfOrigin').value = state.draftData.country_of_origin;
+                if (state.draftData.country_of_destination) document.getElementById('countryOfDestination').value = state.draftData.country_of_destination;
+                if (state.draftData.transport_mode) document.getElementById('transportMode').value = state.draftData.transport_mode;
+                if (state.draftData.expected_arrival_date) document.getElementById('expectedArrivalDate').value = state.draftData.expected_arrival_date;
+            }
+        }
+        loadFormData();
+
+        // Save and continue
+        document.getElementById('saveAndContinueBtn').addEventListener('click', async function() {
+            const stepData = {
+                consignment_number: document.getElementById('consignmentNumber').value,
+                manifest_number: document.getElementById('manifestNumber').value,
+                vessel_name: document.getElementById('vesselName').value,
+                voyage_number: document.getElementById('voyageNumber').value,
+                port_of_loading: document.getElementById('portOfLoading').value,
+                port_of_discharge: document.getElementById('portOfDischarge').value,
+                country_of_origin: document.getElementById('countryOfOrigin').value,
+                country_of_destination: document.getElementById('countryOfDestination').value,
+                transport_mode: document.getElementById('transportMode').value,
+                expected_arrival_date: document.getElementById('expectedArrivalDate').value
+            };
+
+            // Validate
+            const validation = workflow.validateStep(4, stepData);
+            if (!validation.success) {
+                toastManager.warning('Please fill in all required fields: ' + validation.missingFields.join(', '));
+                return;
+            }
+
+            // Save draft
+            const saveResult = await workflow.saveDraft(stepData);
+            if (!saveResult.success) {
+                toastManager.error('Error saving: ' + saveResult.error);
+                return;
+            }
+
+            // Move to next step
+            const nextResult = workflow.nextStep();
+            if (nextResult.success) {
+                toastManager.success('Step saved successfully');
+                window.location.href = nextResult.step.page + '?id=' + workflow.applicationId;
+            }
+        });
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+    </script>
+</body></html>
+
+
+
+
+
+
+

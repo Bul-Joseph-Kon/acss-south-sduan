@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Create Customs Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script type="module" src="../../js/trader-sidebar.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .service-card { transition: all 0.3s ease; cursor: pointer; border: 2px solid #e5e7eb; }
+        .service-card:hover { transform: translateY(-4px); border-color: #0a4d3e; box-shadow: 0 10px 25px rgba(10,77,62,0.15); }
+        .service-card.selected { border-color: #0a4d3e; background: #ecfdf5; }
+        .service-icon { width: 4rem; height: 4rem; border-radius: 1rem; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="trader-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">📋 Create Customs Application</h2>
+                            <p class="opacity-90 text-sm">Select the customs service you wish to apply for</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Trader</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Declaration Services</h3>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('import-declaration')">
+                                <div class="service-icon bg-blue-100 text-blue-600 mb-3">
+                                    <i class="ri-download-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Import Declaration</h4>
+                                <p class="text-sm text-gray-500">Declare goods imported into South Sudan</p>
+                            </div>
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('export-declaration')">
+                                <div class="service-icon bg-green-100 text-green-600 mb-3">
+                                    <i class="ri-upload-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Export Declaration</h4>
+                                <p class="text-sm text-gray-500">Declare goods exported from South Sudan</p>
+                            </div>
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('transit-declaration')">
+                                <div class="service-icon bg-purple-100 text-purple-600 mb-3">
+                                    <i class="ri-exchange-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Transit Declaration</h4>
+                                <p class="text-sm text-gray-500">Declare goods in transit through South Sudan</p>
+                            </div>
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('temporary-import')">
+                                <div class="service-icon bg-orange-100 text-orange-600 mb-3">
+                                    <i class="ri-time-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Temporary Import</h4>
+                                <p class="text-sm text-gray-500">Import goods temporarily for re-export</p>
+                            </div>
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('temporary-export')">
+                                <div class="service-icon bg-yellow-100 text-yellow-600 mb-3">
+                                    <i class="ri-refresh-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Temporary Export</h4>
+                                <p class="text-sm text-gray-500">Export goods temporarily for re-import</p>
+                            </div>
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('re-export')">
+                                <div class="service-icon bg-teal-100 text-teal-600 mb-3">
+                                    <i class="ri-arrow-go-back-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Re-export</h4>
+                                <p class="text-sm text-gray-500">Re-export previously imported goods</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Permit & License Services</h3>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('customs-permit')">
+                                <div class="service-icon bg-red-100 text-red-600 mb-3">
+                                    <i class="ri-file-list-3-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Customs Permit</h4>
+                                <p class="text-sm text-gray-500">Apply for special customs permits</p>
+                            </div>
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('warehouse-application')">
+                                <div class="service-icon bg-indigo-100 text-indigo-600 mb-3">
+                                    <i class="ri-store-3-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Warehouse Application</h4>
+                                <p class="text-sm text-gray-500">Apply for customs warehouse storage</p>
+                            </div>
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('free-zone')">
+                                <div class="service-icon bg-cyan-100 text-cyan-600 mb-3">
+                                    <i class="ri-global-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Free Zone Application</h4>
+                                <p class="text-sm text-gray-500">Apply for free zone operations</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Special Services</h3>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('cvet')">
+                                <div class="service-icon bg-emerald-100 text-emerald-600 mb-3">
+                                    <i class="ri-file-text-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">CVET Certificate</h4>
+                                <p class="text-sm text-gray-500">Certificate of Value for Export/Import</p>
+                            </div>
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('direct-assessment')">
+                                <div class="service-icon bg-pink-100 text-pink-600 mb-3">
+                                    <i class="ri-calculator-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Direct Assessment</h4>
+                                <p class="text-sm text-gray-500">Direct duty assessment and payment</p>
+                            </div>
+                            <div class="service-card bg-white rounded-xl p-5" onclick="selectService('vehicle-query')">
+                                <div class="service-icon bg-gray-100 text-gray-600 mb-3">
+                                    <i class="ri-car-line"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-1">Vehicle Query</h4>
+                                <p class="text-sm text-gray-500">Query vehicle customs status</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        import { checkPageAuth, signOut } from '../../js/auth-check.js';
+        
+        import { signOut as authSignOut } from '../../js/auth.js';
+        
+        import { getUnreadCount } from '../../js/notifications.js';
+        
+        import toastManager from '../../js/toast.js';
+
+        
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        // Check authentication
+        await checkPageAuth('trader');
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Load trader profile
+        await loadCurrentUserProfile();
+
+        // Sign out handler
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn) {
+            signOutBtn.addEventListener('click', async () => {
+                const result = await authSignOut();
+                if (result.success) {
+                    toastManager.success('Signed out successfully');
+                    window.location.href = '../../auth/login.html';
+                }
+            });
+        }
+
+        function selectService(serviceType) {
+            switch(serviceType) {
+                case 'cvet':
+                    window.location.href = 'create-declaration.html';
+                    break;
+                case 'direct-assessment':
+                    window.location.href = 'dashboard.html';
+                    break;
+                case 'vehicle-query':
+                    window.location.href = 'search-vehicle.html';
+                    break;
+                case 'import-declaration':
+                case 'export-declaration':
+                case 'transit-declaration':
+                case 'temporary-import':
+                case 'temporary-export':
+                case 're-export':
+                case 'customs-permit':
+                case 'warehouse-application':
+                case 'free-zone':
+                    toastManager.info('Service ' + serviceType + ' is under development. Please use CVET for now.');
+                    break;
+                default:
+                    toastManager.error('Invalid service selection');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.service-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    cards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+        });
+
+        // Update notification badge
+        async function updateNotificationBadge() {
+            const result = await getUnreadCount();
+            if (result.success && result.count > 0) {
+                const badge = document.getElementById('notificationBadge');
+                badge.textContent = result.count;
+                badge.classList.remove('hidden');
+            }
+        }
+        updateNotificationBadge();
+
+        // Expose function
+        window.selectService = selectService;
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

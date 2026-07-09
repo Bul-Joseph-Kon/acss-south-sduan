@@ -6,6 +6,8 @@
     <title>SSRA Customs · Risk Assessment Queue</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="../../js/officer-sidebar.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -36,30 +38,9 @@
     <div class="min-h-screen bg-gray-100">
         <div class="max-w-7xl mx-auto px-4 py-5">
             <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Sidebar -->
                 <aside class="lg:w-72 flex-shrink-0">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
-                        <div class="text-center mb-5">
-                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
-                                <i class="ri-user-line text-white text-3xl"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-800">Officer</h3>
-                            <p class="text-gray-500 text-sm">Customs Officer</p>
-                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
-                        </div>
-                        <nav class="space-y-1 mb-4">
-                            <a href="dashboard-officer.html" class="sidebar-link"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
-                            <a href="cvet-review-queue.html" class="sidebar-link"><i class="ri-file-invoice-line"></i><span>CVET Review Queue</span></a>
-                            <a href="direct-assessment-queue.html" class="sidebar-link"><i class="ri-file-search-line"></i><span>Direct Assessment Queue</span></a>
-                            <a href="agent-license-review.html" class="sidebar-link"><i class="ri-id-card-line"></i><span>Agent License Review</span></a>
-                            <a href="risk-assessment-queue.html" class="sidebar-link active"><i class="ri-shield-line"></i><span>Risk Assessment Queue</span></a>
-                            <a href="inspection-requests.html" class="sidebar-link"><i class="ri-clipboard-line"></i><span>Inspection Requests</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">8</span></a>
-                            <a href="reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Reports</span></a>
-                        </nav>
-                        <button onclick="alert('👋 Signed out')" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
-                            <i class="ri-logout-box-line"></i> Sign Out
-                        </button>
-                    </div>
+                    <div id="officer-sidebar"></div>
                 </aside>
 
                 <main class="flex-1 space-y-5">
@@ -84,79 +65,221 @@
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">3 high-risk assessments requiring review</span>
-                            <span class="text-sm text-red-600">⚠️ Action required</span>
+                        <div class="flex items-center justify-between" id="riskSummary">
+                            <span class="text-sm text-gray-500">Loading risk assessment summary...</span>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="risk-card high">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-red-600">CV-2026-0042</h4>
-                                    <p class="text-sm text-gray-500">John Trading Co. · Electronics · $25,000</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-high-risk">High Risk</span>
-                                        <span class="text-xs text-gray-400">AI Score: 85/100</span>
-                                        <span class="text-xs text-gray-400">Flagged: Jun 22, 2026</span>
-                                    </div>
-                                    <p class="text-xs text-red-600 mt-1">⚠️ Mismatched invoice values detected</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('🔍 Reviewing high-risk case')">Investigate</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Downloading risk report')">Download Report</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="risk-card medium">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-yellow-600">DA-2026-0018</h4>
-                                    <p class="text-sm text-gray-500">Sarah Exporters · Machinery · $50,000</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-medium-risk">Medium Risk</span>
-                                        <span class="text-xs text-gray-400">AI Score: 65/100</span>
-                                        <span class="text-xs text-gray-400">Flagged: Jun 20, 2026</span>
-                                    </div>
-                                    <p class="text-xs text-yellow-600 mt-1">⚠️ Missing supporting documents</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('🔍 Reviewing medium-risk case')">Investigate</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Downloading risk report')">Download Report</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="risk-card medium">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-yellow-600">LIC-2026-0010</h4>
-                                    <p class="text-sm text-gray-500">Peter Imports · License Upgrade</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-medium-risk">Medium Risk</span>
-                                        <span class="text-xs text-gray-400">AI Score: 55/100</span>
-                                        <span class="text-xs text-gray-400">Flagged: Jun 18, 2026</span>
-                                    </div>
-                                    <p class="text-xs text-yellow-600 mt-1">⚠️ Incomplete verification documents</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('🔍 Reviewing medium-risk case')">Investigate</button>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('📄 Downloading risk report')">Download Report</button>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="space-y-3" id="riskList">
+                        <div class="text-sm text-gray-500 text-center py-8">Loading Risk Assessment queue...</div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
+        
+        import { fetchApplicationsForRole } from '../../js/applications.js';
+
+        
+        const PAGE_KEY = 'risk-assessment-queue';
+        let currentRole = null;
+        let currentUserId = null;
+
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profileDropdown')) {
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+
+        async function init() {
+            console.log('=== LOADING RISK ASSESSMENT QUEUE ===');
+
+            const isAuthenticated = await checkAuth();
+
+        // Load user profile
+        await loadCurrentUserProfile();
+            if (!isAuthenticated) {
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            const hasAccess = await verifyRoleAccess('officer');
+            if (!hasAccess) {
+                
+                if (user) {
+                    
+                    if (profile && profile.role) {
+                        const dashboardUrl = redirectToDashboard(profile.role);
+                        window.location.href = dashboardUrl;
+                        return;
+                    }
+                }
+                window.location.href = '../../auth/login.html';
+                return;
+            }
+
+            
+            
+
+            if (profile) {
+                currentRole = profile.role || 'officer';
+                currentUserId = profile.id;
+            } else {
+                currentRole = 'officer';
+                currentUserId = user?.id;
+            }
+
+            await loadRiskAssessmentQueue();
+            setupRealtime();
+        }
+
+        let realtimeChannel = null;
+        function setupRealtime() {
+            realtimeChannel = supabase
+                .channel('risk-queue-updates')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, async () => {
+                    await loadRiskAssessmentQueue();
+                })
+                .subscribe();
+        }
+
+        async function loadRiskAssessmentQueue() {
+            console.log('=== LOADING RISK ASSESSMENT QUEUE ===');
+
+            const result = await fetchApplicationsForRole('officer', {
+                limit: 50
+            });
+
+            if (result.success && result.data) {
+                const applications = result.data;
+                console.log('Applications loaded for risk assessment:', applications);
+
+                // Filter applications with risk assessment data
+                const riskApplications = applications.filter(app => 
+                    app.risk_score !== undefined || app.risk_level !== undefined || app.ai_validation_result
+                );
+
+                console.log('Risk applications filtered:', riskApplications);
+
+                renderRiskList(riskApplications);
+            } else {
+                console.error('Failed to load Risk Assessment queue:', result.error);
+                document.getElementById('riskList').innerHTML = `
+                    <div class="text-sm text-red-500 text-center py-8">
+                        Failed to load Risk Assessment queue: ${result.error}
+                    </div>
+                `;
+            }
+        }
+
+        function renderRiskList(applications) {
+            const container = document.getElementById('riskList');
+            const summaryContainer = document.getElementById('riskSummary');
+
+            if (!applications || applications.length === 0) {
+                container.innerHTML = `
+                    <div class="text-sm text-gray-500 text-center py-8">
+                        No risk assessments requiring review
+                    </div>
+                `;
+                summaryContainer.innerHTML = '<span class="text-sm text-gray-500">0 risk assessments requiring review</span>';
+                return;
+            }
+
+            const highRisk = applications.filter(app => getRiskLevel(app) === 'high').length;
+            const mediumRisk = applications.filter(app => getRiskLevel(app) === 'medium').length;
+            const lowRisk = applications.filter(app => getRiskLevel(app) === 'low').length;
+
+            summaryContainer.innerHTML = `
+                <span class="text-sm text-gray-500">${applications.length} risk assessments requiring review</span>
+                <span class="text-sm text-red-600">${highRisk > 0 ? '⚠️ Action required' : ''}</span>
+            `;
+
+            container.innerHTML = applications.map(app => {
+                const riskLevel = getRiskLevel(app);
+                const riskClass = getRiskClass(riskLevel);
+                const riskLabel = getRiskLabel(riskLevel);
+                const riskScore = app.risk_score || app.ai_validation_result?.risk_score || 0;
+
+                return `
+                    <div class="risk-card ${riskClass}">
+                        <div class="flex flex-wrap justify-between items-start gap-2">
+                            <div>
+                                <h4 class="font-bold text-${getRiskColor(riskLevel)}-600">${app.application_number || 'N/A'}</h4>
+                                <p class="text-sm text-gray-500">${app.applicant_name || app.company_name || 'Unknown'} · ${app.goods_description || app.vehicle_description || 'N/A'} · ${formatCurrency(app.declared_value)}</p>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="status-badge ${riskClass}">${riskLabel}</span>
+                                    <span class="text-xs text-gray-400">AI Score: ${riskScore}/100</span>
+                                    <span class="text-xs text-gray-400">Flagged: ${formatDate(app.submitted_at || app.created_at)}</span>
+                                </div>
+                                ${app.ai_validation_result?.flags && app.ai_validation_result.flags.length > 0 ? 
+                                    `<p class="text-xs text-${getRiskColor(riskLevel)}-600 mt-1">⚠️ ${app.ai_validation_result.flags[0]}</p>` : ''}
+                            </div>
+                            <div class="flex gap-2">
+                                <a href="review-application.html?id=${app.id}" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Investigate</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function getRiskLevel(app) {
+            const score = app.risk_score || app.ai_validation_result?.risk_score || 0;
+            if (score >= 70) return 'high';
+            if (score >= 40) return 'medium';
+            return 'low';
+        }
+
+        function getRiskClass(riskLevel) {
+            const classMap = {
+                'high': 'high',
+                'medium': 'medium',
+                'low': 'low'
+            };
+            return classMap[riskLevel] || 'low';
+        }
+
+        function getRiskLabel(riskLevel) {
+            const labelMap = {
+                'high': 'High Risk',
+                'medium': 'Medium Risk',
+                'low': 'Low Risk'
+            };
+            return labelMap[riskLevel] || 'Low Risk';
+        }
+
+        function getRiskColor(riskLevel) {
+            const colorMap = {
+                'high': 'red',
+                'medium': 'yellow',
+                'low': 'green'
+            };
+            return colorMap[riskLevel] || 'green';
+        }
+
+        function formatCurrency(value) {
+            if (!value) return '$0';
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        init();
     </script>
 </body></html>
+
+
+
+

@@ -22,6 +22,8 @@ export async function signIn(email, password) {
         console.log('=== SIGN IN ATTEMPT ===');
         console.log('Email:', email);
         console.log('Password length:', password.length);
+        console.log('=== SUPABASE PROJECT VERIFICATION ===');
+        console.log('supabase.supabaseUrl:', supabase.supabaseUrl);
 
         const { data, error } = await supabase.auth.signInWithPassword({
             email,
@@ -89,7 +91,7 @@ export async function signIn(email, password) {
         // Check profile status
         console.log('=== CHECKING PROFILE STATUS ===');
         console.log('Profile status:', profile.status);
-        
+
         if (!profile.status) {
             console.error('=== PROFILE HAS NO STATUS ===');
             return { success: false, error: 'User profile has no status assigned. Please contact administrator.' };
@@ -99,9 +101,9 @@ export async function signIn(email, password) {
             console.log('=== ACCOUNT PENDING APPROVAL ===');
             // Sign out the user immediately
             await supabase.auth.signOut();
-            return { 
-                success: false, 
-                error: 'Your account is awaiting administrator approval. Please check back later.' 
+            return {
+                success: false,
+                error: 'Your account is awaiting administrator approval. Please check back later.'
             };
         }
 
@@ -109,9 +111,9 @@ export async function signIn(email, password) {
             console.log('=== ACCOUNT INACTIVE ===');
             // Sign out the user immediately
             await supabase.auth.signOut();
-            return { 
-                success: false, 
-                error: 'Your account is inactive. Please contact the administrator.' 
+            return {
+                success: false,
+                error: 'Your account is inactive. Please contact the administrator.'
             };
         }
 
@@ -119,9 +121,9 @@ export async function signIn(email, password) {
             console.log('=== ACCOUNT SUSPENDED ===');
             // Sign out the user immediately
             await supabase.auth.signOut();
-            return { 
-                success: false, 
-                error: 'Your account has been suspended. Please contact the administrator.' 
+            return {
+                success: false,
+                error: 'Your account has been suspended. Please contact the administrator.'
             };
         }
 
@@ -130,9 +132,9 @@ export async function signIn(email, password) {
             console.error('Status:', profile.status);
             // Sign out the user immediately
             await supabase.auth.signOut();
-            return { 
-                success: false, 
-                error: 'Your account has an unknown status. Please contact the administrator.' 
+            return {
+                success: false,
+                error: 'Your account has an unknown status. Please contact the administrator.'
             };
         }
 
@@ -144,6 +146,39 @@ export async function signIn(email, password) {
         console.log('Profile user_id:', profile.user_id);
         console.log('Profile role:', profile.role);
         console.log('Profile full_name:', profile.full_name);
+
+        // Log activity for successful login
+        const payload = {
+            user_id: sessionData.session.user.id,
+            activity_type: 'user_login',
+            description: 'User logged in successfully',
+            metadata: JSON.stringify({
+                email: email,
+                role: profile.role
+            }),
+            ip_address: null,
+            created_at: new Date().toISOString()
+        };
+
+        console.log("=== BEFORE ACTIVITY INSERT ===");
+        console.log(payload);
+
+        const { data: activityData, error: activityError } = await supabase
+            .from('activity_logs')
+            .insert(payload)
+            .select()
+            .single();
+
+        console.log("=== AFTER ACTIVITY INSERT ===");
+        console.log(activityData);
+        console.log(activityError);
+
+        if (activityError) {
+            console.error(activityError.code);
+            console.error(activityError.message);
+            console.error(activityError.details);
+            console.error(activityError.hint);
+        }
 
         // Store in localStorage for compatibility
         localStorage.setItem('isLoggedIn', 'true');
@@ -217,6 +252,39 @@ export async function signUp(email, password, metadata = {}) {
                     console.error('Profile error details:', JSON.stringify(profileError, null, 2));
                 } else {
                     console.log('Profile created successfully:', profileData);
+
+                    // Log activity for successful registration
+                    const payload = {
+                        user_id: data.user.id,
+                        activity_type: 'user_registration',
+                        description: 'User registered successfully',
+                        metadata: JSON.stringify({
+                            email: email,
+                            role: metadata?.role || 'trader'
+                        }),
+                        ip_address: null,
+                        created_at: new Date().toISOString()
+                    };
+
+                    console.log("=== BEFORE ACTIVITY INSERT ===");
+                    console.log(payload);
+
+                    const { data: activityData, error: activityError } = await supabase
+                        .from('activity_logs')
+                        .insert(payload)
+                        .select()
+                        .single();
+
+                    console.log("=== AFTER ACTIVITY INSERT ===");
+                    console.log(activityData);
+                    console.log(activityError);
+
+                    if (activityError) {
+                        console.error(activityError.code);
+                        console.error(activityError.message);
+                        console.error(activityError.details);
+                        console.error(activityError.hint);
+                    }
                 }
             } catch (profileError) {
                 console.error('Profile creation error:', profileError);
@@ -334,7 +402,18 @@ export async function updateEmail(newEmail) {
 
 export async function getUserProfile(userId) {
     try {
-        console.log('=== getUserProfile ===');
+        const { getProfile } = await import('./profile-store.js');
+        const profile = await getProfile();
+        if (profile && profile.user_id === userId) {
+            console.log('=== getUserProfile (CACHED FROM PROFILE STORE) ===', profile);
+            return profile;
+        }
+    } catch (e) {
+        console.error('ProfileStore cache load failed, falling back to database query:', e);
+    }
+
+    try {
+        console.log('=== getUserProfile (DATABASE QUERY) ===');
         console.log('Querying profiles table with user_id:', userId);
         
         const { data, error } = await supabase
@@ -413,13 +492,13 @@ export function redirectToDashboard(role) {
     
     // Fallback dashboard URLs in case import fails
     const fallbackUrls = {
-        trader: 'pages/trader/dashboard-trader.html',
-        agent: 'pages/agent/dashboard-agent.html',
-        officer: 'pages/officer/dashboard-officer.html',
-        inspector: 'pages/inspector/dashboard-inspector.html',
-        supervisor: 'pages/supervisor/dashboard-supervisor.html',
-        revenue: 'pages/revenue/dashboard-revenue.html',
-        administrator: 'pages/admin/dashboard-admin.html'
+        trader: '/pages/trader/dashboard-trader.html',
+        agent: '/pages/agent/dashboard-agent.html',
+        officer: '/pages/officer/dashboard-officer.html',
+        inspector: '/pages/inspector/dashboard-inspector.html',
+        supervisor: '/pages/supervisor/dashboard-supervisor.html',
+        revenue: '/pages/revenue/dashboard-revenue.html',
+        administrator: '/pages/admin/dashboard-admin.html'
     };
     
     // Use imported dashboardUrls or fallback
@@ -807,3 +886,5 @@ export async function getAllUsers(filters = {}) {
         return { success: false, error: error.message };
     }
 }
+
+export { dashboardUrls };

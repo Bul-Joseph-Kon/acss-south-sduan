@@ -10,6 +10,7 @@
     <script type="module" src="../../js/auth.js"></script>
     <script type="module" src="../../js/dashboard.js"></script>
     <script type="module" src="../../js/realtime.js"></script>
+    <script type="module" src="../../js/officer-sidebar.js"></script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
@@ -44,29 +45,7 @@
             <div class="flex flex-col lg:flex-row gap-6">
                 <!-- Sidebar -->
                 <aside class="lg:w-72 flex-shrink-0">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-5 sticky top-6">
-                        <div class="text-center mb-5">
-                            <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-md gradient-bg">
-                                <i class="ri-user-line text-white text-3xl"></i>
-                            </div>
-                            <h3 class="text-lg font-bold text-gray-800">Officer</h3>
-                            <p class="text-gray-500 text-sm">Customs Officer</p>
-                            <span class="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium">● Active</span>
-                        </div>
-                        <nav class="space-y-1 mb-4">
-                            <a href="dashboard-officer.html" class="sidebar-link active"><i class="ri-dashboard-line"></i><span>Dashboard</span></a>
-                            <a href="cvet-review-queue.html" class="sidebar-link"><i class="ri-file-invoice-line"></i><span>CVET Review Queue</span></a>
-                            <a href="direct-assessment-queue.html" class="sidebar-link"><i class="ri-file-search-line"></i><span>Direct Assessment Queue</span></a>
-                            <a href="agent-license-review.html" class="sidebar-link"><i class="ri-id-card-line"></i><span>Agent License Review</span></a>
-                            <a href="risk-assessment-queue.html" class="sidebar-link"><i class="ri-shield-line"></i><span>Risk Assessment Queue</span></a>
-                            <a href="inspection-requests.html" class="sidebar-link"><i class="ri-clipboard-line"></i><span>Inspection Requests</span></a>
-                            <a href="notifications.html" class="sidebar-link"><i class="ri-notification-3-line"></i><span>Notifications</span><span class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold" id="notificationBadge">0</span></a>
-                            <a href="reports.html" class="sidebar-link"><i class="ri-file-chart-line"></i><span>Reports</span></a>
-                        </nav>
-                        <button id="signOutBtn" class="mt-4 w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
-                            <i class="ri-logout-box-line"></i> Sign Out
-                        </button>
-                    </div>
+                    <div id="officer-sidebar"></div>
                 </aside>
 
                 <!-- Main Content -->
@@ -150,6 +129,7 @@
         async function loadDashboard() {
             console.log('=== LOADING OFFICER DASHBOARD ===');
             const isAuthenticated = await checkAuth();
+
             if (!isAuthenticated) {
                 window.location.href = '../../auth/login.html';
                 return;
@@ -158,13 +138,11 @@
             // Verify role access
             const hasAccess = await verifyRoleAccess('officer');
             if (!hasAccess) {
-                // Get user's actual role and redirect to their dashboard
                 const user = await getCurrentUser();
                 if (user) {
                     const profile = await getUserProfile(user.id);
                     if (profile && profile.role) {
-                        const dashboardUrl = redirectToDashboard(profile.role);
-                        window.location.href = dashboardUrl;
+                        window.location.href = redirectToDashboard(profile.role);
                         return;
                     }
                 }
@@ -174,10 +152,7 @@
 
             const user = await getCurrentUser();
             const profile = user ? await getUserProfile(user.id) : null;
-            
             if (profile) {
-                document.querySelector('h3').textContent = profile.full_name || 'Officer';
-                document.querySelector('.text-gray-500.text-sm').textContent = profile.role || 'Officer';
                 currentRole = profile.role || 'officer';
                 currentUserId = profile.id;
             } else {
@@ -185,13 +160,9 @@
                 currentUserId = user?.id;
             }
 
-            // Load workflow-based applications
-            await loadWorkflowApplications();
-            
-            // Load notifications
+            await loadStats();
+            await loadQueuesOverview();
             await loadNotifications();
-
-            // Initialize realtime monitoring
             await initializeRealtimeMonitoring();
         }
 
@@ -200,70 +171,37 @@
             
             realtimeManager.registerPage(PAGE_KEY, currentRole, currentUserId, {
                 onApplicationChange: async () => {
-                    await loadWorkflowApplications();
+                    await loadStats();
+                    await loadQueuesOverview();
                 },
-                onPaymentChange: async () => {
-                    await loadWorkflowApplications();
+                onNotificationChange: async () => {
+                    await loadNotifications();
                 }
             });
         }
 
-        async function loadWorkflowApplications() {
-            console.log('=== LOADING WORKFLOW APPLICATIONS FOR OFFICER ===');
-            
-            const result = await fetchApplicationsForRole('officer', { limit: 10 });
-            
-            if (result.success && result.data) {
-                const applications = result.data;
-                console.log('Applications loaded:', applications);
-                
-                // Update stats
-                updateWorkflowStats(applications);
-                
-                // Update review queues
-                updateReviewQueues(applications);
-            } else {
-                console.error('Failed to load applications:', result.error);
+        async function loadStats() {
+            const stats = await fetchDashboardData('officer');
+            if (stats) {
+                document.getElementById('statPendingReviews').textContent = stats.pending || 0;
+                document.getElementById('statUnderReview').textContent = stats.underReview || 0;
+                document.getElementById('statApproved').textContent = stats.approved || 0;
+                document.getElementById('statRejected').textContent = stats.rejected || 0;
             }
         }
 
-        function updateWorkflowStats(applications) {
-            const stats = {
-                pending_review: 0,
-                under_review: 0,
-                approved: 0,
-                rejected: 0,
-                submitted: 0,
-                under_inspection: 0
-            };
-
-            applications.forEach(app => {
-                if (stats.hasOwnProperty(app.status)) {
-                    stats[app.status]++;
-                }
-            });
-
-            // Update stat cards by ID
-            document.getElementById('statPendingReviews').textContent = stats.pending_review + stats.submitted;
-            document.getElementById('statUnderReview').textContent = stats.under_review;
-            document.getElementById('statApproved').textContent = stats.approved;
-            document.getElementById('statRejected').textContent = stats.rejected;
-        }
-
-        function updateReviewQueues(applications) {
-            const queues = {
-                cvet: 0,
-                direct_assessment: 0,
-                agent_license: 0,
-                vehicle_query: 0
-            };
-
-            applications.forEach(app => {
-                if (app.application_type === 'cvet') queues.cvet++;
-                else if (app.application_type === 'direct_assessment') queues.direct_assessment++;
-                else if (app.application_type === 'agent_license') queues.agent_license++;
-                else if (app.application_type === 'vehicle_query') queues.vehicle_query++;
-            });
+        async function loadQueuesOverview() {
+            const result = await fetchApplicationsForRole('officer', { limit: 100 });
+            const queues = { cvet: 0, direct_assessment: 0, agent_license: 0, vehicle_query: 0 };
+            
+            if (result.success && result.data) {
+                result.data.forEach(app => {
+                    if (app.service_type === 'cvet' || !app.service_type) queues.cvet++;
+                    else if (app.service_type === 'direct_assessment') queues.direct_assessment++;
+                    else if (app.service_type === 'agent_license') queues.agent_license++;
+                    else if (app.service_type === 'vehicle_query') queues.vehicle_query++;
+                });
+            }
 
             const queueContainer = document.getElementById('reviewQueues');
             if (queueContainer) {
@@ -280,11 +218,6 @@
             try {
                 const result = await fetchUnreadNotifications();
                 if (result.success && result.data) {
-                    // Update notification badge
-                    document.getElementById('notificationBadge').textContent = result.data.length;
-                    document.getElementById('notificationBadge').style.display = result.data.length > 0 ? 'inline-block' : 'none';
-
-                    // Update recent notifications list
                     const notifContainer = document.getElementById('recentNotifications');
                     if (notifContainer) {
                         notifContainer.innerHTML = result.data.slice(0, 3).map(notif => `
@@ -295,7 +228,6 @@
                         `).join('');
                     }
                 } else {
-                    document.getElementById('notificationBadge').style.display = 'none';
                     document.getElementById('recentNotifications').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No notifications</div>';
                 }
             } catch (error) {
@@ -316,26 +248,14 @@
             return date.toLocaleDateString();
         }
 
-        function getAIStatusBadge(aiPassed, aiResults) {
-            if (aiPassed) return '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">✓ AI Validated</span>';
-            if (aiResults && aiResults.hasIssues) return '<span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">⚠ AI Issues</span>';
-            return '<span class="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">Pending AI</span>';
-        }
-
         // Cleanup realtime subscriptions when leaving page
         window.addEventListener('beforeunload', () => {
             realtimeManager.unregisterPage(PAGE_KEY);
         });
 
-        // Cleanup on sign out
-        document.getElementById('signOutBtn')?.addEventListener('click', () => {
-            realtimeManager.unregisterPage(PAGE_KEY);
-        });
-
-        document.addEventListener('DOMContentLoaded', loadDashboard);
-
         // Sign out functionality
         async function handleSignOut() {
+            realtimeManager.unregisterPage(PAGE_KEY);
             const result = await signOut();
             if (result.success) {
                 window.location.href = '../../auth/login.html';
@@ -344,8 +264,9 @@
             }
         }
 
-        document.getElementById('signOutBtn').addEventListener('click', handleSignOut);
-        document.getElementById('dropdownSignOut').addEventListener('click', handleSignOut);
+        document.getElementById('dropdownSignOut')?.addEventListener('click', handleSignOut);
+
+        loadDashboard();
     </script>
 </body>
 </html>

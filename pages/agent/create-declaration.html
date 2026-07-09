@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Agent CVET Declaration</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .step-card { transition: all 0.3s ease; cursor: pointer; background: white; border-radius: 0.75rem; padding: 1rem 1.25rem; border: 2px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+        .step-card:hover { border-color: #1e3a5f; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+        .step-card .step-icon { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; background: #e8f0fe; color: #1e3a5f; flex-shrink: 0; }
+        .step-card .step-title { font-weight: 600; font-size: 0.95rem; color: #1f2937; }
+        .step-card .step-desc { font-size: 0.8rem; color: #6b7280; }
+        .step-card .step-status { font-size: 0.6rem; font-weight: 600; padding: 0.15rem 0.6rem; border-radius: 9999px; }
+        .step-status-current { background: #dbeafe; color: #1e40af; }
+        .step-status-locked { background: #f3f4f6; color: #6b7280; }
+        .step-status-done { background: #d1fae5; color: #065f46; }
+        .step-status-ai { background: #dbeafe; color: #1e40af; }
+        .step-status-officer { background: #fef3c7; color: #92400e; }
+        .step-status-inspector { background: #fee2e2; color: #991b1b; }
+        .step-status-completed { background: #d1fae5; color: #065f46; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+        .flow-badge { font-size: 0.55rem; padding: 0.1rem 0.4rem; border-radius: 9999px; font-weight: 600; }
+        .flow-badge-ai { background: #dbeafe; color: #1e40af; }
+        .flow-badge-officer { background: #fef3c7; color: #92400e; }
+        .flow-badge-inspector { background: #fee2e2; color: #991b1b; }
+        .flow-badge-revenue { background: #d1fae5; color: #065f46; }
+        .flow-badge-supervisor { background: #f3e8ff; color: #6b21a8; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="agent-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">📄 Create CVET Declaration</h2>
+                            <p class="opacity-90 text-sm">Complete the declaration workflow step by step</p>
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                <span class="flow-badge flow-badge-ai">🤖 AI Validation</span>
+                                <span class="flow-badge flow-badge-officer">👤 Officer Review</span>
+                                <span class="flow-badge flow-badge-inspector">🔍 Inspection</span>
+                                <span class="flow-badge flow-badge-revenue">💰 Revenue</span>
+                                <span class="flow-badge flow-badge-supervisor">⭐ Supervisor</span>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
+                            <span>Step 1 of 8</span>
+                            <span>12% Complete</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width:12%"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <a href="declarant-information.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-user-2-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 1: Declarant Information</div>
+                                    <div class="step-desc">Importer, exporter, and agent details</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-current">In Progress</span>
+                        </a>
+                        <a href="shipment-information.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-ship-2-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 2: Shipment Information</div>
+                                    <div class="step-desc">Consignment, manifest, and transport details</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-locked">Locked</span>
+                        </a>
+                        <a href="goods-information.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-package-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 3: Goods Information</div>
+                                    <div class="step-desc">Goods description, HS Code, quantity, weight</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-locked">Locked</span>
+                        </a>
+                        <a href="documents.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-attachment-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 4: Upload Documents</div>
+                                    <div class="step-desc">Invoice, packing list, bill of lading, permits</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-locked">Locked</span>
+                        </a>
+                        <a href="ai-validation.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-robot-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 5: AI Validation</div>
+                                    <div class="step-desc">AI-powered document validation and risk assessment</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-locked">Locked</span>
+                        </a>
+                        <a href="duty-assessment.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-calculator-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 6: Duty Assessment</div>
+                                    <div class="step-desc">Customs duty, VAT, and tax calculation</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-locked">Locked</span>
+                        </a>
+                        <a href="risk-assessment.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-shield-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 7: Risk Assessment</div>
+                                    <div class="step-desc">AI Risk Engine evaluation and channel assignment</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-locked">Locked</span>
+                        </a>
+                        <a href="payment.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-bank-card-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 8: Payment Processing</div>
+                                    <div class="step-desc">Duty payment and receipt generation</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-locked">Locked</span>
+                        </a>
+                        <a href="certificate.html" class="step-card">
+                            <div class="flex items-center gap-3">
+                                <div class="step-icon"><i class="ri-file-pdf-line"></i></div>
+                                <div>
+                                    <div class="step-title">Step 9: Certificate Generation</div>
+                                    <div class="step-desc">Download CVET certificate with QR code</div>
+                                </div>
+                            </div>
+                            <span class="step-status step-status-locked">Locked</span>
+                        </a>
+                    </div>
+
+                    <!-- Business Flow Legend -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                        <h4 class="font-semibold text-xs text-gray-500 mb-2">🔹 Business Flow Legend</h4>
+                        <div class="flex flex-wrap gap-3 text-xs">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> AI Validation</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-500"></span> Officer Review</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Inspection</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> Revenue</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Supervisor</span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Complete</span>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+
+        <script type="module" src="../../js/agent-sidebar.js"></script>
+<!-- Supabase & Shared Authentication Guards -->
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+
+        async function initPage() {
+            console.log('=== INITIALIZING AUTH GUARD ON MOCK PAGE ===');
+            const role = 'agent';
+            
+            // 1. Run auth check
+            const hasAccess = await checkPageAuth(role);
+            if (!hasAccess) {
+                console.log('Access denied, redirecting...');
+                return;
+            }
+
+            // 2. Load profile data from Supabase
+            const { user, profile } = await loadCurrentUserProfile();
+            
+            // 3. Update sidebar and profile UI
+            if (profile) {
+                const displayName = profile.full_name || user?.email || 'User';
+                const displayRole = role === 'agent' ? 'Clearing Agent' : 'Trader';
+                
+                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
+                if (nameEl) nameEl.textContent = displayName;
+                
+                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
+                if (roleEl) roleEl.textContent = displayRole;
+                
+                const statusEl = document.getElementById(role + 'ProfileStatus');
+                if (statusEl) statusEl.textContent = '● ' + (profile.status || 'Active');
+                
+                const tinEl = document.getElementById(role + 'ProfileTIN');
+                if (tinEl && profile.organization) {
+                    tinEl.textContent = 'Org: ' + profile.organization;
+                }
+            }
+
+            // 4. Bind Logout Button Listeners
+            const handleLogout = async (e) => {
+                e.preventDefault();
+                console.log('Signing out...');
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
+
+            const dropdownSignOut = document.getElementById('dropdownSignOut');
+            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            initPage();
+        }
+    </script>
+</body></html>
+
