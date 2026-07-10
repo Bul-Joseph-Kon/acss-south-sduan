@@ -9,8 +9,78 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="../../js/auth.js"></script>
-    <script type="module" src="../../js/dashboard.js"></script>
-    <script type="module" src="../../js/realtime.js"></script>
+    <script type="module" src="../../js/inspector-service.js"></script>
+    <script type="module" src="../../js/realtime-service.js"></script>
+    <script type="module">
+        import { getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { getInspectorStatistics, getInspectionQueue } from '../../js/inspector-service.js';
+        import { setupRealtimeForRole, updateDashboardCount, showToastNotification } from '../../js/realtime-service.js';
+
+        // Load inspector dashboard statistics
+        async function loadInspectorDashboard() {
+            try {
+                const user = await getCurrentUser();
+                const profile = await getUserProfile(user.id);
+                
+                if (!profile || profile.role !== 'inspector') {
+                    console.error('User is not an inspector');
+                    return;
+                }
+
+                // Load statistics
+                const statsResult = await getInspectorStatistics();
+                if (statsResult.success) {
+                    const stats = statsResult.statistics;
+                    updateDashboardCount('pendingInspectionCount', stats.pending_inspection);
+                    updateDashboardCount('approvedCount', stats.approved);
+                    updateDashboardCount('escalatedCount', stats.escalated);
+                }
+
+                // Load inspection queue
+                const appsResult = await getInspectionQueue();
+                if (appsResult.success && appsResult.data) {
+                    const appsContainer = document.getElementById('inspectionQueueList');
+                    if (appsContainer) {
+                        appsContainer.innerHTML = appsResult.data.slice(0, 5).map(app => `
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium">${app.application_number || 'N/A'}</div>
+                                    <div class="text-xs text-gray-500">${app.profiles?.full_name || 'Unknown Agent'}</div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">Inspection</span>
+                            </div>
+                        `).join('');
+                    }
+                }
+
+                // Setup realtime subscriptions
+                setupRealtimeForRole('inspector', profile.id, {
+                    onApplicationUpdate: (payload) => {
+                        console.log('Application update:', payload);
+                        loadInspectorDashboard();
+                        showToastNotification('Application status updated', 'info');
+                    },
+                    onEscalatedCase: (payload) => {
+                        console.log('Escalated case update:', payload);
+                        loadInspectorDashboard();
+                        showToastNotification('Escalated case updated', 'warning');
+                    },
+                    onNotification: (payload) => {
+                        console.log('New notification:', payload);
+                        showToastNotification(payload.new.title, payload.new.type === 'success' ? 'success' : 'info');
+                    },
+                    onActivityLog: (payload) => {
+                        console.log('Activity log:', payload);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading inspector dashboard:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadInspectorDashboard);
+    </script>
     <style>
         .gradient-bg {
             background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%);

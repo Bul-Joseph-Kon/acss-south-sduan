@@ -8,8 +8,90 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="../../js/auth.js"></script>
-    <script type="module" src="../../js/dashboard.js"></script>
-    <script type="module" src="../../js/realtime.js"></script>
+    <script type="module" src="../../js/supervisor-service.js"></script>
+    <script type="module" src="../../js/revenue-service.js"></script>
+    <script type="module" src="../../js/realtime-service.js"></script>
+    <script type="module">
+        import { getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { getSupervisorStatistics, getEscalatedCases } from '../../js/supervisor-service.js';
+        import { getRevenueStatistics } from '../../js/revenue-service.js';
+        import { setupRealtimeForRole, updateDashboardCount, showToastNotification } from '../../js/realtime-service.js';
+
+        // Load supervisor dashboard statistics
+        async function loadSupervisorDashboard() {
+            try {
+                const user = await getCurrentUser();
+                const profile = await getUserProfile(user.id);
+                
+                if (!profile || profile.role !== 'supervisor') {
+                    console.error('User is not a supervisor');
+                    return;
+                }
+
+                // Load supervisor statistics
+                const statsResult = await getSupervisorStatistics();
+                if (statsResult.success) {
+                    const stats = statsResult.statistics;
+                    updateDashboardCount('pendingEscalationsCount', stats.pending_escalations);
+                    updateDashboardCount('resolvedEscalationsCount', stats.resolved_escalations);
+                    updateDashboardCount('approvedCount', stats.approved);
+                    updateDashboardCount('rejectedCount', stats.rejected);
+                }
+
+                // Load revenue statistics
+                const revenueResult = await getRevenueStatistics();
+                if (revenueResult.success) {
+                    const stats = revenueResult.statistics;
+                    updateDashboardCount('totalRevenue', stats.total_revenue);
+                    updateDashboardCount('awaitingPaymentCount', stats.awaiting_payment);
+                    updateDashboardCount('paidCount', stats.paid);
+                }
+
+                // Load escalated cases
+                const casesResult = await getEscalatedCases();
+                if (casesResult.success && casesResult.data) {
+                    const casesContainer = document.getElementById('escalatedCasesList');
+                    if (casesContainer) {
+                        casesContainer.innerHTML = casesResult.data.slice(0, 5).map(c => `
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium">${c.applications?.application_number || 'N/A'}</div>
+                                    <div class="text-xs text-gray-500">${c.escalation_reason || 'No reason'}</div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Escalated</span>
+                            </div>
+                        `).join('');
+                    }
+                }
+
+                // Setup realtime subscriptions
+                setupRealtimeForRole('supervisor', profile.id, {
+                    onEscalatedCase: (payload) => {
+                        console.log('Escalated case update:', payload);
+                        loadSupervisorDashboard();
+                        showToastNotification('Escalated case updated', 'warning');
+                    },
+                    onApplicationUpdate: (payload) => {
+                        console.log('Application update:', payload);
+                        loadSupervisorDashboard();
+                        showToastNotification('Application status updated', 'info');
+                    },
+                    onNotification: (payload) => {
+                        console.log('New notification:', payload);
+                        showToastNotification(payload.new.title, payload.new.type === 'success' ? 'success' : 'info');
+                    },
+                    onActivityLog: (payload) => {
+                        console.log('Activity log:', payload);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading supervisor dashboard:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSupervisorDashboard);
+    </script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }

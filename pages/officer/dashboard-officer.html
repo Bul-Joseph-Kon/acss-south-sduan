@@ -8,9 +8,76 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="../../js/auth.js"></script>
-    <script type="module" src="../../js/dashboard.js"></script>
-    <script type="module" src="../../js/realtime.js"></script>
+    <script type="module" src="../../js/officer-service.js"></script>
+    <script type="module" src="../../js/realtime-service.js"></script>
     <script type="module" src="../../js/officer-sidebar.js"></script>
+    <script type="module">
+        import { getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { getOfficerStatistics, getPendingReviewApplications } from '../../js/officer-service.js';
+        import { setupRealtimeForRole, updateDashboardCount, showToastNotification } from '../../js/realtime-service.js';
+
+        // Load officer dashboard statistics
+        async function loadOfficerDashboard() {
+            try {
+                const user = await getCurrentUser();
+                const profile = await getUserProfile(user.id);
+                
+                if (!profile || profile.role !== 'officer') {
+                    console.error('User is not an officer');
+                    return;
+                }
+
+                // Load statistics
+                const statsResult = await getOfficerStatistics();
+                if (statsResult.success) {
+                    const stats = statsResult.statistics;
+                    updateDashboardCount('pendingReviewCount', stats.pending_review);
+                    updateDashboardCount('approvedCount', stats.approved);
+                    updateDashboardCount('rejectedCount', stats.rejected);
+                    updateDashboardCount('returnedCount', stats.returned);
+                    updateDashboardCount('inspectionCount', stats.under_inspection);
+                }
+
+                // Load pending applications
+                const appsResult = await getPendingReviewApplications();
+                if (appsResult.success && appsResult.data) {
+                    const appsContainer = document.getElementById('pendingApplicationsList');
+                    if (appsContainer) {
+                        appsContainer.innerHTML = appsResult.data.slice(0, 5).map(app => `
+                            <div class="flex justify-between items-center border-b pb-2">
+                                <div class="flex-1">
+                                    <div class="text-sm font-medium">${app.application_number || 'N/A'}</div>
+                                    <div class="text-xs text-gray-500">${app.profiles?.full_name || 'Unknown Agent'}</div>
+                                </div>
+                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>
+                            </div>
+                        `).join('');
+                    }
+                }
+
+                // Setup realtime subscriptions
+                setupRealtimeForRole('officer', profile.id, {
+                    onApplicationUpdate: (payload) => {
+                        console.log('Application update:', payload);
+                        loadOfficerDashboard();
+                        showToastNotification('Application status updated', 'info');
+                    },
+                    onNotification: (payload) => {
+                        console.log('New notification:', payload);
+                        showToastNotification(payload.new.title, payload.new.type === 'success' ? 'success' : 'info');
+                    },
+                    onActivityLog: (payload) => {
+                        console.log('Activity log:', payload);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading officer dashboard:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadOfficerDashboard);
+    </script>
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
