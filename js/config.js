@@ -6,8 +6,8 @@
 // ================================================================
 
 export const SUPABASE_CONFIG = {
-    url: import.meta.env.VITE_SUPABASE_URL || 'https://avpoufxsjiecbsxvngip.supabase.co',
-    key: import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_XZ7BUTHNhF1ojqoxlJq7Bg_cqn9o8HE',
+    url: 'https://avpoufxsjiecbsxvngip.supabase.co',
+    key: 'sb_publishable_XZ7BUTHNhF1ojqoxlJq7Bg_cqn9o8HE',
     
     // Storage buckets
     buckets: {
