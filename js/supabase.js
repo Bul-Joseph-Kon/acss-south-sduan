@@ -4,7 +4,6 @@
 // This file initializes the Supabase client with the provided credentials
 // ================================================================
 
-import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_CONFIG } from './config.js';
 
 console.log('=== SUPABASE CLIENT INITIALIZATION ===');
@@ -12,10 +11,14 @@ console.log('Supabase URL:', SUPABASE_CONFIG.url);
 console.log('Supabase Key:', SUPABASE_CONFIG.key);
 console.log('Key type:', SUPABASE_CONFIG.key.startsWith('sb_publishable_') ? 'Publishable key' : 'JWT token');
 
-// Initialize Supabase client - minimal configuration
-const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
-
-console.log('Supabase client initialized successfully');
+// Initialize Supabase client using global window.supabase (loaded from CDN)
+let supabase;
+if (window.supabase) {
+    supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+    console.log('Supabase client initialized successfully from CDN');
+} else {
+    console.error('Supabase CDN not loaded. Please include the Supabase CDN script in your HTML.');
+}
 
 // ================================================================
 // EXPORT SUPABASE CLIENT
