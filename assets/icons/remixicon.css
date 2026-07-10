@@ -1,7 +1,7 @@
 @font-face {
   font-family: "remixicon";
-  src: url("https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.woff2") format("woff2"),
-       url("https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.woff") format("woff");
+  src: url("../fonts/remixicon.woff2") format("woff2"),
+       url("../fonts/remixicon.woff") format("woff");
   font-display: block;
 }
 
