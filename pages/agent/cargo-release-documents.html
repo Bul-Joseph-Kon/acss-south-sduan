@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Cargo Release Documents</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+        .doc-card { border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.5rem; transition: all 0.2s ease; background: white; }
+        .doc-card:hover { border-color: #1e3a5f; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .doc-card .doc-icon { width: 3rem; height: 3rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="agent-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">📦 Cargo Release Documents</h2>
+                            <p class="opacity-90 text-sm">Download cargo release and clearance documents</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-lg">Application Details</h3>
+                            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700" id="appStatus">Cargo Released</span>
+                        </div>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-500">Application Number</p>
+                                <p class="font-semibold" id="applicationNumber">CVET-123456</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Release Date</p>
+                                <p class="font-semibold" id="releaseDate">January 25, 2024</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Port of Entry</p>
+                                <p class="font-semibold" id="portOfEntry">Juba</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Available Documents</h3>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="doc-card">
+                                <div class="flex items-start gap-3">
+                                    <div class="doc-icon bg-blue-100 text-blue-600">
+                                        <i class="ri-file-pdf-line"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-sm">CVET Certificate</h4>
+                                        <p class="text-xs text-gray-500 mb-2">Customs Valuation Certificate</p>
+                                        <button class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded transition">
+                                            Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="doc-card">
+                                <div class="flex items-start gap-3">
+                                    <div class="doc-icon bg-green-100 text-green-600">
+                                        <i class="ri-file-check-line"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-sm">Cargo Release Order</h4>
+                                        <p class="text-xs text-gray-500 mb-2">Official cargo release authorization</p>
+                                        <button class="text-xs bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded transition">
+                                            Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="doc-card">
+                                <div class="flex items-start gap-3">
+                                    <div class="doc-icon bg-purple-100 text-purple-600">
+                                        <i class="ri-ship-line"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-sm">Clearance Certificate</h4>
+                                        <p class="text-xs text-gray-500 mb-2">Final customs clearance document</p>
+                                        <button class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded transition">
+                                            Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="doc-card">
+                                <div class="flex items-start gap-3">
+                                    <div class="doc-icon bg-yellow-100 text-yellow-600">
+                                        <i class="ri-file-text-line"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-sm">Inspection Report</h4>
+                                        <p class="text-xs text-gray-500 mb-2">Physical inspection findings</p>
+                                        <button class="text-xs bg-yellow-600 hover:bg-yellow-700 text-white px-3 py-1 rounded transition">
+                                            Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="doc-card">
+                                <div class="flex items-start gap-3">
+                                    <div class="doc-icon bg-red-100 text-red-600">
+                                        <i class="ri-money-dollar-circle-line"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-sm">Duty Assessment</h4>
+                                        <p class="text-xs text-gray-500 mb-2">Calculated duties and taxes</p>
+                                        <button class="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition">
+                                            Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="doc-card">
+                                <div class="flex items-start gap-3">
+                                    <div class="doc-icon bg-indigo-100 text-indigo-600">
+                                        <i class="ri-receipt-line"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-semibold text-sm">Payment Receipt</h4>
+                                        <p class="text-xs text-gray-500 mb-2">Official payment confirmation</p>
+                                        <button class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded transition">
+                                            Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Document Actions</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2">
+                                <i class="ri-download-cloud-2-line"></i> Download All Documents
+                            </button>
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2">
+                                <i class="ri-mail-send-line"></i> Email Documents
+                            </button>
+                            <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2">
+                                <i class="ri-printer-line"></i> Print Package
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                        <div class="flex items-start gap-3">
+                            <i class="ri-information-line text-yellow-600 text-xl"></i>
+                            <div>
+                                <h4 class="font-semibold text-sm text-yellow-800">Important Notice</h4>
+                                <p class="text-sm text-yellow-700">These documents are official and should be presented to customs officials at the port of entry. Keep copies for your records. Documents are valid for 30 days from the release date.</p>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profileDropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+
+    <script type="module" src="../../js/agent-sidebar.js"></script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { getApplicationById, getApplicationDocuments } from '../../js/agent-declaration-service.js';
+
+        async function initPage() {
+            console.log('=== INITIALIZING CARGO RELEASE DOCUMENTS PAGE ===');
+            const role = 'agent';
+            
+            const hasAccess = await checkPageAuth(role);
+            if (!hasAccess) {
+                console.log('Access denied, redirecting...');
+                return;
+            }
+
+            const { user, profile } = await loadCurrentUserProfile();
+            
+            if (profile) {
+                const displayName = profile.full_name || user?.email || 'User';
+                const displayRole = 'Clearing Agent';
+                
+                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
+                if (nameEl) nameEl.textContent = displayName;
+                
+                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
+                if (roleEl) roleEl.textContent = displayRole;
+            }
+
+            const handleLogout = async (e) => {
+                e.preventDefault();
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
+
+            const dropdownSignOut = document.getElementById('dropdownSignOut');
+            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+
+            // Load application data from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const applicationId = urlParams.get('application_id');
+            
+            if (applicationId) {
+                await loadApplicationData(applicationId);
+            }
+        }
+
+        async function loadApplicationData(applicationId) {
+            try {
+                const result = await getApplicationById(applicationId);
+                if (result.success && result.data) {
+                    const app = result.data;
+                    document.getElementById('applicationNumber').textContent = app.application_number || 'N/A';
+                    document.getElementById('appStatus').textContent = app.status === 'completed' ? 'Cargo Released' : app.status;
+                    document.getElementById('releaseDate').textContent = app.completed_at ? new Date(app.completed_at).toLocaleDateString() : 'N/A';
+                    
+                    if (app.declaration_data && app.declaration_data.shipment) {
+                        document.getElementById('portOfEntry').textContent = app.declaration_data.shipment.port_of_entry || 'N/A';
+                    }
+                }
+
+                // Load documents
+                const docsResult = await getApplicationDocuments(applicationId);
+                if (docsResult.success && docsResult.data) {
+                    console.log('Documents loaded:', docsResult.data);
+                }
+            } catch (error) {
+                console.error('Error loading application data:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            initPage();
+        }
+    </script>
+</body>
+</html>

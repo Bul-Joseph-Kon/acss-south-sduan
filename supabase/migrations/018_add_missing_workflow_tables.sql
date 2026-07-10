@@ -1,0 +1,252 @@
+-- ================================================================
+-- ADD MISSING WORKFLOW TABLES
+-- ================================================================
+
+-- Enable pgcrypto extension for gen_random_uuid() (Supabase default)
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- ================================================================
+-- ESCALATED CASES TABLE
+-- ================================================================
+
+CREATE TABLE IF NOT EXISTS escalated_cases (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
+    
+    escalated_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    escalated_to UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    
+    escalation_reason TEXT NOT NULL,
+    escalation_type TEXT CHECK (escalation_type IN ('inspection', 'valuation', 'compliance', 'other')),
+    
+    priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
+    
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'in_review', 'resolved', 'rejected')),
+    
+    resolution_notes TEXT,
+    resolved_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    resolved_at TIMESTAMP WITH TIME ZONE,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_escalated_cases_application_id ON escalated_cases(application_id);
+CREATE INDEX IF NOT EXISTS idx_escalated_cases_escalated_by ON escalated_cases(escalated_by);
+CREATE INDEX IF NOT EXISTS idx_escalated_cases_status ON escalated_cases(status);
+CREATE INDEX IF NOT EXISTS idx_escalated_cases_priority ON escalated_cases(priority);
+
+-- ================================================================
+-- RISK ASSESSMENTS TABLE
+-- ================================================================
+
+CREATE TABLE IF NOT EXISTS risk_assessments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
+    
+    overall_score NUMERIC,
+    risk_level TEXT CHECK (risk_level IN ('low', 'medium', 'high', 'critical')),
+    
+    fraud_score NUMERIC,
+    compliance_score NUMERIC,
+    valuation_score NUMERIC,
+    
+    risk_factors JSONB DEFAULT '{}',
+    recommendations JSONB DEFAULT '[]',
+    
+    assessed_by TEXT DEFAULT 'ai',
+    assessed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_risk_assessments_application_id ON risk_assessments(application_id);
+CREATE INDEX IF NOT EXISTS idx_risk_assessments_risk_level ON risk_assessments(risk_level);
+CREATE INDEX IF NOT EXISTS idx_risk_assessments_assessed_at ON risk_assessments(assessed_at DESC);
+
+-- ================================================================
+-- AI VALIDATION RESULTS TABLE
+-- ================================================================
+
+-- Check if table exists, if not create it
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'ai_validation_results') THEN
+        CREATE TABLE ai_validation_results (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
+            
+            validation_type TEXT CHECK (validation_type IN ('ocr', 'document_verification', 'hs_code_validation', 'fraud_detection', 'compliance_check')),
+            
+            status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'passed', 'failed', 'warning')),
+            
+            confidence_score NUMERIC,
+            
+            results JSONB DEFAULT '{}',
+            errors JSONB DEFAULT '[]',
+            warnings JSONB DEFAULT '[]',
+            
+            processing_time_ms INTEGER,
+            
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+    END IF;
+END $$;
+
+-- Add missing columns if table exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'ai_validation_results') THEN
+        -- Add validation_type column if it doesn't exist
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'ai_validation_results'::regclass AND attname = 'validation_type') THEN
+            ALTER TABLE ai_validation_results ADD COLUMN validation_type TEXT CHECK (validation_type IN ('ocr', 'document_verification', 'hs_code_validation', 'fraud_detection', 'compliance_check'));
+        END IF;
+        
+        -- Add status column if it doesn't exist
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'ai_validation_results'::regclass AND attname = 'status') THEN
+            ALTER TABLE ai_validation_results ADD COLUMN status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'passed', 'failed', 'warning'));
+        END IF;
+        
+        -- Add confidence_score column if it doesn't exist
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'ai_validation_results'::regclass AND attname = 'confidence_score') THEN
+            ALTER TABLE ai_validation_results ADD COLUMN confidence_score NUMERIC;
+        END IF;
+        
+        -- Add results column if it doesn't exist
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'ai_validation_results'::regclass AND attname = 'results') THEN
+            ALTER TABLE ai_validation_results ADD COLUMN results JSONB DEFAULT '{}';
+        END IF;
+        
+        -- Add errors column if it doesn't exist
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'ai_validation_results'::regclass AND attname = 'errors') THEN
+            ALTER TABLE ai_validation_results ADD COLUMN errors JSONB DEFAULT '[]';
+        END IF;
+        
+        -- Add warnings column if it doesn't exist
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'ai_validation_results'::regclass AND attname = 'warnings') THEN
+            ALTER TABLE ai_validation_results ADD COLUMN warnings JSONB DEFAULT '[]';
+        END IF;
+        
+        -- Add processing_time_ms column if it doesn't exist
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'ai_validation_results'::regclass AND attname = 'processing_time_ms') THEN
+            ALTER TABLE ai_validation_results ADD COLUMN processing_time_ms INTEGER;
+        END IF;
+        
+        -- Add updated_at column if it doesn't exist
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'ai_validation_results'::regclass AND attname = 'updated_at') THEN
+            ALTER TABLE ai_validation_results ADD COLUMN updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+        END IF;
+    END IF;
+END $$;
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_ai_validation_results_application_id ON ai_validation_results(application_id);
+CREATE INDEX IF NOT EXISTS idx_ai_validation_results_validation_type ON ai_validation_results(validation_type);
+CREATE INDEX IF NOT EXISTS idx_ai_validation_results_status ON ai_validation_results(status);
+
+-- ================================================================
+-- CVET CERTIFICATES TABLE
+-- ================================================================
+
+CREATE TABLE IF NOT EXISTS cvet_certificates (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
+    
+    certificate_number TEXT UNIQUE NOT NULL,
+    qr_code TEXT,
+    
+    issued_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    issued_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    valid_from DATE,
+    valid_until DATE,
+    
+    certificate_data JSONB DEFAULT '{}',
+    
+    status TEXT DEFAULT 'active' CHECK (status IN ('active', 'revoked', 'expired')),
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_cvet_certificates_application_id ON cvet_certificates(application_id);
+CREATE INDEX IF NOT EXISTS idx_cvet_certificates_certificate_number ON cvet_certificates(certificate_number);
+CREATE INDEX IF NOT EXISTS idx_cvet_certificates_status ON cvet_certificates(status);
+
+-- ================================================================
+-- CARGO RELEASE DOCUMENTS TABLE
+-- ================================================================
+
+CREATE TABLE IF NOT EXISTS cargo_release_documents (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
+    
+    release_number TEXT UNIQUE NOT NULL,
+    release_order_number TEXT UNIQUE,
+    
+    port_of_release TEXT,
+    release_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    released_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    
+    cargo_description TEXT,
+    quantity NUMERIC,
+    unit TEXT,
+    
+    release_conditions JSONB DEFAULT '{}',
+    
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'released', 'on_hold', 'cancelled')),
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_cargo_release_documents_application_id ON cargo_release_documents(application_id);
+CREATE INDEX IF NOT EXISTS idx_cargo_release_documents_release_number ON cargo_release_documents(release_number);
+CREATE INDEX IF NOT EXISTS idx_cargo_release_documents_status ON cargo_release_documents(status);
+
+-- ================================================================
+-- INVOICES TABLE
+-- ================================================================
+
+CREATE TABLE IF NOT EXISTS invoices (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID REFERENCES applications(id) ON DELETE CASCADE,
+    
+    invoice_number TEXT UNIQUE NOT NULL,
+    
+    subtotal NUMERIC NOT NULL,
+    tax_amount NUMERIC NOT NULL,
+    total_amount NUMERIC NOT NULL,
+    currency TEXT DEFAULT 'SSP',
+    
+    due_date DATE,
+    
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'partial', 'paid', 'overdue', 'cancelled')),
+    
+    items JSONB DEFAULT '[]',
+    
+    generated_by UUID REFERENCES profiles(id) ON DELETE SET NULL,
+    generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    paid_at TIMESTAMP WITH TIME ZONE,
+    
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_invoices_application_id ON invoices(application_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_invoice_number ON invoices(invoice_number);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
+CREATE INDEX IF NOT EXISTS idx_invoices_due_date ON invoices(due_date);
+
+-- ================================================================
+-- END OF MIGRATION
+-- ================================================================

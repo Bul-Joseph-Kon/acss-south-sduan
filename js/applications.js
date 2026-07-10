@@ -619,10 +619,15 @@ export async function fetchApplicationsForRole(role, options = {}) {
     if (!filters.status) {
         switch (role) {
             case 'trader':
-            case 'agent':
                 // See their own applications
                 if (profile && !options.includeAll) {
                     filters.user_id = profile.id;
+                }
+                break;
+            case 'agent':
+                // See applications where they are the agent
+                if (profile && !options.includeAll) {
+                    filters.agent_id = profile.id;
                 }
                 break;
             case 'officer':

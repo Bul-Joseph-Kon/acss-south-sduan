@@ -2,11 +2,12 @@
 // SUPABASE CONFIGURATION
 // ================================================================
 // Supabase Project: https://avpoufxsjiecbsxvngip.supabase.co
+// Credentials loaded from environment variables for security
 // ================================================================
 
 export const SUPABASE_CONFIG = {
-    url: 'https://avpoufxsjiecbsxvngip.supabase.co',
-    key: 'sb_publishable_XZ7BUTHNhF1ojqoxlJq7Bg_cqn9o8HE',
+    url: import.meta.env.VITE_SUPABASE_URL || 'https://avpoufxsjiecbsxvngip.supabase.co',
+    key: import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_XZ7BUTHNhF1ojqoxlJq7Bg_cqn9o8HE',
     
     // Storage buckets
     buckets: {

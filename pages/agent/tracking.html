@@ -70,127 +70,23 @@
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex flex-wrap gap-3">
-                            <input type="text" class="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Enter declaration reference number..." value="CV-2026-0042" />
+                            <input type="text" class="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Enter declaration reference number..." />
                             <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition">Track</button>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="text-xl font-bold">CV-2026-0042</h3>
-                                <p class="text-sm text-gray-500">John Trading Co. · Electronics · $25,000</p>
-                            </div>
-                            <span class="status-badge status-review">Under Review</span>
-                        </div>
-
-                        <div class="mt-4">
-                            <div class="flex justify-between text-xs text-gray-500 mb-1">
-                                <span>Progress</span>
-                                <span>62%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width:62%"></div>
-                            </div>
-                        </div>
-
-                        <div class="mt-4 track-timeline">
-                            <div class="track-item completed">
-                                <div class="track-status">✓ Completed</div>
-                                <div class="track-title">Declarant Information</div>
-                                <div class="track-date">June 23, 2026 09:00</div>
-                            </div>
-                            <div class="track-item completed">
-                                <div class="track-status">✓ Completed</div>
-                                <div class="track-title">Shipment Information</div>
-                                <div class="track-date">June 23, 2026 09:15</div>
-                            </div>
-                            <div class="track-item completed">
-                                <div class="track-status">✓ Completed</div>
-                                <div class="track-title">Goods Information</div>
-                                <div class="track-date">June 23, 2026 09:30</div>
-                            </div>
-                            <div class="track-item completed">
-                                <div class="track-status">✓ Completed</div>
-                                <div class="track-title">Documents Uploaded</div>
-                                <div class="track-date">June 23, 2026 09:45</div>
-                            </div>
-                            <div class="track-item current">
-                                <div class="track-status">● In Progress</div>
-                                <div class="track-title">AI Validation</div>
-                                <div class="track-date">Started: June 23, 2026 10:00</div>
-                            </div>
-                            <div class="track-item">
-                                <div class="track-status">○ Pending</div>
-                                <div class="track-title">Duty Assessment</div>
-                                <div class="track-date">Awaiting</div>
-                            </div>
-                            <div class="track-item">
-                                <div class="track-status">○ Pending</div>
-                                <div class="track-title">Payment Processing</div>
-                                <div class="track-date">Awaiting</div>
-                            </div>
-                            <div class="track-item">
-                                <div class="track-status">○ Pending</div>
-                                <div class="track-title">Certificate Generation</div>
-                                <div class="track-date">Awaiting</div>
-                            </div>
-                        </div>
-
-                        <div class="track-footer">
-                            <div class="flex items-center gap-4">
-                                <div class="qr-container">
-                                    <div id="qrcode"></div>
-                                </div>
-                                <div class="text-left">
-                                    <p class="text-xs font-semibold text-gray-700">SCAN TO TRACK</p>
-                                    <p class="text-xs text-gray-500">Scan this QR code to track declaration status</p>
-                                    <p class="text-xs text-gray-400 mt-1">Declaration: CV-2026-0042</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-xs text-gray-500">Tracked by</p>
-                                <p class="font-semibold text-sm">SSRA Customs Agency</p>
-                                <p class="text-xs text-gray-400">Clearing Agent</p>
-                            </div>
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm" id="trackingResult">
+                        <div class="text-center py-8">
+                            <i class="ri-search-line text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">Enter a declaration reference number above to track its status</p>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                        <h3 class="font-bold text-sm mb-3">Declaration Summary</h3>
-                        <div class="grid md:grid-cols-4 gap-3">
-                            <div><span class="text-xs text-gray-500">Reference</span><p class="font-semibold text-sm">CV-2026-0042</p></div>
-                            <div><span class="text-xs text-gray-500">Total Value</span><p class="font-semibold text-sm">$27,500.00</p></div>
-                            <div><span class="text-xs text-gray-500">Total Duty</span><p class="font-semibold text-sm">$7,850.00</p></div>
-                            <div><span class="text-xs text-gray-500">Status</span><p class="font-semibold text-sm text-yellow-600">Under Review</p></div>
-                        </div>
-                    </div>
                 </main>
             </div>
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var qrData = JSON.stringify({
-                declaration: 'CV-2026-0042',
-                importer: 'John Trading Co.',
-                goods: 'Electronic Components',
-                status: 'Under Review',
-                progress: '62%',
-                issuer: 'SSRA Customs'
-            });
-            
-            var qrContainer = document.getElementById('qrcode');
-            var qr = new QRCode(qrContainer, {
-                text: qrData,
-                width: 80,
-                height: 80,
-                colorDark: '#1e3a5f',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            });
-        });
-
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
                 document.getElementById('profileDropdown').classList.remove('open');

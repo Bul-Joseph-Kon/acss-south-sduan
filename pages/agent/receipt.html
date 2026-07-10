@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Agent Receipt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+        .receipt-card { background: white; border: 2px solid #e5e7eb; border-radius: 0.75rem; padding: 2rem; position: relative; }
+        .receipt-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 8px; background: repeating-linear-gradient(45deg, #1e3a5f, #1e3a5f 10px, #2a5f8f 10px, #2a5f8f 20px); border-radius: 0.75rem 0.75rem 0 0; }
+        .receipt-stamp { border: 3px solid #1e3a5f; border-radius: 50%; padding: 0.5rem 1rem; transform: rotate(-15deg); position: absolute; top: 1rem; right: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="agent-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">🧾 Payment Receipt</h2>
+                            <p class="opacity-90 text-sm">Download and print payment receipts</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="receipt-card max-w-2xl mx-auto">
+                        <div class="receipt-stamp text-center">
+                            <div class="text-xs font-bold text-blue-900">PAID</div>
+                        </div>
+
+                        <div class="text-center mb-6">
+                            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i class="ri-government-line text-3xl text-blue-600"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-800">South Sudan Revenue Authority</h3>
+                            <p class="text-sm text-gray-500">Customs & Excise Department</p>
+                        </div>
+
+                        <div class="border-t border-b border-gray-200 py-4 mb-4">
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p class="text-gray-500">Receipt Number</p>
+                                    <p class="font-semibold" id="receiptNumber">RCT-2024-001</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Payment Date</p>
+                                    <p class="font-semibold" id="paymentDate">January 20, 2024</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Application Number</p>
+                                    <p class="font-semibold" id="applicationNumber">CVET-123456</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Payment Method</p>
+                                    <p class="font-semibold" id="paymentMethod">Bank Transfer</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center py-2 border-b border-dashed border-gray-300">
+                                <span class="text-gray-600">Customs Duty</span>
+                                <span class="font-semibold" id="customsDuty">50,000.00 SSP</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-dashed border-gray-300">
+                                <span class="text-gray-600">VAT (15%)</span>
+                                <span class="font-semibold" id="vatAmount">7,500.00 SSP</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-dashed border-gray-300">
+                                <span class="text-gray-600">Processing Fee</span>
+                                <span class="font-semibold" id="processingFee">2,500.00 SSP</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-dashed border-gray-300">
+                                <span class="text-gray-600">Inspection Fee</span>
+                                <span class="font-semibold" id="inspectionFee">1,000.00 SSP</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center py-3 bg-gray-50 rounded-lg px-4">
+                            <span class="font-bold text-lg">Total Paid</span>
+                            <span class="font-bold text-xl text-green-600" id="totalPaid">61,000.00 SSP</span>
+                        </div>
+
+                        <div class="mt-6 text-center text-xs text-gray-500">
+                            <p>This receipt serves as proof of payment for customs duties and fees.</p>
+                            <p class="mt-1">Generated by SSRA Customs System</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center gap-3">
+                        <button id="downloadPdfBtn" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2">
+                            <i class="ri-file-pdf-line"></i> Download PDF
+                        </button>
+                        <button id="printBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2">
+                            <i class="ri-printer-line"></i> Print Receipt
+                        </button>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+
+        document.getElementById('printBtn').addEventListener('click', () => {
+            window.print();
+        });
+
+        document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+            alert('PDF download functionality would be implemented here');
+        });
+    </script>
+
+    <script type="module" src="../../js/agent-sidebar.js"></script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { getApplicationPayments } from '../../js/agent-declaration-service.js';
+
+        async function initPage() {
+            console.log('=== INITIALIZING RECEIPT PAGE ===');
+            const role = 'agent';
+            
+            const hasAccess = await checkPageAuth(role);
+            if (!hasAccess) {
+                console.log('Access denied, redirecting...');
+                return;
+            }
+
+            const { user, profile } = await loadCurrentUserProfile();
+            
+            if (profile) {
+                const displayName = profile.full_name || user?.email || 'User';
+                const displayRole = 'Clearing Agent';
+                
+                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
+                if (nameEl) nameEl.textContent = displayName;
+                
+                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
+                if (roleEl) roleEl.textContent = displayRole;
+            }
+
+            const handleLogout = async (e) => {
+                e.preventDefault();
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
+
+            const dropdownSignOut = document.getElementById('dropdownSignOut');
+            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+
+            // Load receipt data from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const applicationId = urlParams.get('application_id');
+            
+            if (applicationId) {
+                await loadReceiptData(applicationId);
+            }
+        }
+
+        async function loadReceiptData(applicationId) {
+            try {
+                const result = await getApplicationPayments(applicationId);
+                if (result.success && result.data && result.data.length > 0) {
+                    const payment = result.data.find(p => p.status === 'completed');
+                    if (payment) {
+                        document.getElementById('receiptNumber').textContent = payment.receipt_number || payment.payment_number || 'N/A';
+                        document.getElementById('paymentDate').textContent = payment.paid_at ? new Date(payment.paid_at).toLocaleDateString() : 'N/A';
+                        document.getElementById('paymentMethod').textContent = payment.payment_method || 'Bank Transfer';
+                        document.getElementById('totalPaid').textContent = `${payment.amount?.toLocaleString() || '0'} SSP`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading receipt data:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            initPage();
+        }
+    </script>
+</body>
+</html>

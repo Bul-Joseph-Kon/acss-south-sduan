@@ -170,7 +170,7 @@ CREATE POLICY "Administrators can update system settings"
 DROP POLICY IF EXISTS "Administrators can insert system settings" ON public.system_settings;
 CREATE POLICY "Administrators can insert system settings"
     ON public.system_settings FOR INSERT
-    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Services
 DROP POLICY IF EXISTS "Administrators can view all services" ON public.services;
@@ -181,7 +181,7 @@ CREATE POLICY "Administrators can view all services"
 DROP POLICY IF EXISTS "Administrators can insert services" ON public.services;
 CREATE POLICY "Administrators can insert services"
     ON public.services FOR INSERT
-    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can update services" ON public.services;
 CREATE POLICY "Administrators can update services"
@@ -192,7 +192,8 @@ CREATE POLICY "Administrators can update services"
 DROP POLICY IF EXISTS "Administrators can modify departments" ON public.departments;
 CREATE POLICY "Administrators can modify departments"
     ON public.departments FOR ALL
-    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()))
+    WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Offices
 DROP POLICY IF EXISTS "Administrators can view all offices" ON public.offices;
@@ -203,7 +204,8 @@ CREATE POLICY "Administrators can view all offices"
 DROP POLICY IF EXISTS "Administrators can modify offices" ON public.offices;
 CREATE POLICY "Administrators can modify offices"
     ON public.offices FOR ALL
-    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()))
+    WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Countries
 DROP POLICY IF EXISTS "Administrators can view all countries" ON public.countries;
@@ -214,7 +216,8 @@ CREATE POLICY "Administrators can view all countries"
 DROP POLICY IF EXISTS "Administrators can modify countries" ON public.countries;
 CREATE POLICY "Administrators can modify countries"
     ON public.countries FOR ALL
-    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()))
+    WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Ports
 DROP POLICY IF EXISTS "Administrators can view all ports" ON public.ports;
@@ -225,7 +228,8 @@ CREATE POLICY "Administrators can view all ports"
 DROP POLICY IF EXISTS "Administrators can modify ports" ON public.ports;
 CREATE POLICY "Administrators can modify ports"
     ON public.ports FOR ALL
-    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()))
+    WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Tariff codes
 DROP POLICY IF EXISTS "Administrators can view all tariff codes" ON public.tariff_codes;
@@ -236,7 +240,8 @@ CREATE POLICY "Administrators can view all tariff codes"
 DROP POLICY IF EXISTS "Administrators can modify tariff codes" ON public.tariff_codes;
 CREATE POLICY "Administrators can modify tariff codes"
     ON public.tariff_codes FOR ALL
-    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()))
+    WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Currencies
 DROP POLICY IF EXISTS "Administrators can view all currencies" ON public.currencies;
@@ -247,13 +252,14 @@ CREATE POLICY "Administrators can view all currencies"
 DROP POLICY IF EXISTS "Administrators can modify currencies" ON public.currencies;
 CREATE POLICY "Administrators can modify currencies"
     ON public.currencies FOR ALL
-    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()))
+    WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Roles
 DROP POLICY IF EXISTS "Administrators can insert roles" ON public.roles;
 CREATE POLICY "Administrators can insert roles"
     ON public.roles FOR INSERT
-    USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
+    WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can update roles" ON public.roles;
 CREATE POLICY "Administrators can update roles"

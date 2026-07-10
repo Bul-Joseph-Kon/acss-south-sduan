@@ -73,15 +73,15 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div class="form-group">
                                 <label>Goods Description <span class="text-red-500">*</span></label>
-                                <input type="text" class="form-input" placeholder="Enter goods description" value="Industrial Machinery" />
+                                <input type="text" class="form-input" placeholder="Enter goods description" />
                             </div>
                             <div class="form-group">
                                 <label>HS Code <span class="text-red-500">*</span> <span class="ai-badge-sm">AI Recommend</span></label>
-                                <input type="text" class="form-input ai-highlight" placeholder="Enter HS Code" value="8479.89" />
+                                <input type="text" class="form-input ai-highlight" placeholder="Enter HS Code" />
                             </div>
                             <div class="form-group">
                                 <label>Quantity <span class="text-red-500">*</span></label>
-                                <input type="number" class="form-input" placeholder="Enter quantity" value="5" />
+                                <input type="number" class="form-input" placeholder="Enter quantity" />
                             </div>
                             <div class="form-group">
                                 <label>Unit of Measurement <span class="text-red-500">*</span></label>
@@ -94,23 +94,23 @@
                             </div>
                             <div class="form-group">
                                 <label>Gross Weight (kg) <span class="text-red-500">*</span></label>
-                                <input type="number" class="form-input" placeholder="Enter gross weight" value="2100" />
+                                <input type="number" class="form-input" placeholder="Enter gross weight" />
                             </div>
                             <div class="form-group">
                                 <label>Net Weight (kg) <span class="text-red-500">*</span></label>
-                                <input type="number" class="form-input" placeholder="Enter net weight" value="2000" />
+                                <input type="number" class="form-input" placeholder="Enter net weight" />
                             </div>
                             <div class="form-group">
                                 <label>Unit Value (SSP) <span class="text-red-500">*</span></label>
-                                <input type="number" class="form-input" placeholder="Enter unit value in SSP" value="12000000" />
+                                <input type="number" class="form-input" placeholder="Enter unit value in SSP" />
                             </div>
                             <div class="form-group">
                                 <label>Customs Value (SSP) <span class="ai-badge-sm">AI Estimate</span></label>
-                                <input type="text" class="form-input ai-highlight" value="SSP 60,000,000" />
+                                <input type="text" class="form-input ai-highlight" placeholder="Customs value" />
                             </div>
                             <div class="form-group">
                                 <label>CIF Value (SSP) <span class="ai-badge-sm">AI Estimate</span></label>
-                                <input type="text" class="form-input ai-highlight" value="SSP 66,000,000" />
+                                <input type="text" class="form-input ai-highlight" placeholder="CIF value" />
                             </div>
                             <div class="form-group">
                                 <label>Currency <span class="text-red-500">*</span></label>
@@ -127,9 +127,9 @@
                             <a href="shipment-information.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
                                 <i class="ri-arrow-left-line"></i> Previous
                             </a>
-                            <a href="documents.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <button id="saveContinueBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
                                 Save & Continue <i class="ri-arrow-right-line"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </main>
@@ -151,6 +151,12 @@
         import { checkPageAuth } from '../../js/auth-check.js';
         import { signOut } from '../../js/auth.js';
         import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { 
+            saveDraft, 
+            loadDraft,
+            getCurrentApplication,
+            getDraftData 
+        } from '../../js/agent-declaration-service.js';
 
         async function initPage() {
             console.log('=== INITIALIZING AUTH GUARD ON MOCK PAGE ===');
@@ -207,6 +213,80 @@
         if (document.readyState === 'interactive' || document.readyState === 'complete') {
             initPage();
         }
+
+        // ================================================================
+        // FORM HANDLING - GOODS INFORMATION
+        // ================================================================
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const applicationId = urlParams.get('application_id');
+
+        if (applicationId) {
+            loadExistingDraft(applicationId);
+        }
+
+        async function loadExistingDraft(appId) {
+            try {
+                const result = await loadDraft(appId);
+                if (result.success && result.data) {
+                    const draft = getDraftData();
+                    if (draft.goods) {
+                        const fields = draft.goods;
+                        document.querySelector('input[placeholder="Enter goods description"]').value = fields.goods_description || '';
+                        document.querySelector('input[placeholder="Enter HS Code"]').value = fields.hs_code || '';
+                        document.querySelector('input[type="number"]').value = fields.quantity || '';
+                        document.querySelector('select').value = fields.unit_of_measurement || 'Kg';
+                        document.querySelectorAll('input[type="number"]')[1].value = fields.gross_weight || '';
+                        document.querySelectorAll('input[type="number"]')[2].value = fields.net_weight || '';
+                        document.querySelectorAll('input[type="number"]')[3].value = fields.unit_value || '';
+                        document.querySelectorAll('input[type="text"]')[0].value = fields.customs_value || '';
+                        document.querySelectorAll('input[type="text"]')[1].value = fields.cif_value || '';
+                        document.querySelectorAll('select')[1].value = fields.currency || 'SSP (South Sudanese Pound)';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading draft:', error);
+            }
+        }
+
+        document.getElementById('saveContinueBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            if (!applicationId) {
+                alert('No application ID found. Please start from the beginning.');
+                window.location.href = 'declarant-information.html';
+                return;
+            }
+
+            const goodsData = {
+                goods_description: document.querySelector('input[placeholder="Enter goods description"]').value,
+                hs_code: document.querySelector('input[placeholder="Enter HS Code"]').value,
+                quantity: document.querySelector('input[type="number"]').value,
+                unit_of_measurement: document.querySelector('select').value,
+                gross_weight: document.querySelectorAll('input[type="number"]')[1].value,
+                net_weight: document.querySelectorAll('input[type="number"]')[2].value,
+                unit_value: document.querySelectorAll('input[type="number"]')[3].value,
+                customs_value: document.querySelectorAll('input[type="text"]')[0].value,
+                cif_value: document.querySelectorAll('input[type="text"]')[1].value,
+                currency: document.querySelectorAll('select')[1].value
+            };
+
+            const required = ['goods_description', 'hs_code', 'quantity', 'unit_of_measurement', 'gross_weight', 'net_weight', 'unit_value', 'currency'];
+            const missing = required.filter(field => !goodsData[field]);
+            
+            if (missing.length > 0) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const result = await saveDraft('goods', goodsData);
+            
+            if (result.success) {
+                window.location.href = `documents.html?application_id=${applicationId}`;
+            } else {
+                alert('Error saving draft: ' + result.error);
+            }
+        });
     </script>
 </body></html>
 

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · Agent Invoice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
+        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+        .profile-dropdown .danger { color: #dc2626; }
+        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+        .invoice-table th { background: #f8fafc; font-weight: 600; text-align: left; padding: 0.75rem; border-bottom: 2px solid #e5e7eb; }
+        .invoice-table td { padding: 0.75rem; border-bottom: 1px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-100">
+        <div class="max-w-7xl mx-auto px-4 py-5">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <aside class="lg:w-72 flex-shrink-0">
+                    <div id="agent-sidebar"></div>
+                </aside>
+
+                <main class="flex-1 space-y-5">
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold tracking-tight">📄 Invoice Details</h2>
+                            <p class="opacity-90 text-sm">View and manage payment invoices</p>
+                        </div>
+                        <div class="relative">
+                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
+                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
+                                <i class="ri-arrow-down-s-line text-sm"></i>
+                            </button>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+                                <div class="divider"></div>
+                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-lg">Invoice Information</h3>
+                            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700" id="invoiceStatus">Pending Payment</span>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <p class="text-sm text-gray-500">Invoice Number</p>
+                                <p class="font-semibold" id="invoiceNumber">INV-2024-001</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Application Number</p>
+                                <p class="font-semibold" id="applicationNumber">CVET-123456</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Issue Date</p>
+                                <p class="font-semibold" id="issueDate">January 15, 2024</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Due Date</p>
+                                <p class="font-semibold" id="dueDate">January 30, 2024</p>
+                            </div>
+                        </div>
+
+                        <table class="w-full invoice-table mb-6">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th class="text-right">Amount (SSP)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoiceItems">
+                                <tr>
+                                    <td>Customs Duty</td>
+                                    <td class="text-right">50,000.00</td>
+                                </tr>
+                                <tr>
+                                    <td>VAT (15%)</td>
+                                    <td class="text-right">7,500.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Processing Fee</td>
+                                    <td class="text-right">2,500.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Inspection Fee</td>
+                                    <td class="text-right">1,000.00</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td class="font-bold">Total</td>
+                                    <td class="text-right font-bold text-lg" id="totalAmount">61,000.00 SSP</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <div class="flex gap-3">
+                            <button id="payNowBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+                                <i class="ri-bank-card-line"></i> Pay Now
+                            </button>
+                            <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition flex items-center justify-center gap-2">
+                                <i class="ri-download-line"></i> Download Invoice
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+                        <h3 class="font-bold text-lg mb-4">Payment History</h3>
+                        <div id="paymentHistory" class="space-y-3">
+                            <div class="text-sm text-gray-500 text-center py-4">No payment history available</div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+                document.getElementById('profileDropdown').classList.remove('open');
+            }
+        });
+    </script>
+
+    <script type="module" src="../../js/agent-sidebar.js"></script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { checkPageAuth } from '../../js/auth-check.js';
+        import { signOut } from '../../js/auth.js';
+        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { getApplicationPayments } from '../../js/agent-declaration-service.js';
+
+        async function initPage() {
+            console.log('=== INITIALIZING INVOICE PAGE ===');
+            const role = 'agent';
+            
+            const hasAccess = await checkPageAuth(role);
+            if (!hasAccess) {
+                console.log('Access denied, redirecting...');
+                return;
+            }
+
+            const { user, profile } = await loadCurrentUserProfile();
+            
+            if (profile) {
+                const displayName = profile.full_name || user?.email || 'User';
+                const displayRole = 'Clearing Agent';
+                
+                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
+                if (nameEl) nameEl.textContent = displayName;
+                
+                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
+                if (roleEl) roleEl.textContent = displayRole;
+            }
+
+            const handleLogout = async (e) => {
+                e.preventDefault();
+                const result = await signOut();
+                if (result.success) {
+                    window.location.href = '../../auth/login.html';
+                }
+            };
+
+            const signOutBtn = document.getElementById('signOutBtn');
+            if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
+
+            const dropdownSignOut = document.getElementById('dropdownSignOut');
+            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+
+            // Load invoice data from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const applicationId = urlParams.get('application_id');
+            
+            if (applicationId) {
+                await loadInvoiceData(applicationId);
+            }
+
+            // Pay Now button
+            document.getElementById('payNowBtn').addEventListener('click', () => {
+                window.location.href = `payment.html?application_id=${applicationId}`;
+            });
+        }
+
+        async function loadInvoiceData(applicationId) {
+            try {
+                const result = await getApplicationPayments(applicationId);
+                if (result.success && result.data && result.data.length > 0) {
+                    const payment = result.data[0];
+                    document.getElementById('invoiceNumber').textContent = payment.payment_number || 'N/A';
+                    document.getElementById('invoiceStatus').textContent = payment.status === 'completed' ? 'Paid' : 'Pending';
+                    document.getElementById('invoiceStatus').className = payment.status === 'completed' 
+                        ? 'px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700'
+                        : 'px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700';
+                    
+                    // Update payment history
+                    const historyEl = document.getElementById('paymentHistory');
+                    historyEl.innerHTML = result.data.map(p => `
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div>
+                                <p class="font-semibold text-sm">${p.payment_number}</p>
+                                <p class="text-xs text-gray-500">${p.paid_at ? new Date(p.paid_at).toLocaleDateString() : 'Not paid'}</p>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold ${p.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                                ${p.status}
+                            </span>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading invoice data:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            initPage();
+        }
+    </script>
+</body>
+</html>

@@ -71,11 +71,11 @@
                         <div class="grid md:grid-cols-2 gap-4">
                             <div class="form-group">
                                 <label>Consignment Number <span class="text-red-500">*</span></label>
-                                <input type="text" class="form-input" placeholder="Enter consignment number" value="CON-2026-0042" />
+                                <input type="text" class="form-input" placeholder="Enter consignment number" />
                             </div>
                             <div class="form-group">
                                 <label>Manifest Number <span class="text-red-500">*</span></label>
-                                <input type="text" class="form-input" placeholder="Enter manifest number" value="MAN-2026-0018" />
+                                <input type="text" class="form-input" placeholder="Enter manifest number" />
                             </div>
                             <div class="form-group">
                                 <label>Port of Entry <span class="text-red-500">*</span></label>
@@ -87,11 +87,11 @@
                             </div>
                             <div class="form-group">
                                 <label>Country of Origin <span class="text-red-500">*</span></label>
-                                <input type="text" class="form-input" placeholder="Enter country of origin" value="Germany" />
+                                <input type="text" class="form-input" placeholder="Enter country of origin" />
                             </div>
                             <div class="form-group">
                                 <label>Destination <span class="text-red-500">*</span></label>
-                                <input type="text" class="form-input" placeholder="Enter destination" value="Juba, South Sudan" />
+                                <input type="text" class="form-input" placeholder="Enter destination" />
                             </div>
                             <div class="form-group">
                                 <label>Transport Mode <span class="text-red-500">*</span></label>
@@ -104,19 +104,19 @@
                             </div>
                             <div class="form-group">
                                 <label>Expected Arrival Date <span class="text-red-500">*</span></label>
-                                <input type="date" class="form-input" value="2026-06-25" />
+                                <input type="date" class="form-input" />
                             </div>
                             <div class="form-group">
                                 <label>Place of Loading</label>
-                                <input type="text" class="form-input" placeholder="Enter place of loading" value="Hamburg, Germany" />
+                                <input type="text" class="form-input" placeholder="Enter place of loading" />
                             </div>
                             <div class="form-group">
                                 <label>Shipping Line</label>
-                                <input type="text" class="form-input" placeholder="Enter shipping line" value="DHL Aviation" />
+                                <input type="text" class="form-input" placeholder="Enter shipping line" />
                             </div>
                             <div class="form-group">
                                 <label>Vessel/Flight Number</label>
-                                <input type="text" class="form-input" placeholder="Enter vessel or flight number" value="LH-1234" />
+                                <input type="text" class="form-input" placeholder="Enter vessel or flight number" />
                             </div>
                         </div>
 
@@ -124,9 +124,9 @@
                             <a href="declarant-information.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
                                 <i class="ri-arrow-left-line"></i> Previous
                             </a>
-                            <a href="goods-information.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <button id="saveContinueBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
                                 Save & Continue <i class="ri-arrow-right-line"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </main>
@@ -148,6 +148,12 @@
         import { checkPageAuth } from '../../js/auth-check.js';
         import { signOut } from '../../js/auth.js';
         import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { 
+            saveDraft, 
+            loadDraft,
+            getCurrentApplication,
+            getDraftData 
+        } from '../../js/agent-declaration-service.js';
 
         async function initPage() {
             console.log('=== INITIALIZING AUTH GUARD ON MOCK PAGE ===');
@@ -204,6 +210,80 @@
         if (document.readyState === 'interactive' || document.readyState === 'complete') {
             initPage();
         }
+
+        // ================================================================
+        // FORM HANDLING - SHIPMENT INFORMATION
+        // ================================================================
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const applicationId = urlParams.get('application_id');
+
+        if (applicationId) {
+            loadExistingDraft(applicationId);
+        }
+
+        async function loadExistingDraft(appId) {
+            try {
+                const result = await loadDraft(appId);
+                if (result.success && result.data) {
+                    const draft = getDraftData();
+                    if (draft.shipment) {
+                        const fields = draft.shipment;
+                        document.querySelector('input[placeholder="Enter consignment number"]').value = fields.consignment_number || '';
+                        document.querySelector('input[placeholder="Enter manifest number"]').value = fields.manifest_number || '';
+                        document.querySelector('select').value = fields.port_of_entry || 'Juba';
+                        document.querySelector('input[placeholder="Enter country of origin"]').value = fields.country_of_origin || '';
+                        document.querySelector('input[placeholder="Enter destination"]').value = fields.destination || '';
+                        document.querySelectorAll('select')[1].value = fields.transport_mode || 'Air';
+                        document.querySelector('input[type="date"]').value = fields.expected_arrival_date || '';
+                        document.querySelectorAll('input[type="text"]')[4].value = fields.place_of_loading || '';
+                        document.querySelectorAll('input[type="text"]')[5].value = fields.shipping_line || '';
+                        document.querySelectorAll('input[type="text"]')[6].value = fields.vessel_flight_number || '';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading draft:', error);
+            }
+        }
+
+        document.getElementById('saveContinueBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            if (!applicationId) {
+                alert('No application ID found. Please start from the beginning.');
+                window.location.href = 'declarant-information.html';
+                return;
+            }
+
+            const shipmentData = {
+                consignment_number: document.querySelector('input[placeholder="Enter consignment number"]').value,
+                manifest_number: document.querySelector('input[placeholder="Enter manifest number"]').value,
+                port_of_entry: document.querySelector('select').value,
+                country_of_origin: document.querySelector('input[placeholder="Enter country of origin"]').value,
+                destination: document.querySelector('input[placeholder="Enter destination"]').value,
+                transport_mode: document.querySelectorAll('select')[1].value,
+                expected_arrival_date: document.querySelector('input[type="date"]').value,
+                place_of_loading: document.querySelectorAll('input[type="text"]')[4].value,
+                shipping_line: document.querySelectorAll('input[type="text"]')[5].value,
+                vessel_flight_number: document.querySelectorAll('input[type="text"]')[6].value
+            };
+
+            const required = ['consignment_number', 'manifest_number', 'port_of_entry', 'country_of_origin', 'destination', 'transport_mode', 'expected_arrival_date'];
+            const missing = required.filter(field => !shipmentData[field]);
+            
+            if (missing.length > 0) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            const result = await saveDraft('shipment', shipmentData);
+            
+            if (result.success) {
+                window.location.href = `goods-information.html?application_id=${applicationId}`;
+            } else {
+                alert('Error saving draft: ' + result.error);
+            }
+        });
     </script>
 </body></html>
 

@@ -365,28 +365,10 @@ function getUserStats() {
     };
 }
 
-// Initialize demo users if empty
-function initDemoUsers() {
-    var db = initializeDatabase();
-    if (db.users.length === 0) {
-        db.users = [
-            { id: 1, name: "John Importer", email: "john@importer.com", identifier: "TIN-TRD-001", password: "pass123", role: "trader", traderType: "importer", phone: "+211 912 000001", status: "active", createdAt: new Date().toISOString() },
-            { id: 2, name: "Sarah Exporter", email: "sarah@exporter.com", identifier: "TIN-TRD-002", password: "pass123", role: "trader", traderType: "exporter", phone: "+211 912 000002", status: "active", createdAt: new Date().toISOString() },
-            { id: 3, name: "Mike Clearing Agent", email: "mike@agent.com", identifier: "AGT-003", password: "pass123", role: "agent", traderType: null, phone: "+211 912 000003", status: "active", licenseNumber: "SSRA-AGT-001", createdAt: new Date().toISOString() },
-            { id: 4, name: "David Officer", email: "david@ssra.gov", identifier: "OFF-004", password: "pass123", role: "officer", traderType: null, phone: "+211 912 000004", status: "active", badgeNumber: "SSRA-OFF-001", createdAt: new Date().toISOString() },
-            { id: 5, name: "Grace Supervisor", email: "grace@ssra.gov", identifier: "SUP-005", password: "pass123", role: "supervisor", traderType: null, phone: "+211 912 000005", status: "active", badgeNumber: "SSRA-SUP-001", createdAt: new Date().toISOString() },
-            { id: 6, name: "Robert Manager", email: "robert@ssra.gov", identifier: "MGR-006", password: "pass123", role: "manager", traderType: null, phone: "+211 912 000006", status: "active", badgeNumber: "SSRA-MGR-001", createdAt: new Date().toISOString() },
-            { id: 7, name: "Admin User", email: "admin@ssra.gov", identifier: "ADMIN-007", password: "admin123", role: "admin", traderType: null, phone: "+211 912 000007", status: "active", createdAt: new Date().toISOString() }
-        ];
-        saveDatabase(db);
-    }
-}
-
 // Export functions for use in dashboards
 window.SSRA = {
     init: function() {
         initializeDatabase();
-        initDemoUsers();
     },
     getCurrentUser: getCurrentUser,
     getDatabase: initializeDatabase,

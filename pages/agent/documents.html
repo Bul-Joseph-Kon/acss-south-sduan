@@ -70,25 +70,29 @@
                     <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                         <h3 class="font-bold text-lg mb-4">Required Documents</h3>
                         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div class="doc-upload-box" onclick="alert('📄 Upload Packing List')">
+                            <div class="doc-upload-box" id="packingListBox" onclick="document.getElementById('packingListInput').click()">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
                                 <p class="font-medium text-sm mt-1">Packing List <span class="text-red-500">*</span></p>
-                                <p class="text-xs text-yellow-600">⏳ Pending</p>
+                                <p class="text-xs text-gray-400" id="packingListStatus">Not uploaded</p>
+                                <input type="file" id="packingListInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileUpload(this, 'packing_list')" />
                             </div>
-                            <div class="doc-upload-box" onclick="alert('📄 Upload Bill of Lading')">
+                            <div class="doc-upload-box" id="billOfLadingBox" onclick="document.getElementById('billOfLadingInput').click()">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
                                 <p class="font-medium text-sm mt-1">Bill of Lading <span class="text-red-500">*</span></p>
-                                <p class="text-xs text-yellow-600">⏳ Pending</p>
+                                <p class="text-xs text-gray-400" id="billOfLadingStatus">Not uploaded</p>
+                                <input type="file" id="billOfLadingInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileUpload(this, 'bill_of_lading')" />
                             </div>
-                            <div class="doc-upload-box" onclick="alert('📄 Upload Certificate of Origin')">
+                            <div class="doc-upload-box" id="certificateOfOriginBox" onclick="document.getElementById('certificateOfOriginInput').click()">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
                                 <p class="font-medium text-sm mt-1">Certificate of Origin <span class="text-red-500">*</span></p>
-                                <p class="text-xs text-gray-400">Not uploaded</p>
+                                <p class="text-xs text-gray-400" id="certificateOfOriginStatus">Not uploaded</p>
+                                <input type="file" id="certificateOfOriginInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileUpload(this, 'certificate_of_origin')" />
                             </div>
-                            <div class="doc-upload-box" onclick="alert('📄 Upload Import Permit')">
+                            <div class="doc-upload-box" id="importPermitBox" onclick="document.getElementById('importPermitInput').click()">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
                                 <p class="font-medium text-sm mt-1">Import Permit <span class="text-red-500">*</span></p>
-                                <p class="text-xs text-gray-400">Not uploaded</p>
+                                <p class="text-xs text-gray-400" id="importPermitStatus">Not uploaded</p>
+                                <input type="file" id="importPermitInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileUpload(this, 'import_permit')" />
                             </div>
                         </div>
 
@@ -96,9 +100,9 @@
                             <a href="goods-information.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
                                 <i class="ri-arrow-left-line"></i> Previous
                             </a>
-                            <a href="ai-assessment.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <button id="uploadContinueBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
                                 Upload & Continue <i class="ri-arrow-right-line"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </main>
@@ -120,6 +124,12 @@
         import { checkPageAuth } from '../../js/auth-check.js';
         import { signOut } from '../../js/auth.js';
         import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { 
+            saveDraft, 
+            loadDraft,
+            getCurrentApplication,
+            getDraftData 
+        } from '../../js/agent-declaration-service.js';
 
         async function initPage() {
             console.log('=== INITIALIZING AUTH GUARD ON MOCK PAGE ===');
@@ -176,6 +186,107 @@
         if (document.readyState === 'interactive' || document.readyState === 'complete') {
             initPage();
         }
+
+        // ================================================================
+        // FORM HANDLING - DOCUMENTS UPLOAD
+        // ================================================================
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const applicationId = urlParams.get('application_id');
+        let uploadedDocuments = {
+            packing_list: null,
+            bill_of_lading: null,
+            certificate_of_origin: null,
+            import_permit: null
+        };
+
+        if (applicationId) {
+            loadExistingDraft(applicationId);
+        }
+
+        async function loadExistingDraft(appId) {
+            try {
+                const result = await loadDraft(appId);
+                if (result.success && result.data) {
+                    const draft = getDraftData();
+                    if (draft.documents) {
+                        uploadedDocuments = draft.documents;
+                        updateDocumentUI();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading draft:', error);
+            }
+        }
+
+        window.handleFileUpload = function(input, docType) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Store file reference (in production, upload to Supabase Storage)
+            uploadedDocuments[docType] = {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                uploaded_at: new Date().toISOString()
+            };
+
+            // Update UI
+            const statusEl = document.getElementById(docType + 'Status');
+            const boxEl = document.getElementById(docType + 'Box');
+            if (statusEl) {
+                statusEl.textContent = '✓ Uploaded';
+                statusEl.className = 'text-xs text-green-600';
+            }
+            if (boxEl) {
+                boxEl.classList.add('uploaded');
+            }
+        };
+
+        function updateDocumentUI() {
+            Object.keys(uploadedDocuments).forEach(docType => {
+                if (uploadedDocuments[docType]) {
+                    const statusEl = document.getElementById(docType + 'Status');
+                    const boxEl = document.getElementById(docType + 'Box');
+                    if (statusEl) {
+                        statusEl.textContent = '✓ Uploaded';
+                        statusEl.className = 'text-xs text-green-600';
+                    }
+                    if (boxEl) {
+                        boxEl.classList.add('uploaded');
+                    }
+                }
+            });
+        }
+
+        document.getElementById('uploadContinueBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            if (!applicationId) {
+                alert('No application ID found. Please start from the beginning.');
+                window.location.href = 'declarant-information.html';
+                return;
+            }
+
+            // Check if required documents are uploaded
+            const requiredDocs = ['packing_list', 'bill_of_lading'];
+            const missingDocs = requiredDocs.filter(doc => !uploadedDocuments[doc]);
+            
+            if (missingDocs.length > 0) {
+                alert('Please upload all required documents (Packing List and Bill of Lading)');
+                return;
+            }
+
+            // Save draft with documents
+            const result = await saveDraft('documents', uploadedDocuments);
+            
+            if (result.success) {
+                // Navigate to AI validation step
+                window.location.href = `ai-validation.html?application_id=${applicationId}`;
+            } else {
+                alert('Error saving documents: ' + result.error);
+            }
+        });
     </script>
 </body></html>
 

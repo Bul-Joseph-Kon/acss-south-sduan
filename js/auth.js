@@ -404,7 +404,7 @@ export async function getUserProfile(userId) {
     try {
         const { getProfile } = await import('./profile-store.js');
         const profile = await getProfile();
-        if (profile && profile.user_id === userId) {
+        if (profile && (!userId || profile.user_id === userId)) {
             console.log('=== getUserProfile (CACHED FROM PROFILE STORE) ===', profile);
             return profile;
         }
@@ -413,6 +413,15 @@ export async function getUserProfile(userId) {
     }
 
     try {
+        // If userId not provided, get it from current session
+        if (!userId) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                throw new Error('No active session found');
+            }
+            userId = session.user.id;
+        }
+
         console.log('=== getUserProfile (DATABASE QUERY) ===');
         console.log('Querying profiles table with user_id:', userId);
         

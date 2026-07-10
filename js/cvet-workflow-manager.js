@@ -7,18 +7,19 @@
 
 import { createTraderApplication, updateTraderApplication, fetchTraderApplicationById } from './trader-service.js';
 import { getCurrentUser, getUserProfile } from './auth.js';
+import { logApplicationSubmission } from './logging-service.js';
 
 // ================================================================
 // CVET WORKFLOW STEPS CONFIGURATION
 // ================================================================
 
 const CVET_STEPS = [
-    { id: 1, name: 'Declaration Details', page: 'declaration-details.html', fields: ['declaration_type', 'customs_office', 'procedure_code', 'declaration_number'] },
-    { id: 2, name: 'Declarant Information', page: 'declarant-information.html', fields: ['declarant_name', 'declarant_tin', 'declarant_address', 'declarant_contact'] },
-    { id: 3, name: 'Parties Information', page: 'parties-information.html', fields: ['importer_name', 'importer_tin', 'exporter_name', 'exporter_address'] },
-    { id: 4, name: 'Shipment Information', page: 'shipment-information.html', fields: ['consignment_number', 'manifest_number', 'vessel_name', 'voyage_number'] },
-    { id: 5, name: 'Goods Information', page: 'goods-information.html', fields: ['goods_description', 'hs_code', 'quantity', 'weight', 'declared_value'] },
-    { id: 6, name: 'Transport Information', page: 'transport-information.html', fields: ['vehicle_registration', 'transport_company', 'driver_name', 'driver_license'] },
+    { id: 1, name: 'Declaration Details', page: 'declaration-details.html', fields: ['declaration_date', 'declaration_type', 'customs_office', 'port_of_entry', 'customs_procedure'] },
+    { id: 2, name: 'Declarant Information', page: 'declarant-information.html', fields: ['declarant_name', 'company_name', 'tin', 'business_reg_number', 'customs_reg_number', 'national_id', 'nationality', 'email', 'phone', 'physical_address'] },
+    { id: 3, name: 'Parties Information', page: 'parties-information.html', fields: ['importer_name', 'importer_tin', 'importer_address', 'importer_country', 'importer_contact', 'exporter_name', 'exporter_tin', 'exporter_address', 'exporter_country', 'exporter_contact', 'consignor_name', 'consignor_address', 'consignor_country', 'consignor_contact', 'consignee_name', 'consignee_address', 'consignee_country', 'consignee_contact'] },
+    { id: 4, name: 'Shipment Information', page: 'shipment-information.html', fields: ['consignment_number', 'manifest_number', 'vessel_name', 'voyage_number', 'port_of_loading', 'port_of_discharge', 'country_of_origin', 'country_of_destination', 'transport_mode', 'expected_arrival_date'] },
+    { id: 5, name: 'Goods Information', page: 'goods-information.html', fields: ['goods_description', 'hs_code', 'quantity', 'unit_of_measurement', 'gross_weight', 'net_weight', 'unit_value', 'declared_value', 'currency'] },
+    { id: 6, name: 'Transport Information', page: 'transport-information.html', fields: ['vehicle_registration', 'vehicle_type', 'transport_company', 'transport_company_license', 'driver_name', 'driver_license', 'driver_phone', 'driver_id', 'trailer_number', 'transport_mode'] },
     { id: 7, name: 'Supporting Documents', page: 'supporting-documents.html', fields: ['invoice_document', 'packing_list', 'bill_of_lading', 'permits'] },
     { id: 8, name: 'AI Validation', page: 'ai-validation.html', fields: ['validation_status', 'validation_score', 'validation_errors'] },
     { id: 9, name: 'Declaration Statement', page: 'declaration-statement.html', fields: ['declaration_accepted', 'electronic_signature', 'declaration_date'] }
@@ -78,31 +79,88 @@ export class CVETWorkflowManager {
         if (this.isNewApplication) {
             // Create new application - structure data according to schema
             try {
+                const profile = await getUserProfile();
                 const structuredData = {
                     application_type: 'CVET',
+                    service_type: 'CVET Declaration',
                     status: 'draft',
+                    current_step: this.currentStep,
+                    // Set agent_id if the user is an agent
+                    agent_id: profile?.role === 'agent' ? profile.id : null,
+                    // Trader details from declarant information
+                    trader_name: this.draftData.declarant_name || this.draftData.fullName,
+                    trader_tin: this.draftData.tin || this.draftData.declarant_tin,
+                    trader_address: this.draftData.physical_address || this.draftData.declarant_address,
+                    trader_contact: this.draftData.phone || this.draftData.declarant_contact,
+                    trader_email: this.draftData.email,
+                    // Store all step data in JSONB fields
                     declaration_data: {
+                        declaration_date: this.draftData.declaration_date,
                         declaration_type: this.draftData.declaration_type,
                         customs_office: this.draftData.customs_office,
-                        procedure_code: this.draftData.procedure_code,
-                        declaration_number: this.draftData.declaration_number,
-                        declarant_name: this.draftData.declarant_name,
-                        declarant_tin: this.draftData.declarant_tin,
-                        declarant_address: this.draftData.declarant_address,
-                        declarant_contact: this.draftData.declarant_contact,
+                        port_of_entry: this.draftData.port_of_entry,
+                        customs_procedure: this.draftData.customs_procedure,
+                        declarant_name: this.draftData.declarant_name || this.draftData.fullName,
+                        company_name: this.draftData.company_name,
+                        tin: this.draftData.tin,
+                        business_reg_number: this.draftData.business_reg_number,
+                        customs_reg_number: this.draftData.customs_reg_number,
+                        national_id: this.draftData.national_id,
+                        nationality: this.draftData.nationality,
+                        email: this.draftData.email,
+                        phone: this.draftData.phone,
+                        physical_address: this.draftData.physical_address
+                    },
+                    goods_data: {
                         importer_name: this.draftData.importer_name,
                         importer_tin: this.draftData.importer_tin,
+                        importer_address: this.draftData.importer_address,
+                        importer_country: this.draftData.importer_country,
+                        importer_contact: this.draftData.importer_contact,
                         exporter_name: this.draftData.exporter_name,
+                        exporter_tin: this.draftData.exporter_tin,
                         exporter_address: this.draftData.exporter_address,
+                        exporter_country: this.draftData.exporter_country,
+                        exporter_contact: this.draftData.exporter_contact,
+                        consignor_name: this.draftData.consignor_name,
+                        consignor_address: this.draftData.consignor_address,
+                        consignor_country: this.draftData.consignor_country,
+                        consignor_contact: this.draftData.consignor_contact,
+                        consignee_name: this.draftData.consignee_name,
+                        consignee_address: this.draftData.consignee_address,
+                        consignee_country: this.draftData.consignee_country,
+                        consignee_contact: this.draftData.consignee_contact,
                         consignment_number: this.draftData.consignment_number,
                         manifest_number: this.draftData.manifest_number,
                         vessel_name: this.draftData.vessel_name,
                         voyage_number: this.draftData.voyage_number,
+                        port_of_loading: this.draftData.port_of_loading,
+                        port_of_discharge: this.draftData.port_of_discharge,
+                        country_of_origin: this.draftData.country_of_origin,
+                        country_of_destination: this.draftData.country_of_destination,
+                        transport_mode: this.draftData.transport_mode,
+                        expected_arrival_date: this.draftData.expected_arrival_date,
                         goods_description: this.draftData.goods_description,
                         hs_code: this.draftData.hs_code,
                         quantity: this.draftData.quantity,
-                        weight: this.draftData.weight,
-                        declared_value: this.draftData.declared_value
+                        unit_of_measurement: this.draftData.unit_of_measurement,
+                        gross_weight: this.draftData.gross_weight,
+                        net_weight: this.draftData.net_weight,
+                        unit_value: this.draftData.unit_value,
+                        declared_value: this.draftData.declared_value,
+                        currency: this.draftData.currency
+                    },
+                    vehicle_data: {
+                        vehicle_registration: this.draftData.vehicle_registration,
+                        vehicle_type: this.draftData.vehicle_type,
+                        transport_company: this.draftData.transport_company,
+                        transport_company_license: this.draftData.transport_company_license,
+                        driver_name: this.draftData.driver_name,
+                        driver_license: this.draftData.driver_license,
+                        driver_phone: this.draftData.driver_phone,
+                        driver_id: this.draftData.driver_id,
+                        trailer_number: this.draftData.trailer_number,
+                        transport_mode: this.draftData.transport_mode
                     }
                 };
 
@@ -122,33 +180,89 @@ export class CVETWorkflowManager {
         } else {
             // Update existing application
             try {
+                const profile = await getUserProfile();
                 const structuredData = {
+                    // Update trader details if present
+                    trader_name: this.draftData.declarant_name || this.draftData.fullName,
+                    trader_tin: this.draftData.tin || this.draftData.declarant_tin,
+                    trader_address: this.draftData.physical_address || this.draftData.declarant_address,
+                    trader_contact: this.draftData.phone || this.draftData.declarant_contact,
+                    trader_email: this.draftData.email,
+                    // Update JSONB fields with new data
                     declaration_data: {
+                        declaration_date: this.draftData.declaration_date,
                         declaration_type: this.draftData.declaration_type,
                         customs_office: this.draftData.customs_office,
-                        procedure_code: this.draftData.procedure_code,
-                        declaration_number: this.draftData.declaration_number,
-                        declarant_name: this.draftData.declarant_name,
-                        declarant_tin: this.draftData.declarant_tin,
-                        declarant_address: this.draftData.declarant_address,
-                        declarant_contact: this.draftData.declarant_contact,
+                        port_of_entry: this.draftData.port_of_entry,
+                        customs_procedure: this.draftData.customs_procedure,
+                        declarant_name: this.draftData.declarant_name || this.draftData.fullName,
+                        company_name: this.draftData.company_name,
+                        tin: this.draftData.tin,
+                        business_reg_number: this.draftData.business_reg_number,
+                        customs_reg_number: this.draftData.customs_reg_number,
+                        national_id: this.draftData.national_id,
+                        nationality: this.draftData.nationality,
+                        email: this.draftData.email,
+                        phone: this.draftData.phone,
+                        physical_address: this.draftData.physical_address
+                    },
+                    goods_data: {
                         importer_name: this.draftData.importer_name,
                         importer_tin: this.draftData.importer_tin,
+                        importer_address: this.draftData.importer_address,
+                        importer_country: this.draftData.importer_country,
+                        importer_contact: this.draftData.importer_contact,
                         exporter_name: this.draftData.exporter_name,
+                        exporter_tin: this.draftData.exporter_tin,
                         exporter_address: this.draftData.exporter_address,
+                        exporter_country: this.draftData.exporter_country,
+                        exporter_contact: this.draftData.exporter_contact,
+                        consignor_name: this.draftData.consignor_name,
+                        consignor_address: this.draftData.consignor_address,
+                        consignor_country: this.draftData.consignor_country,
+                        consignor_contact: this.draftData.consignor_contact,
+                        consignee_name: this.draftData.consignee_name,
+                        consignee_address: this.draftData.consignee_address,
+                        consignee_country: this.draftData.consignee_country,
+                        consignee_contact: this.draftData.consignee_contact,
                         consignment_number: this.draftData.consignment_number,
                         manifest_number: this.draftData.manifest_number,
                         vessel_name: this.draftData.vessel_name,
                         voyage_number: this.draftData.voyage_number,
+                        port_of_loading: this.draftData.port_of_loading,
+                        port_of_discharge: this.draftData.port_of_discharge,
+                        country_of_origin: this.draftData.country_of_origin,
+                        country_of_destination: this.draftData.country_of_destination,
+                        transport_mode: this.draftData.transport_mode,
+                        expected_arrival_date: this.draftData.expected_arrival_date,
                         goods_description: this.draftData.goods_description,
                         hs_code: this.draftData.hs_code,
                         quantity: this.draftData.quantity,
-                        weight: this.draftData.weight,
-                        declared_value: this.draftData.declared_value
+                        unit_of_measurement: this.draftData.unit_of_measurement,
+                        gross_weight: this.draftData.gross_weight,
+                        net_weight: this.draftData.net_weight,
+                        unit_value: this.draftData.unit_value,
+                        declared_value: this.draftData.declared_value,
+                        currency: this.draftData.currency
+                    },
+                    vehicle_data: {
+                        vehicle_registration: this.draftData.vehicle_registration,
+                        vehicle_type: this.draftData.vehicle_type,
+                        transport_company: this.draftData.transport_company,
+                        transport_company_license: this.draftData.transport_company_license,
+                        driver_name: this.draftData.driver_name,
+                        driver_license: this.draftData.driver_license,
+                        driver_phone: this.draftData.driver_phone,
+                        driver_id: this.draftData.driver_id,
+                        trailer_number: this.draftData.trailer_number,
+                        transport_mode: this.draftData.transport_mode
                     }
                 };
 
-                const result = await updateTraderApplication(this.applicationId, structuredData);
+                const result = await updateTraderApplication(this.applicationId, {
+                    ...structuredData,
+                    current_step: this.currentStep
+                });
                 return result;
             } catch (error) {
                 console.error('Error updating application:', error);
@@ -191,6 +305,47 @@ export class CVETWorkflowManager {
 
         this.currentStep--;
         return { success: true, currentStep: this.currentStep, step: CVET_STEPS[this.currentStep - 1] };
+    }
+
+    // ================================================================
+    // SUBMIT APPLICATION
+    // ================================================================
+
+    async submitApplication() {
+        try {
+            if (!this.applicationId) {
+                return { success: false, error: 'No application to submit' };
+            }
+
+            const profile = await getUserProfile();
+            if (!profile) {
+                return { success: false, error: 'User profile not found' };
+            }
+
+            // Update application status to submitted
+            const result = await updateTraderApplication(this.applicationId, {
+                status: 'submitted',
+                submitted_at: new Date().toISOString()
+            });
+
+            if (!result.success) {
+                return result;
+            }
+
+            // Log the submission
+            const applicationNumber = result.data?.application_number || this.draftData.application_number || 'Unknown';
+            await logApplicationSubmission(this.applicationId, profile.id, applicationNumber);
+
+            return { success: true, applicationId: this.applicationId, applicationNumber };
+        } catch (error) {
+            console.error('Error submitting application:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Alias for submitApplication for backward compatibility
+    async submitDeclaration() {
+        return await this.submitApplication();
     }
 
     // ================================================================
@@ -363,6 +518,14 @@ export async function initializeWorkflowFromURL() {
     // Sync current step with URL
     const urlStep = getStepFromURL();
     if (urlStep !== workflow.currentStep) {
+        // Check if step is accessible (can only go to completed steps or next step)
+        if (urlStep > workflow.currentStep + 1) {
+            // Redirect to the current step
+            const currentStepPage = getStepURL(workflow.currentStep);
+            const redirectUrl = applicationId ? `${currentStepPage}?id=${applicationId}` : currentStepPage;
+            window.location.href = redirectUrl;
+            return workflow.getState();
+        }
         workflow.goToStep(urlStep);
     }
 

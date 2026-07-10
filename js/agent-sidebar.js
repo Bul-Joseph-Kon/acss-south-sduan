@@ -255,7 +255,7 @@ async function initializeAgentSidebar() {
 
         const sidebarContainer = document.getElementById('agent-sidebar');
         if (sidebarContainer) {
-            // Render sidebar immediately with placeholder data
+            // Render sidebar immediately
             sidebarContainer.innerHTML = renderSidebarHTML();
             
             const observer = new MutationObserver((mutations) => {
