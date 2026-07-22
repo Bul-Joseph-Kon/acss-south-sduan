@@ -355,38 +355,38 @@
                 if (user.status === 'pending') {
                     // Pending registrations get approve/reject buttons
                     actionButtons = `
-                        <button class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="approveUser('${user.user_id}')">Approve</button>
-                        <button class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition" onclick="rejectUser('${user.user_id}')">Reject</button>
-                        <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="editUser('${user.user_id}')">Edit</button>
+                        <button class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="approveUser('${user.id}')">Approve</button>
+                        <button class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition" onclick="rejectUser('${user.id}')">Reject</button>
+                        <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="editUser('${user.id}')">Edit</button>
                     `;
                 } else if (user.status === 'active') {
                     // Active users get suspend/deactivate buttons
                     actionButtons = `
-                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.user_id}')">Edit</button>
-                        <button class="bg-purple-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-purple-700 transition" onclick="suspendUser('${user.user_id}')">Suspend</button>
-                        <button class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-700 transition" onclick="deactivateUser('${user.user_id}')">Deactivate</button>
+                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.id}')">Edit</button>
+                        <button class="bg-purple-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-purple-700 transition" onclick="suspendUser('${user.id}')">Suspend</button>
+                        <button class="bg-gray-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-gray-700 transition" onclick="deactivateUser('${user.id}')">Deactivate</button>
                         <button class="border border-gray-300 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="resetUserPassword('${user.email}')">Reset Password</button>
-                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.user_id}')">Delete</button>
+                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.id}')">Delete</button>
                     `;
                 } else if (user.status === 'suspended') {
                     // Suspended users get activate button
                     actionButtons = `
-                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.user_id}')">Edit</button>
-                        <button class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="activateUser('${user.user_id}')">Activate</button>
-                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.user_id}')">Delete</button>
+                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.id}')">Edit</button>
+                        <button class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="activateUser('${user.id}')">Activate</button>
+                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.id}')">Delete</button>
                     `;
                 } else if (user.status === 'inactive') {
                     // Inactive users get activate button
                     actionButtons = `
-                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.user_id}')">Edit</button>
-                        <button class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="activateUser('${user.user_id}')">Activate</button>
-                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.user_id}')">Delete</button>
+                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.id}')">Edit</button>
+                        <button class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition" onclick="activateUser('${user.id}')">Activate</button>
+                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.id}')">Delete</button>
                     `;
                 } else {
                     // Rejected or other statuses
                     actionButtons = `
-                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.user_id}')">Edit</button>
-                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.user_id}')">Delete</button>
+                        <button class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="editUser('${user.id}')">Edit</button>
+                        <button class="border border-red-300 text-red-600 px-3 py-1.5 rounded-lg text-sm hover:bg-red-50 transition" onclick="deleteUserConfirm('${user.id}')">Delete</button>
                     `;
                 }
 
@@ -468,7 +468,7 @@
         }
 
         window.editUser = function(userId) {
-            const user = allUsers.find(u => u.user_id === userId);
+            const user = allUsers.find(u => u.id === userId);
             if (!user) return;
 
             document.getElementById('modalTitle').textContent = 'Edit User';
@@ -565,9 +565,11 @@
         };
 
         window.approveUser = async function(userId) {
+            console.log('=== approveUser called with userId:', userId);
             if (!confirm('Approve this user registration? This will allow them to access the system.')) return;
             
             const result = await updateUserStatus(userId, 'active');
+            console.log('=== approveUser result:', result);
             if (result.success) {
                 alert('User approved successfully');
                 loadUsers();

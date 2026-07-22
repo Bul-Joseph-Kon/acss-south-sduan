@@ -740,11 +740,31 @@ export async function updateUserStatus(userId, status) {
             console.log('Found record - id:', check.data[0].id, 'user_id:', check.data[0].user_id, 'status:', check.data[0].status);
         }
 
-        const { data, error, count } = await supabase
+        // Try updating by profile id first, then by user_id if that fails
+        let updateResult;
+        
+        // First try by profile id
+        updateResult = await supabase
             .from('profiles')
             .update({ status })
-            .eq('user_id', userId)
+            .eq('id', userId)
             .select('id,user_id,status', { count: 'exact' });
+
+        console.log('Update by id result - count:', updateResult.count, 'error:', updateResult.error);
+
+        // If no rows updated by id, try by user_id
+        if (updateResult.count === 0) {
+            console.log('No rows updated by id, trying by user_id');
+            updateResult = await supabase
+                .from('profiles')
+                .update({ status })
+                .eq('user_id', userId)
+                .select('id,user_id,status', { count: 'exact' });
+
+            console.log('Update by user_id result - count:', updateResult.count, 'error:', updateResult.error);
+        }
+
+        const { data, error, count } = updateResult;
 
         console.log('Updated rows:', count);
         console.log('Returned data:', data);
@@ -754,7 +774,7 @@ export async function updateUserStatus(userId, status) {
         const verify = await supabase
             .from('profiles')
             .select('id,user_id,status')
-            .eq('user_id', userId);
+            .or(`id.eq.${userId},user_id.eq.${userId}`);
 
         console.log('Database after update:', verify.data);
 
