@@ -39,8 +39,8 @@
                 <main class="flex-1 space-y-5">
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
-                            <h2 class="text-2xl font-bold tracking-tight">🚢 Step 2: Shipment Information</h2>
-                            <p class="opacity-90 text-sm">Enter consignment, manifest, and transport details</p>
+                            <h2 class="text-2xl font-bold tracking-tight">🚢 Step 2: Consignment Information</h2>
+                            <p class="opacity-90 text-sm">Enter consignment number, manifest, and port details</p>
                         </div>
                         <div class="relative">
                             <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
@@ -59,11 +59,11 @@
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span>Step 2 of 8</span>
-                            <span>25% Complete</span>
+                            <span>Step 2 of 6</span>
+                            <span>33% Complete</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-600 h-2 rounded-full" style="width:25%"></div>
+                            <div class="bg-blue-600 h-2 rounded-full" style="width:33%"></div>
                         </div>
                     </div>
 
@@ -228,8 +228,8 @@
                 const result = await loadDraft(appId);
                 if (result.success && result.data) {
                     const draft = getDraftData();
-                    if (draft.shipment) {
-                        const fields = draft.shipment;
+                    if (draft.consignment) {
+                        const fields = draft.consignment;
                         document.querySelector('input[placeholder="Enter consignment number"]').value = fields.consignment_number || '';
                         document.querySelector('input[placeholder="Enter manifest number"]').value = fields.manifest_number || '';
                         document.querySelector('select').value = fields.port_of_entry || 'Juba';
@@ -256,7 +256,7 @@
                 return;
             }
 
-            const shipmentData = {
+            const consignmentData = {
                 consignment_number: document.querySelector('input[placeholder="Enter consignment number"]').value,
                 manifest_number: document.querySelector('input[placeholder="Enter manifest number"]').value,
                 port_of_entry: document.querySelector('select').value,
@@ -270,14 +270,14 @@
             };
 
             const required = ['consignment_number', 'manifest_number', 'port_of_entry', 'country_of_origin', 'destination', 'transport_mode', 'expected_arrival_date'];
-            const missing = required.filter(field => !shipmentData[field]);
+            const missing = required.filter(field => !consignmentData[field]);
             
             if (missing.length > 0) {
                 alert('Please fill in all required fields');
                 return;
             }
 
-            const result = await saveDraft('shipment', shipmentData);
+            const result = await saveDraft('consignment', shipmentData);
             
             if (result.success) {
                 window.location.href = `goods-information.html?application_id=${applicationId}`;

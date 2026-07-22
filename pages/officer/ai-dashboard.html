@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SSRA Customs · AI Validation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="../assets/icons/remixicon.css" rel="stylesheet" />
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
+        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
+        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        .score-ring { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
+        .score-ring svg { transform: rotate(-90deg); }
+        .score-ring .score-text { position: absolute; font-size: 1.5rem; font-weight: 700; }
+        .risk-low { background: #d1fae5; color: #065f46; }
+        .risk-medium { background: #fef3c7; color: #92400e; }
+        .risk-high { background: #fed7aa; color: #9a3412; }
+        .risk-critical { background: #fee2e2; color: #991b1b; }
+        .validation-card { background: white; border-radius: 0.75rem; padding: 1.25rem; border: 1px solid #e5e7eb; }
+        .recommendation-item { padding: 0.75rem; border-radius: 0.5rem; background: #f9fafb; border-left: 3px solid #3b82f6; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 gradient-bg min-h-screen p-4 flex flex-col">
+            <div class="text-white mb-8">
+                <h1 class="text-xl font-bold">SSRA Customs</h1>
+                <p class="text-sm opacity-80">South Sudan Revenue Authority</p>
+            </div>
+            <nav class="flex-1">
+                <a href="dashboard-officer.html" class="sidebar-link text-white/80 hover:text-white"><i class="ri-dashboard-line"></i>Dashboard</a>
+                <a href="ai-dashboard.html" class="sidebar-link active text-white"><i class="ri-robot-line"></i>AI Dashboard</a>
+                <a href="#" class="sidebar-link text-white/80 hover:text-white"><i class="ri-file-list-3-line"></i>Applications</a>
+                <a href="#" class="sidebar-link text-white/80 hover:text-white"><i class="ri-search-line"></i>Search</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-8">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">AI Validation Dashboard</h1>
+                        <p class="text-gray-500">Real-time AI validation results and risk assessments</p>
+                    </div>
+                    <select id="applicationFilter" class="px-4 py-2 border rounded-lg" onchange="loadApplicationDetails()">
+                        <option value="">Select Application</option>
+                    </select>
+                </div>
+
+                <!-- AI Validation Summary -->
+                <div id="aiSummary" class="grid grid-cols-4 gap-6 mb-8">
+                    <div class="validation-card">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-500">Validation Score</span>
+                            <i class="ri-checkbox-circle-line text-green-500 text-xl"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-800" id="validationScore">--</div>
+                        <div class="text-xs text-gray-400 mt-1">Overall AI confidence</div>
+                    </div>
+                    <div class="validation-card">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-500">Risk Score</span>
+                            <i class="ri-shield-check-line text-blue-500 text-xl"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-800" id="riskScore">--</div>
+                        <div class="text-xs text-gray-400 mt-1">Risk assessment</div>
+                    </div>
+                    <div class="validation-card">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-500">Fraud Score</span>
+                            <i class="ri-alert-line text-orange-500 text-xl"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-800" id="fraudScore">--</div>
+                        <div class="text-xs text-gray-400 mt-1">Fraud detection</div>
+                    </div>
+                    <div class="validation-card">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-500">Tax Verification</span>
+                            <i class="ri-money-dollar-circle-line text-purple-500 text-xl"></i>
+                        </div>
+                        <div class="text-3xl font-bold text-gray-800" id="taxScore">--</div>
+                        <div class="text-xs text-gray-400 mt-1">Tax calculation</div>
+                    </div>
+                </div>
+
+                <!-- Detailed Validation Results -->
+                <div class="grid grid-cols-2 gap-6 mb-8">
+                    <!-- OCR Results -->
+                    <div class="validation-card">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="ri-file-text-line text-blue-500"></i>Document OCR
+                        </h3>
+                        <div id="ocrResults" class="space-y-2">
+                            <div class="text-sm text-gray-500">Select an application to view results</div>
+                        </div>
+                    </div>
+
+                    <!-- Document Verification -->
+                    <div class="validation-card">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="ri-file-check-line text-green-500"></i>Document Verification
+                        </h3>
+                        <div id="docVerificationResults" class="space-y-2">
+                            <div class="text-sm text-gray-500">Select an application to view results</div>
+                        </div>
+                    </div>
+
+                    <!-- HS Code Validation -->
+                    <div class="validation-card">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="ri-barcode-box-line text-purple-500"></i>HS Code Validation
+                        </h3>
+                        <div id="hsCodeResults" class="space-y-2">
+                            <div class="text-sm text-gray-500">Select an application to view results</div>
+                        </div>
+                    </div>
+
+                    <!-- Fraud Detection -->
+                    <div class="validation-card">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="ri-alert-triangle-line text-red-500"></i>Fraud Detection
+                        </h3>
+                        <div id="fraudResults" class="space-y-2">
+                            <div class="text-sm text-gray-500">Select an application to view results</div>
+                        </div>
+                    </div>
+
+                    <!-- Tax Calculation -->
+                    <div class="validation-card">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="ri-calculator-line text-indigo-500"></i>Tax Calculation
+                        </h3>
+                        <div id="taxResults" class="space-y-2">
+                            <div class="text-sm text-gray-500">Select an application to view results</div>
+                        </div>
+                    </div>
+
+                    <!-- Compliance Check -->
+                    <div class="validation-card">
+                        <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <i class="ri-shield-check-line text-teal-500"></i>Compliance Check
+                        </h3>
+                        <div id="complianceResults" class="space-y-2">
+                            <div class="text-sm text-gray-500">Select an application to view results</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Recommendations -->
+                <div class="validation-card mb-8">
+                    <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="ri-lightbulb-line text-yellow-500"></i>AI Recommendations
+                    </h3>
+                    <div id="recommendations" class="space-y-2">
+                        <div class="text-sm text-gray-500">Select an application to view recommendations</div>
+                    </div>
+                </div>
+
+                <!-- Missing Documents -->
+                <div class="validation-card">
+                    <h3 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <i class="ri-file-warning-line text-red-500"></i>Missing Documents
+                    </h3>
+                    <div id="missingDocuments" class="space-y-2">
+                        <div class="text-sm text-gray-500">Select an application to view missing documents</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { getCurrentUser, getUserProfile } from '../../js/auth.js';
+
+        let selectedApplicationId = null;
+        let realtimeSubscriptions = [];
+
+        async function loadApplications() {
+            const { data: applications, error } = await supabase
+                .from('applications')
+                .select('id, application_number, status, created_at')
+                .in('status', ['under_review', 'approved', 'returned'])
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            if (error) {
+                console.error('Error loading applications:', error);
+                return;
+            }
+
+            const select = document.getElementById('applicationFilter');
+            select.innerHTML = '<option value="">Select Application</option>';
+            applications.forEach(app => {
+                const option = document.createElement('option');
+                option.value = app.id;
+                option.textContent = `${app.application_number} - ${app.status}`;
+                select.appendChild(option);
+            });
+        }
+
+        async function loadApplicationDetails() {
+            selectedApplicationId = document.getElementById('applicationFilter').value;
+            if (!selectedApplicationId) return;
+
+            const { data: application, error } = await supabase
+                .from('applications')
+                .select('*')
+                .eq('id', selectedApplicationId)
+                .single();
+
+            if (error || !application) {
+                console.error('Error loading application:', error);
+                return;
+            }
+
+            const aiResults = application.ai_validation_results || {};
+            const riskAssessment = aiResults.risk_assessment || {};
+
+            // Update summary scores
+            const validationScore = Math.round((riskAssessment.overall_score || 0) * 100);
+            const riskScore = Math.round((riskAssessment.overall_score || 0) * 100);
+            const fraudScore = Math.round((riskAssessment.fraud_score || 0) * 100);
+            const taxScore = Math.round((riskAssessment.tax_score || 0) * 100);
+
+            document.getElementById('validationScore').textContent = `${validationScore}%`;
+            document.getElementById('riskScore').textContent = `${riskScore}%`;
+            document.getElementById('fraudScore').textContent = `${fraudScore}%`;
+            document.getElementById('taxScore').textContent = `${taxScore}%`;
+
+            // Update OCR results
+            updateValidationSection('ocrResults', aiResults.ocr, {
+                status: 'OCR Status',
+                confidence_score: 'Confidence Score',
+                results: 'Extracted Data'
+            });
+
+            // Update document verification
+            updateValidationSection('docVerificationResults', aiResults.document_verification, {
+                status: 'Verification Status',
+                confidence_score: 'Confidence Score',
+                results: 'Document Check'
+            });
+
+            // Update HS code validation
+            updateValidationSection('hsCodeResults', aiResults.hs_code_validation, {
+                status: 'Validation Status',
+                confidence_score: 'Confidence Score',
+                results: 'HS Code Check'
+            });
+
+            // Update fraud detection
+            updateValidationSection('fraudResults', aiResults.fraud_detection, {
+                status: 'Fraud Status',
+                confidence_score: 'Fraud Score',
+                results: 'Risk Factors'
+            });
+
+            // Update tax calculation
+            updateTaxSection(aiResults.tax_calculation);
+
+            // Update compliance check
+            updateValidationSection('complianceResults', aiResults.compliance_check, {
+                status: 'Compliance Status',
+                confidence_score: 'Compliance Score',
+                results: 'Compliance Issues'
+            });
+
+            // Update recommendations
+            updateRecommendations(riskAssessment.recommendations || []);
+
+            // Update missing documents
+            updateMissingDocuments(aiResults.document_verification?.results?.missing_documents || []);
+        }
+
+        function updateValidationSection(elementId, data, labels) {
+            const element = document.getElementById(elementId);
+            if (!data) {
+                element.innerHTML = '<div class="text-sm text-gray-500">No data available</div>';
+                return;
+            }
+
+            const statusColors = {
+                'passed': 'text-green-600',
+                'warning': 'text-yellow-600',
+                'failed': 'text-red-600',
+                'pending': 'text-gray-600'
+            };
+
+            const confidence = data.confidence_score ? Math.round(data.confidence_score * 100) + '%' : '--';
+
+            element.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium">${labels.status}:</span>
+                    <span class="text-sm font-semibold ${statusColors[data.status] || 'text-gray-600'}">${data.status || 'N/A'}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium">${labels.confidence_score}:</span>
+                    <span class="text-sm">${confidence}</span>
+                </div>
+                ${data.errors && data.errors.length > 0 ? `
+                    <div class="mt-2">
+                        <span class="text-sm font-medium text-red-500">Errors:</span>
+                        <ul class="text-xs text-red-500 mt-1 list-disc list-inside">
+                            ${data.errors.map(e => `<li>${e}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                ${data.warnings && data.warnings.length > 0 ? `
+                    <div class="mt-2">
+                        <span class="text-sm font-medium text-yellow-600">Warnings:</span>
+                        <ul class="text-xs text-yellow-600 mt-1 list-disc list-inside">
+                            ${data.warnings.map(w => `<li>${w}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function updateTaxSection(data) {
+            const element = document.getElementById('taxResults');
+            if (!data || !data.results) {
+                element.innerHTML = '<div class="text-sm text-gray-500">No tax data available</div>';
+                return;
+            }
+
+            const results = data.results;
+            element.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium">Customs Duty:</span>
+                    <span class="text-sm">${results.customs_duty?.toFixed(2) || '--'} SSP</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium">VAT:</span>
+                    <span class="text-sm">${results.vat?.toFixed(2) || '--'} SSP</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-medium">Excise Duty:</span>
+                    <span class="text-sm">${results.excise_duty?.toFixed(2) || '--'} SSP</span>
+                </div>
+                <div class="flex justify-between items-center border-t pt-2 mt-2">
+                    <span class="text-sm font-bold">Total Payable:</span>
+                    <span class="text-sm font-bold">${results.total_payable?.toFixed(2) || '--'} SSP</span>
+                </div>
+                ${results.discrepancies && results.discrepancies.length > 0 ? `
+                    <div class="mt-2">
+                        <span class="text-sm font-medium text-orange-500">Discrepancies:</span>
+                        <ul class="text-xs text-orange-500 mt-1 list-disc list-inside">
+                            ${results.discrepancies.map(d => `<li>${d}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function updateRecommendations(recommendations) {
+            const element = document.getElementById('recommendations');
+            if (!recommendations || recommendations.length === 0) {
+                element.innerHTML = '<div class="text-sm text-gray-500">No recommendations</div>';
+                return;
+            }
+
+            element.innerHTML = recommendations.map(rec => `
+                <div class="recommendation-item">
+                    <div class="text-sm">${rec}</div>
+                </div>
+            `).join('');
+        }
+
+        function updateMissingDocuments(missingDocs) {
+            const element = document.getElementById('missingDocuments');
+            if (!missingDocs || missingDocs.length === 0) {
+                element.innerHTML = '<div class="text-sm text-green-600">All required documents uploaded</div>';
+                return;
+            }
+
+            element.innerHTML = missingDocs.map(doc => `
+                <div class="flex items-center gap-2 text-sm text-red-500">
+                    <i class="ri-file-warning-line"></i>
+                    <span>${doc}</span>
+                </div>
+            `).join('');
+        }
+
+        // Setup Realtime subscriptions
+        function setupRealtimeSubscriptions() {
+            // Subscribe to applications table
+            const appSubscription = supabase
+                .channel('applications-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, (payload) => {
+                    console.log('Application change:', payload);
+                    if (selectedApplicationId === payload.new.id) {
+                        loadApplicationDetails();
+                    }
+                    loadApplications();
+                })
+                .subscribe();
+
+            realtimeSubscriptions.push(appSubscription);
+
+            // Subscribe to ai_validation_results table
+            const aiValidationSubscription = supabase
+                .channel('ai-validation-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'ai_validation_results' }, (payload) => {
+                    console.log('AI validation change:', payload);
+                    if (selectedApplicationId === payload.new.application_id) {
+                        loadApplicationDetails();
+                    }
+                })
+                .subscribe();
+
+            realtimeSubscriptions.push(aiValidationSubscription);
+
+            // Subscribe to risk_assessments table
+            const riskAssessmentSubscription = supabase
+                .channel('risk-assessment-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'risk_assessments' }, (payload) => {
+                    console.log('Risk assessment change:', payload);
+                    if (selectedApplicationId === payload.new.application_id) {
+                        loadApplicationDetails();
+                    }
+                })
+                .subscribe();
+
+            realtimeSubscriptions.push(riskAssessmentSubscription);
+        }
+
+        // Cleanup subscriptions on page unload
+        window.addEventListener('beforeunload', () => {
+            realtimeSubscriptions.forEach(subscription => {
+                supabase.removeChannel(subscription);
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadApplications();
+            setupRealtimeSubscriptions();
+        });
+    </script>
+</body>
+</html>

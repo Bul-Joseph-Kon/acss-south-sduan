@@ -1,145 +1,287 @@
 <!DOCTYPE html>
 
+
+
 <html lang="en">
+
+
 
 <head>
 
+
+
     <meta charset="UTF-8" />
+
+
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+
+
     <title>SSRA Customs · Trader Dashboard</title>
+
+
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
+
     <link href="../assets/icons/remixicon.css" rel="stylesheet" />
+
+
 
     
 
+
+
     <script src="../../js/dashboard-ui.js"></script>
+
+
 
     <script type="module" src="../../js/auth.js"></script>
 
+
+
     <script type="module" src="../../js/dashboard.js"></script>
+
+
 
     <script type="module" src="../../js/applications.js"></script>
 
+
+
     <script type="module" src="../../js/realtime.js"></script>
+
+
 
     <script type="module" src="../../js/trader-sidebar.js"></script>
 
+
+
     <style>
+
+
 
         .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
 
+
+
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+
+
 
         .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
 
+
+
         .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+
+
 
         .stat-card { transition: all 0.3s ease; cursor: pointer; background: white; border-radius: 0.75rem; padding: 1rem; border: 1px solid #e5e7eb; }
 
+
+
         .stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0,0,0,0.06); }
+
+
 
         .stat-number { font-size: 1.5rem; font-weight: 700; }
 
+
+
         .stat-label { font-size: 0.75rem; color: #6b7280; }
+
+
 
         .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
 
+
+
         .status-approved { background: #d1fae5; color: #065f46; }
+
+
 
         .status-pending { background: #fef3c7; color: #92400e; }
 
+
+
         .status-review { background: #dbeafe; color: #1e40af; }
+
+
 
         .status-rejected { background: #fee2e2; color: #991b1b; }
 
+
+
         .status-draft { background: #f3f4f6; color: #4b5563; }
+
+
 
         .status-completed { background: #d1fae5; color: #065f46; }
 
+
+
         .status-inspection { background: #fef3c7; color: #92400e; }
+
+
 
         .quick-action-btn { transition: all 0.2s ease; cursor: pointer; padding: 0.5rem 0.75rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; background: white; font-size: 0.8rem; display: flex; align-items: center; gap: 0.5rem; }
 
+
+
         .quick-action-btn:hover { border-color: #0a4d3e; background: #ecfdf5; transform: translateY(-2px); }
+
+
 
         .notification-item { padding: 0.5rem 0.75rem; border-radius: 0.5rem; border-left: 3px solid #0a4d3e; background: white; margin-bottom: 0.5rem; }
 
+
+
         .notification-item.unread { background: #ecfdf5; }
+
+
 
         .notification-item .notif-time { font-size: 0.65rem; color: #6b7280; }
 
+
+
         .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+
+
 
         .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
+
+
         .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+
+
 
         .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
 
+
+
         .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+
+
 
         .profile-dropdown .danger { color: #dc2626; }
 
+
+
         .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+
+
 
         .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
 
+
+
         .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+
+
 
         .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
 
+
+
         /* Sidebar category toggle styles */
+
+
 
         .category-toggle { cursor: pointer; }
 
+
+
         .category-toggle .arrow { transition: transform 0.3s ease; }
+
+
 
         .category-toggle .arrow.open { transform: rotate(180deg); }
 
+
+
         .category-submenu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding-left: 1.5rem; }
+
+
 
         .category-submenu.open { max-height: 1000px; }
 
+
+
         .category-submenu .sidebar-link { font-size: 0.8rem; padding: 0.4rem 1rem; }
+
+
 
         .category-submenu .sidebar-link i { font-size: 1rem; width: 1.2rem; }
 
+
+
         .flow-badge { font-size: 0.55rem; padding: 0.1rem 0.4rem; border-radius: 9999px; font-weight: 600; }
+
+
 
         .flow-badge-ai { background: #dbeafe; color: #1e40af; }
 
+
+
         .flow-badge-officer { background: #fef3c7; color: #92400e; }
+
+
 
         .flow-badge-inspector { background: #fee2e2; color: #991b1b; }
 
+
+
         .flow-badge-revenue { background: #d1fae5; color: #065f46; }
+
+
 
         .flow-badge-supervisor { background: #f3e8ff; color: #6b21a8; }
 
+
+
         .flow-badge-completed { background: #d1fae5; color: #065f46; }
+
+
 
         .agent-auth-card { background: #f0fdf4; border: 1px solid #86efac; border-radius: 0.75rem; padding: 1rem; }
 
+
+
         .agent-auth-card .auth-status { color: #065f46; }
+
+
 
     </style>
 
+
+
 </head>
+
+
 
 <body>
 
+
+
     <div class="min-h-screen bg-gray-100">
+
+
 
         <div class="max-w-7xl mx-auto px-4 py-5">
 
+
+
             <div class="flex flex-col lg:flex-row gap-6">
 
+
+
                 <!-- Sidebar -->
+
+
 
                 <aside class="lg:w-72 flex-shrink-0">
                     <div id="trader-sidebar"></div>
@@ -147,903 +289,1794 @@
 
 
 
+
+
+
+
                 <!-- Main Content -->
+
+
 
                 <main class="flex-1 space-y-5">
 
+
+
                     <!-- Welcome Banner -->
+
+
 
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
 
+
+
                         <div>
+
+
 
                             <h2 id="traderWelcomeTitle" class="text-2xl font-bold tracking-tight">Welcome back, John! 👋</h2>
 
+
+
                             <p class="opacity-90 text-sm">Manage your customs declarations and track applications</p>
+
+
 
                             <div class="flex gap-2 mt-2 flex-wrap">
 
-                                <span class="flow-badge flow-badge-ai">🤖 AI Verified</span>
 
-                                <span class="flow-badge flow-badge-officer">👤 Officer Review</span>
 
-                                <span class="flow-badge flow-badge-inspector">🔍 Inspection</span>
+                                <span class="flow-badge flow-badge-ai"> AI Verified</span>
 
-                                <span class="flow-badge flow-badge-revenue">💰 Revenue</span>
 
-                                <span class="flow-badge flow-badge-supervisor">⭐ Supervisor</span>
+
+                                <span class="flow-badge flow-badge-officer">Officer Review</span>
+
+
+
+                                <span class="flow-badge flow-badge-inspector">Inspection</span>
+
+
+
+                                <span class="flow-badge flow-badge-revenue">Revenue</span>
+
+
+
+                                <span class="flow-badge flow-badge-supervisor">Supervisor</span>
+
+
 
                             </div>
 
+
+
                         </div>
+
+
 
                         <div class="relative">
 
+
+
                             <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+
+
 
                                 <span class="avatar-sm"><i class="ri-user-line"></i></span>
 
+
+
                                 <span id="traderHeaderRole" class="text-sm font-medium hidden sm:inline">Loading...</span>
+
+
 
                                 <i class="ri-arrow-down-s-line text-sm"></i>
 
+
+
                             </button>
+
+
 
                             <div class="profile-dropdown" id="profileDropdown">
 
+
+
                                 <a href="overview.html" onclick="document.getElementById('profileDropdown').classList.remove('open')"><i class="ri-user-settings-line"></i> My Profile</a>
+
+
 
                                 <a href="overview.html" onclick="document.getElementById('profileDropdown').classList.remove('open')"><i class="ri-edit-line"></i> Edit Profile</a>
 
+
+
                                 <a href="submitted.html" onclick="document.getElementById('profileDropdown').classList.remove('open')"><i class="ri-file-copy-line"></i> My Documents</a>
+
+
 
                                 <div class="divider"></div>
 
+
+
                                 <button id="dropdownSignOut" class="danger" style="width:100%;text-align:left;background:none;border:none;padding:0.6rem 1rem;font-size:0.85rem;color:#dc2626;cursor:pointer;display:flex;align-items:center;gap:0.75rem;"><i class="ri-logout-box-line"></i> Sign Out</button>
+
+
 
                             </div>
 
+
+
                         </div>
 
+
+
                     </div>
+
+
+
+
 
 
 
                     <!-- Agent Authorization Status -->
 
+
+
                     <div class="agent-auth-card">
+
+
 
                         <div class="flex items-center justify-between flex-wrap gap-2">
 
+
+
                             <div class="flex items-center gap-3">
+
+
 
                                 <i class="ri-check-circle-fill text-emerald-600 text-xl"></i>
 
+
+
                                 <div>
+
+
 
                                     <p class="font-semibold text-sm auth-status">✓ Clearing Agent Authorized</p>
 
+
+
                                     <p class="text-xs text-gray-500">Agent: SSRA Customs Agency Ltd · License: LIC-2026-0008</p>
+
+
 
                                 </div>
 
+
+
                             </div>
+
+
 
                             <div class="flex gap-2">
 
-                                <button class="text-emerald-600 text-sm hover:underline" onclick="alert('📋 Viewing agent details')">View Agent</button>
 
-                                <button class="text-emerald-600 text-sm hover:underline" onclick="alert('🔄 Changing agent authorization')">Change Agent</button>
+
+                                <button class="text-emerald-600 text-sm hover:underline" onclick="alert('Viewing agent details')">View Agent</button>
+
+
+
+                                <button class="text-emerald-600 text-sm hover:underline" onclick="alert('Changing agent authorization')">Change Agent</button>
+
+
 
                             </div>
 
+
+
                         </div>
 
+
+
                     </div>
+
+
+
+
 
 
 
                     <!-- Stats -->
 
+
+
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+
+
 
                         <a href="submitted.html" class="stat-card"><div class="stat-number text-emerald-600" id="statTotal">0</div><div class="stat-label">Total Applications</div></a>
 
+
+
                         <a href="under-review.html" class="stat-card"><div class="stat-number text-yellow-600" id="statPending">0</div><div class="stat-label">Pending Review</div></a>
+
+
 
                         <a href="under-review.html" class="stat-card"><div class="stat-number text-blue-600" id="statInspection">0</div><div class="stat-label">Under Inspection</div></a>
 
+
+
                         <a href="approved.html" class="stat-card"><div class="stat-number text-green-600" id="statApproved">0</div><div class="stat-label">Approved</div></a>
+
+
 
                         <a href="rejected.html" class="stat-card"><div class="stat-number text-red-600" id="statRejected">0</div><div class="stat-label">Rejected</div></a>
 
+
+
                     </div>
+
+
+
+
 
 
 
                     <!-- Quick Actions -->
 
+
+
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+
+
 
                         <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-flashlight-line text-emerald-500 mr-2"></i>Quick Actions</h3>
 
+
+
                         <div class="flex flex-wrap gap-2">
+
+
 
                             <a href="create-declaration.html" class="quick-action-btn"><i class="ri-file-add-line text-emerald-500"></i> New CVET</a>
 
+
+
                             <a href="create-assessment.html" class="quick-action-btn"><i class="ri-file-search-line text-emerald-500"></i> Direct Assessment</a>
+
+
 
                             <a href="search-vehicle.html" class="quick-action-btn"><i class="ri-search-line text-emerald-500"></i> Vehicle Query</a>
 
+
+
                             <a href="draft.html" class="quick-action-btn"><i class="ri-pen-line text-emerald-500"></i> Drafts</a>
+
+
 
                             <a href="application-updates.html" class="quick-action-btn"><i class="ri-notification-3-line text-emerald-500"></i> Notifications</a>
 
-                            <a href="#" class="quick-action-btn" onclick="alert('📋 Authorizing a clearing agent')"><i class="ri-user-add-line text-emerald-500"></i> Authorize Agent</a>
+
+
+                            <a href="#" class="quick-action-btn" onclick="alert('Authorizing a clearing agent')"><i class="ri-user-add-line text-emerald-500"></i> Authorize Agent</a>
+
+
 
                         </div>
 
+
+
                     </div>
+
+
+
+
 
 
 
                     <!-- Business Flow Status -->
 
+
+
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+
+
 
                         <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-flow-chart text-emerald-500 mr-2"></i>Application Flow Status</h3>
 
+
+
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+
+
 
                             <div class="text-center p-2 border rounded-lg">
 
-                                <div class="text-2xl">📋</div>
+
+
+                                <div class="text-2xl"></div>
+
+
 
                                 <div class="text-xs font-semibold text-emerald-600" id="flowSubmitted">0</div>
 
+
+
                                 <div class="text-xs text-gray-500">Submitted</div>
+
+
 
                             </div>
 
+
+
                             <div class="text-center p-2 border rounded-lg">
 
-                                <div class="text-2xl">🤖</div>
+
+
+                                <div class="text-2xl"></div>
+
+
 
                                 <div class="text-xs font-semibold text-blue-600" id="flowAIValidated">0</div>
 
+
+
                                 <div class="text-xs text-gray-500">AI Validated</div>
+
+
 
                             </div>
 
+
+
                             <div class="text-center p-2 border rounded-lg">
 
-                                <div class="text-2xl">👤</div>
+
+
+                                <div class="text-2xl"></div>
+
+
 
                                 <div class="text-xs font-semibold text-yellow-600" id="flowOfficerReview">0</div>
 
+
+
                                 <div class="text-xs text-gray-500">Officer Review</div>
 
+
+
                             </div>
+
+
 
                             <div class="text-center p-2 border rounded-lg">
 
-                                <div class="text-2xl">✅</div>
+
+
+                                <div class="text-2xl"></div>
+
+
 
                                 <div class="text-xs font-semibold text-green-600" id="flowCompleted">0</div>
 
+
+
                                 <div class="text-xs text-gray-500">Completed</div>
+
+
 
                             </div>
 
+
+
                         </div>
 
+
+
                     </div>
+
+
+
+
 
 
 
                     <!-- Recent Applications & Notifications -->
 
+
+
                     <div class="grid lg:grid-cols-2 gap-4">
 
+
+
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+
+
 
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-file-copy-line text-emerald-500 mr-2"></i>Recent Applications</h3>
 
+
+
                             <div class="space-y-2" id="recentApplicationsList">
+
+
 
                                 <div class="text-sm text-gray-500 text-center py-4">Loading applications...</div>
 
+
+
                             </div>
+
+
 
                             <a href="submitted.html" class="mt-3 text-sm text-emerald-600 hover:underline inline-block">View All →</a>
 
+
+
                         </div>
+
+
 
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
 
+
+
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-notification-3-line text-emerald-500 mr-2"></i>Recent Notifications</h3>
+
+
 
                             <div class="space-y-2" id="recentNotificationsList">
 
+
+
                                 <div class="text-sm text-gray-500 text-center py-4">Loading notifications...</div>
+
+
 
                             </div>
 
+
+
                             <a href="application-updates.html" class="mt-3 text-sm text-emerald-600 hover:underline inline-block">View All →</a>
+
+
 
                         </div>
 
+
+
                     </div>
+
+
+
+
 
 
 
                     <!-- Business Flow Steps -->
 
+
+
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+
+
 
                         <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-route-line text-emerald-500 mr-2"></i>Complete Business Flow</h3>
 
+
+
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+
+
 
                             <div class="p-2 bg-gray-50 rounded-lg">
 
-                                <div class="text-lg">📝</div>
+
+
+                                <div class="text-lg"></div>
+
+
 
                                 <div class="text-xs font-semibold">Registration</div>
 
+
+
                                 <div class="text-[0.6rem] text-gray-400">Account Created</div>
+
+
 
                             </div>
 
+
+
                             <div class="p-2 bg-gray-50 rounded-lg">
 
-                                <div class="text-lg">🔐</div>
+
+
+                                <div class="text-lg"></div>
+
+
 
                                 <div class="text-xs font-semibold">Agent Auth</div>
 
+
+
                                 <div class="text-[0.6rem] text-gray-400">Agent Authorized</div>
+
+
 
                             </div>
 
+
+
                             <div class="p-2 bg-gray-50 rounded-lg">
 
-                                <div class="text-lg">📋</div>
+
+
+                                <div class="text-lg"></div>
+
+
 
                                 <div class="text-xs font-semibold">Application</div>
 
+
+
                                 <div class="text-[0.6rem] text-gray-400">Submitted</div>
+
+
 
                             </div>
 
+
+
                             <div class="p-2 bg-gray-50 rounded-lg">
 
-                                <div class="text-lg">🤖</div>
+
+
+                                <div class="text-lg"></div>
+
+
 
                                 <div class="text-xs font-semibold">AI Validation</div>
 
+
+
                                 <div class="text-[0.6rem] text-gray-400">Verified</div>
+
+
 
                             </div>
 
+
+
                             <div class="p-2 bg-gray-50 rounded-lg">
 
-                                <div class="text-lg">👤</div>
+
+
+                                <div class="text-lg"></div>
+
+
 
                                 <div class="text-xs font-semibold">Officer</div>
 
+
+
                                 <div class="text-[0.6rem] text-gray-400">Review</div>
+
+
 
                             </div>
 
+
+
                             <div class="p-2 bg-gray-50 rounded-lg">
 
-                                <div class="text-lg">🔍</div>
+
+
+                                <div class="text-lg"></div>
+
+
 
                                 <div class="text-xs font-semibold">Inspection</div>
 
+
+
                                 <div class="text-[0.6rem] text-gray-400">If Required</div>
 
+
+
                             </div>
+
+
 
                             <div class="p-2 bg-gray-50 rounded-lg">
 
-                                <div class="text-lg">⭐</div>
+
+
+                                <div class="text-lg"></div>
+
+
 
                                 <div class="text-xs font-semibold">Approval</div>
 
+
+
                                 <div class="text-[0.6rem] text-gray-400">Supervisor</div>
 
+
+
                             </div>
+
+
 
                             <div class="p-2 bg-emerald-50 rounded-lg border border-emerald-200">
 
-                                <div class="text-lg">✅</div>
+
+
+                                <div class="text-lg"></div>
+
+
 
                                 <div class="text-xs font-semibold text-emerald-700">Complete</div>
 
+
+
                                 <div class="text-[0.6rem] text-emerald-600">Certificate</div>
+
+
 
                             </div>
 
+
+
                         </div>
+
+
 
                     </div>
 
+
+
                 </main>
+
+
 
             </div>
 
+
+
         </div>
+
+
 
     </div>
 
+
+
     <script type="module">
+
+
 
         import supabase from '../../js/supabase.js';
 
+
+
         import { checkAuth, getUserProfile, signOut, getCurrentUser } from '../../js/auth.js';
+
+
 
         import { fetchTraderDashboardData, subscribeToTraderDashboard, unsubscribeFromTraderDashboard } from '../../js/trader-service.js';
 
+
+
         import { realtimeManager } from '../../js/realtime.js';
+
+
 
         import toastManager from '../../js/toast.js';
 
 
 
+
+
+
+
         const PAGE_KEY = 'trader-dashboard';
 
+
+
         let currentRole = null;
+
+
 
         let currentUserId = null;
 
 
 
+
+
+
+
         function toggleCategory(category) {
+
+
 
             const submenu = document.getElementById(category + 'Submenu');
 
+
+
             const arrow = document.getElementById(category + 'Arrow');
+
+
 
             submenu.classList.toggle('open');
 
+
+
             arrow.classList.toggle('open');
 
+
+
         }
+
+
+
+
 
 
 
         document.addEventListener('click', function(e) {
 
+
+
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+
+
 
                 document.getElementById('profileDropdown').classList.remove('open');
 
+
+
             }
 
+
+
         });
+
+
+
+
 
 
 
         async function loadDashboard() {
 
+
+
             const isAuthenticated = await checkAuth();
+
+
 
             if (!isAuthenticated) {
 
+
+
                 window.location.href = '../../auth/login.html';
+
+
 
                 return;
 
+
+
             }
+
+
+
+
 
 
 
             const user = await getCurrentUser();
 
+
+
             const profile = user ? await getUserProfile(user.id) : null;
+
+
+
+
 
 
 
             if (profile) {
 
+
+
                 const displayName = profile.full_name || localStorage.getItem('userName') || user.email || 'Trader';
+
+
 
                 const displayRole = formatRole(profile.role || localStorage.getItem('userRole') || 'trader');
 
+
+
                 const displayStatus = profile.status || 'active';
+
+
 
                 const displayTIN = profile.tin || `TIN-${profile.id?.substring(0, 8).toUpperCase()}` || 'Not Available';
 
 
 
+
+
+
+
                 const nameEl = document.getElementById('traderProfileName');
+
+
 
                 if (nameEl) nameEl.textContent = displayName;
 
+
+
                 const roleEl = document.getElementById('traderProfileRole');
+
+
 
                 if (roleEl) roleEl.textContent = displayRole;
 
+
+
                 const headerRoleEl = document.getElementById('traderHeaderRole');
+
+
 
                 if (headerRoleEl) headerRoleEl.textContent = displayRole;
 
+
+
                 const welcomeEl = document.getElementById('traderWelcomeTitle');
+
+
 
                 if (welcomeEl) welcomeEl.textContent = `Welcome back, ${displayName}!`;
 
+
+
                 const statusEl = document.getElementById('traderProfileStatus');
+
+
 
                 if (statusEl) statusEl.textContent = `● ${displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}`;
 
+
+
                 const tinEl = document.getElementById('traderProfileTIN');
+
+
 
                 if (tinEl) tinEl.textContent = `TIN: ${displayTIN}`;
 
 
 
+
+
+
+
                 // Update status badge color based on status
+
+
 
                 const statusBadge = document.getElementById('traderProfileStatus');
 
+
+
                 if (statusBadge) {
+
+
 
                     if (displayStatus === 'active') {
 
+
+
                         statusBadge.className = 'inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium';
+
+
 
                     } else if (displayStatus === 'inactive') {
 
+
+
                         statusBadge.className = 'inline-block mt-1 text-xs bg-gray-100 text-gray-700 px-2.5 py-0.5 rounded-full font-medium';
+
+
 
                     } else if (displayStatus === 'suspended') {
 
+
+
                         statusBadge.className = 'inline-block mt-1 text-xs bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full font-medium';
+
+
 
                     }
 
+
+
                 }
+
+
+
+
 
 
 
                 // Store role and userId for RealtimeManager
 
+
+
                 currentRole = profile.role || 'trader';
+
+
 
                 currentUserId = profile.id;
 
+
+
             } else {
+
+
 
                 const nameEl = document.getElementById('traderProfileName');
 
+
+
                 if (nameEl) nameEl.textContent = 'Trader';
+
+
 
                 const roleEl = document.getElementById('traderProfileRole');
 
+
+
                 if (roleEl) roleEl.textContent = 'Trader';
+
+
 
                 const headerRoleEl = document.getElementById('traderHeaderRole');
 
+
+
                 if (headerRoleEl) headerRoleEl.textContent = 'Trader';
+
+
 
                 const welcomeEl = document.getElementById('traderWelcomeTitle');
 
+
+
                 if (welcomeEl) welcomeEl.textContent = 'Welcome back!';
+
+
 
                 const statusEl = document.getElementById('traderProfileStatus');
 
+
+
                 if (statusEl) statusEl.textContent = '● Active';
 
+
+
                 const tinEl = document.getElementById('traderProfileTIN');
+
+
 
                 if (tinEl) tinEl.textContent = 'TIN: Not Available';
 
 
 
+
+
+
+
                 currentRole = 'trader';
+
+
 
                 currentUserId = user?.id;
 
+
+
             }
+
+
+
+
 
 
 
             // Fetch dashboard data from Supabase using trader service
+
             const dashboardResult = await fetchTraderDashboardData();
 
+
+
             if (!dashboardResult.success) {
+
                 console.error('Failed to fetch dashboard data:', dashboardResult.error);
+
                 document.getElementById('recentApplicationsList').innerHTML = '<div class="text-sm text-red-500 text-center py-4">Error loading dashboard data</div>';
+
                 return;
+
             }
 
+
+
             const data = dashboardResult.data;
+
             const recentApps = data.applications || [];
+
             const notifications = data.notifications || [];
+
             const statistics = data.statistics || {};
 
 
 
+
+
+
+
             // Update statistics
+
             if (statistics) {
+
                 const statTotal = document.getElementById('statTotal');
+
                 if (statTotal) statTotal.textContent = statistics.totalApplications || 0;
+
                 const statPending = document.getElementById('statPending');
+
                 if (statPending) statPending.textContent = statistics.submittedApplications || 0;
+
                 const statInspection = document.getElementById('statInspection');
+
                 if (statInspection) statInspection.textContent = statistics.underReviewApplications || 0;
+
                 const statApproved = document.getElementById('statApproved');
+
                 if (statApproved) statApproved.textContent = statistics.approvedApplications || 0;
+
                 const statRejected = document.getElementById('statRejected');
+
                 if (statRejected) statRejected.textContent = statistics.rejectedApplications || 0;
+
             }
+
+
+
+
 
 
 
             // Update notification badge
+
             const unreadCount = statistics.unreadNotifications || 0;
+
             const notifBadge = document.getElementById('notificationBadge');
+
             if (notifBadge) {
+
                 notifBadge.textContent = unreadCount;
+
                 notifBadge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+
             }
+
+
+
+
 
 
 
             // Update flow status
+
             if (statistics) {
+
                 const flowSubmitted = document.getElementById('flowSubmitted');
+
                 if (flowSubmitted) flowSubmitted.textContent = statistics.submittedApplications || 0;
+
                 const flowAIValidated = document.getElementById('flowAIValidated');
+
                 if (flowAIValidated) flowAIValidated.textContent = statistics.underReviewApplications || 0;
+
                 const flowOfficerReview = document.getElementById('flowOfficerReview');
+
                 if (flowOfficerReview) flowOfficerReview.textContent = statistics.underReviewApplications || 0;
+
                 const flowCompleted = document.getElementById('flowCompleted');
+
                 if (flowCompleted) flowCompleted.textContent = statistics.completedApplications || 0;
+
             }
+
+
+
+
 
 
 
             // Update recent applications list
+
             if (recentApps && recentApps.length > 0) {
+
                 const appsList = document.getElementById('recentApplicationsList');
+
                 appsList.innerHTML = recentApps.slice(0, 5).map(app => {
+
                     const statusBadge = getStatusBadgeClass(app.status);
+
                     const flowBadge = getFlowBadgeClass(app.status);
+
                     return `
+
                         <div class="flex justify-between items-center border-b pb-2">
+
                             <span class="text-sm font-medium">${app.application_number || 'N/A'}</span>
+
                             <div class="flex items-center gap-2">
+
                                 <span class="status-badge ${statusBadge}">${formatStatus(app.status)}</span>
+
                                 <span class="flow-badge ${flowBadge} text-[0.5rem]">${getFlowStage(app.status)}</span>
+
                             </div>
+
                         </div>
+
                     `;
+
                 }).join('');
+
             } else {
+
                 document.getElementById('recentApplicationsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No applications yet</div>';
+
             }
+
+
+
+
 
 
 
             // Update recent notifications list
+
             if (notifications && notifications.length > 0) {
+
                 const notifList = document.getElementById('recentNotificationsList');
+
                 notifList.innerHTML = notifications.slice(0, 5).map(notif => `
+
                     <div class="notification-item ${notif.read ? '' : 'unread'} p-2">
+
                         <div>
+
                             <span class="font-semibold text-sm">${notif.title}</span>
+
                             <p class="text-xs text-gray-600">${notif.message}</p>
+
                             <span class="notif-time">${formatTimeAgo(notif.created_at)}</span>
+
                         </div>
+
                     </div>
+
                 `).join('');
+
             } else {
+
                 document.getElementById('recentNotificationsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No notifications</div>';
+
             }
+
+
+
+
 
 
 
             // Initialize realtime monitoring
 
+
+
             await initializeRealtimeMonitoring();
 
+
+
         }
+
+
+
+
 
 
 
         async function initializeRealtimeMonitoring() {
+
             await realtimeManager.initialize();
 
+
+
             subscribeToTraderDashboard({
+
                 onApplicationChange: async (payload) => {
+
                     const dashboardResult = await fetchTraderDashboardData();
+
                     if (!dashboardResult.success) return;
+
+
 
                     const data = dashboardResult.data;
+
                     const statistics = data.statistics || {};
+
                     const recentApps = data.applications || [];
 
+
+
                     if (statistics) {
+
                         const oldTotal = parseInt(document.getElementById('statTotal').textContent);
+
                         const newTotal = statistics.totalApplications || 0;
 
+
+
                         document.getElementById('statTotal').textContent = newTotal;
+
                         document.getElementById('statPending').textContent = statistics.submittedApplications || 0;
+
                         document.getElementById('statInspection').textContent = statistics.underReviewApplications || 0;
+
                         document.getElementById('statApproved').textContent = statistics.approvedApplications || 0;
+
                         document.getElementById('statRejected').textContent = statistics.rejectedApplications || 0;
 
+
+
                         document.getElementById('flowSubmitted').textContent = statistics.submittedApplications || 0;
+
                         document.getElementById('flowAIValidated').textContent = statistics.underReviewApplications || 0;
+
                         document.getElementById('flowOfficerReview').textContent = statistics.underReviewApplications || 0;
+
                         document.getElementById('flowCompleted').textContent = statistics.completedApplications || 0;
 
+
+
                         if (oldTotal !== newTotal) {
+
                             realtimeManager.animateStatChange('statTotal', oldTotal, newTotal);
+
                         }
+
                     }
+
+
 
                     if (recentApps && recentApps.length > 0) {
+
                         const appsList = document.getElementById('recentApplicationsList');
+
                         appsList.innerHTML = recentApps.slice(0, 5).map(app => {
+
                             const statusBadge = getStatusBadgeClass(app.status);
+
                             const flowBadge = getFlowBadgeClass(app.status);
+
                             return `
+
                                 <div class="flex justify-between items-center border-b pb-2">
+
                                     <span class="text-sm font-medium">${app.application_number || 'N/A'}</span>
+
                                     <div class="flex items-center gap-2">
+
                                         <span class="status-badge ${statusBadge}">${formatStatus(app.status)}</span>
+
                                         <span class="flow-badge ${flowBadge} text-[0.5rem]">${getFlowStage(app.status)}</span>
+
                                     </div>
+
                                 </div>
+
                             `;
+
                         }).join('');
+
                     } else {
+
                         document.getElementById('recentApplicationsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No applications yet</div>';
+
                     }
+
                 },
+
                 onPaymentChange: async () => {
+
                     const dashboardResult = await fetchTraderDashboardData();
+
                     if (!dashboardResult.success) return;
 
+
+
                     const statistics = dashboardResult.data.statistics || {};
+
                     if (statistics) {
+
                         document.getElementById('statTotal').textContent = statistics.totalApplications || 0;
+
                         document.getElementById('statApproved').textContent = statistics.approvedApplications || 0;
+
                     }
+
                 },
-                onNotificationChange: async () => {
+
+                onNotificationChange: async (payload) => {
+                    if (payload && payload.new && payload.eventType === 'INSERT') {
+                        toastManager.info(payload.new.title || 'Notification', payload.new.message || 'You have a new notification.');
+                    }
+
                     const dashboardResult = await fetchTraderDashboardData();
+
                     if (!dashboardResult.success) return;
 
                     const statistics = dashboardResult.data.statistics || {};
+
                     const notifications = dashboardResult.data.notifications || [];
 
                     const unreadCount = statistics.unreadNotifications || 0;
-                    document.getElementById('notificationBadge').textContent = unreadCount;
-                    document.getElementById('notificationBadge').style.display = unreadCount > 0 ? 'inline-block' : 'none';
 
-                    if (notifications && notifications.length > 0) {
-                        const notifList = document.getElementById('recentNotificationsList');
-                        notifList.innerHTML = notifications.slice(0, 5).map(notif => `
-                            <div class="notification-item ${notif.read ? '' : 'unread'} p-2">
-                                <div>
-                                    <span class="font-semibold text-sm">${notif.title}</span>
-                                    <p class="text-xs text-gray-600">${notif.message}</p>
-                                    <span class="notif-time">${formatTimeAgo(notif.created_at)}</span>
-                                </div>
-                            </div>
-                        `).join('');
-                    } else {
-                        document.getElementById('recentNotificationsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No notifications</div>';
+                    const badge = document.getElementById('notificationBadge');
+                    if (badge) {
+                        badge.textContent = unreadCount;
+                        badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
                     }
-                },
-                onProfileChange: async (payload) => {
-                    realtimeManager.showToastForProfileStatusChange(payload, currentRole, currentUserId);
 
-                    if (payload.new && payload.new.status) {
-                        const statusBadge = document.getElementById('traderProfileStatus');
-                        const displayStatus = payload.new.status;
-                        statusBadge.textContent = `● ${displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}`;
-
-                        if (displayStatus === 'active') {
-                            statusBadge.className = 'inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium';
-                        } else if (displayStatus === 'inactive') {
-                            statusBadge.className = 'inline-block mt-1 text-xs bg-gray-100 text-gray-700 px-2.5 py-0.5 rounded-full font-medium';
-                        } else if (displayStatus === 'suspended') {
-                            statusBadge.className = 'inline-block mt-1 text-xs bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full font-medium';
+                    const notifList = document.getElementById('recentNotificationsList');
+                    if (notifList) {
+                        if (notifications && notifications.length > 0) {
+                            notifList.innerHTML = notifications.slice(0, 5).map(notif => `
+                                <div class="notification-item ${notif.read ? '' : 'unread'} p-2">
+                                    <div>
+                                        <span class="font-semibold text-sm">${notif.title}</span>
+                                        <p class="text-xs text-gray-600">${notif.message}</p>
+                                        <span class="notif-time">${formatTimeAgo(notif.created_at)}</span>
+                                    </div>
+                                </div>
+                            `).join('');
+                        } else {
+                            notifList.innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No notifications</div>';
                         }
                     }
+                },
+
+                onProfileChange: async (payload) => {
+
+                    realtimeManager.showToastForProfileStatusChange(payload, currentRole, currentUserId);
+
+
+
+                    if (payload.new && payload.new.status) {
+
+                        const statusBadge = document.getElementById('traderProfileStatus');
+
+                        const displayStatus = payload.new.status;
+
+                        statusBadge.textContent = `● ${displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1)}`;
+
+
+
+                        if (displayStatus === 'active') {
+
+                            statusBadge.className = 'inline-block mt-1 text-xs bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full font-medium';
+
+                        } else if (displayStatus === 'inactive') {
+
+                            statusBadge.className = 'inline-block mt-1 text-xs bg-gray-100 text-gray-700 px-2.5 py-0.5 rounded-full font-medium';
+
+                        } else if (displayStatus === 'suspended') {
+
+                            statusBadge.className = 'inline-block mt-1 text-xs bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full font-medium';
+
+                        }
+
+                    }
+
+
 
                     if (payload.new && payload.new.status === 'active' && payload.old && payload.old.status === 'pending') {
+
                         setTimeout(() => {
+
                             window.location.reload();
+
                         }, 2000);
+
                     }
+
                 }
+
             }, PAGE_KEY);
+
         }
 
 
 
+
+
+
+
         // Cleanup realtime subscriptions when leaving page
+
         window.addEventListener('beforeunload', () => {
+
             unsubscribeFromTraderDashboard(PAGE_KEY);
+
         });
 
+
+
         // Cleanup on sign out
+
         document.getElementById('signOutBtn')?.addEventListener('click', async () => {
+
             unsubscribeFromTraderDashboard(PAGE_KEY);
+
             const result = await signOut();
+
             if (result.success) {
+
                 toastManager.success('Signed out successfully');
+
                 window.location.href = '../../auth/login.html';
+
             }
+
         });
+
+
+
+
 
 
 
         function getStatusBadgeClass(status) {
 
+
+
             const classes = {
+
+
 
                 draft: 'status-draft',
 
+
+
                 submitted: 'status-pending',
+
+
 
                 pending_review: 'status-review',
 
+
+
                 under_inspection: 'status-inspection',
+
+
 
                 approved: 'status-approved',
 
+
+
                 rejected: 'status-rejected',
+
+
 
                 paid: 'status-approved',
 
+
+
                 completed: 'status-completed',
+
+
 
                 returned: 'status-rejected'
 
+
+
             };
+
+
 
             return classes[status] || 'status-draft';
 
+
+
         }
+
+
+
+
 
 
 
         function getFlowBadgeClass(status) {
 
+
+
             const classes = {
+
+
 
                 submitted: 'flow-badge-ai',
 
+
+
                 pending_review: 'flow-badge-officer',
+
+
 
                 under_inspection: 'flow-badge-inspector',
 
+
+
                 approved: 'flow-badge-supervisor',
+
+
 
                 paid: 'flow-badge-revenue',
 
+
+
                 completed: 'flow-badge-completed'
+
+
 
             };
 
+
+
             return classes[status] || '';
 
+
+
         }
+
+
+
+
 
 
 
         function formatStatus(status) {
 
+
+
             const labels = {
+
+
 
                 draft: 'Draft',
 
+
+
                 submitted: 'Submitted',
+
+
 
                 pending_review: 'Review',
 
+
+
                 under_inspection: 'Inspection',
+
+
 
                 approved: 'Approved',
 
+
+
                 rejected: 'Rejected',
+
+
 
                 paid: 'Paid',
 
+
+
                 completed: 'Completed',
+
+
 
                 returned: 'Returned'
 
+
+
             };
+
+
 
             return labels[status] || status;
 
+
+
         }
+
+
+
+
 
 
 
         function getFlowStage(status) {
 
+
+
             const stages = {
+
+
 
                 submitted: 'AI',
 
+
+
                 pending_review: 'Officer',
+
+
 
                 under_inspection: 'Inspector',
 
+
+
                 approved: 'Supervisor',
+
+
 
                 paid: 'Revenue',
 
+
+
                 completed: '✓ Done'
+
+
 
             };
 
+
+
             return stages[status] || '';
 
+
+
         }
+
+
+
+
 
 
 
         function formatTimeAgo(dateString) {
 
+
+
             const date = new Date(dateString);
+
+
 
             const now = new Date();
 
+
+
             const seconds = Math.floor((now - date) / 1000);
+
+
 
             
 
+
+
             if (seconds < 60) return 'Just now';
+
+
 
             if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
 
+
+
             if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+
+
 
             if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
 
+
+
             return date.toLocaleDateString();
 
+
+
         }
+
+
+
+
 
 
 
         function formatRole(role) {
 
+
+
             const labels = {
+
+
 
                 agent: 'Agent',
 
+
+
                 trader: 'Trader',
+
+
 
                 officer: 'Officer',
 
+
+
                 inspector: 'Inspector',
+
+
 
                 supervisor: 'Supervisor',
 
+
+
                 revenue: 'Revenue Officer',
+
+
 
                 revenue_officer: 'Revenue Officer',
 
+
+
                 administrator: 'Administrator',
+
+
 
                 admin: 'Administrator'
 
+
+
             };
+
+
 
             return labels[String(role || '').toLowerCase()] || 'Trader';
 
+
+
         }
+
+
+
+
 
 
 
@@ -1051,35 +2084,71 @@
 
 
 
+
+
+
+
         // Sign out functionality
+
+
 
         async function handleSignOut() {
 
+
+
             const result = await signOut();
+
+
 
             if (result.success) {
 
+
+
                 window.location.href = '../../auth/login.html';
+
+
 
             } else {
 
+
+
                 alert('Sign out failed: ' + result.error);
 
+
+
             }
+
+
 
         }
 
 
 
+
+
+
+
         const signOutBtn = document.getElementById('signOutBtn');
+
         if (signOutBtn) signOutBtn.addEventListener('click', handleSignOut);
 
+
+
         const dropdownSignOut = document.getElementById('dropdownSignOut');
+
         if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleSignOut);
+
+
 
     </script>
 
+
+
 </body>
+
+
+
+
 
 
 

@@ -1,139 +1,264 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>SSRA Customs · Search Vehicle</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <link href="../assets/icons/remixicon.css" rel="stylesheet" />
     <script type="module" src="../../js/trader-sidebar.js"></script>
+
     <style>
+
         .gradient-bg { background: linear-gradient(135deg, #0a4d3e 0%, #0a6b58 100%); }
+
         .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
+
         .sidebar-link:hover, .sidebar-link.active { background-color: #ecfdf5; color: #0a4d3e; }
+
         .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+
         .form-group { margin-bottom: 1rem; }
+
         .form-group label { display: block; font-size: 0.8rem; font-weight: 500; color: #374151; margin-bottom: 0.2rem; }
+
         .form-group .form-input { width: 100%; padding: 0.4rem 0.6rem; border-radius: 0.4rem; border: 1px solid #d1d5db; font-size: 0.85rem; transition: border-color 0.2s; }
+
         .form-group .form-input:focus { outline: none; border-color: #0a4d3e; box-shadow: 0 0 0 3px rgba(10,77,62,0.1); }
+
         .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
+
         .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
         .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
+
         .profile-dropdown a:hover { background: #ecfdf5; color: #0a4d3e; }
+
         .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
+
         .profile-dropdown .danger { color: #dc2626; }
+
         .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
+
         .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
+
         .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
+
         .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #0a4d3e; }
+
         .search-tip { background: #f0fdf4; border: 1px solid #86efac; border-radius: 0.5rem; padding: 0.75rem 1rem; }
+
     </style>
+
 </head>
+
 <body>
+
     <div class="min-h-screen bg-gray-100">
+
         <div class="max-w-7xl mx-auto px-4 py-5">
+
             <div class="flex flex-col lg:flex-row gap-6">
+
                 <aside class="lg:w-72 flex-shrink-0">
                     <div id="trader-sidebar"></div>
                 </aside>
 
+
+
                 <main class="flex-1 space-y-5">
+
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
+
                         <div>
+
                             <h2 class="text-2xl font-bold tracking-tight">🚗 Vehicle Registration Query</h2>
+
                             <p class="opacity-90 text-sm">Search for vehicle registration and customs information</p>
+
                         </div>
+
                         <div class="relative">
+
                             <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
+
                                 <span class="avatar-sm"><i class="ri-user-line"></i></span>
+
                                 <span class="text-sm font-medium hidden sm:inline">Trader</span>
+
                                 <i class="ri-arrow-down-s-line text-sm"></i>
+
                             </button>
+
                             <div class="profile-dropdown" id="profileDropdown">
+
                                 <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
+
                                 <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
+
                                 <div class="divider"></div>
+
                                 <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+
                             </div>
+
                         </div>
+
                     </div>
+
+
 
                     <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+
                         <h3 class="font-bold text-lg mb-4">Search Vehicle</h3>
+
                         <div class="grid md:grid-cols-3 gap-4">
+
                             <div class="form-group">
+
                                 <label>Chassis Number (VIN) <span class="text-red-500">*</span></label>
+
                                 <input type="text" id="vinInput" class="form-input" placeholder="Enter 17-digit VIN" />
+
                             </div>
+
                             <div class="form-group">
+
                                 <label>Registration Number</label>
+
                                 <input type="text" id="regInput" class="form-input" placeholder="Enter plate number" />
+
                             </div>
+
                             <div class="form-group">
+
                                 <label>Declaration Number</label>
+
                                 <input type="text" id="declInput" class="form-input" placeholder="Enter declaration ref" />
+
                             </div>
+
                         </div>
+
+
 
                         <div class="search-tip mt-4">
+
                             <p class="text-sm text-emerald-800"><i class="ri-information-line mr-2"></i>Enter at least one search criterion. VIN is recommended for accurate results.</p>
+
                         </div>
+
+
 
                         <div class="flex gap-3 mt-4">
+
                             <button id="searchBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+
                                 <i class="ri-search-line"></i> Search Vehicle
+
                             </button>
+
                             <button id="clearBtn" class="border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-semibold transition">Clear</button>
+
                         </div>
+
                     </div>
+
+
 
                     <div id="searchLoading" class="text-center py-8 hidden">
+
                         <i class="ri-loader-4-line animate-spin text-2xl text-emerald-600"></i>
+
                         <p class="text-gray-500 mt-2">Searching vehicle database...</p>
+
                     </div>
+
                     <div id="searchEmpty" class="hidden text-center py-8">
+
                         <i class="ri-car-line text-4xl text-gray-300"></i>
+
                         <p class="text-gray-500 mt-2">No vehicle found matching your search criteria</p>
+
                     </div>
+
                     <div id="searchError" class="hidden bg-red-50 border border-red-200 rounded-lg p-4">
+
                         <p class="text-red-700" id="errorMessage">Error searching vehicle</p>
+
                         <button onclick="searchVehicle()" class="mt-2 text-sm text-red-600 hover:underline">Retry</button>
+
                     </div>
+
+
 
                     <!-- Recent Searches -->
+
                     <div id="recentSearches" class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+
                         <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-time-line text-emerald-500 mr-2"></i>Recent Searches</h3>
+
                         <div id="recentSearchesList" class="space-y-3">
+
                             <p class="text-gray-500 text-sm">No recent searches</p>
+
                         </div>
+
                     </div>
+
                 </main>
+
             </div>
+
         </div>
+
     </div>
+
     <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
 
+
         import { checkPageAuth, signOut } from '../../js/auth-check.js';
+
         
         import { signOut as authSignOut } from '../../js/auth.js';
+
         
         import { getUnreadCount } from '../../js/notifications.js';
+
         
         import toastManager from '../../js/toast.js';
+
         
         import { searchVehicles } from '../../js/vehicle-service.js';
+
         
         import supabase from '../../js/supabase.js';
 
+
+
         
         document.addEventListener('click', function(e) {
+
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
+
                 document.getElementById('profileDropdown').classList.remove('open');
+
             }
+
         });
 
+
+
         // Check authentication
+
         await checkPageAuth('trader');
 
         // Load trader profile
@@ -143,137 +268,276 @@
         await loadCurrentUserProfile();
 
         // Sign out handler
+
         const signOutBtn = document.getElementById('signOutBtn');
+
         if (signOutBtn) {
+
             signOutBtn.addEventListener('click', async () => {
+
                 const result = await authSignOut();
+
                 if (result.success) {
+
                     window.location.href = '../../auth/login.html';
+
                 }
+
             });
+
         }
+
+
 
         let recentSearches = JSON.parse(localStorage.getItem('recent_vehicle_searches') || '[]');
 
+
+
         async function searchVehicle() {
+
             const vin = document.getElementById('vinInput').value.trim();
+
             const reg = document.getElementById('regInput').value.trim();
+
             const decl = document.getElementById('declInput').value.trim();
 
+
+
             if (!vin && !reg && !decl) {
+
                 toastManager.warning('Please enter at least one search criterion');
+
                 return;
+
             }
 
+
+
             document.getElementById('searchLoading').classList.remove('hidden');
+
             document.getElementById('searchEmpty').classList.add('hidden');
+
             document.getElementById('searchError').classList.add('hidden');
 
+
+
             try {
+
                 let query = supabase.from('vehicles').select('*');
+
                 
+
                 if (vin) query = query.ilike('vin', `%${vin}%`);
+
                 if (reg) query = query.ilike('registration_number', `%${reg}%`);
+
                 if (decl) query = query.ilike('declaration_number', `%${decl}%`);
+
+
 
                 const { data, error } = await query.limit(1);
 
+
+
                 if (error) throw error;
 
+
+
                 if (!data || data.length === 0) {
+
                     document.getElementById('searchLoading').classList.add('hidden');
+
                     document.getElementById('searchEmpty').classList.remove('hidden');
+
                     toastManager.info('No vehicles found matching your search');
+
                     return;
+
                 }
 
+
+
                 const vehicle = data[0];
+
                 
+
                 // Save to recent searches
+
                 addToRecentSearches(vehicle);
+
                 
+
                 toastManager.success('Vehicle found');
+
                 // Navigate to vehicle information page with vehicle ID
+
                 window.location.href = `vehicle-information.html?id=${vehicle.id}`;
 
+
+
             } catch (error) {
+
                 console.error('Search vehicle error:', error);
+
                 document.getElementById('searchLoading').classList.add('hidden');
+
                 document.getElementById('searchError').classList.remove('hidden');
+
                 document.getElementById('errorMessage').textContent = 'Error searching vehicle: ' + error.message;
+
                 toastManager.error('Error searching vehicle: ' + error.message);
+
             }
+
         }
+
+
 
         function addToRecentSearches(vehicle) {
+
             const search = {
+
                 vin: vehicle.vin,
+
                 registration: vehicle.registration_number,
+
                 make: vehicle.make,
+
                 model: vehicle.model,
+
                 year: vehicle.year,
+
                 id: vehicle.id,
+
                 timestamp: new Date().toISOString()
+
             };
 
+
+
             // Remove duplicate if exists
+
             recentSearches = recentSearches.filter(s => s.id !== vehicle.id);
+
             // Add to beginning
+
             recentSearches.unshift(search);
+
             // Keep only last 10
+
             recentSearches = recentSearches.slice(0, 10);
+
             
+
             localStorage.setItem('recent_vehicle_searches', JSON.stringify(recentSearches));
+
             renderRecentSearches();
+
         }
+
+
 
         function renderRecentSearches() {
+
             const container = document.getElementById('recentSearchesList');
+
             
+
             if (recentSearches.length === 0) {
+
                 container.innerHTML = '<p class="text-gray-500 text-sm">No recent searches</p>';
+
                 return;
+
             }
+
+
 
             container.innerHTML = recentSearches.map(search => `
+
                 <div class="flex justify-between items-center border-b pb-2">
+
                     <div>
+
                         <span class="font-medium">${search.vin}</span>
+
                         <p class="text-xs text-gray-500">${search.make} ${search.model} · ${search.year}</p>
+
                     </div>
+
                     <a href="vehicle-information.html?id=${search.id}" class="text-emerald-600 text-sm hover:underline">View Results</a>
+
                 </div>
+
             `).join('');
+
         }
+
+
 
         function clearSearch() {
+
             document.getElementById('vinInput').value = '';
+
             document.getElementById('regInput').value = '';
+
             document.getElementById('declInput').value = '';
+
         }
+
+
 
         // Event listeners
+
         document.getElementById('searchBtn').addEventListener('click', searchVehicle);
+
         document.getElementById('clearBtn').addEventListener('click', clearSearch);
 
+
+
         // Expose functions
+
         window.searchVehicle = searchVehicle;
 
+
+
         // Render recent searches on load
+
         renderRecentSearches();
 
+
+
         // Update notification badge
+
         async function updateNotificationBadge() {
+
             const result = await getUnreadCount();
+
             if (result.success && result.count > 0) {
+
                 const badge = document.getElementById('notificationBadge');
-                badge.textContent = result.count;
-                badge.classList.remove('hidden');
+                if (badge) {
+                    badge.textContent = result.count;
+                    badge.classList.remove('hidden');
+                }
+
             }
+
         }
+
         updateNotificationBadge();
+
     </script>
+
 </body></html>
+
+
+
+
+
+
+
+
 
 
 

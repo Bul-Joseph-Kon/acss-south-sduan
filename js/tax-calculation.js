@@ -300,7 +300,7 @@ export async function getTaxCalculation(applicationId) {
             .from('tax_calculations')
             .select('*')
             .eq('application_id', applicationId)
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
 
@@ -408,15 +408,15 @@ export async function generatePaymentInvoice(applicationId, invoiceData) {
         const invoice = {
             invoice_number: invoiceNumber,
             application_id: applicationId,
-            application_number: application.application_number,
-            applicant_name: application.applicant_name || application.company_name,
-            applicant_email: application.applicant_email,
-            calculation_data: calculation,
-            total_amount: calculation.totalPayable,
+            subtotal: calculation.subtotal || 0,
+            duty_amount: calculation.dutyAmount || 0,
+            tax_amount: calculation.taxAmount || calculation.totalPayable || 0,
+            fees_amount: calculation.feesAmount || 0,
+            total_amount: calculation.totalPayable || 0,
+            issued_at: new Date().toISOString(),
+            due_at: invoiceData.dueDate ? new Date(invoiceData.dueDate).toISOString() : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
             status: 'pending',
-            due_date: invoiceData.dueDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
-            created_by: invoiceData.officerId,
-            created_at: new Date().toISOString()
+            generated_by: invoiceData.officerId
         };
 
         const { data: createdInvoice, error: insertError } = await supabase
@@ -427,13 +427,11 @@ export async function generatePaymentInvoice(applicationId, invoiceData) {
 
         if (insertError) throw insertError;
 
-        // Update application status
+        // Update application status - keep as approved since invoice is created
+        // The invoice table tracks payment status separately
         await supabase
             .from('applications')
             .update({
-                status: 'awaiting_payment',
-                invoice_id: createdInvoice.id,
-                invoice_number: invoiceNumber,
                 updated_at: new Date().toISOString()
             })
             .eq('id', applicationId);

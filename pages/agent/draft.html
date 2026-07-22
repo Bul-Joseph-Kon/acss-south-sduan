@@ -80,10 +80,10 @@
 
                     <!-- Action Buttons -->
                     <div class="flex flex-wrap gap-3">
-                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="alert('📄 Creating new application')">
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition" onclick="window.createNewApplication()">
                             <i class="ri-add-line mr-1"></i> New Application
                         </button>
-                        <button class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition" onclick="alert('🗑️ All drafts cleared')">
+                        <button class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50 transition" onclick="window.clearAllDrafts()">
                             <i class="ri-delete-bin-line mr-1"></i> Clear All Drafts
                         </button>
                     </div>
@@ -218,7 +218,7 @@
                                 </div>
                                 <div class="flex gap-2">
                                     <a href="${continueLink}" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Continue</a>
-                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="deleteDraft('${draft.id}')">Delete</button>
+                                    <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="window.deleteDraft('${draft.id}')">Delete</button>
                                 </div>
                             </div>
                         </div>
@@ -279,6 +279,46 @@
             }
         }
 
+        // Expose deleteDraft to window for onclick handlers
+        window.deleteDraft = deleteDraft;
+
+        async function createNewApplication() {
+            window.location.href = 'create-declaration.html';
+        }
+
+        async function clearAllDrafts() {
+            if (!confirm('Are you sure you want to delete all draft applications? This action cannot be undone.')) return;
+
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                const profile = user ? await getUserProfile(user.id) : null;
+
+                if (!profile) {
+                    alert('Error: Unable to identify user');
+                    return;
+                }
+
+                const { error } = await supabase
+                    .from('applications')
+                    .delete()
+                    .eq('agent_id', profile.id)
+                    .eq('status', 'draft');
+
+                if (error) throw error;
+
+                // Reload drafts
+                await loadDrafts(profile.id);
+                alert('All drafts cleared successfully');
+            } catch (error) {
+                console.error('Error clearing drafts:', error);
+                alert('Error clearing drafts');
+            }
+        }
+
+        // Expose functions to window for onclick handlers
+        window.createNewApplication = createNewApplication;
+        window.clearAllDrafts = clearAllDrafts;
+
         function setupRealtimeSubscriptions(profileId) {
             // Subscribe to applications table changes
             const appChannel = supabase
@@ -303,4 +343,3 @@
         }
     </script>
 </body></html>
-

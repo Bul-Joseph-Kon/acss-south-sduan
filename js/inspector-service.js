@@ -24,11 +24,11 @@ async function getInspectionQueue() {
             .from('applications')
             .select(`
                 *,
-                profiles:agent_id(full_name, email, phone),
-                profiles:officer_id(full_name)
+                agent_profile:profiles!agent_id(full_name, email, phone),
+                officer_profile:profiles!officer_id(full_name)
             `)
             .eq('status', 'under_inspection')
-            .order('reviewed_at', { ascending: false });
+            .order('assigned_at', { ascending: false });
 
         if (error) throw error;
 
@@ -57,13 +57,35 @@ async function recordInspection(applicationId, inspectionData) {
 
         if (fetchError) throw fetchError;
 
-        // Update application with inspection report
+        // Create inspection report
+        const { data: inspectionReport, error: reportError } = await supabase
+            .from('inspection_reports')
+            .insert({
+                application_id: applicationId,
+                inspector_id: profile.id,
+                inspection_date: new Date().toISOString(),
+                inspection_location: inspectionData.location || 'Customs Warehouse',
+                container_number: inspectionData.container_number,
+                findings_summary: inspectionData.findings_summary,
+                discrepancies: inspectionData.discrepancies,
+                violations: inspectionData.violations,
+                recommendation: inspectionData.recommendation,
+                recommendation_reason: inspectionData.recommendation_reason,
+                supporting_documents: inspectionData.supporting_documents || [],
+                status: 'submitted'
+            })
+            .select()
+            .single();
+
+        if (reportError) throw reportError;
+
+        // Update application status to inspection_completed
         const { data: updatedApp, error } = await supabase
             .from('applications')
             .update({
+                inspection_report_id: inspectionReport.id,
+                status: 'inspection_completed',
                 inspector_id: profile.id,
-                inspection_report: inspectionData,
-                inspection_completed_at: new Date().toISOString(),
                 inspected_at: new Date().toISOString()
             })
             .eq('id', applicationId)
@@ -72,22 +94,42 @@ async function recordInspection(applicationId, inspectionData) {
 
         if (error) throw error;
 
+        // Log workflow transition
+        await supabase.from('workflow_logs').insert({
+            application_id: applicationId,
+            from_status: 'under_inspection',
+            to_status: 'inspection_completed',
+            action: 'inspection_completed',
+            notes: `Inspection completed with recommendation: ${inspectionData.recommendation}`,
+            performed_by: profile.id
+        });
+
         // Create activity log
         await createActivityLog(
             profile.id,
-            'inspection_recorded',
-            `Inspection recorded for application ${updatedApp.application_number}`,
-            { application_id: applicationId, inspection_data: inspectionData }
+            'inspection_completed',
+            `Inspection completed for application ${updatedApp.application_number}`,
+            { application_id: applicationId, inspection_report_id: inspectionReport.id }
         );
 
         // Create audit log
         await createAuditLog(
             profile.id,
-            'UPDATE',
-            'applications',
+            'INSERT',
+            'inspection_reports',
+            inspectionReport.id,
+            null,
+            { recommendation: inspectionData.recommendation }
+        );
+
+        // Notify customs officer
+        await createNotification(
+            currentApp.officer_id,
+            'Inspection Completed',
+            `Inspection report submitted for application ${updatedApp.application_number}. Recommendation: ${inspectionData.recommendation}`,
+            'info',
             applicationId,
-            { inspection_report: currentApp.inspection_report },
-            { inspection_report: inspectionData }
+            'application'
         );
 
         console.log('Inspection recorded:', updatedApp.application_number);

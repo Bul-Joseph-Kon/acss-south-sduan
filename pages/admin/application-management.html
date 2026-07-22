@@ -129,6 +129,7 @@
         import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
         import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { fetchApplicationsForRole } from '../../js/applications.js';
+        import supabase from '../../js/supabase.js';
 
         let currentPage = 1;
         let applicationsPerPage = 10;
@@ -223,16 +224,71 @@
             return statusMap[status] || 'status-pending';
         }
 
-        window.viewApplication = function(id) {
-            alert('View application - ID: ' + id);
+        window.viewApplication = async function(id) {
+            try {
+                const { data: application, error } = await supabase
+                    .from('applications')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                // Show application details in a modal
+                const modalHtml = `
+                    <div id="viewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div class="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold">Application Details</h3>
+                                <button onclick="document.getElementById('viewModal').remove()" class="text-gray-500 hover:text-gray-700">
+                                    <i class="ri-close-line text-2xl"></i>
+                                </button>
+                            </div>
+                            <div class="space-y-3">
+                                <p><strong>Application Number:</strong> ${application.application_number || 'N/A'}</p>
+                                <p><strong>Status:</strong> ${application.status || 'N/A'}</p>
+                                <p><strong>Application Type:</strong> ${application.application_type || 'N/A'}</p>
+                                <p><strong>Created At:</strong> ${new Date(application.created_at).toLocaleString()}</p>
+                                <p><strong>Updated At:</strong> ${new Date(application.updated_at).toLocaleString()}</p>
+                                <hr>
+                                <p><strong>Declaration Data:</strong></p>
+                                <pre class="bg-gray-100 p-3 rounded text-xs overflow-auto">${JSON.stringify(application.declaration_data, null, 2)}</pre>
+                                <p><strong>Goods Data:</strong></p>
+                                <pre class="bg-gray-100 p-3 rounded text-xs overflow-auto">${JSON.stringify(application.goods_data, null, 2)}</pre>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            } catch (error) {
+                console.error('Error viewing application:', error);
+                alert('Error loading application details');
+            }
         };
 
         window.editApplication = function(id) {
-            alert('Edit application - ID: ' + id);
+            // Navigate to edit page with application ID
+            window.location.href = `../agent/create-declaration.html?id=${id}`;
         };
 
-        window.deleteApplication = function(id) {
-            alert('Delete application - ID: ' + id);
+        window.deleteApplication = async function(id) {
+            if (!confirm('Are you sure you want to delete this application? This action cannot be undone.')) return;
+
+            try {
+                const { error } = await supabase
+                    .from('applications')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                // Reload applications
+                await loadApplications();
+                alert('Application deleted successfully');
+            } catch (error) {
+                console.error('Error deleting application:', error);
+                alert('Error deleting application');
+            }
         };
 
         document.addEventListener('DOMContentLoaded', loadPage);

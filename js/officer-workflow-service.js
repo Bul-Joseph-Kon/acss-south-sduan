@@ -11,6 +11,22 @@ import {
     logApplicationRejection, 
     logApplicationReturn 
 } from './logging-service.js';
+import { generateInvoice } from './payment-service.js';
+
+async function createNotification(userId, title, message, type = 'info', referenceId = null, referenceType = null) {
+    try {
+        await supabase.from('notifications').insert({
+            user_id: userId,
+            title,
+            message,
+            type,
+            reference_id: referenceId,
+            reference_type: referenceType
+        });
+    } catch (error) {
+        console.error('Error creating notification:', error);
+    }
+}
 
 // ================================================================
 // OFFICER OPERATIONS
@@ -36,7 +52,95 @@ export async function approveApplication(applicationId, notes = '') {
         if (fetchError) throw fetchError;
         if (!application) throw new Error('Application not found');
 
+        // Check if application requires supervisor escalation
+        const requiresEscalation = application.declared_value > 100000 || // High value threshold
+                                   application.risk_assessments?.[0]?.risk_level === 'high' ||
+                                   application.requires_supervisor_review;
+
         // Update application status
+        const newStatus = requiresEscalation ? 'pending_supervisor' : 'awaiting_payment';
+        
+        const { error: updateError } = await supabase
+            .from('applications')
+            .update({
+                status: newStatus,
+                officer_id: profile.id,
+                reviewed_at: new Date().toISOString(),
+                notes: notes || application.notes
+            })
+            .eq('id', applicationId);
+
+        if (updateError) throw updateError;
+
+        // Log the approval
+        await logApplicationApproval(
+            applicationId, 
+            application.agent_id || application.user_id, 
+            application.application_number,
+            profile.id
+        );
+
+        // If not escalated, generate invoice automatically
+        if (!requiresEscalation) {
+            await generateInvoice(applicationId);
+            
+            // Notify agent
+            await createNotification(
+                application.agent_id || application.user_id,
+                'Declaration Approved',
+                `Your declaration ${application.application_number} has been approved. Invoice has been generated.`,
+                'success',
+                applicationId,
+                'application'
+            );
+        } else {
+            // Create escalation record
+            await supabase.from('escalated_cases').insert({
+                application_id: applicationId,
+                escalation_reason: requiresEscalation ? 'high_value_or_risk' : 'manual_review',
+                escalated_by: profile.id,
+                status: 'pending'
+            });
+            
+            // Notify supervisor
+            await createNotification(
+                profile.id,
+                'Application Escalated',
+                `Application ${application.application_number} has been escalated for supervisor review.`,
+                'warning',
+                applicationId,
+                'application'
+            );
+        }
+
+        return { success: true, message: 'Application approved and invoice generated' };
+    } catch (error) {
+        console.error('Error approving application:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Approve and send to inspection (if inspection is required)
+ */
+export async function approveAndSendToInspection(applicationId, notes = '') {
+    try {
+        const profile = await getUserProfile();
+        if (!profile) {
+            return { success: false, error: 'User profile not found' };
+        }
+
+        // Get application details
+        const { data: application, error: fetchError } = await supabase
+            .from('applications')
+            .select('*')
+            .eq('id', applicationId)
+            .single();
+
+        if (fetchError) throw fetchError;
+        if (!application) throw new Error('Application not found');
+
+        // Update application status to under_inspection
         const { error: updateError } = await supabase
             .from('applications')
             .update({
@@ -109,6 +213,16 @@ export async function returnApplication(applicationId, returnReason) {
             returnReason
         );
 
+        // Notify agent
+        await createNotification(
+            application.agent_id || application.user_id,
+            'Declaration Returned',
+            `Your declaration ${application.application_number} has been returned for corrections. Reason: ${returnReason}`,
+            'warning',
+            applicationId,
+            'application'
+        );
+
         return { success: true, message: 'Application returned to agent' };
     } catch (error) {
         console.error('Error returning application:', error);
@@ -159,6 +273,16 @@ export async function rejectApplication(applicationId, rejectionReason) {
             application.agent_id || application.user_id,
             application.application_number,
             rejectionReason
+        );
+
+        // Notify agent
+        await createNotification(
+            application.agent_id || application.user_id,
+            'Declaration Rejected',
+            `Your declaration ${application.application_number} has been rejected. Reason: ${rejectionReason}`,
+            'error',
+            applicationId,
+            'application'
         );
 
         return { success: true, message: 'Application rejected' };

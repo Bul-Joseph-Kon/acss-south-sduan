@@ -30,13 +30,16 @@
 
                 // Load statistics
                 const statsResult = await getOfficerStatistics();
-                if (statsResult.success) {
+                if (statsResult.success && statsResult.statistics) {
                     const stats = statsResult.statistics;
-                    updateDashboardCount('pendingReviewCount', stats.pending_review);
-                    updateDashboardCount('approvedCount', stats.approved);
-                    updateDashboardCount('rejectedCount', stats.rejected);
-                    updateDashboardCount('returnedCount', stats.returned);
-                    updateDashboardCount('inspectionCount', stats.under_inspection);
+                    const elPending = document.getElementById('statPendingReviews');
+                    if (elPending) elPending.textContent = stats.pending_review || 0;
+                    const elUnder = document.getElementById('statUnderReview');
+                    if (elUnder) elUnder.textContent = stats.under_inspection || 0;
+                    const elApproved = document.getElementById('statApproved');
+                    if (elApproved) elApproved.textContent = stats.approved || 0;
+                    const elRejected = document.getElementById('statRejected');
+                    if (elRejected) elRejected.textContent = (stats.rejected || 0) + (stats.returned || 0);
                 }
 
                 // Load pending applications
@@ -44,15 +47,33 @@
                 if (appsResult.success && appsResult.data) {
                     const appsContainer = document.getElementById('pendingApplicationsList');
                     if (appsContainer) {
-                        appsContainer.innerHTML = appsResult.data.slice(0, 5).map(app => `
+                        appsContainer.innerHTML = appsResult.data.slice(0, 5).map(app => {
+                            const aiResults = app.ai_validation_results || {};
+                            const riskScore = aiResults.validation_score || 0;
+                            const riskLevel = aiResults.risk_level || 'unknown';
+                            
+                            const riskColors = {
+                                'low': 'bg-green-100 text-green-700',
+                                'medium': 'bg-yellow-100 text-yellow-700',
+                                'high': 'bg-orange-100 text-orange-700',
+                                'critical': 'bg-red-100 text-red-700'
+                            };
+                            const riskColor = riskColors[riskLevel] || 'bg-gray-100 text-gray-700';
+                            
+                            return `
                             <div class="flex justify-between items-center border-b pb-2">
                                 <div class="flex-1">
                                     <div class="text-sm font-medium">${app.application_number || 'N/A'}</div>
                                     <div class="text-xs text-gray-500">${app.profiles?.full_name || 'Unknown Agent'}</div>
+                                    <div class="text-xs text-gray-400 mt-1">AI Risk Score: ${riskScore}%</div>
                                 </div>
-                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${riskColor}">${riskLevel}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Under Review</span>
+                                </div>
                             </div>
-                        `).join('');
+                        `;
+                        }).join('');
                     }
                 }
 
@@ -69,6 +90,11 @@
                     },
                     onActivityLog: (payload) => {
                         console.log('Activity log:', payload);
+                    },
+                    onAIValidationResult: (payload) => {
+                        console.log('AI validation result:', payload);
+                        loadOfficerDashboard();
+                        showToastNotification('AI validation completed', 'info');
                     }
                 });
 
@@ -120,7 +146,7 @@
                 <main class="flex-1 space-y-5">
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
-                            <h2 class="text-2xl font-bold tracking-tight">👋 Welcome, Officer</h2>
+                            <h2 class="text-2xl font-bold tracking-tight"> Welcome, Officer</h2>
                             <p class="opacity-90 text-sm">Review and manage customs applications</p>
                         </div>
                         <div class="relative">
@@ -157,12 +183,18 @@
                         </div>
                     </div>
 
-                    <!-- Queue Overview -->
-                    <div class="grid lg:grid-cols-2 gap-4">
+                    <!-- Queue Overview & Applications -->
+                    <div class="grid lg:grid-cols-3 gap-4">
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                             <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-file-copy-line text-blue-500 mr-2"></i>Review Queues</h3>
                             <div class="space-y-2" id="reviewQueues">
                                 <div class="text-sm text-gray-500 text-center py-4">Loading queues...</div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                            <h3 class="font-bold text-sm mb-3 flex items-center"><i class="ri-search-eye-line text-blue-500 mr-2"></i>Pending Review Applications</h3>
+                            <div class="space-y-2" id="pendingApplicationsList">
+                                <div class="text-sm text-gray-500 text-center py-4">Loading applications...</div>
                             </div>
                         </div>
                         <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
@@ -179,6 +211,7 @@
     <script type="module">
         import supabase from '../../js/supabase.js';
         import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
+        import { getOfficerStatistics } from '../../js/officer-service.js';
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
         import { fetchApplicationsForRole } from '../../js/applications.js';
         import { fetchUnreadNotifications } from '../../js/notifications.js';
@@ -249,25 +282,31 @@
         }
 
         async function loadStats() {
-            const stats = await fetchDashboardData('officer');
-            if (stats) {
-                document.getElementById('statPendingReviews').textContent = stats.pending || 0;
-                document.getElementById('statUnderReview').textContent = stats.underReview || 0;
-                document.getElementById('statApproved').textContent = stats.approved || 0;
-                document.getElementById('statRejected').textContent = stats.rejected || 0;
+            const statsResult = await getOfficerStatistics();
+            if (statsResult.success && statsResult.statistics) {
+                const stats = statsResult.statistics;
+                const elPending = document.getElementById('statPendingReviews');
+                if (elPending) elPending.textContent = stats.pending_review || 0;
+                const elUnder = document.getElementById('statUnderReview');
+                if (elUnder) elUnder.textContent = stats.under_inspection || 0;
+                const elApproved = document.getElementById('statApproved');
+                if (elApproved) elApproved.textContent = stats.approved || 0;
+                const elRejected = document.getElementById('statRejected');
+                if (elRejected) elRejected.textContent = (stats.rejected || 0) + (stats.returned || 0);
             }
         }
 
         async function loadQueuesOverview() {
-            const result = await fetchApplicationsForRole('officer', { limit: 100 });
+            const result = await fetchApplicationsForRole('officer', { limit: 100, includeAll: true });
             const queues = { cvet: 0, direct_assessment: 0, agent_license: 0, vehicle_query: 0 };
             
             if (result.success && result.data) {
                 result.data.forEach(app => {
-                    if (app.service_type === 'cvet' || !app.service_type) queues.cvet++;
-                    else if (app.service_type === 'direct_assessment') queues.direct_assessment++;
-                    else if (app.service_type === 'agent_license') queues.agent_license++;
-                    else if (app.service_type === 'vehicle_query') queues.vehicle_query++;
+                    const serviceType = (app.service_type || '').toLowerCase();
+                    if (!app.service_type || serviceType === 'cvet' || serviceType.includes('cvet declaration')) queues.cvet++;
+                    else if (serviceType === 'direct_assessment') queues.direct_assessment++;
+                    else if (serviceType === 'agent_license') queues.agent_license++;
+                    else if (serviceType === 'vehicle_query') queues.vehicle_query++;
                 });
             }
 

@@ -24,11 +24,11 @@ async function getPendingReviewApplications() {
             .from('applications')
             .select(`
                 *,
-                profiles:agent_id(full_name, email),
-                risk_assessments(risk_level, overall_score)
+                agent_profile:profiles!agent_id(full_name, email),
+                ai_validation_results!ai_validation_results_application_id_fkey(*)
             `)
-            .eq('status', 'pending_review')
-            .order('submitted_at', { ascending: false });
+            .in('status', ['under_review', 'under_inspection'])
+            .order('created_at', { ascending: false });
 
         if (error) throw error;
 
@@ -72,6 +72,16 @@ async function approveApplication(applicationId, notes) {
             .single();
 
         if (error) throw error;
+
+        // Log workflow transition
+        await supabase.from('workflow_logs').insert({
+            application_id: applicationId,
+            from_status: currentApp.status,
+            to_status: 'approved',
+            action: 'application_approved',
+            notes: notes || 'Application approved by officer',
+            performed_by: profile.id
+        });
 
         // Create activity log
         await createActivityLog(
@@ -146,6 +156,16 @@ async function returnApplication(applicationId, returnReason, notes) {
 
         if (error) throw error;
 
+        // Log workflow transition
+        await supabase.from('workflow_logs').insert({
+            application_id: applicationId,
+            from_status: currentApp.status,
+            to_status: 'returned',
+            action: 'application_returned',
+            notes: returnReason,
+            performed_by: profile.id
+        });
+
         // Create activity log
         await createActivityLog(
             profile.id,
@@ -216,6 +236,16 @@ async function rejectApplication(applicationId, rejectionReason, notes) {
 
         if (error) throw error;
 
+        // Log workflow transition
+        await supabase.from('workflow_logs').insert({
+            application_id: applicationId,
+            from_status: currentApp.status,
+            to_status: 'rejected',
+            action: 'application_rejected',
+            notes: rejectionReason,
+            performed_by: profile.id
+        });
+
         // Create activity log
         await createActivityLog(
             profile.id,
@@ -277,6 +307,7 @@ async function sendForInspection(applicationId, inspectionType, notes) {
                 status: 'under_inspection',
                 officer_id: profile.id,
                 reviewed_at: new Date().toISOString(),
+                inspection_required: true,
                 inspection_type: inspectionType,
                 notes: notes || currentApp.notes
             })
@@ -286,12 +317,22 @@ async function sendForInspection(applicationId, inspectionType, notes) {
 
         if (error) throw error;
 
+        // Log workflow transition
+        await supabase.from('workflow_logs').insert({
+            application_id: applicationId,
+            from_status: currentApp.status,
+            to_status: 'under_inspection',
+            action: 'inspection_assigned',
+            notes: `${inspectionType} inspection requested`,
+            performed_by: profile.id
+        });
+
         // Create activity log
         await createActivityLog(
             profile.id,
             'inspection_requested',
             `Application ${updatedApp.application_number} sent for ${inspectionType} inspection`,
-            { application_id: applicationId, inspection_type }
+            { application_id: applicationId, inspection_type: inspectionType }
         );
 
         // Create audit log
@@ -301,7 +342,7 @@ async function sendForInspection(applicationId, inspectionType, notes) {
             'applications',
             applicationId,
             { status: currentApp.status },
-            { status: 'under_inspection', inspection_type }
+            { status: 'under_inspection', inspection_type: inspectionType }
         );
 
         // Notify agent
@@ -333,7 +374,7 @@ async function getApplicationById(applicationId) {
                 *,
                 profiles:agent_id(full_name, email, phone),
                 risk_assessments(risk_level, overall_score, recommendations),
-                ai_validation_results(validation_type, status, results)
+                ai_validation_results!ai_validation_results_application_id_fkey(validation_type, status, results)
             `)
             .eq('id', applicationId)
             .single();
@@ -357,7 +398,7 @@ async function getOfficerStatistics() {
         }
 
         const [pendingResult, approvedResult, rejectedResult, returnedResult, inspectionResult] = await Promise.all([
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'pending_review'),
+            supabase.from('applications').select('*', { count: 'exact', head: true }).in('status', ['under_review', 'pending_review', 'submitted']),
             supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'approved'),
             supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'rejected'),
             supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'returned'),
@@ -477,6 +518,102 @@ async function notifyInspectors(applicationId, applicationNumber, inspectionType
     }
 }
 
+async function escalateApplication(applicationId, reason, priority = 'high', notes = '') {
+    try {
+        const user = await getCurrentUser();
+        const profile = await getUserProfile(user.id);
+
+        if (!profile || profile.role !== 'officer') {
+            throw new Error('User must be a customs officer');
+        }
+
+        const { data: currentApp, error: fetchError } = await supabase
+            .from('applications')
+            .select('*')
+            .eq('id', applicationId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        const { data: updatedApp, error: updateError } = await supabase
+            .from('applications')
+            .update({
+                status: 'escalated',
+                officer_id: profile.id,
+                escalated: true,
+                escalated_at: new Date().toISOString(),
+                escalated_by: profile.id,
+                notes: notes || currentApp.notes
+            })
+            .eq('id', applicationId)
+            .select()
+            .single();
+
+        if (updateError) throw updateError;
+
+        await supabase
+            .from('escalated_cases')
+            .insert({
+                application_id: applicationId,
+                trader_id: currentApp.user_id,
+                assigned_officer_id: profile.id,
+                reason: reason || 'Escalated by officer for supervisor review',
+                priority: priority || 'high',
+                status: 'open',
+                notes: notes
+            });
+
+        await supabase.from('workflow_logs').insert({
+            application_id: applicationId,
+            from_status: currentApp.status,
+            to_status: 'escalated',
+            action: 'application_escalated',
+            notes: reason,
+            performed_by: profile.id
+        });
+
+        await createActivityLog(
+            profile.id,
+            'application_escalated',
+            `Application ${currentApp.application_number} escalated to supervisor: ${reason}`,
+            { application_id: applicationId, reason, priority }
+        );
+
+        await createAuditLog(
+            profile.id,
+            'UPDATE',
+            'applications',
+            applicationId,
+            { status: currentApp.status },
+            { status: 'escalated', escalated_by: profile.id }
+        );
+
+        const { data: supervisors } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('role', 'supervisor');
+
+        if (supervisors) {
+            for (const supervisor of supervisors) {
+                await createNotification(
+                    supervisor.id,
+                    'Escalated Case Assigned',
+                    `Declaration ${currentApp.application_number} has been escalated for your review. Reason: ${reason}`,
+                    'warning',
+                    applicationId,
+                    'application'
+                );
+            }
+        }
+
+        console.log('Application escalated:', currentApp.application_number);
+        return { success: true, data: updatedApp };
+    } catch (error) {
+        console.error('Error escalating application:', error);
+        return { success: false, error: error.message };
+    }
+}
+
 // ================================================================
 // EXPORTS
 // ================================================================
@@ -487,6 +624,8 @@ export {
     returnApplication,
     rejectApplication,
     sendForInspection,
+    escalateApplication,
     getApplicationById,
     getOfficerStatistics
 };
+

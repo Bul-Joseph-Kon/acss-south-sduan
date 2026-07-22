@@ -199,7 +199,7 @@
                 // Calculate summary statistics
                 const totalApps = applications?.length || 0;
                 const totalDuty = applications?.reduce((sum, app) => sum + (app.duty_amount || 0), 0) || 0;
-                const approvedApps = applications?.filter(app => app.status === 'approved' || app.status === 'completed').length || 0;
+                const approvedApps = applications?.filter(app => ['approved', 'awaiting_payment', 'paid', 'completed'].includes(app.status)).length || 0;
                 const approvalRate = totalApps > 0 ? Math.round((approvedApps / totalApps) * 100) : 0;
                 const certificates = applications?.filter(app => app.status === 'completed' && (app.application_type === 'cvet' || app.application_type === 'agent_license')).length || 0;
 
@@ -312,29 +312,44 @@
 
         function calculateStatusDistribution(applications) {
             const statuses = {
-                'Approved': 0,
-                'Pending': 0,
-                'Review': 0,
+                'Draft': 0,
+                'Submitted': 0,
+                'Pending Review': 0,
+                'Under Inspection': 0,
+                'Awaiting Payment': 0,
+                'Paid': 0,
+                'Completed': 0,
+                'Returned': 0,
                 'Rejected': 0
             };
 
             applications?.forEach(app => {
                 switch (app.status) {
-                    case 'approved':
-                    case 'completed':
-                    case 'paid':
-                        statuses['Approved']++;
+                    case 'draft':
+                        statuses['Draft']++;
                         break;
                     case 'submitted':
+                        statuses['Submitted']++;
+                        break;
                     case 'pending_review':
-                        statuses['Pending']++;
+                        statuses['Pending Review']++;
                         break;
                     case 'under_inspection':
-                    case 'inspection_in_progress':
-                        statuses['Review']++;
+                        statuses['Under Inspection']++;
+                        break;
+                    case 'awaiting_payment':
+                        statuses['Awaiting Payment']++;
+                        break;
+                    case 'paid':
+                        statuses['Paid']++;
+                        break;
+                    case 'completed':
+                        statuses['Completed']++;
+                        break;
+                    case 'returned':
+                        statuses['Returned']++;
                         break;
                     case 'rejected':
-                    case 'returned':
                         statuses['Rejected']++;
                         break;
                 }
@@ -346,9 +361,14 @@
         function renderStatusDistribution(distribution) {
             const container = document.getElementById('statusDistribution');
             const badgeClasses = {
-                'Approved': 'status-approved',
-                'Pending': 'status-pending',
-                'Review': 'status-review',
+                'Draft': 'status-pending',
+                'Submitted': 'status-pending',
+                'Pending Review': 'status-review',
+                'Under Inspection': 'status-review',
+                'Awaiting Payment': 'status-approved',
+                'Paid': 'status-approved',
+                'Completed': 'status-approved',
+                'Returned': 'status-rejected',
                 'Rejected': 'status-rejected'
             };
 
@@ -362,7 +382,7 @@
 
         function calculateAvgProcessingTime(applications) {
             const completedApps = applications?.filter(app => 
-                app.status === 'completed' || app.status === 'approved'
+                app.status === 'completed'
             );
 
             if (!completedApps || completedApps.length === 0) return '0';

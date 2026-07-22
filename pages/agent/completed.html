@@ -1,300 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SSRA Customs · Completed Applications</title>
+    <title>Completed Declarations · SSRA Customs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="../assets/icons/remixicon.css" rel="stylesheet" />
-    
-    <script type="module" src="../../js/agent-sidebar.js"></script>
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%);
-        }
-
-        .sidebar-link {
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.6rem 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            color: #4b5563;
-        }
-
-        .sidebar-link:hover,
-        .sidebar-link.active {
-            background-color: #e8f0fe;
-            color: #1e3a5f;
-        }
-
-        .sidebar-link i {
-            font-size: 1.2rem;
-            width: 1.5rem;
-            text-align: center;
-        }
-
-        .status-badge {
-            padding: 0.2rem 0.6rem;
-            border-radius: 9999px;
-            font-size: 0.65rem;
-            font-weight: 600;
-        }
-
-        .status-completed {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .profile-dropdown {
-            position: absolute;
-            right: 0;
-            top: calc(100% + 0.5rem);
-            background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e5e7eb;
-            min-width: 200px;
-            z-index: 50;
-            overflow: hidden;
-            opacity: 0;
-            transform: translateY(-10px);
-            pointer-events: none;
-            transition: all 0.2s ease;
-        }
-
-        .profile-dropdown.open {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-
-        .profile-dropdown a {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.6rem 1rem;
-            font-size: 0.85rem;
-            color: #374151;
-            transition: background 0.15s;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .profile-dropdown a:hover {
-            background: #e8f0fe;
-            color: #1e3a5f;
-        }
-
-        .profile-dropdown .divider {
-            height: 1px;
-            background: #e5e7eb;
-            margin: 0.25rem 0;
-        }
-
-        .profile-dropdown .danger {
-            color: #dc2626;
-        }
-
-        .profile-dropdown .danger:hover {
-            background: #fef2f2;
-            color: #dc2626;
-        }
-
-        .header-profile-btn {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.3rem 0.75rem 0.3rem 0.5rem;
-            border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.2);
-            transition: background 0.2s;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .header-profile-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .header-profile-btn .avatar-sm {
-            width: 2rem;
-            height: 2rem;
-            border-radius: 50%;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #1e3a5f;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+        .doc-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.9rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1.5px solid; }
+        .doc-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .doc-cvet { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+        .doc-release { background: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+        .doc-receipt { background: #fefce8; color: #a16207; border-color: #fef08a; }
+        .doc-invoice { background: #fdf2f8; color: #be185d; border-color: #fbcfe8; }
+        .doc-clearance { background: #f5f3ff; color: #6d28d9; border-color: #ddd6fe; }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #059669; color: white; padding: 0.75rem 1.25rem; border-radius: 0.75rem; font-size: 0.85rem; z-index: 100; transform: translateY(100px); opacity: 0; transition: all 0.3s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .toast.show { transform: translateY(0); opacity: 1; }
     </style>
 </head>
-
-<body>
-    <div class="min-h-screen bg-gray-100">
+<body class="bg-gray-50">
+    <div id="toast" class="toast"></div>
+    <div class="min-h-screen">
         <div class="max-w-7xl mx-auto px-4 py-5">
             <div class="flex flex-col lg:flex-row gap-6">
-                <!-- Sidebar -->
-                <aside class="lg:w-72 flex-shrink-0">
-                    <div id="agent-sidebar"></div>
-                </aside>
-
-                <!-- Main Content -->
+                <aside class="lg:w-72 flex-shrink-0"><div id="agent-sidebar"></div></aside>
                 <main class="flex-1 space-y-5">
-                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
-                        <div>
-                            <h2 class="text-2xl font-bold tracking-tight">🏆 Completed Applications</h2>
-                            <p class="opacity-90 text-sm">Review declarations and licensing applications successfully
-                                processed and completed</p>
+                    <div class="gradient-bg rounded-2xl p-6 text-white shadow-lg">
+                        <h1 class="text-2xl font-bold">✅ Completed Declarations</h1>
+                        <p class="opacity-80 text-sm mt-1">Download your CVET, Cargo Release, Clearance Certificate, Invoice and Receipt</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-white rounded-xl border p-4 text-center shadow-sm">
+                            <div class="text-3xl font-bold text-emerald-600" id="statCompleted">–</div>
+                            <div class="text-xs text-gray-500 mt-1">Completed</div>
                         </div>
-                        <div class="relative">
-                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')"
-                                class="header-profile-btn">
-                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
-                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
-                                <i class="ri-arrow-down-s-line text-sm"></i>
-                            </button>
-                            <div class="profile-dropdown" id="profileDropdown">
-                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
-                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
-                                <div class="divider"></div>
-                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign
-                                    Out</a>
-                            </div>
+                        <div class="bg-white rounded-xl border p-4 text-center shadow-sm">
+                            <div class="text-3xl font-bold text-green-600" id="statPaid">–</div>
+                            <div class="text-xs text-gray-500 mt-1">Paid (Generating Documents)</div>
                         </div>
                     </div>
 
-                    <!-- Completed List -->
-                    <div class="space-y-3" id="completedList">
-                        <div class="text-center py-8 text-gray-500">Loading completed applications...</div>
-                    </div>
-
-                    <div class="bg-blue-50 rounded-xl border border-blue-200 p-5">
-                        <h3 class="font-bold text-blue-800 mb-2"><i class="ri-information-line mr-2"></i>Completed
-                            Applications Summary</h3>
-                        <div class="grid md:grid-cols-3 gap-3 text-sm">
-                            <div><span class="text-blue-700">Total Completed:</span> <span class="font-bold"
-                                    id="totalCompletedCount">0</span></div>
-                            <div><span class="text-blue-700">Average Processing Time:</span> <span class="font-bold">4
-                                    days</span></div>
-                            <div><span class="text-blue-700">Clearance Success Rate:</span> <span
-                                    class="font-bold">100%</span></div>
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                                <i class="ri-file-list-3-line text-emerald-500"></i> Completed & Paid Declarations
+                            </h3>
+                        </div>
+                        <div id="completedList">
+                            <div class="p-8 text-center text-gray-400"><i class="ri-loader-4-line text-3xl animate-spin block mb-2"></i>Loading...</div>
                         </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('click', function (e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
-            }
-        });
-    </script>
+
+    <script type="module" src="../../js/agent-sidebar.js"></script>
     <script type="module">
         import supabase from '../../js/supabase.js';
-        import { checkPageAuth } from '../../js/auth-check.js';
-        import { signOut } from '../../js/auth.js';
-        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { getCargoDocuments } from '../../js/cargo-release-service.js';
 
-        let currentAgentId = null;
-        let realtimeChannel = null;
+        let profileId = null;
 
-        async function initPage() {
-            const role = 'agent';
-            const hasAccess = await checkPageAuth(role);
-            if (!hasAccess) return;
-
-            const { user, profile } = await loadCurrentUserProfile();
-            if (profile) {
-                currentAgentId = profile.id;
-            }
-
-            await loadCompleted(profile?.id);
-            setupRealtimeSubscriptions(profile?.id);
-
-            document.getElementById('dropdownSignOut')?.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const result = await signOut();
-                if (result.success) {
-                    window.location.href = '../../auth/login.html';
-                }
-            });
+        function showToast(msg) {
+            const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3500);
         }
 
-        async function loadCompleted(profileId) {
+        function fmtDate(d) { return d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '–'; }
+
+        window.downloadDoc = async function(appId, docType) {
+            showToast(`Preparing ${docType} document...`);
             try {
-                const { data: applications, error } = await supabase
-                    .from('applications')
-                    .select('*, profiles!applications_user_id_fkey(full_name, organization)')
-                    .eq('agent_id', profileId)
-                    .eq('status', 'completed')
-                    .order('completed_at', { ascending: false });
+                const docs = await getCargoDocuments(appId);
+                if (!docs.success) { showToast('Document not available'); return; }
 
-                if (error) throw error;
-
-                document.getElementById('totalCompletedCount').textContent = applications?.length || 0;
-
-                const listContainer = document.getElementById('completedList');
-                if (!applications || applications.length === 0) {
-                    listContainer.innerHTML = '<div class="text-center py-8 text-gray-500 bg-white rounded-xl border border-gray-200">No completed applications found</div>';
-                    return;
+                let docData = null;
+                if (docType === 'cvet' && docs.cvet) docData = docs.cvet.certificate_data || docs.cvet;
+                else if (docType === 'cargo_release' && docs.cargo_release) docData = docs.cargo_release;
+                else {
+                    const found = docs.all_documents.find(d => d.document_type === docType);
+                    if (found) docData = found.metadata || found;
                 }
 
-                listContainer.innerHTML = applications.map(app => {
-                    const traderName = app.profiles?.full_name || app.profiles?.organization || 'Unknown Trader';
-                    const compDate = app.completed_at || app.updated_at;
-                    const dateStr = compDate ? new Date(compDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
-                    const certificateNum = `CERT-${app.application_number?.replace(/^\w+-/, '') || 'N/A'}`;
+                if (!docData) { showToast('Document not generated yet'); return; }
 
-                    return `
-                        <div class="bg-white rounded-xl border border-green-200 p-5 shadow-sm">
-                            <div class="flex flex-wrap justify-between items-start gap-2">
-                                <div>
-                                    <h4 class="font-bold text-emerald-600">${app.application_number || 'N/A'}</h4>
-                                    <p class="text-sm text-gray-500">${app.application_type || 'Declaration'} · ${traderName} · ${app.goods_data?.description || app.vehicle_data?.description || 'Goods/Vehicle description'}</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="status-badge status-completed">✓ Completed</span>
-                                        <span class="text-xs text-gray-400">Completed: ${dateStr}</span>
-                                        <span class="text-xs text-gray-400">Certificate: ${certificateNum}</span>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <a href="certificate.html?id=${app.id}" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">Certificate</a>
-                                </div>
+                // Generate printable HTML document
+                const docHtml = generateDocumentHTML(docType, docData);
+                const win = window.open('', '_blank');
+                win.document.write(docHtml);
+                win.document.close();
+                win.print();
+            } catch (err) {
+                console.error('Download error:', err);
+                showToast('Error downloading document');
+            }
+        };
+
+        function generateDocumentHTML(type, data) {
+            const titles = {
+                cvet: 'CVET Certificate', cargo_release: 'Cargo Release Order',
+                clearance_certificate: 'Clearance Certificate', invoice: 'Invoice', receipt: 'Payment Receipt'
+            };
+            return `<!DOCTYPE html><html><head><title>${titles[type] || type}</title>
+            <style>body{font-family:Arial,sans-serif;padding:40px;color:#333;}
+            .header{text-align:center;border-bottom:3px solid #1e3a5f;padding-bottom:20px;margin-bottom:30px;}
+            .logo{font-size:24px;font-weight:bold;color:#1e3a5f;}
+            .subtitle{color:#666;font-size:14px;}
+            .doc-number{font-size:20px;font-weight:bold;color:#059669;margin:15px 0;}
+            .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:14px;}
+            .row .label{color:#666;} .row .value{font-weight:600;}
+            .footer{margin-top:40px;text-align:center;font-size:12px;color:#999;border-top:2px solid #eee;padding-top:20px;}
+            .qr{text-align:center;margin:20px 0;padding:15px;background:#f8f9fa;border-radius:8px;font-family:monospace;}
+            @media print{body{padding:20px;}}</style></head>
+            <body>
+            <div class="header">
+                <div class="logo">🇸🇸 SOUTH SUDAN REVENUE AUTHORITY</div>
+                <div class="subtitle">Customs Division — ${titles[type] || type}</div>
+                <div class="doc-number">${data.certificate_number || data.release_number || data.clearance_number || data.invoice_number || data.receipt_number || 'N/A'}</div>
+            </div>
+            ${Object.entries(data).filter(([k]) => !['qr_code'].includes(k)).map(([k, v]) =>
+                `<div class="row"><span class="label">${k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span><span class="value">${typeof v === 'object' ? JSON.stringify(v) : v}</span></div>`
+            ).join('')}
+            ${data.qr_code ? `<div class="qr">QR: ${data.qr_code}</div>` : ''}
+            <div class="footer">
+                <p>This is a computer-generated document. Valid without signature.</p>
+                <p>South Sudan Revenue Authority (SSRA) — Generated: ${new Date().toLocaleString()}</p>
+            </div>
+            </body></html>`;
+        }
+
+        async function loadCompleted() {
+            const [compRes, paidRes] = await Promise.all([
+                supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', profileId).eq('status', 'completed'),
+                supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', profileId).eq('status', 'paid')
+            ]);
+            document.getElementById('statCompleted').textContent = compRes.count || 0;
+            document.getElementById('statPaid').textContent = paidRes.count || 0;
+
+            const { data } = await supabase
+                .from('applications')
+                .select(`id, application_number, status, declared_value, goods_data, completed_at, release_number,
+                         payments(receipt_number, amount, paid_at),
+                         invoices(invoice_number, total_amount)`)
+                .eq('agent_id', profileId)
+                .in('status', ['completed', 'paid'])
+                .order('updated_at', { ascending: false });
+
+            const container = document.getElementById('completedList');
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="p-8 text-center text-gray-400">No completed declarations yet</div>';
+                return;
+            }
+
+            container.innerHTML = `<div class="divide-y divide-gray-50">${data.map(app => {
+                const payment = Array.isArray(app.payments) ? app.payments[0] : app.payments;
+                const invoice = Array.isArray(app.invoices) ? app.invoices[0] : app.invoices;
+                const isCompleted = app.status === 'completed';
+
+                return `
+                <div class="p-5">
+                    <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                        <div>
+                            <div class="font-bold text-gray-800 text-lg">${app.application_number}</div>
+                            <div class="text-sm text-gray-500">${app.goods_data?.description || 'Customs Declaration'}</div>
+                            <div class="text-xs text-gray-400 mt-1">
+                                ${app.release_number ? `Release: ${app.release_number} · ` : ''}
+                                ${fmtDate(app.completed_at || payment?.paid_at)}
                             </div>
                         </div>
-                    `;
-                }).join('');
-            } catch (error) {
-                console.error('Error loading completed applications:', error);
-                document.getElementById('completedList').innerHTML = '<div class="text-center py-8 text-red-500 bg-white rounded-xl border border-gray-200">Error loading applications</div>';
-            }
+                        <div class="text-right">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${isCompleted ? 'bg-emerald-100 text-emerald-700' : 'bg-green-100 text-green-700'}">
+                                ${isCompleted ? '✓ Completed' : '💳 Paid'}
+                            </span>
+                            <div class="text-lg font-bold text-gray-700 mt-1">${(invoice?.total_amount || payment?.amount || app.declared_value || 0).toLocaleString()} SSP</div>
+                        </div>
+                    </div>
+                    ${isCompleted ? `
+                    <div class="flex flex-wrap gap-2">
+                        <button class="doc-btn doc-receipt" onclick="downloadDoc('${app.id}', 'receipt')"><i class="ri-receipt-line"></i>Receipt</button>
+                        <button class="doc-btn doc-invoice" onclick="downloadDoc('${app.id}', 'invoice')"><i class="ri-file-invoice-line"></i>Invoice</button>
+                        <button class="doc-btn doc-cvet" onclick="downloadDoc('${app.id}', 'cvet')"><i class="ri-file-shield-2-line"></i>CVET</button>
+                        <button class="doc-btn doc-release" onclick="downloadDoc('${app.id}', 'cargo_release')"><i class="ri-truck-line"></i>Cargo Release</button>
+                        <button class="doc-btn doc-clearance" onclick="downloadDoc('${app.id}', 'clearance_certificate')"><i class="ri-award-line"></i>Clearance Certificate</button>
+                    </div>` : `<div class="text-sm text-amber-600"><i class="ri-loader-4-line animate-spin inline-block mr-1"></i>Documents being generated...</div>`}
+                </div>`;
+            }).join('')}</div>`;
         }
 
-        function setupRealtimeSubscriptions(profileId) {
-            realtimeChannel = supabase
-                .channel('agent-completed')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, async () => {
-                    await loadCompleted(profileId);
-                })
+        async function init() {
+            const user = await getCurrentUser();
+            if (!user) { window.location.href = '/auth/login.html'; return; }
+            const profile = await getUserProfile(user.id);
+            if (!profile || profile.role !== 'agent') { window.location.href = '/auth/login.html'; return; }
+            profileId = profile.id;
+            await loadCompleted();
+            supabase.channel('completed-apps')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, loadCompleted)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'documents_generated' }, loadCompleted)
                 .subscribe();
-
-            window.addEventListener('beforeunload', () => {
-                if (realtimeChannel) {
-                    supabase.removeChannel(realtimeChannel);
-                }
-            });
         }
 
-        document.addEventListener('DOMContentLoaded', initPage);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
     </script>
 </body>
-
 </html>

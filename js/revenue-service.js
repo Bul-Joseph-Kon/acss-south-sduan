@@ -1,11 +1,13 @@
 // ================================================================
 // REVENUE OFFICER SERVICE
 // ================================================================
-// Handles invoice generation, payment confirmation, and receipt generation
+// Handles invoice generation for approved applications
+// Payment is completed by Clearing Agent
 // ================================================================
 
 import supabase from './supabase.js';
 import { getCurrentUser, getUserProfile } from './auth.js';
+import { generateCargoDocuments } from './cargo-release-service.js';
 
 // ================================================================
 // REVENUE OFFICER FUNCTIONS
@@ -16,19 +18,19 @@ async function getApprovedApplications() {
         const user = await getCurrentUser();
         const profile = await getUserProfile(user.id);
 
-        if (!profile || profile.role !== 'supervisor') {
-            throw new Error('User must be a revenue officer (supervisor role)');
+        if (!profile || profile.role !== 'revenue') {
+            throw new Error('User must be a revenue officer');
         }
 
         const { data, error } = await supabase
             .from('applications')
             .select(`
                 *,
-                profiles:agent_id(full_name, email, phone),
+                agent_profile:profiles!agent_id(full_name, email, phone),
                 goods_data
             `)
             .eq('status', 'approved')
-            .is('approved_at', null)
+            .is('invoice_id', null)
             .order('approved_at', { ascending: false });
 
         if (error) throw error;
@@ -45,7 +47,7 @@ async function generateInvoice(applicationId) {
         const user = await getCurrentUser();
         const profile = await getUserProfile(user.id);
 
-        if (!profile || profile.role !== 'supervisor') {
+        if (!profile || profile.role !== 'revenue') {
             throw new Error('User must be a revenue officer');
         }
 
@@ -86,14 +88,25 @@ async function generateInvoice(applicationId) {
 
         if (invoiceError) throw invoiceError;
 
-        // Update application status to awaiting_payment
+        // Update application status to payment_required
         await supabase
             .from('applications')
             .update({
-                status: 'awaiting_payment',
+                status: 'payment_required',
+                invoice_id: invoice.id,
                 declared_value: calculatedDuties.total
             })
             .eq('id', applicationId);
+
+        // Log workflow transition
+        await supabase.from('workflow_logs').insert({
+            application_id: applicationId,
+            from_status: 'approved',
+            to_status: 'payment_required',
+            action: 'invoice_generated',
+            notes: `Invoice ${invoiceNumber} generated`,
+            performed_by: profile.id
+        });
 
         // Create activity log
         await createActivityLog(
@@ -131,116 +144,12 @@ async function generateInvoice(applicationId) {
     }
 }
 
-async function confirmPayment(applicationId, paymentData) {
+async function getAwaitingPaymentApplications() {
     try {
         const user = await getCurrentUser();
         const profile = await getUserProfile(user.id);
 
-        if (!profile || profile.role !== 'supervisor') {
-            throw new Error('User must be a revenue officer');
-        }
-
-        // Get application and invoice
-        const { data: application, error: appError } = await supabase
-            .from('applications')
-            .select('*, invoices(*)')
-            .eq('id', applicationId)
-            .single();
-
-        if (appError) throw appError;
-
-        const invoice = application.invoices && application.invoices[0];
-        if (!invoice) {
-            throw new Error('No invoice found for this application');
-        }
-
-        // Generate payment number and receipt number
-        const paymentNumber = await generatePaymentNumber();
-        const receiptNumber = await generateReceiptNumber();
-
-        // Create payment record
-        const { data: payment, error: paymentError } = await supabase
-            .from('payments')
-            .insert({
-                application_id: applicationId,
-                user_id: application.agent_id,
-                payment_number: paymentNumber,
-                amount: invoice.total_amount,
-                currency: invoice.currency,
-                status: 'completed',
-                payment_method: paymentData.payment_method || 'bank_transfer',
-                transaction_id: paymentData.transaction_id,
-                receipt_number: receiptNumber,
-                paid_at: new Date().toISOString()
-            })
-            .select()
-            .single();
-
-        if (paymentError) throw paymentError;
-
-        // Update invoice status
-        await supabase
-            .from('invoices')
-            .update({
-                status: 'paid',
-                paid_at: new Date().toISOString()
-            })
-            .eq('id', invoice.id);
-
-        // Update application status to paid
-        await supabase
-            .from('applications')
-            .update({
-                status: 'paid'
-            })
-            .eq('id', applicationId);
-
-        // Create activity log
-        await createActivityLog(
-            profile.id,
-            'payment_confirmed',
-            `Payment ${paymentNumber} confirmed for application ${application.application_number}`,
-            { application_id: applicationId, payment_id: payment.id, amount: payment.amount }
-        );
-
-        // Create audit log
-        await createAuditLog(
-            profile.id,
-            'INSERT',
-            'payments',
-            payment.id,
-            null,
-            { payment_number: paymentNumber, amount: payment.amount, status: 'completed' }
-        );
-
-        // Notify agent
-        await createNotification(
-            application.agent_id,
-            'Payment Confirmed',
-            `Payment of ${payment.amount} SSP has been confirmed for declaration ${application.application_number}. Receipt: ${receiptNumber}`,
-            'success',
-            applicationId,
-            'application'
-        );
-
-        // Trigger CVET and Cargo Release generation
-        await generateCVETCertificate(applicationId);
-        await generateCargoReleaseDocument(applicationId);
-
-        console.log('Payment confirmed:', paymentNumber);
-        return { success: true, data: payment };
-    } catch (error) {
-        console.error('Error confirming payment:', error);
-        return { success: false, error: error.message };
-    }
-}
-
-async function getPendingPayments() {
-    try {
-        const user = await getCurrentUser();
-        const profile = await getUserProfile(user.id);
-
-        if (!profile || profile.role !== 'supervisor') {
+        if (!profile || profile.role !== 'revenue') {
             throw new Error('User must be a revenue officer');
         }
 
@@ -248,17 +157,48 @@ async function getPendingPayments() {
             .from('applications')
             .select(`
                 *,
-                profiles:agent_id(full_name, email, phone),
-                invoices(*)
+                agent_profile:profiles!agent_id(full_name, email, phone),
+                invoices(*),
+                goods_data
             `)
-            .eq('status', 'awaiting_payment')
-            .order('approved_at', { ascending: false });
+            .eq('status', 'payment_required')
+            .order('updated_at', { ascending: false });
 
         if (error) throw error;
 
         return { success: true, data };
     } catch (error) {
-        console.error('Error fetching pending payments:', error);
+        console.error('Error fetching awaiting payment applications:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function getPaidApplications() {
+    try {
+        const user = await getCurrentUser();
+        const profile = await getUserProfile(user.id);
+
+        if (!profile || profile.role !== 'revenue') {
+            throw new Error('User must be a revenue officer');
+        }
+
+        const { data, error } = await supabase
+            .from('applications')
+            .select(`
+                *,
+                agent_profile:profiles!agent_id(full_name, email, phone),
+                invoices(*),
+                payments(*),
+                goods_data
+            `)
+            .eq('status', 'paid')
+            .order('paid_at', { ascending: false });
+
+        if (error) throw error;
+
+        return { success: true, data };
+    } catch (error) {
+        console.error('Error fetching paid applications:', error);
         return { success: false, error: error.message };
     }
 }
@@ -268,12 +208,12 @@ async function getRevenueStatistics() {
         const user = await getCurrentUser();
         const profile = await getUserProfile(user.id);
 
-        if (!profile || profile.role !== 'supervisor') {
+        if (!profile || profile.role !== 'revenue') {
             throw new Error('User must be a revenue officer');
         }
 
         const [awaitingPaymentResult, paidResult, totalRevenue] = await Promise.all([
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'awaiting_payment'),
+            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'payment_required'),
             supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'paid'),
             supabase.from('payments').select('amount').eq('status', 'completed')
         ]);
@@ -290,6 +230,109 @@ async function getRevenueStatistics() {
         };
     } catch (error) {
         console.error('Error fetching revenue statistics:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function verifyPayment(applicationId, notes) {
+    try {
+        const user = await getCurrentUser();
+        const profile = await getUserProfile(user.id);
+
+        if (!profile || profile.role !== 'revenue') {
+            throw new Error('User must be a revenue officer');
+        }
+
+        // Get current application
+        const { data: application, error: fetchError } = await supabase
+            .from('applications')
+            .select(`
+                *,
+                payments(*),
+                invoices(*)
+            `)
+            .eq('id', applicationId)
+            .single();
+
+        if (fetchError) throw fetchError;
+        if (!application) throw new Error('Application not found');
+        if (application.status !== 'paid') throw new Error('Application must be in paid status for verification');
+
+        // Update payment status to verified
+        if (application.payment_id) {
+            await supabase
+                .from('payments')
+                .update({
+                    status: 'verified',
+                    verified_by: profile.id,
+                    verified_at: new Date().toISOString()
+                })
+                .eq('id', application.payment_id);
+        }
+
+        // Update application status to payment_verified
+        const { data: updatedApp, error: updateError } = await supabase
+            .from('applications')
+            .update({
+                status: 'payment_verified',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', applicationId)
+            .select()
+            .single();
+
+        if (updateError) throw updateError;
+
+        // Log workflow transition
+        await supabase.from('workflow_logs').insert({
+            application_id: applicationId,
+            from_status: 'paid',
+            to_status: 'payment_verified',
+            action: 'payment_verified',
+            notes: notes || 'Payment verified by revenue officer',
+            performed_by: profile.id
+        });
+
+        // Create activity log
+        await createActivityLog(
+            profile.id,
+            'payment_verified',
+            `Payment verified for application ${application.application_number}`,
+            { application_id: applicationId, payment_id: application.payment_id }
+        );
+
+        // Create audit log
+        await createAuditLog(
+            profile.id,
+            'UPDATE',
+            'applications',
+            applicationId,
+            { status: 'paid' },
+            { status: 'payment_verified' }
+        );
+
+        // Notify agent
+        await createNotification(
+            application.agent_id,
+            'Payment Verified',
+            `Your payment for declaration ${application.application_number} has been verified. Documents are being generated.`,
+            'success',
+            applicationId,
+            'application'
+        );
+
+        // Trigger automatic document generation
+        try {
+            await generateCustomsDocuments(applicationId);
+        } catch (docError) {
+            console.error('Error generating documents:', docError);
+            // Don't fail verification if document generation fails
+        }
+
+        console.log('Payment verified:', application.application_number);
+        return { success: true, data: updatedApp };
+    } catch (error) {
+        console.error('Error verifying payment:', error);
         return { success: false, error: error.message };
     }
 }
@@ -338,194 +381,245 @@ async function generateReceiptNumber() {
     return `RCT-${timestamp}`;
 }
 
-async function generateCVETCertificate(applicationId) {
+async function generateCustomsDocuments(applicationId) {
     try {
         // Get application details
         const { data: application } = await supabase
             .from('applications')
-            .select('*')
+            .select(`
+                *,
+                profiles:agent_id(full_name),
+                payments(*),
+                invoices(*)
+            `)
             .eq('id', applicationId)
             .single();
 
         if (!application) throw new Error('Application not found');
 
-        // Generate certificate number
-        const certificateNumber = `CVET-${Date.now().toString().slice(-6)}`;
-        
-        // Generate QR code (simplified - in production would use QR library)
-        const qrCode = `https://ssra.gov.ss/verify/${certificateNumber}`;
-
-        // Create CVET certificate
-        const { data: certificate, error } = await supabase
-            .from('cvet_certificates')
+        // Generate Receipt
+        const receiptNumber = await generateReceiptNumber();
+        const { data: receiptDoc, error: receiptError } = await supabase
+            .from('generated_documents')
             .insert({
                 application_id: applicationId,
-                certificate_number: certificateNumber,
-                qr_code: qrCode,
-                issued_by: application.agent_id,
-                issued_at: new Date().toISOString(),
-                valid_from: new Date().toISOString().split('T')[0],
-                valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 year
-                certificate_data: {
-                    application_number: application.application_number,
-                    goods_data: application.goods_data,
-                    declaration_data: application.declaration_data
-                },
-                status: 'active'
+                document_type: 'receipt',
+                document_number: receiptNumber,
+                generated_by: application.agent_id,
+                generated_at: new Date().toISOString()
             })
             .select()
             .single();
 
-        if (error) throw error;
+        if (receiptError) throw receiptError;
+
+        // Generate CVET
+        const cvetNumber = `CVET-${Date.now().toString().slice(-6)}`;
+        const { data: cvetDoc, error: cvetError } = await supabase
+            .from('generated_documents')
+            .insert({
+                application_id: applicationId,
+                document_type: 'cvet',
+                document_number: cvetNumber,
+                generated_by: application.agent_id,
+                generated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (cvetError) throw cvetError;
+
+        // Generate Cargo Release Order
+        const releaseNumber = `REL-${Date.now().toString().slice(-6)}`;
+        const { data: releaseDoc, error: releaseError } = await supabase
+            .from('generated_documents')
+            .insert({
+                application_id: applicationId,
+                document_type: 'cargo_release_order',
+                document_number: releaseNumber,
+                generated_by: application.agent_id,
+                generated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (releaseError) throw releaseError;
+
+        // Generate Clearance Certificate
+        const clearanceNumber = `CLR-${Date.now().toString().slice(-6)}`;
+        const { data: clearanceDoc, error: clearanceError } = await supabase
+            .from('generated_documents')
+            .insert({
+                application_id: applicationId,
+                document_type: 'clearance_certificate',
+                document_number: clearanceNumber,
+                generated_by: application.agent_id,
+                generated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (clearanceError) throw clearanceError;
+
+        // Generate CVET, Cargo Release Order, and Clearance Certificate via Cargo Release Service
+        await generateCargoDocuments(applicationId, application.agent_id || application.user_id);
 
         // Update application status to completed
         await supabase
             .from('applications')
             .update({
                 status: 'completed',
-                completed_at: new Date().toISOString()
+                completed_at: new Date().toISOString(),
+                cleared_at: new Date().toISOString()
             })
             .eq('id', applicationId);
 
+        // Log workflow transition
+        await supabase.from('workflow_logs').insert({
+            application_id: applicationId,
+            from_status: 'payment_verified',
+            to_status: 'completed',
+            action: 'documents_generated',
+            notes: 'All customs documents generated',
+            performed_by: application.agent_id
+        });
+
         // Create activity log
         await createActivityLog(
-            null,
-            'cvet_generated',
-            `CVET certificate ${certificateNumber} generated for application ${application.application_number}`,
-            { application_id: applicationId, certificate_id: certificate.id }
+            application.agent_id,
+            'documents_generated',
+            `Customs documents generated for application ${application.application_number}`,
+            {
+                application_id: applicationId,
+                documents: [receiptNumber, cvetNumber, releaseNumber, clearanceNumber]
+            }
         );
 
         // Notify agent
         await createNotification(
             application.agent_id,
-            'CVET Certificate Generated',
-            `Your CVET certificate ${certificateNumber} has been generated. You can now download it.`,
+            'Documents Generated',
+            `All customs documents have been generated for declaration ${application.application_number}. You can now download them.`,
             'success',
             applicationId,
             'application'
         );
 
-        console.log('CVET generated:', certificateNumber);
-        return certificate;
+        console.log('Customs documents generated:', application.application_number);
+        return {
+            success: true,
+            documents: {
+                receipt: receiptDoc,
+                cvet: cvetDoc,
+                cargo_release: releaseDoc,
+                clearance: clearanceDoc
+            }
+        };
     } catch (error) {
-        console.error('Error generating CVET:', error);
+        console.error('Error generating customs documents:', error);
+        return { success: false, error: error.message };
     }
 }
 
-async function generateCargoReleaseDocument(applicationId) {
+async function confirmPayment(applicationId, notes) {
+    return verifyPayment(applicationId, notes);
+}
+
+async function rejectPayment(applicationId, rejectionReason) {
     try {
-        // Get application details
-        const { data: application } = await supabase
+        const user = await getCurrentUser();
+        const profile = await getUserProfile(user.id);
+
+        if (!profile || profile.role !== 'revenue') {
+            throw new Error('User must be a revenue officer');
+        }
+
+        const { data: application, error: fetchError } = await supabase
             .from('applications')
             .select('*')
             .eq('id', applicationId)
             .single();
 
+        if (fetchError) throw fetchError;
         if (!application) throw new Error('Application not found');
 
-        // Generate release numbers
-        const releaseNumber = `REL-${Date.now().toString().slice(-6)}`;
-        const releaseOrderNumber = `RO-${Date.now().toString().slice(-6)}`;
+        if (application.payment_id) {
+            await supabase
+                .from('payments')
+                .update({
+                    status: 'rejected',
+                    rejection_reason: rejectionReason,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', application.payment_id);
+        }
 
-        // Get port from declaration data
-        const portOfRelease = application.declaration_data?.shipment?.port_of_entry || 'Juba';
-
-        // Create cargo release document
-        const { data: releaseDoc, error } = await supabase
-            .from('cargo_release_documents')
-            .insert({
-                application_id: applicationId,
-                release_number: releaseNumber,
-                release_order_number: releaseOrderNumber,
-                port_of_release: portOfRelease,
-                release_date: new Date().toISOString(),
-                released_by: application.agent_id,
-                cargo_description: application.goods_data?.goods_description || 'Goods',
-                quantity: application.goods_data?.quantity || 0,
-                unit: application.goods_data?.unit_of_measurement || 'Kg',
-                status: 'released'
+        const { data: updatedApp, error: updateError } = await supabase
+            .from('applications')
+            .update({
+                status: 'payment_required',
+                updated_at: new Date().toISOString()
             })
+            .eq('id', applicationId)
             .select()
             .single();
 
-        if (error) throw error;
+        if (updateError) throw updateError;
 
-        // Create activity log
+        await supabase.from('workflow_logs').insert({
+            application_id: applicationId,
+            from_status: application.status,
+            to_status: 'payment_required',
+            action: 'payment_rejected',
+            notes: rejectionReason,
+            performed_by: profile.id
+        });
+
         await createActivityLog(
-            null,
-            'cargo_release_generated',
-            `Cargo release document ${releaseNumber} generated for application ${application.application_number}`,
-            { application_id: applicationId, release_id: releaseDoc.id }
+            profile.id,
+            'payment_rejected',
+            `Payment rejected for application ${application.application_number}: ${rejectionReason}`,
+            { application_id: applicationId, rejection_reason: rejectionReason }
         );
 
-        // Notify agent
+        await createAuditLog(
+            profile.id,
+            'UPDATE',
+            'applications',
+            applicationId,
+            { status: application.status },
+            { status: 'payment_required', rejection_reason: rejectionReason }
+        );
+
         await createNotification(
             application.agent_id,
-            'Cargo Release Document Generated',
-            `Your cargo release document ${releaseNumber} has been generated. Cargo is ready for release.`,
-            'success',
+            'Payment Rejected',
+            `Your payment for declaration ${application.application_number} was rejected. Reason: ${rejectionReason}. Please resubmit valid payment details.`,
+            'error',
             applicationId,
             'application'
         );
 
-        console.log('Cargo release generated:', releaseNumber);
-        return releaseDoc;
+        return { success: true, data: updatedApp };
     } catch (error) {
-        console.error('Error generating cargo release:', error);
-    }
-}
-
-async function createActivityLog(userId, activityType, description, metadata) {
-    try {
-        await supabase.from('activity_logs').insert({
-            user_id: userId,
-            activity_type: activityType,
-            description,
-            metadata
-        });
-    } catch (error) {
-        console.error('Error creating activity log:', error);
-    }
-}
-
-async function createAuditLog(userId, action, tableName, recordId, oldValues, newValues) {
-    try {
-        await supabase.from('audit_logs').insert({
-            user_id: userId,
-            action,
-            table_name: tableName,
-            record_id: recordId,
-            old_values,
-            new_values
-        });
-    } catch (error) {
-        console.error('Error creating audit log:', error);
-    }
-}
-
-async function createNotification(userId, title, message, type, referenceId, referenceType) {
-    try {
-        await supabase.from('notifications').insert({
-            user_id: userId,
-            title,
-            message,
-            type,
-            reference_id: referenceId,
-            reference_type: referenceType
-        });
-    } catch (error) {
-        console.error('Error creating notification:', error);
+        console.error('Error rejecting payment:', error);
+        return { success: false, error: error.message };
     }
 }
 
 // ================================================================
-// EXPORTS
+// EXPORT FUNCTIONS
 // ================================================================
 
 export {
     getApprovedApplications,
     generateInvoice,
+    getAwaitingPaymentApplications,
+    getPaidApplications,
+    getRevenueStatistics,
+    verifyPayment,
     confirmPayment,
-    getPendingPayments,
-    getRevenueStatistics
+    rejectPayment,
+    generateCustomsDocuments
 };
+

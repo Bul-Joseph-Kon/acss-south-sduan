@@ -41,7 +41,7 @@
                 <main class="flex-1 space-y-5">
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
-                            <h2 class="text-2xl font-bold tracking-tight">📎 Step 7: Supporting Documents</h2>
+                            <h2 class="text-2xl font-bold tracking-tight">Step 7: Supporting Documents</h2>
                             <p class="opacity-90 text-sm">Upload required supporting documents</p>
                         </div>
                         <div class="relative">
@@ -61,41 +61,71 @@
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span id="progressText">Step 7 of 9</span>
-                            <span id="progressPercent">78% Complete</span>
+                            <span id="progressText">Step 6 of 6</span>
+                            <span id="progressPercent">100% Complete</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:78%"></div>
+                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:100%"></div>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                         <h3 class="font-bold text-lg mb-4">Required Documents</h3>
                         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div class="doc-upload-box" id="packingListBox" onclick="handleDocumentUpload('packing_list')">
+                            <div class="doc-upload-box" id="packingListBox" data-doc-type="packing_list">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
                                 <p class="font-medium text-sm mt-1">Packing List <span class="text-red-500">*</span></p>
                                 <p class="text-xs text-gray-400" id="packingListStatus">Not uploaded</p>
                             </div>
-                            <div class="doc-upload-box" id="billOfLadingBox" onclick="handleDocumentUpload('bill_of_lading')">
+                            <div class="doc-upload-box" id="billOfLadingBox" data-doc-type="bill_of_lading">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
                                 <p class="font-medium text-sm mt-1">Bill of Lading <span class="text-red-500">*</span></p>
                                 <p class="text-xs text-gray-400" id="billOfLadingStatus">Not uploaded</p>
                             </div>
-                            <div class="doc-upload-box" id="certificateOfOriginBox" onclick="handleDocumentUpload('certificate_of_origin')">
+                            <div class="doc-upload-box" id="certificateOfOriginBox" data-doc-type="certificate_of_origin">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
                                 <p class="font-medium text-sm mt-1">Certificate of Origin <span class="text-red-500">*</span></p>
                                 <p class="text-xs text-gray-400" id="certificateOfOriginStatus">Not uploaded</p>
                             </div>
-                            <div class="doc-upload-box" id="importPermitBox" onclick="handleDocumentUpload('import_permit')">
+                            <div class="doc-upload-box" id="importPermitBox" data-doc-type="import_permit">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
                                 <p class="font-medium text-sm mt-1">Import Permit <span class="text-red-500">*</span></p>
                                 <p class="text-xs text-gray-400" id="importPermitStatus">Not uploaded</p>
                             </div>
+                            <div class="doc-upload-box" id="commercialInvoiceBox" data-doc-type="commercial_invoice">
+                                <i class="ri-file-pdf-2-line doc-icon"></i>
+                                <p class="font-medium text-sm mt-1">Commercial Invoice <span class="text-red-500">*</span></p>
+                                <p class="text-xs text-gray-400" id="commercialInvoiceStatus">Not uploaded</p>
+                            </div>
+                            <div class="doc-upload-box" id="insuranceCertificateBox" data-doc-type="insurance_certificate">
+                                <i class="ri-file-pdf-2-line doc-icon"></i>
+                                <p class="font-medium text-sm mt-1">Insurance Certificate</p>
+                                <p class="text-xs text-gray-400" id="insuranceCertificateStatus">Not uploaded</p>
+                            </div>
+                            <div class="doc-upload-box" id="inspectionCertificateBox" data-doc-type="inspection_certificate">
+                                <i class="ri-file-pdf-2-line doc-icon"></i>
+                                <p class="font-medium text-sm mt-1">Inspection Certificate</p>
+                                <p class="text-xs text-gray-400" id="inspectionCertificateStatus">Not uploaded</p>
+                            </div>
+                            <div class="doc-upload-box" id="otherDocumentsBox" data-doc-type="other_documents">
+                                <i class="ri-file-pdf-2-line doc-icon"></i>
+                                <p class="font-medium text-sm mt-1">Other Documents</p>
+                                <p class="text-xs text-gray-400" id="otherDocumentsStatus">Not uploaded</p>
+                            </div>
                         </div>
 
+                        <!-- Hidden file inputs -->
+                        <input type="file" id="packing_listInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="bill_of_ladingInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="certificate_of_originInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="import_permitInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="commercial_invoiceInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="insurance_certificateInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="inspection_certificateInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="other_documentsInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+
                         <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
-                            <a href="transport-information.html" id="backBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
+                            <a href="goods-information.html" id="backBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
                                 <i class="ri-arrow-left-line"></i> Previous
                             </a>
                             <button id="saveAndContinueBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
@@ -109,7 +139,7 @@
     </div>
     <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
 
-        import { getWorkflow, initializeWorkflowFromURL } from '../../js/cvet-workflow-manager.js';
+        import { getTraderWorkflow, initializeWorkflowFromURL } from '../../js/cvet-workflow-manager.js';
         
         import { signOut } from '../../js/auth.js';
         
@@ -148,7 +178,7 @@
         }
 
         // Initialize workflow
-        const workflow = getWorkflow();
+        const workflow = getTraderWorkflow();
         const state = await initializeWorkflowFromURL();
 
         // Document storage
@@ -156,13 +186,17 @@
             packing_list: null,
             bill_of_lading: null,
             certificate_of_origin: null,
-            import_permit: null
+            import_permit: null,
+            commercial_invoice: null,
+            insurance_certificate: null,
+            inspection_certificate: null,
+            other_documents: null
         };
 
         // Update progress
         function updateProgress() {
-            const progress = Math.round((state.currentStep / 9) * 100);
-            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 9`;
+            const progress = Math.round((state.currentStep / 6) * 100);
+            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 6`;
             document.getElementById('progressPercent').textContent = `${progress}% Complete`;
             document.getElementById('progressBar').style.width = `${progress}%`;
         }
@@ -200,28 +234,63 @@
                     document.getElementById('importPermitStatus').textContent = '✓ Uploaded';
                     document.getElementById('importPermitStatus').className = 'text-xs text-green-600';
                 }
+                if (state.draftData.commercial_invoice) {
+                    documents.commercial_invoice = state.draftData.commercial_invoice;
+                    document.getElementById('commercialInvoiceBox').classList.add('uploaded');
+                    document.getElementById('commercialInvoiceStatus').textContent = '✓ Uploaded';
+                    document.getElementById('commercialInvoiceStatus').className = 'text-xs text-green-600';
+                }
+                if (state.draftData.insurance_certificate) {
+                    documents.insurance_certificate = state.draftData.insurance_certificate;
+                    document.getElementById('insuranceCertificateBox').classList.add('uploaded');
+                    document.getElementById('insuranceCertificateStatus').textContent = '✓ Uploaded';
+                    document.getElementById('insuranceCertificateStatus').className = 'text-xs text-green-600';
+                }
+                if (state.draftData.inspection_certificate) {
+                    documents.inspection_certificate = state.draftData.inspection_certificate;
+                    document.getElementById('inspectionCertificateBox').classList.add('uploaded');
+                    document.getElementById('inspectionCertificateStatus').textContent = '✓ Uploaded';
+                    document.getElementById('inspectionCertificateStatus').className = 'text-xs text-green-600';
+                }
+                if (state.draftData.other_documents) {
+                    documents.other_documents = state.draftData.other_documents;
+                    document.getElementById('otherDocumentsBox').classList.add('uploaded');
+                    document.getElementById('otherDocumentsStatus').textContent = '✓ Uploaded';
+                    document.getElementById('otherDocumentsStatus').className = 'text-xs text-green-600';
+                }
             }
         }
         loadDocuments();
 
-        // Handle document upload (simulated)
-        window.handleDocumentUpload = function(docType) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.pdf,.jpg,.jpeg,.png';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    documents[docType] = file.name;
-                    const boxId = docType + 'Box';
-                    const statusId = docType + 'Status';
-                    document.getElementById(boxId).classList.add('uploaded');
-                    document.getElementById(statusId).textContent = '✓ Uploaded';
-                    document.getElementById(statusId).className = 'text-xs text-green-600';
-                }
-            };
-            input.click();
-        };
+        // Handle document upload
+        function handleDocumentUpload(docType) {
+            const inputId = docType + 'Input';
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        documents[docType] = file.name;
+                        // Convert docType to camelCase for box and status IDs
+                        const camelCase = docType.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+                        const boxId = camelCase + 'Box';
+                        const statusId = camelCase + 'Status';
+                        document.getElementById(boxId).classList.add('uploaded');
+                        document.getElementById(statusId).textContent = '✓ Uploaded';
+                        document.getElementById(statusId).className = 'text-xs text-green-600';
+                    }
+                };
+                input.click();
+            }
+        }
+
+        // Add click event listeners to all document upload boxes
+        document.querySelectorAll('.doc-upload-box').forEach(box => {
+            box.addEventListener('click', function() {
+                const docType = this.getAttribute('data-doc-type');
+                handleDocumentUpload(docType);
+            });
+        });
 
         // Save and continue
         document.getElementById('saveAndContinueBtn').addEventListener('click', async function() {
@@ -229,11 +298,15 @@
                 packing_list: documents.packing_list,
                 bill_of_lading: documents.bill_of_lading,
                 certificate_of_origin: documents.certificate_of_origin,
-                import_permit: documents.import_permit
+                import_permit: documents.import_permit,
+                commercial_invoice: documents.commercial_invoice,
+                insurance_certificate: documents.insurance_certificate,
+                inspection_certificate: documents.inspection_certificate,
+                other_documents: documents.other_documents
             };
 
             // Validate
-            const validation = workflow.validateStep(7, stepData);
+            const validation = workflow.validateStep(6, stepData);
             if (!validation.success) {
                 toastManager.warning('Please upload all required documents: ' + validation.missingFields.join(', '));
                 return;
@@ -246,11 +319,13 @@
                 return;
             }
 
-            // Move to next step
-            const nextResult = workflow.nextStep();
-            if (nextResult.success) {
-                toastManager.success('Step saved successfully');
-                window.location.href = nextResult.step.page + '?id=' + workflow.applicationId;
+            // This is the final step - submit the declaration
+            const submitResult = await workflow.submitDeclaration();
+            if (submitResult.success) {
+                toastManager.success('Declaration submitted successfully');
+                window.location.href = 'dashboard.html';
+            } else {
+                toastManager.error('Error submitting: ' + submitResult.error);
             }
         });
 
@@ -259,8 +334,10 @@
             const result = await getUnreadCount();
             if (result.success && result.count > 0) {
                 const badge = document.getElementById('notificationBadge');
-                badge.textContent = result.count;
-                badge.classList.remove('hidden');
+                if (badge) {
+                    badge.textContent = result.count;
+                    badge.classList.remove('hidden');
+                }
             }
         }
         updateNotificationBadge();

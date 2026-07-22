@@ -151,6 +151,8 @@
 
         import { fetchPayments, processPayment as processPaymentService } from '../../js/payments.js';
         
+        import supabase from '../../js/supabase.js';
+        
         import { checkPageAuth, signOut } from '../../js/auth-check.js';
         
         import { signOut as authSignOut } from '../../js/auth.js';
@@ -189,6 +191,10 @@
 
         let selectedPaymentMethod = null;
         let currentPayment = null;
+        // Get application ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const applicationId = urlParams.get('id');
+        const applicationRef = urlParams.get('ref');
 
         // Load payment details
         async function loadPaymentDetails() {
@@ -198,7 +204,31 @@
             document.getElementById('paymentData').classList.add('hidden');
 
             try {
-                const result = await fetchPayments({ filters: { status: 'pending' }, limit: 1 });
+                let result;
+                if (applicationId) {
+                    // Try to fetch invoice for specific application with specific columns
+                    const { data: invoice, error } = await supabase
+                        .from('invoices')
+                        .select('id,invoice_number,application_id,subtotal,duty_amount,tax_amount,fees_amount,total_amount,issued_at,due_at,status,generated_by')
+                        .eq('application_id', applicationId)
+                        .eq('status', 'pending')
+                        .maybeSingle();
+                    
+                    if (error) throw error;
+                    
+                    result = { success: true, data: invoice ? [invoice] : [] };
+                } else {
+                    // Try to fetch any pending invoice with specific columns
+                    const { data: invoices, error } = await supabase
+                        .from('invoices')
+                        .select('id,invoice_number,application_id,subtotal,duty_amount,tax_amount,fees_amount,total_amount,issued_at,due_at,status,generated_by')
+                        .eq('status', 'pending')
+                        .limit(1);
+                    
+                    if (error) throw error;
+                    
+                    result = { success: true, data: invoices || [] };
+                }
                 
                 if (result.success && result.data.length > 0) {
                     currentPayment = result.data[0];
@@ -206,33 +236,33 @@
                 } else {
                     document.getElementById('paymentLoading').classList.add('hidden');
                     document.getElementById('paymentEmpty').classList.remove('hidden');
-                    toastManager.info('No pending payments found');
+                    toastManager.info('No pending invoices found. Please contact the revenue officer to generate an invoice.');
                 }
             } catch (error) {
                 console.error('Load payment error:', error);
                 document.getElementById('paymentLoading').classList.add('hidden');
                 document.getElementById('paymentError').classList.remove('hidden');
                 document.getElementById('errorMessage').textContent = 'Error loading payment details: ' + error.message;
-                toastManager.error('Error loading payment details: ' + error.message);
+                toastManager.error('Error loading payment details. Please contact support if this persists.');
             }
         }
 
-        function displayPaymentDetails(payment) {
+        function displayPaymentDetails(invoice) {
             document.getElementById('paymentLoading').classList.add('hidden');
             document.getElementById('paymentData').classList.remove('hidden');
 
-            document.getElementById('assessmentRef').textContent = payment.application_number || payment.id;
-            document.getElementById('totalPayable').textContent = formatCurrency(payment.amount);
-            document.getElementById('amountDue').textContent = formatCurrency(payment.amount);
+            document.getElementById('assessmentRef').textContent = invoice.invoice_number || invoice.application_number || invoice.id;
+            document.getElementById('totalPayable').textContent = formatCurrency(invoice.total_amount);
+            document.getElementById('amountDue').textContent = formatCurrency(invoice.total_amount);
             
             const statusBadge = document.getElementById('paymentStatus');
-            statusBadge.textContent = payment.status;
+            statusBadge.textContent = invoice.status;
             statusBadge.className = 'status-badge';
-            if (payment.status === 'pending') {
+            if (invoice.status === 'pending') {
                 statusBadge.classList.add('status-pending-payment');
-            } else if (payment.status === 'paid') {
+            } else if (invoice.status === 'paid') {
                 statusBadge.classList.add('bg-green-100', 'text-green-700');
-            } else if (payment.status === 'failed') {
+            } else if (invoice.status === 'failed') {
                 statusBadge.classList.add('bg-red-100', 'text-red-700');
             }
         }
@@ -249,7 +279,7 @@
 
         async function processPayment() {
             if (!currentPayment) {
-                toastManager.warning('No payment to process');
+                toastManager.warning('No invoice to process');
                 return;
             }
             if (!selectedPaymentMethod) {
@@ -262,16 +292,48 @@
             btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Processing...';
 
             try {
-                const result = await processPaymentService(currentPayment.id, selectedPaymentMethod);
+                // Create payment record from invoice
+                const { data: { user } } = await supabase.auth.getUser();
+                const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
                 
-                if (result.success) {
-                    toastManager.success('Payment processed successfully! Transaction ID: ' + result.data.transaction_id);
-                    window.location.href = 'dashboard-trader.html';
-                } else {
-                    toastManager.error('Payment failed: ' + result.error);
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="ri-check-line"></i> Pay Now';
-                }
+                const payment = {
+                    invoice_id: currentPayment.id,
+                    application_id: currentPayment.application_id,
+                    amount: currentPayment.total_amount,
+                    currency: currentPayment.currency,
+                    payment_method: selectedPaymentMethod,
+                    status: 'completed',
+                    paid_by: profile.id,
+                    paid_at: new Date().toISOString(),
+                    transaction_id: 'TXN-' + Date.now()
+                };
+
+                const { data: createdPayment, error: paymentError } = await supabase
+                    .from('payments')
+                    .insert(payment)
+                    .select()
+                    .single();
+
+                if (paymentError) throw paymentError;
+
+                // Update invoice status to paid
+                const { error: updateError } = await supabase
+                    .from('invoices')
+                    .update({ status: 'paid', paid_at: new Date().toISOString() })
+                    .eq('id', currentPayment.id);
+
+                if (updateError) throw updateError;
+
+                // Update application status to paid
+                const { error: appError } = await supabase
+                    .from('applications')
+                    .update({ status: 'paid' })
+                    .eq('id', currentPayment.application_id);
+
+                if (appError) throw appError;
+
+                toastManager.success('Payment processed successfully! Transaction ID: ' + payment.transaction_id);
+                window.location.href = 'dashboard-trader.html';
             } catch (error) {
                 console.error('Process payment error:', error);
                 toastManager.error('Payment processing error: ' + error.message);
@@ -293,8 +355,10 @@
             const result = await getUnreadCount();
             if (result.success && result.count > 0) {
                 const badge = document.getElementById('notificationBadge');
-                badge.textContent = result.count;
-                badge.classList.remove('hidden');
+                if (badge) {
+                    badge.textContent = result.count;
+                    badge.classList.remove('hidden');
+                }
             }
         }
         updateNotificationBadge();

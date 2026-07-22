@@ -3,265 +3,197 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SSRA Customs · Agent Submitted Notifications</title>
+    <title>Submitted Declarations · SSRA Customs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="../assets/icons/remixicon.css" rel="stylesheet" />
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
-        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
-        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
-        .notification-item { padding: 1rem; border-radius: 0.75rem; border: 1px solid #e5e7eb; transition: all 0.2s ease; }
-        .notification-item:hover { background: #f9fafb; }
-        .notification-item.unread { background: #e8f0fe; border-color: #1e3a5f; }
-        .notification-item .notif-time { font-size: 0.75rem; color: #6b7280; }
-        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
-        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
-        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
-        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
-        .profile-dropdown .danger { color: #dc2626; }
-        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
-        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
-        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
-        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
+        .app-card:hover { background: #f8faff; }
+        .s-submitted { background: #dbeafe; color: #1e40af; }
+        .s-pending_review { background: #fef3c7; color: #92400e; }
+        .s-high_risk { background: #fecaca; color: #991b1b; }
+        .s-returned { background: #fee2e2; color: #991b1b; }
+        .badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.7rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
     </style>
 </head>
-<body>
-    <div class="min-h-screen bg-gray-100">
+<body class="bg-gray-50">
+    <div class="min-h-screen">
         <div class="max-w-7xl mx-auto px-4 py-5">
             <div class="flex flex-col lg:flex-row gap-6">
-                <aside class="lg:w-72 flex-shrink-0">
-                    <div id="agent-sidebar"></div>
-                </aside>
-
+                <aside class="lg:w-72 flex-shrink-0"><div id="agent-sidebar"></div></aside>
                 <main class="flex-1 space-y-5">
-                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
-                        <div>
-                            <h2 class="text-2xl font-bold tracking-tight">📤 Submitted Notifications</h2>
-                            <p class="opacity-90 text-sm">Notifications for submitted applications</p>
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg">
+                        <h1 class="text-2xl font-bold">📤 Submitted Declarations</h1>
+                        <p class="opacity-80 text-sm mt-1">Declarations awaiting AI validation and officer review</p>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-white rounded-xl border p-4 text-center shadow-sm">
+                            <div class="text-2xl font-bold text-blue-600" id="statSubmitted">–</div>
+                            <div class="text-xs text-gray-500 mt-1">Submitted / AI Processing</div>
                         </div>
-                        <div class="relative">
-                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
-                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
-                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
-                                <i class="ri-arrow-down-s-line text-sm"></i>
-                            </button>
-                            <div class="profile-dropdown" id="profileDropdown">
-                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
-                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
-                                <div class="divider"></div>
-                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                        <div class="bg-white rounded-xl border p-4 text-center shadow-sm">
+                            <div class="text-2xl font-bold text-amber-600" id="statPendingReview">–</div>
+                            <div class="text-xs text-gray-500 mt-1">Pending Officer Review</div>
+                        </div>
+                        <div class="bg-white rounded-xl border p-4 text-center shadow-sm">
+                            <div class="text-2xl font-bold text-red-600" id="statReturned">–</div>
+                            <div class="text-xs text-gray-500 mt-1">Returned</div>
+                        </div>
+                    </div>
+
+                    <!-- AI Validation Status Info -->
+                    <div class="bg-violet-50 border border-violet-100 rounded-xl p-4 flex items-start gap-3">
+                        <i class="ri-robot-line text-violet-600 text-xl mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <div class="font-semibold text-violet-800 text-sm">AI Validation Process</div>
+                            <div class="text-xs text-violet-600 mt-1">After submission, our AI system performs: OCR verification, document authentication, HS code validation, fraud detection, duplicate detection, duty calculation, and risk assessment. This typically takes 30–60 seconds.</div>
+                        </div>
+                    </div>
+
+                    <!-- Applications List -->
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                        <div class="flex items-center justify-between p-5 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800">Recent Submissions</h3>
+                            <a href="create-declaration.html" class="text-sm text-blue-600 hover:underline">+ New Declaration</a>
+                        </div>
+                        <div id="applicationsList">
+                            <div class="p-8 text-center text-gray-400">
+                                <i class="ri-loader-4-line text-3xl animate-spin block mb-2"></i>
+                                Loading...
                             </div>
                         </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-3 items-center justify-between">
-                        <div class="flex flex-wrap gap-2">
-                            <button class="px-4 py-1.5 rounded-full text-sm bg-blue-600 text-white">All</button>
-                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Unread</button>
-                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Read</button>
-                        </div>
-                        <button onclick="document.querySelectorAll('.notification-item.unread').forEach(el=>el.classList.remove('unread')); alert('✅ All notifications marked as read')" class="text-sm text-blue-600 hover:underline">Mark all as read</button>
-                    </div>
-
-                    <div class="space-y-3" id="submittedList">
-                        <div class="text-center py-4 text-gray-500">Loading submitted applications...</div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
-            }
-        });
-    </script>
 
-        <script type="module" src="../../js/agent-sidebar.js"></script>
-<!-- Supabase & Shared Authentication Guards -->
+    <script type="module" src="../../js/agent-sidebar.js"></script>
     <script type="module">
         import supabase from '../../js/supabase.js';
-        import { checkPageAuth } from '../../js/auth-check.js';
-        import { signOut } from '../../js/auth.js';
-        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { resubmitDeclaration } from '../../js/agent-declaration-service.js';
 
-        let isInitialized = false;
-        async function initPage() {
-            if (isInitialized) return;
-            isInitialized = true;
-            console.log('=== INITIALIZING AUTH GUARD ON MOCK PAGE ===');
-            const role = 'agent';
-            
-            // 1. Run auth check
-            const hasAccess = await checkPageAuth(role);
-            if (!hasAccess) {
-                console.log('Access denied, redirecting...');
+        let profileId = null;
+
+        function timeAgo(d) {
+            if (!d) return '';
+            const secs = Math.floor((Date.now() - new Date(d)) / 1000);
+            if (secs < 60) return 'just now';
+            if (secs < 3600) return `${Math.floor(secs/60)}m ago`;
+            if (secs < 86400) return `${Math.floor(secs/3600)}h ago`;
+            return new Date(d).toLocaleDateString();
+        }
+
+        function statusBadge(status) {
+            const cfg = {
+                submitted: ['s-submitted', 'AI Validation'],
+                pending_review: ['s-pending_review', 'Pending Review'],
+                high_risk_review: ['s-high_risk', 'High Risk'],
+                returned: ['s-returned', 'Returned']
+            };
+            const [cls, label] = cfg[status] || ['bg-gray-100 text-gray-600', status];
+            return `<span class="badge ${cls}">${label}</span>`;
+        }
+
+        async function handleResubmit(applicationId, applicationNumber) {
+            if (!confirm(`Are you sure you want to resubmit declaration ${applicationNumber}? This will trigger a new AI validation.`)) {
                 return;
             }
 
-            // 2. Load profile data from Supabase
-            const { user, profile } = await loadCurrentUserProfile();
-            
-            // 3. Update sidebar and profile UI
-            if (profile) {
-                const displayName = profile.full_name || user?.email || 'User';
-                const displayRole = role === 'agent' ? 'Clearing Agent' : 'Trader';
-                
-                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
-                if (nameEl) nameEl.textContent = displayName;
-                
-                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
-                if (roleEl) roleEl.textContent = displayRole;
-                
-                const statusEl = document.getElementById(role + 'ProfileStatus');
-                if (statusEl) statusEl.textContent = '● ' + (profile.status || 'Active');
-                
-                const tinEl = document.getElementById(role + 'ProfileTIN');
-                if (tinEl && profile.organization) {
-                    tinEl.textContent = 'Org: ' + profile.organization;
-                }
-            }
-
-            // 4. Load live submitted applications data
-            await loadSubmittedApplications(profile?.id);
-
-            // 5. Setup realtime subscriptions
-            setupRealtimeSubscriptions(profile?.id);
-
-            // 6. Bind Logout Button Listeners
-            const handleLogout = async (e) => {
-                e.preventDefault();
-                console.log('Signing out...');
-                const result = await signOut();
-                if (result.success) {
-                    window.location.href = '../../auth/login.html';
-                }
-            };
-
-            const signOutBtn = document.getElementById('signOutBtn');
-            if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
-
-            const dropdownSignOut = document.getElementById('dropdownSignOut');
-            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
-        }
-
-        async function loadSubmittedApplications(profileId) {
             try {
-                const { data: applications, error } = await supabase
-                    .from('applications')
-                    .select('*, profiles!applications_user_id_fkey(full_name, organization)')
-                    .eq('agent_id', profileId)
-                    .eq('status', 'submitted')
-                    .order('created_at', { ascending: false })
-                    .limit(50);
-
-                if (error) throw error;
-
-                const submittedList = document.getElementById('submittedList');
-                if (!applications || applications.length === 0) {
-                    submittedList.innerHTML = '<div class="text-center py-4 text-gray-500">No submitted applications found</div>';
-                    return;
+                const result = await resubmitDeclaration(applicationId);
+                if (result.success) {
+                    alert(`Declaration ${applicationNumber} has been resubmitted successfully. AI validation is in progress.`);
+                    loadData(); // Refresh the list
+                } else {
+                    alert(`Failed to resubmit: ${result.error}`);
                 }
-
-                submittedList.innerHTML = applications.map(app => {
-                    const clientName = app.profiles?.full_name || app.profiles?.organization || 'Unknown';
-                    const iconClass = getApplicationIcon(app.application_type);
-                    const iconBgClass = getApplicationIconBg(app.application_type);
-                    const timeStr = formatTimeAgo(app.created_at);
-                    const viewLink = getApplicationViewLink(app);
-
-                    return `
-                        <div class="notification-item">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full ${iconBgClass} flex items-center justify-center flex-shrink-0">
-                                    <i class="${iconClass} text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-sm">${app.application_type || 'Application'} Submitted</h4>
-                                    <p class="text-sm text-gray-600 mt-1">${app.application_number || 'N/A'} submitted for client ${clientName}.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>${timeStr}</span>
-                                        <a href="${viewLink}" class="text-blue-600 text-sm hover:underline">View Application</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
             } catch (error) {
-                console.error('Error loading submitted applications:', error);
-                document.getElementById('submittedList').innerHTML = '<div class="text-center py-4 text-red-500">Error loading submitted applications</div>';
+                alert(`Error resubmitting: ${error.message}`);
             }
         }
 
-        function getApplicationIcon(type) {
-            const icons = {
-                cvet: 'ri-file-text-line text-blue-600',
-                direct_assessment: 'ri-file-search-line text-emerald-600',
-                agent_license: 'ri-id-card-line text-purple-600',
-                vehicle_query: 'ri-car-line text-orange-600'
-            };
-            return icons[type] || 'ri-file-line text-gray-600';
+        async function loadData() {
+            const [subRes, prRes, hrRes, retRes] = await Promise.all([
+                supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', profileId).in('status', ['submitted']),
+                supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', profileId).eq('status', 'pending_review'),
+                supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', profileId).eq('status', 'high_risk_review'),
+                supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', profileId).eq('status', 'returned')
+            ]);
+
+            document.getElementById('statSubmitted').textContent = subRes.count || 0;
+            document.getElementById('statPendingReview').textContent = (prRes.count || 0) + (hrRes.count || 0);
+            document.getElementById('statReturned').textContent = retRes.count || 0;
+
+            const { data, error } = await supabase
+                .from('applications')
+                .select('id, application_number, status, declared_value, goods_data, submitted_at, updated_at')
+                .eq('agent_id', profileId)
+                .in('status', ['submitted', 'pending_review', 'high_risk_review', 'returned'])
+                .order('updated_at', { ascending: false });
+
+            const container = document.getElementById('applicationsList');
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="p-8 text-center text-gray-400">No submitted declarations found</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+                        <tr>
+                            <th class="text-left py-3 px-5">Declaration</th>
+                            <th class="text-left py-3 px-3">Status</th>
+                            <th class="text-left py-3 px-3 hidden md:table-cell">Goods</th>
+                            <th class="text-right py-3 px-5 hidden sm:table-cell">Value</th>
+                            <th class="text-right py-3 px-5">Submitted</th>
+                            <th class="text-right py-3 px-5">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        ${data.map(app => `
+                            <tr class="app-card transition">
+                                <td class="py-3 px-5 font-semibold text-gray-800 cursor-pointer" onclick="location.href='tracking.html?id=${app.id}'">${app.application_number}</td>
+                                <td class="py-3 px-3">${statusBadge(app.status)}</td>
+                                <td class="py-3 px-3 text-gray-500 hidden md:table-cell text-xs truncate max-w-xs">${app.goods_data?.description || 'Customs Declaration'}</td>
+                                <td class="py-3 px-5 text-right text-gray-600 hidden sm:table-cell">${app.declared_value ? app.declared_value.toLocaleString() + ' SSP' : '–'}</td>
+                                <td class="py-3 px-5 text-right text-gray-400">${timeAgo(app.submitted_at || app.updated_at)}</td>
+                                <td class="py-3 px-5 text-right">
+                                    ${app.status === 'returned' ? 
+                                        `<button onclick="handleResubmit('${app.id}', '${app.application_number}')" class="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Resubmit</button>` : 
+                                        `<button onclick="location.href='tracking.html?id=${app.id}'" class="text-xs text-blue-600 hover:underline">View</button>`
+                                    }
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`;
         }
 
-        function getApplicationIconBg(type) {
-            const bgs = {
-                cvet: 'bg-blue-100',
-                direct_assessment: 'bg-emerald-100',
-                agent_license: 'bg-purple-100',
-                vehicle_query: 'bg-orange-100'
-            };
-            return bgs[type] || 'bg-gray-100';
+        async function init() {
+            const user = await getCurrentUser();
+            if (!user) { window.location.href = '/auth/login.html'; return; }
+            const profile = await getUserProfile(user.id);
+            if (!profile || profile.role !== 'agent') { window.location.href = '/auth/login.html'; return; }
+            profileId = profile.id;
+            await loadData();
+
+            // Realtime disabled to avoid channel conflicts
+            // Users can manually refresh to see updates
+            console.log('Realtime subscription disabled for submitted page');
         }
 
-        function formatTimeAgo(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const seconds = Math.floor((now - date) / 1000);
-
-            if (seconds < 60) return 'Just now';
-            if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
-            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
-            if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
-            return date.toLocaleDateString();
-        }
-
-        function getApplicationViewLink(app) {
-            const links = {
-                cvet: 'tracking.html',
-                direct_assessment: 'create-assessment.html',
-                agent_license: 'verification.html',
-                vehicle_query: 'search-vehicle.html'
-            };
-            return `${links[app.application_type] || 'tracking.html'}?id=${app.id}`;
-        }
-
-        function setupRealtimeSubscriptions(profileId) {
-            // Subscribe to applications table changes
-            const appChannel = supabase
-                .channel('submitted-applications-apps')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, async () => {
-                    console.log('Applications changed, reloading submitted...');
-                    const { data: { user } } = await supabase.auth.getUser();
-                    const profile = user ? await getUserProfile(user.id) : null;
-                    await loadSubmittedApplications(profile?.id);
-                })
-                .subscribe();
-
-            // Cleanup on page unload
-            window.addEventListener('beforeunload', () => {
-                supabase.removeChannel(appChannel);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', initPage);
-        if (document.readyState === 'interactive' || document.readyState === 'complete') {
-            initPage();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
         }
     </script>
-</body></html>
-
+</body>
+</html>

@@ -42,6 +42,11 @@
                         },
                         onActivityLog: (payload) => {
                             console.log('Activity log:', payload);
+                        },
+                        onAIValidationResult: (payload) => {
+                            console.log('AI validation result:', payload);
+                            fetchAgentCVETApplications();
+                            showToastNotification('AI validation completed for your declaration', 'info');
                         }
                     });
                 }
@@ -195,11 +200,15 @@
                                         <option value="">All Status</option>
                                         <option value="draft">Draft</option>
                                         <option value="submitted">Submitted</option>
-                                        <option value="pending_review">Pending Review</option>
-                                        <option value="under_inspection">Under Inspection</option>
+                                        <option value="under_review">Under Review</option>
+                                        <option value="inspection_required">Inspection Required</option>
+                                        <option value="inspection_completed">Inspection Completed</option>
                                         <option value="approved">Approved</option>
+                                        <option value="payment_required">Payment Required</option>
                                         <option value="paid">Paid</option>
+                                        <option value="payment_verified">Payment Verified</option>
                                         <option value="completed">Completed</option>
+                                        <option value="returned">Returned</option>
                                         <option value="rejected">Rejected</option>
                                     </select>
                                 </div>
@@ -350,16 +359,16 @@
             if (statsResult.success && statsResult.statistics) {
                 const stats = statsResult.statistics;
                 document.getElementById('statTotal').textContent = stats.total || 0;
-                document.getElementById('statPending').textContent = stats.submitted + stats.pending_review || 0;
+                document.getElementById('statPending').textContent = (stats.draft || 0) + (stats.submitted || 0) + (stats.pending_review || 0) + (stats.under_inspection || 0);
                 document.getElementById('statAIValidated').textContent = stats.pending_review || 0;
-                document.getElementById('statApproved').textContent = stats.approved || 0;
-                document.getElementById('statRejected').textContent = stats.rejected || 0;
+                document.getElementById('statApproved').textContent = (stats.approved || 0) + (stats.paid || 0) + (stats.completed || 0);
+                document.getElementById('statRejected').textContent = (stats.rejected || 0) + (stats.returned || 0);
             }
 
             // Update flow status
             if (statsResult.success && statsResult.statistics) {
                 const stats = statsResult.statistics;
-                document.getElementById('flowDeclarations').textContent = stats.submitted || 0;
+                document.getElementById('flowDeclarations').textContent = (stats.draft || 0) + (stats.submitted || 0);
                 document.getElementById('flowAIValidated').textContent = stats.pending_review || 0;
                 document.getElementById('flowOfficerReview').textContent = stats.under_inspection || 0;
                 document.getElementById('flowCompleted').textContent = stats.completed || 0;
@@ -370,6 +379,7 @@
                 const appsList = document.getElementById('recentApplicationsList');
                 appsList.innerHTML = recentAppsResult.data.map(app => {
                     const statusBadge = getCVETStatusBadgeClass(app.status);
+                    const isCompleted = app.status === 'completed';
                     return `
                         <div class="flex justify-between items-center border-b pb-2">
                             <div class="flex-1">
@@ -378,6 +388,7 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${statusBadge}">${formatCVETStatus(app.status)}</span>
+                                ${isCompleted ? `<button onclick="downloadDocuments('${app.id}')" class="text-xs text-blue-600 hover:text-blue-800 font-medium"><i class="ri-download-line"></i> Docs</button>` : ''}
                             </div>
                         </div>
                     `;
@@ -479,8 +490,14 @@
                     return;
                 }
 
-                // Get unique user_ids and fetch their profiles
-                const uniqueUserIds = [...new Set(applications.map(app => app.user_id))];
+                // Get unique user_ids and fetch their profiles (filter out null values)
+                const uniqueUserIds = [...new Set(applications.map(app => app.user_id).filter(id => id !== null))];
+                
+                if (uniqueUserIds.length === 0) {
+                    document.getElementById('clientsList').innerHTML = '<div class="text-sm text-gray-500 text-center py-4">No clients yet</div>';
+                    return;
+                }
+
                 const { data: profiles, error: profileError } = await supabase
                     .from('profiles')
                     .select('id, full_name, email, organization')
@@ -524,13 +541,13 @@
                     if (statsResult.success && statsResult.statistics) {
                         const stats = statsResult.statistics;
                         document.getElementById('statTotal').textContent = stats.total || 0;
-                        document.getElementById('statPending').textContent = stats.submitted + stats.pending_review || 0;
+                        document.getElementById('statPending').textContent = (stats.draft || 0) + (stats.submitted || 0) + (stats.pending_review || 0) + (stats.under_inspection || 0);
                         document.getElementById('statAIValidated').textContent = stats.pending_review || 0;
-                        document.getElementById('statApproved').textContent = stats.approved || 0;
-                        document.getElementById('statRejected').textContent = stats.rejected || 0;
+                        document.getElementById('statApproved').textContent = (stats.approved || 0) + (stats.paid || 0) + (stats.completed || 0);
+                        document.getElementById('statRejected').textContent = (stats.rejected || 0) + (stats.returned || 0);
                         
                         // Update flow status
-                        document.getElementById('flowDeclarations').textContent = stats.submitted || 0;
+                        document.getElementById('flowDeclarations').textContent = (stats.draft || 0) + (stats.submitted || 0);
                         document.getElementById('flowAIValidated').textContent = stats.pending_review || 0;
                         document.getElementById('flowOfficerReview').textContent = stats.under_inspection || 0;
                         document.getElementById('flowCompleted').textContent = stats.completed || 0;
@@ -582,15 +599,45 @@
             const classes = {
                 draft: 'status-draft',
                 submitted: 'status-pending',
-                pending_review: 'status-review',
-                under_inspection: 'status-inspection',
+                under_review: 'status-review',
+                inspection_required: 'status-inspection',
+                inspection_completed: 'status-inspection',
                 approved: 'status-approved',
-                rejected: 'status-rejected',
+                payment_required: 'status-payment',
                 paid: 'status-approved',
+                payment_verified: 'status-approved',
                 completed: 'status-completed',
-                returned: 'status-rejected'
+                returned: 'status-rejected',
+                rejected: 'status-rejected'
             };
             return classes[status] || 'status-draft';
+        }
+
+        async function downloadDocuments(applicationId) {
+            try {
+                const { data: documents, error } = await supabase
+                    .from('generated_documents')
+                    .select('*')
+                    .eq('application_id', applicationId);
+
+                if (error) throw error;
+
+                if (!documents || documents.length === 0) {
+                    alert('No documents available for download');
+                    return;
+                }
+
+                // In production, this would download actual files
+                // For now, show a list of available documents
+                const docList = documents.map(doc => 
+                    `${doc.document_type}: ${doc.document_number}`
+                ).join('\n');
+                
+                alert(`Available documents:\n${docList}\n\nDocument download will be implemented with file storage integration.`);
+            } catch (error) {
+                console.error('Error downloading documents:', error);
+                alert('Error downloading documents');
+            }
         }
 
         function getFlowBadgeClass(status) {

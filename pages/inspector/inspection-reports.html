@@ -179,11 +179,10 @@
         async function init() {
             const hasAuth = await checkPageAuth('inspector');
 
-        // Load user profile
-        await loadCurrentUserProfile();
+            // Load user profile
+            const { user } = await loadCurrentUserProfile();
             if (!hasAuth) return;
 
-            
             if (!user) {
                 window.location.href = '../../auth/login.html';
                 return;
@@ -417,7 +416,7 @@
 
         document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
 
-        document.addEventListener('DOMContentLoaded', init);
+        init();
     </script>
 </body></html>
 

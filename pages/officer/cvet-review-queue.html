@@ -69,8 +69,11 @@
                         <div class="flex flex-wrap gap-3">
                             <select id="filterStatus" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
                                 <option value="all">All Status</option>
+                                <option value="draft">Draft</option>
                                 <option value="submitted">Submitted</option>
                                 <option value="pending_review">Pending Review</option>
+                                <option value="returned">Returned (AI Failed)</option>
+                                <option value="under_review">Under Review</option>
                                 <option value="approved">Approved</option>
                                 <option value="rejected">Rejected</option>
                             </select>
@@ -115,19 +118,24 @@
         async function loadCVETQueue() {
             const filterStatus = document.getElementById('filterStatus').value;
             const options = {
-                filters: {}
+                filters: {},
+                includeAll: true
             };
 
             if (filterStatus !== 'all') {
                 options.filters.status = filterStatus;
             } else {
-                options.filters.status = ['submitted', 'pending_review'];
+                // By default, show all applications that may need attention
+                options.filters.status = ['draft', 'submitted', 'pending_review', 'returned', 'under_review'];
             }
 
             const result = await fetchApplicationsForRole('officer', options);
             if (result.success && result.data) {
-                // Filter locally for CVET (service_type IS NULL or equals 'cvet')
-                const cvetApps = result.data.filter(app => !app.service_type || app.service_type === 'cvet');
+                // Filter locally for CVET (service_type IS NULL or contains 'cvet' case-insensitive)
+                const cvetApps = result.data.filter(app => 
+                    !app.service_type || 
+                    app.service_type.toLowerCase().includes('cvet')
+                );
                 renderList(cvetApps);
             } else {
                 console.error('Failed to load CVET queue:', result.error);

@@ -40,8 +40,8 @@
                 <main class="flex-1 space-y-5">
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
-                            <h2 class="text-2xl font-bold tracking-tight">📎 Step 4: Upload Documents</h2>
-                            <p class="opacity-90 text-sm">Upload required supporting documents</p>
+                            <h2 class="text-2xl font-bold tracking-tight">📎 Step 6: Upload Documents</h2>
+                            <p class="opacity-90 text-sm">Upload invoice, packing list, bill of lading, permits, and supporting documents</p>
                         </div>
                         <div class="relative">
                             <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
@@ -60,17 +60,23 @@
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span>Step 4 of 8</span>
-                            <span>50% Complete</span>
+                            <span>Step 4 of 4</span>
+                            <span>100% Complete</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-600 h-2 rounded-full" style="width:50%"></div>
+                            <div class="bg-blue-600 h-2 rounded-full" style="width:100%"></div>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
                         <h3 class="font-bold text-lg mb-4">Required Documents</h3>
                         <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="doc-upload-box" id="commercialInvoiceBox" onclick="document.getElementById('commercialInvoiceInput').click()">
+                                <i class="ri-file-pdf-2-line doc-icon"></i>
+                                <p class="font-medium text-sm mt-1">Commercial Invoice <span class="text-red-500">*</span></p>
+                                <p class="text-xs text-gray-400" id="commercialInvoiceStatus">Not uploaded</p>
+                                <input type="file" id="commercialInvoiceInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileUpload(this, 'commercial_invoice')" />
+                            </div>
                             <div class="doc-upload-box" id="packingListBox" onclick="document.getElementById('packingListInput').click()">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
                                 <p class="font-medium text-sm mt-1">Packing List <span class="text-red-500">*</span></p>
@@ -79,7 +85,7 @@
                             </div>
                             <div class="doc-upload-box" id="billOfLadingBox" onclick="document.getElementById('billOfLadingInput').click()">
                                 <i class="ri-file-pdf-2-line doc-icon"></i>
-                                <p class="font-medium text-sm mt-1">Bill of Lading <span class="text-red-500">*</span></p>
+                                <p class="font-medium text-sm mt-1">Bill of Lading / Air Waybill <span class="text-red-500">*</span></p>
                                 <p class="text-xs text-gray-400" id="billOfLadingStatus">Not uploaded</p>
                                 <input type="file" id="billOfLadingInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileUpload(this, 'bill_of_lading')" />
                             </div>
@@ -95,6 +101,24 @@
                                 <p class="text-xs text-gray-400" id="importPermitStatus">Not uploaded</p>
                                 <input type="file" id="importPermitInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileUpload(this, 'import_permit')" />
                             </div>
+                            <div class="doc-upload-box" id="insuranceCertificateBox" onclick="document.getElementById('insuranceCertificateInput').click()">
+                                <i class="ri-file-pdf-2-line doc-icon"></i>
+                                <p class="font-medium text-sm mt-1">Insurance Certificate</p>
+                                <p class="text-xs text-gray-400" id="insuranceCertificateStatus">Not uploaded</p>
+                                <input type="file" id="insuranceCertificateInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileUpload(this, 'insurance_certificate')" />
+                            </div>
+                            <div class="doc-upload-box" id="inspectionCertificateBox" onclick="document.getElementById('inspectionCertificateInput').click()">
+                                <i class="ri-file-pdf-2-line doc-icon"></i>
+                                <p class="font-medium text-sm mt-1">Inspection Certificate</p>
+                                <p class="text-xs text-gray-400" id="inspectionCertificateStatus">Not uploaded</p>
+                                <input type="file" id="inspectionCertificateInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileUpload(this, 'inspection_certificate')" />
+                            </div>
+                            <div class="doc-upload-box" id="otherDocumentsBox" onclick="document.getElementById('otherDocumentsInput').click()">
+                                <i class="ri-file-pdf-2-line doc-icon"></i>
+                                <p class="font-medium text-sm mt-1">Other Documents</p>
+                                <p class="text-xs text-gray-400" id="otherDocumentsStatus">Not uploaded</p>
+                                <input type="file" id="otherDocumentsInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleFileUpload(this, 'other_documents')" />
+                            </div>
                         </div>
 
                         <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
@@ -102,7 +126,7 @@
                                 <i class="ri-arrow-left-line"></i> Previous
                             </a>
                             <button id="uploadContinueBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
-                                Upload & Continue <i class="ri-arrow-right-line"></i>
+                                Submit Declaration <i class="ri-arrow-right-line"></i>
                             </button>
                         </div>
                     </div>
@@ -232,9 +256,18 @@
                 uploaded_at: new Date().toISOString()
             };
 
+            // Map docType to element IDs (docType uses underscores, HTML uses camelCase)
+            const idMap = {
+                'packing_list': 'packingList',
+                'bill_of_lading': 'billOfLading',
+                'certificate_of_origin': 'certificateOfOrigin',
+                'import_permit': 'importPermit'
+            };
+            const elementId = idMap[docType];
+
             // Update UI
-            const statusEl = document.getElementById(docType + 'Status');
-            const boxEl = document.getElementById(docType + 'Box');
+            const statusEl = document.getElementById(elementId + 'Status');
+            const boxEl = document.getElementById(elementId + 'Box');
             if (statusEl) {
                 statusEl.textContent = '✓ Uploaded';
                 statusEl.className = 'text-xs text-green-600';
@@ -245,10 +278,18 @@
         };
 
         function updateDocumentUI() {
+            const idMap = {
+                'packing_list': 'packingList',
+                'bill_of_lading': 'billOfLading',
+                'certificate_of_origin': 'certificateOfOrigin',
+                'import_permit': 'importPermit'
+            };
+            
             Object.keys(uploadedDocuments).forEach(docType => {
                 if (uploadedDocuments[docType]) {
-                    const statusEl = document.getElementById(docType + 'Status');
-                    const boxEl = document.getElementById(docType + 'Box');
+                    const elementId = idMap[docType];
+                    const statusEl = document.getElementById(elementId + 'Status');
+                    const boxEl = document.getElementById(elementId + 'Box');
                     if (statusEl) {
                         statusEl.textContent = '✓ Uploaded';
                         statusEl.className = 'text-xs text-green-600';
@@ -282,8 +323,16 @@
             const result = await saveDraft('documents', uploadedDocuments);
             
             if (result.success) {
-                // Navigate to AI validation step
-                window.location.href = `ai-validation.html?application_id=${applicationId}`;
+                // Import submitDeclaration function
+                const { submitDeclaration } = await import('../../js/agent-declaration-service.js');
+                const submitResult = await submitDeclaration();
+                
+                if (submitResult.success) {
+                    // Navigate to dashboard after submission
+                    window.location.href = 'dashboard-agent.html';
+                } else {
+                    alert('Error submitting declaration: ' + submitResult.error);
+                }
             } else {
                 alert('Error saving documents: ' + result.error);
             }

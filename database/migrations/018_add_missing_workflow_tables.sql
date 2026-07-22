@@ -190,7 +190,20 @@ CREATE TABLE IF NOT EXISTS invoices (
 CREATE INDEX IF NOT EXISTS idx_invoices_application_id ON invoices(application_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_invoice_number ON invoices(invoice_number);
 CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
-CREATE INDEX IF NOT EXISTS idx_invoices_due_date ON invoices(due_date);
+
+-- Add due_date column if it doesn't exist, then create index
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'invoices' AND column_name = 'due_date'
+    ) THEN
+        ALTER TABLE invoices ADD COLUMN due_date DATE;
+    END IF;
+    CREATE INDEX IF NOT EXISTS idx_invoices_due_date ON invoices(due_date);
+EXCEPTION WHEN OTHERS THEN
+    NULL;
+END $$;
 
 -- ================================================================
 -- END OF MIGRATION

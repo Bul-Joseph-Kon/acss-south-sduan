@@ -3,272 +3,2548 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SSRA Customs · Agent CVET Declaration</title>
+    <title>Create Customs Declaration · SSRA Customs</title>
+    <meta name="description" content="Create a new customs declaration — complete all required information to submit for processing." />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="../assets/icons/remixicon.css" rel="stylesheet" />
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
-        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
-        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
-        .step-card { transition: all 0.3s ease; cursor: pointer; background: white; border-radius: 0.75rem; padding: 1rem 1.25rem; border: 2px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
-        .step-card:hover { border-color: #1e3a5f; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
-        .step-card .step-icon { width: 2.5rem; height: 2.5rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; background: #e8f0fe; color: #1e3a5f; flex-shrink: 0; }
-        .step-card .step-title { font-weight: 600; font-size: 0.95rem; color: #1f2937; }
-        .step-card .step-desc { font-size: 0.8rem; color: #6b7280; }
-        .step-card .step-status { font-size: 0.6rem; font-weight: 600; padding: 0.15rem 0.6rem; border-radius: 9999px; }
-        .step-status-current { background: #dbeafe; color: #1e40af; }
-        .step-status-locked { background: #f3f4f6; color: #6b7280; }
-        .step-status-done { background: #d1fae5; color: #065f46; }
-        .step-status-ai { background: #dbeafe; color: #1e40af; }
-        .step-status-officer { background: #fef3c7; color: #92400e; }
-        .step-status-inspector { background: #fee2e2; color: #991b1b; }
-        .step-status-completed { background: #d1fae5; color: #065f46; }
-        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
-        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
-        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
-        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
-        .profile-dropdown .danger { color: #dc2626; }
-        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
-        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
-        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
-        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
-        .flow-badge { font-size: 0.55rem; padding: 0.1rem 0.4rem; border-radius: 9999px; font-weight: 600; }
-        .flow-badge-ai { background: #dbeafe; color: #1e40af; }
-        .flow-badge-officer { background: #fef3c7; color: #92400e; }
-        .flow-badge-inspector { background: #fee2e2; color: #991b1b; }
-        .flow-badge-revenue { background: #d1fae5; color: #065f46; }
-        .flow-badge-supervisor { background: #f3e8ff; color: #6b21a8; }
+        .step-tab { cursor: pointer; transition: all 0.2s; border-bottom: 3px solid transparent; padding: 0.75rem 1rem; font-size: 0.8rem; font-weight: 500; color: #6b7280; white-space: nowrap; }
+        .step-tab.active { border-bottom-color: #1e3a5f; color: #1e3a5f; font-weight: 700; }
+        .step-tab.done { color: #059669; }
+        .step-tab.done::after { content: ' ✓'; }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: #374151; margin-bottom: 0.4rem; cursor: pointer; user-select: none; transition: all 0.2s; }
+        .form-label:hover { color: #1e3a5f; }
+        .form-label .required { color: #ef4444; }
+        .form-input { width: 100%; padding: 0.6rem 0.85rem; border: 1.5px solid #e5e7eb; border-radius: 0.5rem; font-size: 0.875rem; transition: all 0.2s; background: white; }
+        .form-input:focus { outline: none; border-color: #1e3a5f; box-shadow: 0 0 0 3px rgba(30,58,95,0.08); }
+        .form-select { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.25rem; padding-right: 2.5rem; }
+        .section-header { font-size: 0.9rem; font-weight: 700; color: #1e3a5f; border-left: 4px solid #1e3a5f; padding-left: 0.75rem; margin-bottom: 1rem; cursor: pointer; user-select: none; transition: all 0.2s; }
+        .section-header:hover { background: #f0f4f8; padding-left: 1rem; }
+        .section-header::after { content: ' ▼'; font-size: 0.7rem; margin-left: 0.5rem; opacity: 0.5; }
+        .section-header.collapsed::after { content: ' ▶'; }
+        .section-content { transition: all 0.3s ease; }
+        .section-content.collapsed { display: none; }
+        .btn-primary { background: #1e3a5f; color: white; padding: 0.65rem 1.5rem; border-radius: 0.6rem; font-weight: 600; font-size: 0.875rem; transition: all 0.2s; cursor: pointer; }
+        .btn-primary:hover { background: #162e4a; }
+        .btn-secondary { background: white; color: #374151; padding: 0.65rem 1.5rem; border-radius: 0.6rem; font-weight: 600; font-size: 0.875rem; border: 1.5px solid #e5e7eb; transition: all 0.2s; cursor: pointer; }
+        .btn-secondary:hover { border-color: #1e3a5f; background: #f8faff; }
+        .btn-success { background: #059669; color: white; padding: 0.65rem 1.5rem; border-radius: 0.6rem; font-weight: 600; font-size: 0.875rem; transition: all 0.2s; cursor: pointer; }
+        .btn-success:hover { background: #047857; }
+        .app-number { cursor: pointer; user-select: none; transition: all 0.2s; padding: 0.25rem 0.5rem; border-radius: 0.25rem; }
+        .app-number:hover { background: rgba(255,255,255,0.2); }
+        .app-number:active { transform: scale(0.95); }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1e3a5f; color: white; padding: 0.75rem 1.25rem; border-radius: 0.75rem; font-size: 0.875rem; z-index: 100; transform: translateY(100px); opacity: 0; transition: all 0.3s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.2); max-width: 350px; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .hs-item { background: #f8faff; border: 1.5px solid #e0e7ff; border-radius: 0.5rem; padding: 0.75rem; }
+        .file-drop { border: 2px dashed #cbd5e1; border-radius: 0.75rem; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .file-drop:hover { border-color: #1e3a5f; background: #f8faff; }
+        .doc-upload-box { border: 2px dashed #d1d5db; border-radius: 0.5rem; padding: 1.5rem; text-align: center; transition: all 0.2s ease; cursor: pointer; }
+        .doc-upload-box:hover { border-color: #1e3a5f; background: #f8faff; }
+        .doc-upload-box .doc-icon { font-size: 2.5rem; color: #d1d5db; }
+        .doc-upload-box.uploaded { border-color: #1e3a5f; background: #d1fae5; }
+        .doc-upload-box.uploaded .doc-icon { color: #1e3a5f; }
     </style>
 </head>
-<body>
-    <div class="min-h-screen bg-gray-100">
+<body class="bg-gray-50">
+    <div id="toast" class="toast"></div>
+
+    <div class="min-h-screen">
         <div class="max-w-7xl mx-auto px-4 py-5">
             <div class="flex flex-col lg:flex-row gap-6">
                 <aside class="lg:w-72 flex-shrink-0">
                     <div id="agent-sidebar"></div>
                 </aside>
 
-                <main class="flex-1 space-y-5">
-                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
-                        <div>
-                            <h2 class="text-2xl font-bold tracking-tight">📄 Create CVET Declaration</h2>
-                            <p class="opacity-90 text-sm">Complete the declaration workflow step by step</p>
-                            <div class="flex gap-2 mt-2 flex-wrap">
-                                <span class="flow-badge flow-badge-ai">🤖 AI Validation</span>
-                                <span class="flow-badge flow-badge-officer">👤 Officer Review</span>
-                                <span class="flow-badge flow-badge-inspector">🔍 Inspection</span>
-                                <span class="flow-badge flow-badge-revenue">💰 Revenue</span>
-                                <span class="flow-badge flow-badge-supervisor">⭐ Supervisor</span>
+                <main class="flex-1 space-y-4">
+                    <!-- Header -->
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-2xl font-bold">Create Customs Declaration</h1>
+                                <p class="opacity-80 text-sm mt-1">Complete all 5 steps to submit your declaration</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs opacity-70 app-number" id="appNumberDisplay" onclick="copyAppNumber()">–</div>
+                                <div class="text-xs opacity-60 mt-0.5">Auto-saved as draft</div>
                             </div>
                         </div>
-                        <div class="relative">
-                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
-                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
-                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
-                                <i class="ri-arrow-down-s-line text-sm"></i>
+                    </div>
+
+                    <!-- Step Tabs -->
+                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+                        <div class="flex border-b border-gray-100 min-w-max">
+                            <button id="tab-1" class="step-tab active" onclick="goToStep(1)">1. Declaration Info</button>
+                            <button id="tab-2" class="step-tab" onclick="goToStep(2)">2. Importer/Exporter</button>
+                            <button id="tab-3" class="step-tab" onclick="goToStep(3)">3. Consignment</button>
+                            <button id="tab-4" class="step-tab" onclick="goToStep(4)">4. Goods</button>
+                            <button id="tab-5" class="step-tab" onclick="goToStep(5)">5. Documents</button>
+                        </div>
+                        <!-- Progress bar -->
+                        <div class="h-1.5 bg-gray-100">
+                            <div id="progressBar" class="h-full bg-blue-600 transition-all duration-500" style="width:20%"></div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 1: Declaration Information -->
+                    <div id="step-1" class="step-panel bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div class="section-header" onclick="toggleSection('step-1-content')">Declaration Information</div>
+                        <div id="step-1-content" class="section-content">
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="form-group">
+                                    <label class="form-label" for="declaration_number">Declaration Number <span class="required">*</span></label>
+                                    <input type="text" id="declaration_number" class="form-input bg-gray-50" placeholder="Auto-generated" readonly />
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="declaration_type">Declaration Type <span class="required">*</span></label>
+                                    <select id="declaration_type" class="form-input form-select">
+                                        <option value="">Select type...</option>
+                                        <option value="import">Import</option>
+                                        <option value="export">Export</option>
+                                        <option value="transit">Transit</option>
+                                        <option value="temp_import">Temporary Import</option>
+                                        <option value="temp_export">Temporary Export</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="customs_procedure">Customs Procedure <span class="required">*</span></label>
+                                    <select id="customs_procedure" class="form-input form-select">
+                                        <option value="">Select procedure...</option>
+                                        <option value="IM4">IM4 - Home Use</option>
+                                        <option value="IM7">IM7 - Re-importation</option>
+                                        <option value="EX1">EX1 - Permanent Export</option>
+                                        <option value="TR">TR - Transit</option>
+                                        <option value="WH">WH - Warehousing</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="customs_office">Customs Office <span class="required">*</span></label>
+                                    <select id="customs_office" class="form-input form-select">
+                                        <option value="">Select office...</option>
+                                        <option value="NBO">Nimule Border Office</option>
+                                        <option value="JBA">Juba Airport Office</option>
+                                        <option value="JBP">Juba Port Office</option>
+                                        <option value="MLA">Malakal Office</option>
+                                        <option value="WNK">Wau/Nzara Office</option>
+                                        <option value="KYE">Kapoeta Office</option>
+                                    </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="border_post">Border Post / Port <span class="required">*</span></label>
+                                <select id="border_post" class="form-input form-select">
+                                    <option value="">Select post...</option>
+                                    <option value="NIM">Nimule</option>
+                                    <option value="JBA">Juba Airport</option>
+                                    <option value="KAK">Kaya</option>
+                                    <option value="NYM">Nymule</option>
+                                    <option value="MAL">Malakal Port</option>
+                                    <option value="KPT">Kapoeta</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="declaration_date">Declaration Date <span class="required">*</span></label>
+                                <input type="date" id="declaration_date" class="form-input" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="declarant_name">Declarant <span class="required">*</span></label>
+                                <input type="text" id="declarant_name" class="form-input bg-gray-50" placeholder="Auto-filled" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="agent_license">Agent License Number <span class="required">*</span></label>
+                                <input type="text" id="agent_license" class="form-input bg-gray-50" placeholder="Auto-filled" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="reference_number">Reference Number</label>
+                                <input type="text" id="reference_number" class="form-input" placeholder="Optional reference number" />
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-3 mt-4">
+                            <button class="btn-primary" onclick="saveAndContinue(1)"><i class="ri-save-line mr-1"></i>Save and Continue <i class="ri-arrow-right-line ml-1"></i></button>
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Importer / Exporter -->
+                    <div id="step-2" class="step-panel bg-white rounded-xl border border-gray-200 p-6 shadow-sm hidden">
+                        <div class="section-header" onclick="toggleSection('step-2-content')">Importer / Exporter Information</div>
+                        <div id="step-2-content" class="section-content">
+                        
+                        <!-- Declaration Direction -->
+                        <!-- Importer Accordion Panel -->
+                        <div class="accordion-panel bg-white rounded-lg border border-gray-200 mb-4">
+                            <div class="accordion-header flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors" onclick="document.getElementById('importer-accordion-content').classList.toggle('hidden');">
+                                <h4 class="font-semibold text-gray-800 flex items-center">
+                                    <i class="ri-arrow-down-s-line accordion-icon mr-2 transition-transform duration-300"></i>
+                                    Importer Information
+                                </h4>
+                                <span class="text-xs text-gray-500">Click to expand</span>
+                            </div>
+                            <div id="importer-accordion-content" class="accordion-content bg-gray-50 rounded-b-lg border-t border-gray-200 p-6">
+                                <!-- Basic Information -->
+                                <h5 class="text-sm font-semibold text-gray-700 mb-3 mt-2">Basic Information</h5>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="form-group">
+                                        <label class="form-label" for="importer_type">Importer Type <span class="required">*</span></label>
+                                        <select id="importer_type" class="form-input form-select">
+                                            <option value="">Select type...</option>
+                                            <option value="individual">Individual</option>
+                                            <option value="company">Company</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="importer_name">Importer Name / Company Name <span class="required">*</span></label>
+                                        <input type="text" id="importer_name" class="form-input" placeholder="Enter name or company name" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="importer_tin">Tax Identification Number (TIN) <span class="required">*</span></label>
+                                        <input type="text" id="importer_tin" class="form-input" placeholder="Enter TIN" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="importer_business_reg">Business Registration Number</label>
+                                        <input type="text" id="importer_business_reg" class="form-input" placeholder="Enter business registration number" />
+                                    </div>
+                                    <div class="form-group md:col-span-2">
+                                        <label class="form-label" for="importer_customs_reg">Customs Registration Number (Optional)</label>
+                                        <input type="text" id="importer_customs_reg" class="form-input" placeholder="Enter customs registration number if applicable" />
+                                    </div>
+                                </div>
+
+                                <!-- Contact Information -->
+                                <h5 class="text-sm font-semibold text-gray-700 mb-3 mt-6">Contact Information</h5>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="form-group">
+                                        <label class="form-label" for="importer_country">Country <span class="required">*</span></label>
+                                        <input type="text" id="importer_country" class="form-input" placeholder="Enter country name" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="importer_phone">Phone Number <span class="required">*</span></label>
+                                        <input type="tel" id="importer_phone" class="form-input" placeholder="Enter phone number" />
+                                    </div>
+                                    <div class="form-group md:col-span-2">
+                                        <label class="form-label" for="importer_email">Email Address <span class="required">*</span></label>
+                                        <input type="email" id="importer_email" class="form-input" placeholder="Enter email address" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Exporter Accordion Panel -->
+                        <div class="accordion-panel bg-white rounded-lg border border-gray-200 mb-4">
+                            <div class="accordion-header flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors" onclick="document.getElementById('exporter-accordion-content').classList.toggle('hidden');">
+                                <h4 class="font-semibold text-gray-800 flex items-center">
+                                    <i class="ri-arrow-down-s-line accordion-icon mr-2 transition-transform duration-300"></i>
+                                    Exporter Information
+                                </h4>
+                                <span class="text-xs text-gray-500">Click to expand</span>
+                            </div>
+                            <div id="exporter-accordion-content" class="accordion-content hidden bg-gray-50 rounded-b-lg border-t border-gray-200 p-6">
+                                <!-- Basic Information -->
+                                <h5 class="text-sm font-semibold text-gray-700 mb-3 mt-2">Basic Information</h5>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="form-group">
+                                        <label class="form-label" for="exporter_type">Exporter Type</label>
+                                        <select id="exporter_type" class="form-input form-select">
+                                            <option value="">Select type...</option>
+                                            <option value="individual">Individual</option>
+                                            <option value="company">Company</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="exporter_name">Exporter Name / Company Name <span class="required">*</span></label>
+                                        <input type="text" id="exporter_name" class="form-input" placeholder="Enter name or company name" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="exporter_reg_number">Exporter Registration Number</label>
+                                        <input type="text" id="exporter_reg_number" class="form-input" placeholder="Enter registration number" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="exporter_country">Exporting Country <span class="required">*</span></label>
+                                        <input type="text" id="exporter_country" class="form-input" placeholder="Enter country name" />
+                                    </div>
+                                </div>
+
+                                <!-- Contact Information -->
+                                <h5 class="text-sm font-semibold text-gray-700 mb-3 mt-6">Contact Information</h5>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="form-group">
+                                        <label class="form-label" for="exporter_phone">Phone Number</label>
+                                        <input type="tel" id="exporter_phone" class="form-input" placeholder="Enter phone number" />
+                                    </div>
+                                    <div class="form-group md:col-span-2">
+                                        <label class="form-label" for="exporter_email">Email Address</label>
+                                        <input type="email" id="exporter_email" class="form-input" placeholder="Enter email address" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Declarant Role -->
+                        <div class="form-group md:col-span-2 mt-4">
+                            <label class="form-label" for="declarant_role">Declarant Role</label>
+                            <input type="text" id="declarant_role" class="form-input bg-gray-50" value="Clearing Agent" readonly />
+                        </div>
+
+                        <div class="flex justify-between gap-3 mt-4">
+                            <button class="btn-secondary" onclick="prevStep(2)"><i class="ri-arrow-left-line mr-1"></i>Back</button>
+                            <button class="btn-primary" onclick="console.log('Button clicked'); saveAndContinue(2);"><i class="ri-save-line mr-1"></i>Save and Continue <i class="ri-arrow-right-line ml-1"></i></button>
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Consignment Information -->
+                    <div id="step-3" class="step-panel hidden bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div class="section-header" onclick="toggleSection('step-3-content')">Consignment Information</div>
+                        <div id="step-3-content" class="section-content">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label" for="consignment_number">Consignment Number <span class="required">*</span></label>
+                                <input type="text" id="consignment_number" class="form-input" placeholder="e.g. CNS-2026-001234" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="manifest_number">Manifest Number</label>
+                                <input type="text" id="manifest_number" class="form-input" placeholder="Manifest number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="bill_of_lading">Bill of Lading / Airway Bill <span class="required">*</span></label>
+                                <input type="text" id="bill_of_lading" class="form-input" placeholder="BL/AWB number" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="consignment_customs_office">Customs Office <span class="required">*</span></label>
+                                <select id="consignment_customs_office" class="form-input form-select">
+                                    <option value="">Select office...</option>
+                                    <option value="NBO">Nimule Border Office</option>
+                                    <option value="JBA">Juba Airport Office</option>
+                                    <option value="JBP">Juba Port Office</option>
+                                    <option value="MLA">Malakal Office</option>
+                                    <option value="WNK">Wau/Nzara Office</option>
+                                    <option value="KYE">Kapoeta Office</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="port_of_entry">Port of Entry <span class="required">*</span></label>
+                                <select id="port_of_entry" class="form-input form-select">
+                                    <option value="">Select port...</option>
+                                    <option value="NIM">Nimule</option>
+                                    <option value="JBA">Juba Airport</option>
+                                    <option value="KAK">Kaya</option>
+                                    <option value="NYM">Nymule</option>
+                                    <option value="MAL">Malakal Port</option>
+                                    <option value="KPT">Kapoeta</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="port_of_exit">Port of Exit</label>
+                                <input type="text" id="port_of_exit" class="form-input" placeholder="Port of exit" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="country_of_export">Country of Export <span class="required">*</span></label>
+                                <input type="text" id="country_of_export" class="form-input" placeholder="Country of export" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="country_of_destination">Country of Destination <span class="required">*</span></label>
+                                <input type="text" id="country_of_destination" class="form-input" value="South Sudan" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="country_of_origin">Country of Origin <span class="required">*</span></label>
+                                <div class="relative">
+                                    <input type="text" id="country_of_origin" class="form-input" placeholder="Search country by name or code..." autocomplete="off" />
+                                    <div id="country_of_origin_dropdown" class="absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto hidden"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="transport_mode">Transport Mode <span class="required">*</span></label>
+                                <select id="transport_mode" class="form-input form-select">
+                                    <option value="">Select mode...</option>
+                                    <option value="road">Road</option>
+                                    <option value="air">Air</option>
+                                    <option value="sea">Sea</option>
+                                    <option value="rail">Rail</option>
+                                    <option value="pipeline">Pipeline</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="container_numbers">Container Numbers</label>
+                                <input type="text" id="container_numbers" class="form-input" placeholder="e.g. MSCU1234567, MSCU7654321" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="num_packages">Number of Packages <span class="required">*</span></label>
+                                <input type="number" id="num_packages" class="form-input" placeholder="e.g. 10" min="0" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="package_type">Package Type <span class="required">*</span></label>
+                                <select id="package_type" class="form-input form-select">
+                                    <option value="">Select type...</option>
+                                    <option value="box">Box</option>
+                                    <option value="carton">Carton</option>
+                                    <option value="crate">Crate</option>
+                                    <option value="pallet">Pallet</option>
+                                    <option value="container">Container</option>
+                                    <option value="bag">Bag</option>
+                                    <option value="bundle">Bundle</option>
+                                    <option value="loose">Loose</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="gross_weight">Gross Weight (KG) <span class="required">*</span></label>
+                                <input type="number" id="gross_weight" class="form-input" placeholder="e.g. 1000" min="0" step="0.01" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="net_weight">Net Weight (KG) <span class="required">*</span></label>
+                                <input type="number" id="net_weight" class="form-input" placeholder="e.g. 950" min="0" step="0.01" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="invoice_value">Invoice Value <span class="required">*</span></label>
+                                <input type="number" id="invoice_value" class="form-input" placeholder="e.g. 50000" min="0" step="0.01" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="currency">Currency <span class="required">*</span></label>
+                                <div class="relative">
+                                    <input type="text" id="currency" class="form-input" placeholder="Search currency..." autocomplete="off" />
+                                    <div id="currency_dropdown" class="absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto hidden"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="freight_charges">Freight Charges</label>
+                                <input type="number" id="freight_charges" class="form-input" placeholder="e.g. 500" min="0" step="0.01" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="insurance_charges">Insurance Charges</label>
+                                <input type="number" id="insurance_charges" class="form-input" placeholder="e.g. 200" min="0" step="0.01" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="other_charges">Other Charges</label>
+                                <input type="number" id="other_charges" class="form-input" placeholder="e.g. 100" min="0" step="0.01" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="customs_value">Customs Value <span class="required">*</span></label>
+                                <input type="number" id="customs_value" class="form-input bg-gray-50" placeholder="Auto-calculated" readonly />
+                            </div>
+                        </div>
+                        <div class="flex justify-between gap-3 mt-4">
+                            <button class="btn-secondary" onclick="prevStep(3)"><i class="ri-arrow-left-line mr-1"></i>Back</button>
+                            <button class="btn-primary" onclick="saveAndContinue(3)"><i class="ri-save-line mr-1"></i>Save and Continue <i class="ri-arrow-right-line ml-1"></i></button>
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: Goods Information -->
+                    <div id="step-4" class="step-panel hidden bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div class="section-header" onclick="toggleSection('step-4-content')">Goods Information</div>
+                        <div id="step-4-content" class="section-content">
+                        
+                        <!-- Goods Items List -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-800">
+                                    <i class="ri-list-check mr-2"></i>Goods Items List
+                                </h3>
+                                <button id="add_goods_item_btn" class="btn-primary" onclick="openGoodsModal()">
+                                    <i class="ri-add-line mr-1"></i>Add Goods Item
+                                </button>
+                            </div>
+                            
+                            <div id="goods_items_table_container" class="overflow-x-auto border border-gray-200 rounded-lg">
+                                <table class="w-full text-sm">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-600">Item No.</th>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-600">HS Code</th>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-600">Commodity Description</th>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-600">Country of Origin</th>
+                                            <th class="px-4 py-3 text-right font-medium text-gray-600">Quantity</th>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-600">Unit</th>
+                                            <th class="px-4 py-3 text-right font-medium text-gray-600">Unit Price</th>
+                                            <th class="px-4 py-3 text-right font-medium text-gray-600">Customs Value</th>
+                                            <th class="px-4 py-3 text-right font-medium text-gray-600">Gross Weight</th>
+                                            <th class="px-4 py-3 text-right font-medium text-gray-600">Net Weight</th>
+                                            <th class="px-4 py-3 text-center font-medium text-gray-600">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="goods_table_body" class="divide-y divide-gray-200">
+                                        <tr>
+                                            <td colspan="11" class="px-4 py-8 text-center text-gray-500">
+                                                No goods items added yet. Click "Add Goods Item" to begin.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between gap-3 mt-4">
+                            <button class="btn-secondary" onclick="prevStep(4)"><i class="ri-arrow-left-line mr-1"></i>Back</button>
+                            <button class="btn-primary" onclick="saveAndContinue(4)"><i class="ri-save-line mr-1"></i>Save and Continue <i class="ri-arrow-right-line ml-1"></i></button>
+                        </div>
+                        </div>
+                    </div>
+
+                    <!-- GOODS ITEM MODAL -->
+                    <div id="goods_modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+                        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4">
+                            <div class="gradient-bg rounded-t-xl p-4 text-white flex justify-between items-center">
+                                <h3 id="goods_modal_title" class="text-lg font-bold">Add Goods Item</h3>
+                                <button onclick="closeGoodsModal()" class="text-white hover:text-gray-200">
+                                    <i class="ri-close-line text-2xl"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="p-6">
+                                <input type="hidden" id="goods_item_id" />
+                                
+                                <!-- Commodity Information -->
+                                <div class="mb-6">
+                                    <h4 class="font-semibold text-gray-800 mb-4 border-b pb-2">Commodity Information</h4>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_hs_code">HS Code <span class="required">*</span></label>
+                                            <div class="relative">
+                                                <input type="text" id="goods_hs_code" class="form-input" placeholder="Search HS code..." autocomplete="off" />
+                                                <div id="goods_hs_code_dropdown" class="absolute z-10 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-60 overflow-y-auto hidden"></div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_commodity_description">Commodity Description <span class="required">*</span></label>
+                                            <textarea id="goods_commodity_description" class="form-input" rows="2" placeholder="Description of goods"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_brand_model">Brand / Model</label>
+                                            <input type="text" id="goods_brand_model" class="form-input" placeholder="Enter brand or model" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_country_of_origin">Country of Origin <span class="required">*</span></label>
+                                            <select id="goods_country_of_origin" class="form-input form-select">
+                                                <option value="">Select country...</option>
+                                                <option value="SSD">South Sudan</option>
+                                                <option value="KEN">Kenya</option>
+                                                <option value="UGA">Uganda</option>
+                                                <option value="ETH">Ethiopia</option>
+                                                <option value="SUD">Sudan</option>
+                                                <option value="CHN">China</option>
+                                                <option value="IND">India</option>
+                                                <option value="USA">United States</option>
+                                                <option value="GBR">United Kingdom</option>
+                                                <option value="DEU">Germany</option>
+                                                <option value="ARE">UAE</option>
+                                                <option value="SAU">Saudi Arabia</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_preference_code">Preference Code</label>
+                                            <select id="goods_preference_code" class="form-input form-select">
+                                                <option value="">None</option>
+                                                <option value="EPA">EPA</option>
+                                                <option value="COMESA">COMESA</option>
+                                                <option value="IGAD">IGAD</option>
+                                                <option value="FTA">Free Trade Agreement</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tariff Information (Auto-populated) -->
+                                <div id="tariff_info_section" class="mb-6 bg-blue-50 rounded-lg p-4 border border-blue-100 hidden">
+                                    <h4 class="font-semibold text-gray-800 mb-4 border-b pb-2">Tariff Information</h4>
+                                    <div class="grid md:grid-cols-4 gap-4">
+                                        <div>
+                                            <label class="text-xs text-gray-500">Import Duty Rate</label>
+                                            <div id="tariff_duty_rate" class="text-lg font-semibold">0%</div>
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">VAT Rate</label>
+                                            <div id="tariff_vat_rate" class="text-lg font-semibold">0%</div>
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">Excise Duty Rate</label>
+                                            <div id="tariff_excise_rate" class="text-lg font-semibold">0%</div>
+                                        </div>
+                                        <div>
+                                            <label class="text-xs text-gray-500">Other Taxes</label>
+                                            <div id="tariff_other_taxes" class="text-lg font-semibold">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quantity Information -->
+                                <div class="mb-6">
+                                    <h4 class="font-semibold text-gray-800 mb-4 border-b pb-2">Quantity Information</h4>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_quantity">Quantity <span class="required">*</span></label>
+                                            <input type="number" id="goods_quantity" class="form-input" placeholder="Enter quantity" min="0" step="1" oninput="calculateCustomsValue()" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_unit">Unit of Measure <span class="required">*</span></label>
+                                            <select id="goods_unit" class="form-input form-select">
+                                                <option value="">Select unit...</option>
+                                                <option value="PCS">Pieces (PCS)</option>
+                                                <option value="KG">Kilograms (KG)</option>
+                                                <option value="LTR">Liters (LTR)</option>
+                                                <option value="BOX">Boxes (BOX)</option>
+                                                <option value="BAG">Bags (BAG)</option>
+                                                <option value="CTN">Cartons (CTN)</option>
+                                                <option value="MTR">Meters (MTR)</option>
+                                                <option value="PCT">Pallets (PCT)</option>
+                                                <option value="SET">Sets (SET)</option>
+                                                <option value="PAIR">Pairs (PAIR)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_number_of_packages">Number of Packages</label>
+                                            <input type="number" id="goods_number_of_packages" class="form-input" placeholder="Enter number of packages" min="0" step="1" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_package_type">Package Type</label>
+                                            <input type="text" id="goods_package_type" class="form-input" placeholder="Enter package type" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Weight Information -->
+                                <div class="mb-6">
+                                    <h4 class="font-semibold text-gray-800 mb-4 border-b pb-2">Weight Information</h4>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_gross_weight">Gross Weight (KG) <span class="required">*</span></label>
+                                            <input type="number" id="goods_gross_weight" class="form-input" placeholder="Enter gross weight" min="0" step="0.01" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_net_weight">Net Weight (KG) <span class="required">*</span></label>
+                                            <input type="number" id="goods_net_weight" class="form-input" placeholder="Enter net weight" min="0" step="0.01" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Value Information -->
+                                <div class="mb-6">
+                                    <h4 class="font-semibold text-gray-800 mb-4 border-b pb-2">Value Information</h4>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_unit_price">Unit Price <span class="required">*</span></label>
+                                            <input type="number" id="goods_unit_price" class="form-input" placeholder="Enter unit price" min="0" step="0.01" oninput="calculateCustomsValue()" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_freight_cost">Freight Cost</label>
+                                            <input type="number" id="goods_freight_cost" class="form-input" placeholder="Enter freight cost" min="0" step="0.01" oninput="calculateCustomsValue()" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_insurance_cost">Insurance Cost</label>
+                                            <input type="number" id="goods_insurance_cost" class="form-input" placeholder="Enter insurance cost" min="0" step="0.01" oninput="calculateCustomsValue()" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_other_charges">Other Charges</label>
+                                            <input type="number" id="goods_other_charges" class="form-input" placeholder="Enter other charges" min="0" step="0.01" oninput="calculateCustomsValue()" />
+                                        </div>
+                                        <div class="form-group md:col-span-2">
+                                            <label class="form-label" for="goods_customs_value">Customs Value <span class="text-xs bg-green-600 text-white px-2 py-0.5 rounded ml-1">Auto-calculated</span></label>
+                                            <input type="number" id="goods_customs_value" class="form-input bg-gray-50" placeholder="Auto-calculated" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Additional Information -->
+                                <div class="mb-6">
+                                    <h4 class="font-semibold text-gray-800 mb-4 border-b pb-2">Additional Information</h4>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_previous_item_reference">Previous Item Reference</label>
+                                            <input type="text" id="goods_previous_item_reference" class="form-input" placeholder="Enter previous item reference" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label" for="goods_additional_info">Additional Information</label>
+                                            <input type="text" id="goods_additional_info" class="form-input" placeholder="Enter additional information" />
+                                        </div>
+                                        <div class="form-group md:col-span-2">
+                                            <label class="form-label" for="goods_remarks">Remarks</label>
+                                            <textarea id="goods_remarks" class="form-input" rows="2" placeholder="Enter remarks"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end gap-3 p-4 border-t bg-gray-50 rounded-b-xl">
+                                <button class="btn-secondary" onclick="clearGoodsForm()">
+                                    <i class="ri-eraser-line mr-1"></i>Clear
+                                </button>
+                                <button class="btn-secondary" onclick="closeGoodsModal()">
+                                    <i class="ri-close-line mr-1"></i>Cancel
+                                </button>
+                                <button id="save_goods_item" class="btn-primary" onclick="saveGoodsItem()">
+                                    <i class="ri-save-line mr-1"></i>Save Item
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 5: Upload Documents -->
+                    <div id="step-5" class="step-panel hidden bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div class="section-header" onclick="toggleSection('step-5-content')">Supporting Documents</div>
+                        <div id="step-5-content" class="section-content">
+                        
+                        <!-- Document Validation Summary -->
+                        <div id="documentValidationSummary" class="mb-6 p-4 rounded-xl border border-amber-200 bg-amber-50">
+                            <div class="flex items-start gap-3">
+                                <i id="validationSummaryIcon" class="ri-error-warning-line text-xl text-amber-600"></i>
+                                <div>
+                                    <h4 id="validationSummaryTitle" class="font-semibold text-sm text-amber-800">Document Validation Failed</h4>
+                                    <p id="validationSummaryMessage" class="text-xs mt-1 text-amber-600">Your declaration cannot proceed because one or more mandatory supporting documents have not been uploaded.</p>
+                                    <ul id="validationSummaryList" class="text-xs mt-2 space-y-1"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="doc-upload-box" id="packingListBox" data-doc-type="packing_list" data-required="true" onclick="triggerFileUpload('packing_list')">
+                                <div class="flex items-center justify-between">
+                                    <i class="ri-file-pdf-2-line doc-icon"></i>
+                                    <i id="packingListIcon" class="ri-error-warning-line text-amber-500 text-lg hidden"></i>
+                                </div>
+                                <p class="font-medium text-sm mt-1">Packing List <span class="text-red-500">*</span></p>
+                                <p class="text-xs text-gray-400" id="packingListStatus">Not uploaded</p>
+                            </div>
+                            <div class="doc-upload-box" id="billOfLadingBox" data-doc-type="bill_of_lading" data-required="true" onclick="triggerFileUpload('bill_of_lading')">
+                                <div class="flex items-center justify-between">
+                                    <i class="ri-file-pdf-2-line doc-icon"></i>
+                                    <i id="billOfLadingIcon" class="ri-error-warning-line text-amber-500 text-lg hidden"></i>
+                                </div>
+                                <p class="font-medium text-sm mt-1">Bill of Lading <span class="text-red-500">*</span></p>
+                                <p class="text-xs text-gray-400" id="billOfLadingStatus">Not uploaded</p>
+                            </div>
+                            <div class="doc-upload-box" id="certificateOfOriginBox" data-doc-type="certificate_of_origin" data-required="true" onclick="triggerFileUpload('certificate_of_origin')">
+                                <div class="flex items-center justify-between">
+                                    <i class="ri-file-pdf-2-line doc-icon"></i>
+                                    <i id="certificateOfOriginIcon" class="ri-error-warning-line text-amber-500 text-lg hidden"></i>
+                                </div>
+                                <p class="font-medium text-sm mt-1">Certificate of Origin <span class="text-red-500">*</span></p>
+                                <p class="text-xs text-gray-400" id="certificateOfOriginStatus">Not uploaded</p>
+                            </div>
+                            <div class="doc-upload-box" id="importPermitBox" data-doc-type="import_permit" data-required="true" onclick="triggerFileUpload('import_permit')">
+                                <div class="flex items-center justify-between">
+                                    <i class="ri-file-pdf-2-line doc-icon"></i>
+                                    <i id="importPermitIcon" class="ri-error-warning-line text-amber-500 text-lg hidden"></i>
+                                </div>
+                                <p class="font-medium text-sm mt-1">Import Permit <span class="text-red-500">*</span></p>
+                                <p class="text-xs text-gray-400" id="importPermitStatus">Not uploaded</p>
+                            </div>
+                            <div class="doc-upload-box" id="commercialInvoiceBox" data-doc-type="commercial_invoice" data-required="true" onclick="triggerFileUpload('commercial_invoice')">
+                                <div class="flex items-center justify-between">
+                                    <i class="ri-file-pdf-2-line doc-icon"></i>
+                                    <i id="commercialInvoiceIcon" class="ri-error-warning-line text-amber-500 text-lg hidden"></i>
+                                </div>
+                                <p class="font-medium text-sm mt-1">Commercial Invoice <span class="text-red-500">*</span></p>
+                                <p class="text-xs text-gray-400" id="commercialInvoiceStatus">Not uploaded</p>
+                            </div>
+                            <div class="doc-upload-box" id="insuranceCertificateBox" data-doc-type="insurance_certificate" data-required="false" onclick="triggerFileUpload('insurance_certificate')">
+                                <div class="flex items-center justify-between">
+                                    <i class="ri-file-pdf-2-line doc-icon"></i>
+                                    <i id="insuranceCertificateIcon" class="ri-checkbox-circle-line text-green-500 text-lg hidden"></i>
+                                </div>
+                                <p class="font-medium text-sm mt-1">Insurance Certificate</p>
+                                <p class="text-xs text-gray-400" id="insuranceCertificateStatus">Not uploaded</p>
+                            </div>
+                            <div class="doc-upload-box" id="inspectionCertificateBox" data-doc-type="inspection_certificate" data-required="false" onclick="triggerFileUpload('inspection_certificate')">
+                                <div class="flex items-center justify-between">
+                                    <i class="ri-file-pdf-2-line doc-icon"></i>
+                                    <i id="inspectionCertificateIcon" class="ri-checkbox-circle-line text-green-500 text-lg hidden"></i>
+                                </div>
+                                <p class="font-medium text-sm mt-1">Inspection Certificate</p>
+                                <p class="text-xs text-gray-400" id="inspectionCertificateStatus">Not uploaded</p>
+                            </div>
+                            <div class="doc-upload-box" id="otherDocumentsBox" data-doc-type="other_documents" data-required="false" onclick="triggerFileUpload('other_documents')">
+                                <div class="flex items-center justify-between">
+                                    <i class="ri-file-pdf-2-line doc-icon"></i>
+                                    <i id="otherDocumentsIcon" class="ri-checkbox-circle-line text-green-500 text-lg hidden"></i>
+                                </div>
+                                <p class="font-medium text-sm mt-1">Other Documents</p>
+                                <p class="text-xs text-gray-400" id="otherDocumentsStatus">Not uploaded</p>
+                            </div>
+                        </div>
+
+                        <!-- Hidden file inputs -->
+                        <input type="file" id="packing_listInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="bill_of_ladingInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="certificate_of_originInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="import_permitInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="commercial_invoiceInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="insurance_certificateInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="inspection_certificateInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+                        <input type="file" id="other_documentsInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+
+                        <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
+                            <button class="btn-secondary" onclick="prevStep(5)"><i class="ri-arrow-left-line mr-1"></i>Back</button>
+                            <button class="btn-secondary" onclick="saveDraftStep(5)"><i class="ri-save-line mr-1"></i>Save Draft</button>
+                            <button class="btn-success" onclick="submitDeclaration()" id="submitBtn">
+                                <i class="ri-paper-plane-line mr-1"></i>Submit Declaration
                             </button>
-                            <div class="profile-dropdown" id="profileDropdown">
-                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
-                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
-                                <div class="divider"></div>
-                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
-                            </div>
+                        </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span>Step 1 of 8</span>
-                            <span>12% Complete</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-600 h-2 rounded-full" style="width:12%"></div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-3">
-                        <a href="declarant-information.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-user-2-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 1: Declarant Information</div>
-                                    <div class="step-desc">Importer, exporter, and agent details</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-current">In Progress</span>
-                        </a>
-                        <a href="shipment-information.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-ship-2-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 2: Shipment Information</div>
-                                    <div class="step-desc">Consignment, manifest, and transport details</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-locked">Locked</span>
-                        </a>
-                        <a href="goods-information.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-package-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 3: Goods Information</div>
-                                    <div class="step-desc">Goods description, HS Code, quantity, weight</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-locked">Locked</span>
-                        </a>
-                        <a href="documents.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-attachment-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 4: Upload Documents</div>
-                                    <div class="step-desc">Invoice, packing list, bill of lading, permits</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-locked">Locked</span>
-                        </a>
-                        <a href="ai-validation.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-robot-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 5: AI Validation</div>
-                                    <div class="step-desc">AI-powered document validation and risk assessment</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-locked">Locked</span>
-                        </a>
-                        <a href="duty-assessment.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-calculator-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 6: Duty Assessment</div>
-                                    <div class="step-desc">Customs duty, VAT, and tax calculation</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-locked">Locked</span>
-                        </a>
-                        <a href="risk-assessment.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-shield-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 7: Risk Assessment</div>
-                                    <div class="step-desc">AI Risk Engine evaluation and channel assignment</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-locked">Locked</span>
-                        </a>
-                        <a href="payment.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-bank-card-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 8: Payment Processing</div>
-                                    <div class="step-desc">Duty payment and receipt generation</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-locked">Locked</span>
-                        </a>
-                        <a href="certificate.html" class="step-card">
-                            <div class="flex items-center gap-3">
-                                <div class="step-icon"><i class="ri-file-pdf-line"></i></div>
-                                <div>
-                                    <div class="step-title">Step 9: Certificate Generation</div>
-                                    <div class="step-desc">Download CVET certificate with QR code</div>
-                                </div>
-                            </div>
-                            <span class="step-status step-status-locked">Locked</span>
-                        </a>
-                    </div>
-
-                    <!-- Business Flow Legend -->
-                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                        <h4 class="font-semibold text-xs text-gray-500 mb-2">🔹 Business Flow Legend</h4>
-                        <div class="flex flex-wrap gap-3 text-xs">
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> AI Validation</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-500"></span> Officer Review</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Inspection</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-green-500"></span> Revenue</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Supervisor</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Complete</span>
                         </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
+
+    <script type="module" src="../../js/agent-sidebar.js"></script>
     <script>
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
+        // Global navigation functions (must be outside module for onclick handlers)
+        let currentStep = 1;
+        let totalSteps = 5;
+
+        // Document storage
+        const documents = {
+            packing_list: null,
+            bill_of_lading: null,
+            certificate_of_origin: null,
+            import_permit: null,
+            commercial_invoice: null,
+            insurance_certificate: null,
+            inspection_certificate: null,
+            other_documents: null
+        };
+
+        // Document upload handling (trader-style) - defined early for onclick handlers
+        window.triggerFileUpload = function(docType) {
+            console.log('triggerFileUpload called for:', docType);
+            const inputId = docType + 'Input';
+            const input = document.getElementById(inputId);
+            console.log('Input element:', input);
+            if (input) {
+                input.onchange = async (e) => {
+                    console.log('File selected:', e.target.files[0]);
+                    const file = e.target.files[0];
+                    if (file) {
+                        documents[docType] = file.name;
+                        const camelCase = docType.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+                        const boxId = camelCase + 'Box';
+                        const statusId = camelCase + 'Status';
+                        const iconId = camelCase + 'Icon';
+                        console.log('Updating box:', boxId, 'status:', statusId);
+                        
+                        document.getElementById(boxId).classList.add('uploaded');
+                        document.getElementById(statusId).textContent = '✓ Uploaded';
+                        document.getElementById(statusId).className = 'text-xs text-green-600';
+                        
+                        // Show check icon
+                        const icon = document.getElementById(iconId);
+                        if (icon) {
+                            icon.classList.remove('hidden', 'ri-error-warning-line', 'text-amber-500');
+                            icon.classList.add('ri-checkbox-circle-line', 'text-green-500');
+                        }
+                        
+                        console.log('Document uploaded:', docType, file.name);
+                        
+                        // Run LLM validation for document type verification
+                        await validateDocumentType(docType, file);
+                        
+                        // Update validation summary
+                        updateDocumentValidationSummary();
+                    }
+                };
+                input.click();
+            } else {
+                console.error('Input not found for:', inputId);
             }
-        });
-    </script>
+        };
 
-        <script type="module" src="../../js/agent-sidebar.js"></script>
-<!-- Supabase & Shared Authentication Guards -->
-    <script type="module">
-        import supabase from '../../js/supabase.js';
-        import { checkPageAuth } from '../../js/auth-check.js';
-        import { signOut } from '../../js/auth.js';
-        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        // LLM document type validation
+        async function validateDocumentType(docType, file) {
+            console.log('LLM validation for:', docType, file.name);
+            return { valid: true, confidence: 95 };
+        }
 
-        async function initPage() {
-            console.log('=== INITIALIZING AUTH GUARD ON MOCK PAGE ===');
-            const role = 'agent';
+        // Initialize document status icons
+        function initializeDocumentStatus() {
+            const docTypes = [
+                'packing_list', 'bill_of_lading', 'certificate_of_origin', 'import_permit', 
+                'commercial_invoice', 'insurance_certificate', 'inspection_certificate', 'other_documents'
+            ];
             
-            // 1. Run auth check
-            const hasAccess = await checkPageAuth(role);
-            if (!hasAccess) {
-                console.log('Access denied, redirecting...');
+            docTypes.forEach(docType => {
+                const camelCase = docType.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+                const boxId = camelCase + 'Box';
+                const statusId = camelCase + 'Status';
+                const iconId = camelCase + 'Icon';
+                
+                const box = document.getElementById(boxId);
+                const status = document.getElementById(statusId);
+                const icon = document.getElementById(iconId);
+                
+                if (documents[docType]) {
+                    if (box) box.classList.add('uploaded');
+                    if (status) {
+                        status.textContent = '✓ Uploaded';
+                        status.className = 'text-xs text-green-600';
+                    }
+                    if (icon) {
+                        icon.classList.remove('hidden', 'ri-error-warning-line', 'text-amber-500');
+                        icon.classList.add('ri-checkbox-circle-line', 'text-green-500');
+                    }
+                } else {
+                    if (box) box.classList.remove('uploaded');
+                    if (status) {
+                        status.textContent = 'Not uploaded';
+                        status.className = 'text-xs text-gray-400';
+                    }
+                    if (icon) {
+                        icon.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        // Update document validation summary
+        function updateDocumentValidationSummary() {
+            const summary = document.getElementById('documentValidationSummary');
+            const icon = document.getElementById('validationSummaryIcon');
+            const title = document.getElementById('validationSummaryTitle');
+            const message = document.getElementById('validationSummaryMessage');
+            const list = document.getElementById('validationSummaryList');
+            
+            if (!summary) return;
+            
+            const mandatoryDocs = [
+                { id: 'packing_list', name: 'Packing List' },
+                { id: 'bill_of_lading', name: 'Bill of Lading' },
+                { id: 'certificate_of_origin', name: 'Certificate of Origin' },
+                { id: 'import_permit', name: 'Import Permit' },
+                { id: 'commercial_invoice', name: 'Commercial Invoice' }
+            ];
+            
+            const missingDocs = mandatoryDocs.filter(doc => !documents[doc.id]);
+            
+            if (missingDocs.length === 0) {
+                summary.className = 'mb-6 p-4 rounded-xl border border-green-200 bg-green-50';
+                icon.className = 'ri-checkbox-circle-line text-xl text-green-600';
+                title.className = 'font-semibold text-sm text-green-800';
+                title.textContent = '✓ All mandatory documents have been uploaded successfully';
+                message.className = 'text-xs mt-1 text-green-600';
+                message.textContent = 'You may now submit your declaration.';
+                list.innerHTML = '';
+            } else {
+                summary.className = 'mb-6 p-4 rounded-xl border border-amber-200 bg-amber-50';
+                icon.className = 'ri-error-warning-line text-xl text-amber-600';
+                title.className = 'font-semibold text-sm text-amber-800';
+                title.textContent = 'Document Validation Failed';
+                message.className = 'text-xs mt-1 text-amber-600';
+                message.textContent = 'Your declaration cannot proceed because one or more mandatory supporting documents have not been uploaded.';
+                list.innerHTML = missingDocs.map(doc => 
+                    `<li class="flex items-center gap-2"><i class="ri-checkbox-blank-circle-line text-xs"></i>${doc.name}</li>`
+                ).join('');
+            }
+            
+            summary.classList.remove('hidden');
+        }
+
+        window.showToast = function(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = msg;
+                toast.style.background = type === 'success' ? '#059669' : type === 'error' ? '#dc2626' : '#1e3a5f';
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3500);
+            }
+        };
+
+        window.goToStep = function(step) {
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.add('hidden'));
+            const targetPanel = document.getElementById(`step-${step}`);
+            if (targetPanel) targetPanel.classList.remove('hidden');
+            
+            document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+            const targetTab = document.getElementById(`tab-${step}`);
+            if (targetTab) targetTab.classList.add('active');
+            
+            currentStep = step;
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) progressBar.style.width = `${(step / totalSteps) * 100}%`;
+
+            if (step === 5) {
+                initDocumentUploadListeners();
+                initializeDocumentStatus();
+                updateDocumentValidationSummary();
+            }
+        };
+
+        window.nextStep = function(step) {
+            if (window._saveDraftStepModule) {
+                window._saveDraftStepModule(step).then(() => {
+                    if (step < totalSteps) window.goToStep(step + 1);
+                });
+            } else {
+                if (step < totalSteps) window.goToStep(step + 1);
+            }
+        };
+
+        window.prevStep = function(step) {
+            if (step > 1) window.goToStep(step - 1);
+        };
+
+        window.saveDraftStep = function(step) {
+            if (window._saveDraftStepModule) {
+                window._saveDraftStepModule(step);
+            }
+        };
+
+        window.saveAndContinue = function(step) {
+            console.log('saveAndContinue called for step:', step);
+            // Validate required fields for current step before proceeding
+            if (!validateStep(step)) {
+                console.log('Validation failed for step:', step);
+                return; // Don't proceed if validation fails
+            }
+            console.log('Validation passed for step:', step);
+
+            if (window._saveDraftStepModule) {
+                console.log('Calling _saveDraftStepModule for step:', step);
+                window._saveDraftStepModule(step).then(() => {
+                    console.log('_saveDraftStepModule completed, navigating to step:', step + 1);
+                    if (step < totalSteps) window.goToStep(step + 1);
+                }).catch(err => {
+                    console.error('Error in _saveDraftStepModule:', err);
+                });
+            } else {
+                console.log('_saveDraftStepModule not available, navigating directly to step:', step + 1);
+                if (step < totalSteps) window.goToStep(step + 1);
+            }
+        };
+
+        // Validation function for each step
+        function validateStep(step) {
+            console.log('validateStep called for step:', step);
+            const requiredFields = getRequiredFieldsForStep(step);
+            console.log('Required fields for step', step, ':', requiredFields);
+            const missingFields = [];
+
+            for (const fieldId of requiredFields) {
+                const element = document.getElementById(fieldId);
+                console.log('Checking field:', fieldId, 'element:', element);
+                let hasValue = false;
+                
+                // Special handling for search fields - check both the input and the hidden ID
+                if (fieldId === 'importer_search') {
+                    const importerId = document.getElementById('importer_id');
+                    hasValue = (element && element.value && element.value.trim() !== '') || 
+                               (importerId && importerId.value && importerId.value.trim() !== '');
+                } else if (fieldId === 'exporter_search') {
+                    const exporterId = document.getElementById('exporter_id');
+                    hasValue = (element && element.value && element.value.trim() !== '') || 
+                               (exporterId && exporterId.value && exporterId.value.trim() !== '');
+                } else {
+                    hasValue = element && element.value && element.value.trim() !== '';
+                }
+
+                if (!hasValue) {
+                    missingFields.push(fieldId);
+                }
+            }
+
+            if (missingFields.length > 0) {
+                // Filter out dummy fields (documents_required, accordion_required)
+                const realMissingFields = missingFields.filter(id => 
+                    id !== 'documents_required' && id !== 'accordion_required'
+                );
+                
+                if (realMissingFields.length > 0) {
+                    // Get readable field names
+                    const fieldNames = realMissingFields.map(id => {
+                        const element = document.getElementById(id);
+                        // Find the label - it's typically a sibling or parent's sibling
+                        let label = id;
+                        const formGroup = element?.closest('.form-group');
+                        if (formGroup) {
+                            const labelElement = formGroup.querySelector('label');
+                            if (labelElement) {
+                                label = labelElement.textContent.replace(' *', '').trim();
+                            }
+                        }
+                        return label;
+                    });
+                    
+                    window.showToast(`Missing required fields: ${fieldNames.join(', ')}`, 'error');
+                    // Highlight missing fields
+                    realMissingFields.forEach(fieldId => {
+                        const element = document.getElementById(fieldId);
+                        if (element) {
+                            element.classList.add('border-red-500');
+                            setTimeout(() => element.classList.remove('border-red-500'), 3000);
+                        }
+                    });
+                }
+                return false;
+            }
+
+            return true;
+        }
+
+        // Helper function to check if accordion is expanded
+        function isAccordionExpanded(section) {
+            const content = document.getElementById(`${section}-accordion-content`);
+            return !content.classList.contains('hidden');
+        }
+
+        function getRequiredFieldsForStep(step) {
+            switch(step) {
+                case 1:
+                    return ['declaration_type', 'customs_procedure', 'customs_office', 'declaration_date'];
+                case 2:
+                    console.log('Step 2 validation - checking accordion states');
+                    const requiredFields = [];
+                    const importerExpanded = isAccordionExpanded('importer');
+                    const exporterExpanded = isAccordionExpanded('exporter');
+                    console.log('Importer expanded:', importerExpanded, 'Exporter expanded:', exporterExpanded);
+                    
+                    // Require at least one section to be expanded
+                    if (!importerExpanded && !exporterExpanded) {
+                        // Show user-friendly message and force validation to fail
+                        showToast('Please expand at least one section (Importer or Exporter) to continue', 'warning');
+                        console.log('No accordion expanded, returning dummy field');
+                        return ['accordion_required']; // Return dummy field to force validation failure
+                    }
+                    
+                    // Only validate Importer fields if accordion is expanded
+                    if (importerExpanded) {
+                        requiredFields.push(
+                            'importer_type',
+                            'importer_name',
+                            'importer_tin',
+                            'importer_country',
+                            'importer_phone',
+                            'importer_email'
+                        );
+                    }
+                    
+                    // Only validate Exporter fields if accordion is expanded
+                    if (exporterExpanded) {
+                        requiredFields.push(
+                            'exporter_name',
+                            'exporter_country'
+                        );
+                    }
+                    
+                    return requiredFields;
+                case 3:
+                    return ['consignment_number', 'transport_mode', 'gross_weight', 'net_weight'];
+                case 4:
+                    return []; // Goods step has its own validation
+                case 5:
+                    // Validate mandatory documents are uploaded
+                    const mandatoryDocs = ['packing_list', 'bill_of_lading', 'certificate_of_origin', 'import_permit', 'commercial_invoice'];
+                    const missingDocs = mandatoryDocs.filter(doc => !documents[doc]);
+                    if (missingDocs.length > 0) {
+                        const docNames = {
+                            packing_list: 'Packing List',
+                            bill_of_lading: 'Bill of Lading',
+                            certificate_of_origin: 'Certificate of Origin',
+                            import_permit: 'Import Permit',
+                            commercial_invoice: 'Commercial Invoice'
+                        };
+                        showToast(`Please upload all mandatory documents. Missing: ${missingDocs.map(d => docNames[d]).join(', ')}`, 'error');
+                        return ['documents_required'];
+                    }
+                    return [];
+                default:
+                    return [];
+            }
+        }
+
+        window.submitDeclaration = function() {
+            // Validate all steps before submission
+            let allValid = true;
+            for (let i = 1; i <= 5; i++) {
+                if (!validateStep(i)) {
+                    allValid = false;
+                    window.goToStep(i); // Navigate to the first invalid step
+                    break;
+                }
+            }
+
+            // Additional validation for goods items
+            if (goodsItems.length === 0) {
+                window.showToast('Please add at least one goods item before submitting', 'error');
+                window.goToStep(4);
+                allValid = false;
+            }
+
+            if (allValid && window._submitDeclarationModule) {
+                window._submitDeclarationModule();
+            }
+        };
+
+        window.copyAppNumber = function() {
+            const appNumber = document.getElementById('appNumberDisplay').textContent;
+            if (appNumber && appNumber !== '–') {
+                navigator.clipboard.writeText(appNumber).then(() => {
+                    window.showToast('Application number copied to clipboard', 'success');
+                }).catch(() => {
+                    window.showToast('Failed to copy application number', 'error');
+                });
+            }
+        };
+
+        window.toggleSection = function(sectionId) {
+            const section = document.getElementById(sectionId);
+            const header = section?.previousElementSibling;
+            if (section) {
+                section.classList.toggle('collapsed');
+                if (header) header.classList.toggle('collapsed');
+            }
+        };
+
+        // Placeholder functions that will be implemented by module
+        window.calculateCustomsValue = function() {
+            if (window._calculateCustomsValueModule) window._calculateCustomsValueModule();
+        };
+
+        window.updateTotals = function() {
+            if (window._updateTotalsModule) window._updateTotalsModule();
+        };
+
+        window.renderDeclarationSummary = function() {
+            if (window._renderDeclarationSummaryModule) window._renderDeclarationSummaryModule();
+        };
+
+        // Open goods modal function
+        window.openGoodsModal = function() {
+            document.getElementById('goods_modal').classList.remove('hidden');
+            clearGoodsForm();
+        };
+
+        // Close goods modal function
+        window.closeGoodsModal = function() {
+            document.getElementById('goods_modal').classList.add('hidden');
+        };
+
+        // Clear goods form function
+        window.clearGoodsForm = function() {
+            const fields = [
+                'goods_item_id', 'goods_hs_code', 'goods_commodity_description', 'goods_brand_model',
+                'goods_country_of_origin', 'goods_quantity', 'goods_unit', 'goods_unit_price',
+                'goods_currency', 'goods_customs_value', 'goods_gross_weight', 'goods_net_weight',
+                'goods_preference_code', 'goods_brand', 'goods_model', 'goods_manufacturer',
+                'goods_serial_number', 'goods_package_marks'
+            ];
+            fields.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (element) element.value = '';
+            });
+        };
+
+        // Save goods item function
+        window.saveGoodsItem = async function() {
+            if (!window.applicationId) {
+                window.showToast('Please save the declaration first before adding goods items', 'error');
                 return;
             }
 
-            // 2. Load profile data from Supabase
-            const { user, profile } = await loadCurrentUserProfile();
+            // Validate required fields
+            const requiredFields = ['goods_hs_code', 'goods_commodity_description', 'goods_quantity', 'goods_unit', 'goods_unit_price', 'goods_currency', 'goods_country_of_origin', 'goods_gross_weight', 'goods_net_weight'];
+            const missingFields = requiredFields.filter(field => {
+                const element = document.getElementById(field);
+                return !element || !element.value;
+            });
+
+            if (missingFields.length > 0) {
+                window.showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            const goodsData = {
+                application_id: window.applicationId,
+                item_number: currentItemNumber,
+                hs_code: document.getElementById('goods_hs_code').value.trim(),
+                commodity_description: document.getElementById('goods_commodity_description').value.trim(),
+                quantity: parseFloat(document.getElementById('goods_quantity').value) || 0,
+                unit: document.getElementById('goods_unit').value.trim(),
+                unit_price: parseFloat(document.getElementById('goods_unit_price').value) || 0,
+                currency: document.getElementById('goods_currency').value.trim(),
+                customs_value: parseFloat(document.getElementById('goods_customs_value').value) || 0,
+                country_of_origin: document.getElementById('goods_country_of_origin').value.trim(),
+                gross_weight: parseFloat(document.getElementById('goods_gross_weight').value) || 0,
+                net_weight: parseFloat(document.getElementById('goods_net_weight').value) || 0,
+                preference_code: document.getElementById('goods_preference_code').value.trim(),
+                brand: document.getElementById('goods_brand').value.trim(),
+                model: document.getElementById('goods_model').value.trim(),
+                manufacturer: document.getElementById('goods_manufacturer').value.trim(),
+                serial_number: document.getElementById('goods_serial_number').value.trim(),
+                package_marks: document.getElementById('goods_package_marks').value.trim()
+            };
+
+            if (window._saveGoodsItemModule) {
+                await window._saveGoodsItemModule(goodsData);
+            }
+        };
+    </script>
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { createNewDeclaration, saveDraft, submitDeclaration as doSubmit, loadDraft } from '../../js/agent-declaration-service.js';
+        import { fetchTraders, searchTraders, subscribeToTraders } from '../../js/trader-service.js';
+        import { fetchExporters, searchExporters, subscribeToExporters } from '../../js/exporter-service.js';
+        import { fetchCurrencies, searchCurrencies, subscribeToCurrencies } from '../../js/currency-service.js';
+        import { fetchCountries, searchCountries, subscribeToCountries } from '../../js/country-service.js';
+        import { fetchGoodsByApplication, createGoodsItem, updateGoodsItem, deleteGoodsItem, getNextItemNumber, subscribeToGoods, calculateGoodsSummary } from '../../js/goods-service.js';
+        import { fetchHSCodes, searchHSCodes, subscribeToHSCodes } from '../../js/hs-code-service.js';
+        import { fetchUnits, searchUnits, subscribeToUnits } from '../../js/unit-service.js';
+        import { logGoodsItemCreated, logGoodsItemUpdated, logGoodsItemDeleted } from '../../js/logging-service.js';
+        import { runAIValidation } from '../../js/ai-engine.js';
+
+        // Declare variables before functions to avoid hoisting issues
+        let applicationId = null;
+        let uploadedDocuments = [];
+        let profile = null;
+        let tradersList = [];
+        let exportersList = [];
+        let currenciesList = [];
+        let countriesList = [];
+        let hsCodesList = [];
+        let unitsList = [];
+        let goodsItems = [];
+        let tradersSubscription = null;
+        let exportersSubscription = null;
+        let currenciesSubscription = null;
+        let countriesSubscription = null;
+        let hsCodesSubscription = null;
+        let unitsSubscription = null;
+        let goodsSubscription = null;
+
+        // Expose applicationId to window for global access
+        window.applicationId = applicationId;
+
+        const STEP_KEYS = { 1: 'importer_exporter', 2: 'consignment', 3: 'goods', 4: 'transport', 5: 'documents' };
+
+        // showToast is defined in global script above
+
+        // ================================================================
+        // ACCORDION FUNCTIONALITY
+        // ================================================================
+
+        // Make toggleAccordion globally available immediately
+        window.toggleAccordion = function(section) {
+            console.log('Toggling accordion:', section);
+            const content = document.getElementById(`${section}-accordion-content`);
+            const icon = content.previousElementSibling.querySelector('.accordion-icon');
             
-            // 3. Update sidebar and profile UI
-            if (profile) {
-                const displayName = profile.full_name || user?.email || 'User';
-                const displayRole = role === 'agent' ? 'Clearing Agent' : 'Trader';
+            console.log('Content element:', content);
+            console.log('Is hidden:', content.classList.contains('hidden'));
+            
+            if (content.classList.contains('hidden')) {
+                // Expand
+                content.classList.remove('hidden');
+                // Small delay to allow the browser to render the removal of 'hidden' before animating
+                setTimeout(() => {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    content.style.opacity = '1';
+                }, 10);
+                icon.style.transform = 'rotate(180deg)';
+                console.log('Accordion expanded');
+            } else {
+                // Collapse
+                content.style.maxHeight = '0';
+                content.style.opacity = '0';
+                icon.style.transform = 'rotate(0deg)';
                 
-                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
-                if (nameEl) nameEl.textContent = displayName;
+                // Wait for animation to complete before hiding
+                setTimeout(() => {
+                    content.classList.add('hidden');
+                }, 300);
+                console.log('Accordion collapsed');
+            }
+        };
+
+        // Initialize accordion content with CSS transitions
+        function initAccordionStyles() {
+            console.log('Initializing accordion styles...');
+            // Don't apply inline styles since we're using simple toggle
+            console.log('Accordion initialization complete');
+        }
+
+        // ================================================================
+        // REAL-TIME VALIDATION
+        // ================================================================
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function validatePhone(phone) {
+            // Allow international formats with digits, spaces, hyphens, plus, parentheses
+            const re = /^[\d\s\-\+\(\)]{10,}$/;
+            return re.test(phone);
+        }
+
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.classList.add('border-red-500');
+                field.classList.remove('border-gray-300');
                 
-                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
-                if (roleEl) roleEl.textContent = displayRole;
+                // Remove existing error message if any
+                const existingError = field.parentElement.querySelector('.field-error');
+                if (existingError) existingError.remove();
                 
-                const statusEl = document.getElementById(role + 'ProfileStatus');
-                if (statusEl) statusEl.textContent = '● ' + (profile.status || 'Active');
+                // Add error message
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'field-error text-xs text-red-600 mt-1';
+                errorDiv.textContent = message;
+                field.parentElement.appendChild(errorDiv);
+            }
+        }
+
+        function clearFieldError(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.classList.remove('border-red-500');
+                field.classList.add('border-gray-300');
                 
-                const tinEl = document.getElementById(role + 'ProfileTIN');
-                if (tinEl && profile.organization) {
-                    tinEl.textContent = 'Org: ' + profile.organization;
+                const existingError = field.parentElement.querySelector('.field-error');
+                if (existingError) existingError.remove();
+            }
+        }
+
+        function setupEmailValidation(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('blur', () => {
+                    const value = field.value.trim();
+                    if (value && !validateEmail(value)) {
+                        showFieldError(fieldId, 'Please enter a valid email address');
+                    } else {
+                        clearFieldError(fieldId);
+                    }
+                });
+
+                field.addEventListener('input', () => {
+                    // Clear error on input
+                    clearFieldError(fieldId);
+                });
+            }
+        }
+
+        function setupPhoneValidation(fieldId) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('blur', () => {
+                    const value = field.value.trim();
+                    if (value && !validatePhone(value)) {
+                        showFieldError(fieldId, 'Please enter a valid phone number');
+                    } else {
+                        clearFieldError(fieldId);
+                    }
+                });
+
+                field.addEventListener('input', () => {
+                    // Clear error on input
+                    clearFieldError(fieldId);
+                });
+            }
+        }
+
+        function setupRequiredFieldValidation(fieldId, fieldName) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('blur', () => {
+                    const value = field.value.trim();
+                    if (!value) {
+                        showFieldError(fieldId, `${fieldName} is required`);
+                    } else {
+                        clearFieldError(fieldId);
+                    }
+                });
+
+                field.addEventListener('input', () => {
+                    if (field.value.trim()) {
+                        clearFieldError(fieldId);
+                    }
+                });
+            }
+        }
+
+        function setupStep2Validation() {
+            // Importer email and phone validation
+            setupEmailValidation('importer_email');
+            setupPhoneValidation('importer_phone');
+
+            // Exporter email and phone validation
+            setupEmailValidation('exporter_email');
+            setupPhoneValidation('exporter_phone');
+
+            // Importer required fields
+            setupRequiredFieldValidation('importer_type', 'Importer Type');
+            setupRequiredFieldValidation('importer_name', 'Importer Name');
+            setupRequiredFieldValidation('importer_tin', 'TIN');
+            setupRequiredFieldValidation('importer_country', 'Country');
+            setupRequiredFieldValidation('importer_city', 'City');
+            setupRequiredFieldValidation('importer_full_address', 'Full Address');
+
+            // Exporter required fields
+            setupRequiredFieldValidation('exporter_name', 'Exporter Name');
+            setupRequiredFieldValidation('exporter_country', 'Exporting Country');
+
+            // Importer TIN LLM validation
+            setupImporterTINValidation();
+
+            // Exporter LLM validation
+            setupExporterValidation();
+        }
+
+        function setupImporterTINValidation() {
+            const tinField = document.getElementById('importer_tin');
+            if (tinField) {
+                let tinValidationTimeout;
+
+                tinField.addEventListener('blur', async () => {
+                    const tin = tinField.value.trim();
+                    if (tin.length >= 8) {
+                        // TIN validation will be handled by backend AI during processing
+                        // Just clear any previous error state
+                        tinField.classList.remove('border-yellow-500');
+                    }
+                });
+
+                tinField.addEventListener('input', () => {
+                    clearTimeout(tinValidationTimeout);
+                    clearFieldError('importer_tin');
+                });
+            }
+        }
+
+        function setupExporterValidation() {
+            const regNumberField = document.getElementById('exporter_reg_number');
+            const countryField = document.getElementById('exporter_country');
+            
+            if (regNumberField) {
+                regNumberField.addEventListener('blur', async () => {
+                    const regNumber = regNumberField.value.trim();
+                    if (regNumber.length >= 8) {
+                        // Exporter validation will be handled by backend AI during processing
+                        // Just clear any previous error state
+                        regNumberField.classList.remove('border-yellow-500');
+                    }
+                });
+            }
+        }
+
+        // ================================================================
+        // COUNTRY DROPDOWN POPULATION
+        // ================================================================
+
+        function populateCountryDropdowns() {
+            const countrySelects = [
+                'importer_country',
+                'exporter_country',
+                'exporter_address_country'
+            ];
+
+            countrySelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select && countriesList.length > 0) {
+                    // Clear existing options except the first one
+                    select.innerHTML = '<option value="">Select country...</option>';
+                    
+                    // Add countries sorted alphabetically
+                    const sortedCountries = [...countriesList].sort((a, b) => a.name.localeCompare(b.name));
+                    sortedCountries.forEach(country => {
+                        const option = document.createElement('option');
+                        option.value = country.name;
+                        option.textContent = country.name;
+                        select.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        function renderImporterDropdown(results) {
+            const dropdown = document.getElementById('importer_dropdown');
+            if (results.length === 0) {
+                dropdown.innerHTML = '<div class="p-3 text-sm text-gray-500">No importers found</div>';
+            } else {
+                dropdown.innerHTML = results.map(trader => `
+                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0" data-id="${trader.id}">
+                        <div class="font-medium text-sm">${trader.full_name}</div>
+                        <div class="text-xs text-gray-500">${trader.company || 'No company'}</div>
+                        <div class="text-xs text-gray-400">TIN: ${trader.tin || 'N/A'}</div>
+                    </div>
+                `).join('');
+                
+                // Add click handlers
+                dropdown.querySelectorAll('[data-id]').forEach(el => {
+                    el.addEventListener('click', () => selectImporter(el.dataset.id));
+                });
+            }
+            dropdown.classList.remove('hidden');
+        }
+
+        function selectImporter(traderId) {
+            const trader = tradersList.find(t => t.id === traderId);
+            if (trader) {
+                document.getElementById('importer_id').value = trader.id;
+                document.getElementById('importer_search').value = trader.full_name;
+                document.getElementById('importer_company').value = trader.company || '';
+                document.getElementById('importer_tin').value = trader.tin || '';
+                document.getElementById('importer_address').value = trader.address || '';
+                document.getElementById('importer_phone').value = trader.phone || '';
+                document.getElementById('importer_email').value = trader.email || '';
+                document.getElementById('importer_dropdown').classList.add('hidden');
+            }
+        }
+
+        // Importer search functionality removed - using simple text input instead
+
+        // ================================================================
+        // EXPORTER SEARCHABLE DROPDOWN
+        // ================================================================
+
+        function renderExporterDropdown(results) {
+            const dropdown = document.getElementById('exporter_dropdown');
+            if (results.length === 0) {
+                dropdown.innerHTML = '<div class="p-3 text-sm text-gray-500">No exporters found</div>';
+            } else {
+                dropdown.innerHTML = results.map(exporter => `
+                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0" data-id="${exporter.id}">
+                        <div class="font-medium text-sm">${exporter.exporter_name}</div>
+                        <div class="text-xs text-gray-500">${exporter.company || 'No company'}</div>
+                        <div class="text-xs text-gray-400">${exporter.country}</div>
+                    </div>
+                `).join('');
+                
+                // Add click handlers
+                dropdown.querySelectorAll('[data-id]').forEach(el => {
+                    el.addEventListener('click', () => selectExporter(el.dataset.id));
+                });
+            }
+            dropdown.classList.remove('hidden');
+        }
+
+        function selectExporter(exporterId) {
+            const exporter = exportersList.find(e => e.id === exporterId);
+            if (exporter) {
+                document.getElementById('exporter_id').value = exporter.id;
+                document.getElementById('exporter_search').value = exporter.exporter_name;
+                document.getElementById('exporter_company').value = exporter.company || '';
+                document.getElementById('exporter_country').value = exporter.country || '';
+                document.getElementById('exporter_address').value = exporter.address || '';
+                document.getElementById('exporter_phone').value = exporter.phone || '';
+                document.getElementById('exporter_email').value = exporter.email || '';
+                document.getElementById('exporter_dropdown').classList.add('hidden');
+            }
+        }
+
+        // Exporter search functionality removed - using simple text input instead
+
+        // ================================================================
+        // COUNTRY OF ORIGIN SEARCHABLE DROPDOWN
+        // ================================================================
+
+        function renderCountryDropdown(results) {
+            const dropdown = document.getElementById('country_of_origin_dropdown');
+            if (results.length === 0) {
+                dropdown.innerHTML = '<div class="p-3 text-sm text-gray-500">No countries found. You can enter a custom country.</div>';
+            } else {
+                dropdown.innerHTML = results.map(country => `
+                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0" data-code="${country.code}">
+                        <div class="font-medium text-sm">${country.name}</div>
+                        <div class="text-xs text-gray-400">${country.code}</div>
+                    </div>
+                `).join('');
+                
+                // Add click handlers
+                dropdown.querySelectorAll('[data-code]').forEach(el => {
+                    el.addEventListener('click', () => selectCountry(el.dataset.code));
+                });
+            }
+            dropdown.classList.remove('hidden');
+        }
+
+        function selectCountry(countryCode) {
+            const country = countriesList.find(c => c.code === countryCode);
+            if (country) {
+                document.getElementById('country_of_origin').value = country.name;
+                document.getElementById('country_of_origin_dropdown').classList.add('hidden');
+            }
+        }
+
+        let countrySearchTimeout;
+        document.getElementById('country_of_origin').addEventListener('input', (e) => {
+            clearTimeout(countrySearchTimeout);
+            const query = e.target.value.trim();
+            
+            if (query.length < 1) {
+                document.getElementById('country_of_origin_dropdown').classList.add('hidden');
+                return;
+            }
+            
+            countrySearchTimeout = setTimeout(async () => {
+                const result = await searchCountries(query);
+                if (result.success) {
+                    countriesList = result.data;
+                    renderCountryDropdown(result.data);
+                }
+            }, 300);
+        });
+
+        document.getElementById('country_of_origin').addEventListener('focus', async () => {
+            const result = await fetchCountries();
+            if (result.success) {
+                countriesList = result.data;
+                renderCountryDropdown(result.data.slice(0, 10));
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#country_of_origin') && !e.target.closest('#country_of_origin_dropdown')) {
+                document.getElementById('country_of_origin_dropdown').classList.add('hidden');
+            }
+        });
+
+        // ================================================================
+        // CURRENCY SEARCHABLE DROPDOWN
+        // ================================================================
+
+        function renderCurrencyDropdown(results) {
+            const dropdown = document.getElementById('currency_dropdown');
+            if (results.length === 0) {
+                dropdown.innerHTML = '<div class="p-3 text-sm text-gray-500">No currencies found. You can enter a custom currency.</div>';
+            } else {
+                dropdown.innerHTML = results.map(currency => `
+                    <div class="p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0" data-code="${currency.code}">
+                        <div class="font-medium text-sm">${currency.code}</div>
+                        <div class="text-xs text-gray-500">${currency.name}</div>
+                    </div>
+                `).join('');
+                
+                // Add click handlers
+                dropdown.querySelectorAll('[data-code]').forEach(el => {
+                    el.addEventListener('click', () => selectCurrency(el.dataset.code));
+                });
+            }
+            dropdown.classList.remove('hidden');
+        }
+
+        function selectCurrency(currencyCode) {
+            const currency = currenciesList.find(c => c.code === currencyCode);
+            if (currency) {
+                document.getElementById('currency').value = currency.code;
+                document.getElementById('currency_dropdown').classList.add('hidden');
+                window.calculateCustomsValue();
+            }
+        }
+
+        let currencySearchTimeout;
+        document.getElementById('currency').addEventListener('input', (e) => {
+            clearTimeout(currencySearchTimeout);
+            const query = e.target.value.trim();
+            
+            if (query.length < 1) {
+                document.getElementById('currency_dropdown').classList.add('hidden');
+                return;
+            }
+            
+            currencySearchTimeout = setTimeout(async () => {
+                const result = await searchCurrencies(query);
+                if (result.success) {
+                    currenciesList = result.data;
+                    renderCurrencyDropdown(result.data);
+                }
+            }, 300);
+        });
+
+        document.getElementById('currency').addEventListener('focus', async () => {
+            const result = await fetchCurrencies();
+            if (result.success) {
+                currenciesList = result.data;
+                renderCurrencyDropdown(result.data.slice(0, 10));
+            }
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#currency') && !e.target.closest('#currency_dropdown')) {
+                document.getElementById('currency_dropdown').classList.add('hidden');
+            }
+        });
+
+        // ================================================================
+        // GOODS FORM-FIRST FUNCTIONALITY
+        // ================================================================
+
+        let currentItemNumber = 1;
+
+        // calculateCustomsValue is defined in global script
+        // updateTotals is defined in global script
+        // clearGoodsForm is defined in global script
+
+        // Edit goods item
+        function renderGoodsTable() {
+            const tbody = document.getElementById('goods_table_body');
+            tbody.innerHTML = goodsItems.map(item => `
+                <tr>
+                    <td class="px-4 py-2">${item.item_number}</td>
+                    <td class="px-4 py-2">${item.hs_code}</td>
+                    <td class="px-4 py-2">${item.commodity_description}</td>
+                    <td class="px-4 py-2 text-right">${item.quantity}</td>
+                    <td class="px-4 py-2">${item.unit}</td>
+                    <td class="px-4 py-2 text-right">${item.unit_price.toFixed(2)}</td>
+                    <td class="px-4 py-2">${item.currency}</td>
+                    <td class="px-4 py-2 text-right">${item.customs_value.toFixed(2)}</td>
+                    <td class="px-4 py-2">${item.country_of_origin}</td>
+                    <td class="px-4 py-2 text-right">${item.gross_weight.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-right">${item.net_weight.toFixed(2)}</td>
+                    <td class="px-4 py-2 text-center">
+                        <button onclick="editGoodsItem('${item.id}')" class="text-blue-600 hover:text-blue-800 mr-2">
+                            <i class="ri-edit-line"></i>
+                        </button>
+                        <button onclick="deleteGoodsItem('${item.id}')" class="text-red-600 hover:text-red-800">
+                            <i class="ri-delete-bin-line"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Edit goods item
+        window.editGoodsItem = async function(itemId) {
+            const item = goodsItems.find(g => g.id === itemId);
+            if (!item) return;
+
+            // Populate form with item data
+            document.getElementById('goods_item_id').value = item.id;
+            document.getElementById('goods_hs_code').value = item.hs_code;
+            document.getElementById('goods_commodity_description').value = item.commodity_description;
+            document.getElementById('goods_quantity').value = item.quantity;
+            document.getElementById('goods_unit').value = item.unit;
+            document.getElementById('goods_unit_price').value = item.unit_price;
+            document.getElementById('goods_currency').value = item.currency;
+            document.getElementById('goods_customs_value').value = item.customs_value;
+            document.getElementById('goods_country_of_origin').value = item.country_of_origin;
+            document.getElementById('goods_gross_weight').value = item.gross_weight;
+            document.getElementById('goods_net_weight').value = item.net_weight;
+            document.getElementById('goods_preference_code').value = item.preference_code || '';
+            document.getElementById('goods_brand').value = item.brand || '';
+            document.getElementById('goods_model').value = item.model || '';
+            document.getElementById('goods_manufacturer').value = item.manufacturer || '';
+            document.getElementById('goods_serial_number').value = item.serial_number || '';
+            document.getElementById('goods_package_marks').value = item.package_marks || '';
+
+            // Update item number display
+            currentItemNumber = item.item_number;
+            document.getElementById('item_number_display').textContent = `Item #${currentItemNumber}`;
+
+            // Change save button text to indicate edit mode
+            const saveBtn = document.getElementById('save_goods_item');
+            if (saveBtn) saveBtn.innerHTML = '<i class="ri-edit-line mr-1"></i>Update Goods Item';
+
+            window.showToast('Editing item #' + currentItemNumber, 'info');
+        };
+
+        // Delete goods item
+        window.deleteGoodsItem = async function(itemId) {
+            if (!confirm('Are you sure you want to delete this goods item?')) return;
+
+            const result = await deleteGoodsItem(itemId);
+            if (result.success) {
+                goodsItems = goodsItems.filter(g => g.id !== itemId);
+                renderGoodsTable();
+                updateTotals();
+                window.showToast('Goods item deleted', 'success');
+                
+                // Hide table if no items remain
+                if (goodsItems.length === 0) {
+                    document.getElementById('declared_items_section').classList.add('hidden');
+                }
+            } else {
+                window.showToast('Error deleting item: ' + result.error, 'error');
+            }
+        };
+
+        // Clear goods form
+        window.clearGoodsForm = function() {
+            document.getElementById('goods_item_id').value = '';
+            document.getElementById('goods_hs_code').value = '';
+            document.getElementById('goods_commodity_description').value = '';
+            document.getElementById('goods_quantity').value = '';
+            document.getElementById('goods_unit').value = '';
+            document.getElementById('goods_unit_price').value = '';
+            document.getElementById('goods_currency').value = 'SSP';
+            document.getElementById('goods_customs_value').value = '';
+            document.getElementById('goods_country_of_origin').value = '';
+            document.getElementById('goods_gross_weight').value = '';
+            document.getElementById('goods_net_weight').value = '';
+            document.getElementById('goods_preference_code').value = '';
+            document.getElementById('goods_brand').value = '';
+            document.getElementById('goods_model').value = '';
+            document.getElementById('goods_manufacturer').value = '';
+            document.getElementById('goods_serial_number').value = '';
+            document.getElementById('goods_package_marks').value = '';
+            document.getElementById('goods_remarks').value = '';
+
+            // Reset item number
+            currentItemNumber = null;
+            document.getElementById('item_number_display').textContent = 'Item #1';
+
+            // Reset save button
+            const saveBtn = document.getElementById('save_goods_item');
+            if (saveBtn) saveBtn.innerHTML = '<i class="ri-save-line mr-1"></i>Save Goods Item';
+
+            window.showToast('Form cleared', 'info');
+        };
+
+        // Calculate customs value for goods item
+        window._calculateCustomsValueModule = function() {
+            const quantity = parseFloat(document.getElementById('goods_quantity').value) || 0;
+            const unitPrice = parseFloat(document.getElementById('goods_unit_price').value) || 0;
+            const customsValue = quantity * unitPrice;
+            document.getElementById('goods_customs_value').value = customsValue.toFixed(2);
+        };
+
+        // Update goods summary totals
+        window._updateTotalsModule = function() {
+            const totalItems = goodsItems.length;
+            const totalQuantity = goodsItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
+            const totalGrossWeight = goodsItems.reduce((sum, item) => sum + (item.gross_weight || 0), 0);
+            const totalNetWeight = goodsItems.reduce((sum, item) => sum + (item.net_weight || 0), 0);
+            const totalCustomsValue = goodsItems.reduce((sum, item) => sum + (item.customs_value || 0), 0);
+        };
+
+        // Render declaration summary (removed - no longer needed)
+        window._renderDeclarationSummaryModule = function() {
+            // Summary page removed - function kept for compatibility but does nothing
+        };
+
+        // Module implementation for saving goods item
+        window._saveGoodsItemModule = async function(goodsData) {
+            try {
+                const result = await createGoodsItem(goodsData);
+                if (result.success) {
+                    goodsItems.push(result.data);
+                    window.showToast('Goods item saved successfully', 'success');
+                    
+                    // Show table if items exist
+                    document.getElementById('declared_items_section').classList.remove('hidden');
+                    
+                    // Update table display
+                    renderGoodsTable();
+                    
+                    // Update summary
+                    window._updateTotalsModule();
+                    
+                    // Clear form for next item
+                    window.clearGoodsForm();
+                } else {
+                    window.showToast('Error saving goods item: ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error saving goods item:', error);
+                window.showToast('Error saving goods item', 'error');
+            }
+        };
+
+        // Clear goods form (module implementation)
+        window._clearGoodsFormModule = function() {
+            const fields = [
+                'goods_item_id', 'goods_hs_code', 'goods_commodity_description', 'goods_quantity',
+                'goods_unit', 'goods_unit_price', 'goods_currency', 'goods_customs_value',
+                'goods_country_of_origin', 'goods_gross_weight', 'goods_net_weight',
+                'goods_preference_code', 'goods_brand', 'goods_model', 'goods_manufacturer',
+                'goods_serial_number', 'goods_package_marks', 'goods_remarks'
+            ];
+            fields.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    element.value = fieldId === 'goods_currency' ? 'SSP' : '';
+                }
+            });
+
+            // Reset item number
+            currentItemNumber = null;
+            const itemNumberDisplay = document.getElementById('item_number_display');
+            if (itemNumberDisplay) itemNumberDisplay.textContent = 'Item #1';
+
+            // Reset save button
+            const saveBtn = document.getElementById('save_goods_item');
+            if (saveBtn) saveBtn.innerHTML = '<i class="ri-save-line mr-1"></i>Save Goods Item';
+
+            window.showToast('Form cleared', 'info');
+        };
+
+        // Update global clearGoodsForm to use module implementation
+        window.clearGoodsForm = function() {
+            if (window._clearGoodsFormModule) window._clearGoodsFormModule();
+        };
+
+        // ================================================================
+        // GOODS TABLE RENDERING
+        // ================================================================
+
+        async function loadGoodsItems() {
+            if (!window.applicationId) return;
+            
+            const result = await fetchGoodsByApplication(window.applicationId);
+            if (result.success) {
+                goodsItems = result.data;
+                
+                // Show table if items exist
+                if (goodsItems.length > 0) {
+                    document.getElementById('declared_items_section').classList.remove('hidden');
+                    renderGoodsTable();
+                }
+            }
+        }
+
+        // ================================================================
+        // INITIALIZATION
+        // ================================================================
+
+        function setupRealtimeSubscriptions() {
+            // Realtime subscriptions disabled to avoid channel conflicts
+            // Traders, exporters, currencies, countries, HS codes, and units can be refreshed manually if needed
+            console.log('Realtime subscriptions disabled for declaration creation page');
+
+            // Subscribe to goods changes for this application (only critical subscription)
+            if (window.applicationId) {
+                try {
+                    goodsSubscription = subscribeToGoods(window.applicationId, async (payload) => {
+                        console.log('Goods change detected:', payload);
+                        // Refresh goods items
+                        await loadGoodsItems();
+                    });
+                } catch (error) {
+                    console.warn('Failed to subscribe to goods:', error);
+                }
+            }
+        }
+
+        function cleanupRealtimeSubscriptions() {
+            if (tradersSubscription) {
+                supabase.removeChannel(tradersSubscription);
+            }
+            if (exportersSubscription) {
+                supabase.removeChannel(exportersSubscription);
+            }
+            if (currenciesSubscription) {
+                supabase.removeChannel(currenciesSubscription);
+            }
+            if (countriesSubscription) {
+                supabase.removeChannel(countriesSubscription);
+            }
+            if (hsCodesSubscription) {
+                supabase.removeChannel(hsCodesSubscription);
+            }
+            if (unitsSubscription) {
+                supabase.removeChannel(unitsSubscription);
+            }
+            if (goodsSubscription) {
+                supabase.removeChannel(goodsSubscription);
+            }
+        }
+
+        // ================================================================
+        // CUSTOMS VALUE CALCULATION
+        // ================================================================
+
+        function setupCustomsValueCalculation() {
+            const invoiceValue = document.getElementById('invoice_value');
+            const freightCharges = document.getElementById('freight_charges');
+            const insuranceCharges = document.getElementById('insurance_charges');
+            const otherCharges = document.getElementById('other_charges');
+            const customsValue = document.getElementById('customs_value');
+
+            function calculateCustomsValue() {
+                const invoice = parseFloat(invoiceValue?.value) || 0;
+                const freight = parseFloat(freightCharges?.value) || 0;
+                const insurance = parseFloat(insuranceCharges?.value) || 0;
+                const other = parseFloat(otherCharges?.value) || 0;
+                const total = invoice + freight + insurance + other;
+                if (customsValue) customsValue.value = total.toFixed(2);
+            }
+
+            invoiceValue?.addEventListener('input', calculateCustomsValue);
+            freightCharges?.addEventListener('input', calculateCustomsValue);
+            insuranceCharges?.addEventListener('input', calculateCustomsValue);
+            otherCharges?.addEventListener('input', calculateCustomsValue);
+        }
+
+        // ================================================================
+        // STEP DATA COLLECTION
+        // ================================================================
+
+        function getStepData(step) {
+            const data = {};
+            if (step === 1) {
+                // Declaration Information
+                data.declaration_info = {
+                    declaration_number: document.getElementById('declaration_number')?.value || '',
+                    declaration_type: document.getElementById('declaration_type')?.value || '',
+                    customs_procedure: document.getElementById('customs_procedure')?.value || '',
+                    customs_office: document.getElementById('customs_office')?.value || '',
+                    border_post: document.getElementById('border_post')?.value || '',
+                    declaration_date: document.getElementById('declaration_date')?.value || '',
+                    declarant_name: document.getElementById('declarant_name')?.value || '',
+                    agent_license: document.getElementById('agent_license')?.value || '',
+                    reference_number: document.getElementById('reference_number')?.value || ''
+                };
+            } else if (step === 2) {
+                // Importer/Exporter Information
+                data.importer_exporter = {
+                    agent_id: profile?.id,
+                    importer: {
+                        type: document.getElementById('importer_type')?.value || '',
+                        name: document.getElementById('importer_name')?.value || '',
+                        tin: document.getElementById('importer_tin')?.value || '',
+                        business_reg: document.getElementById('importer_business_reg')?.value || '',
+                        customs_reg: document.getElementById('importer_customs_reg')?.value || '',
+                        contact_person: document.getElementById('importer_contact_person')?.value || '',
+                        phone: document.getElementById('importer_phone')?.value || '',
+                        email: document.getElementById('importer_email')?.value || '',
+                        country: document.getElementById('importer_country')?.value || '',
+                        state: document.getElementById('importer_state')?.value || '',
+                        city: document.getElementById('importer_city')?.value || '',
+                        postal: document.getElementById('importer_postal')?.value || '',
+                        full_address: document.getElementById('importer_full_address')?.value || ''
+                    },
+                    exporter: {
+                        type: document.getElementById('exporter_type')?.value || '',
+                        name: document.getElementById('exporter_name')?.value || '',
+                        reg_number: document.getElementById('exporter_reg_number')?.value || '',
+                        country: document.getElementById('exporter_country')?.value || '',
+                        contact_person: document.getElementById('exporter_contact_person')?.value || '',
+                        phone: document.getElementById('exporter_phone')?.value || '',
+                        email: document.getElementById('exporter_email')?.value || '',
+                        address_country: document.getElementById('exporter_address_country')?.value || '',
+                        state: document.getElementById('exporter_state')?.value || '',
+                        city: document.getElementById('exporter_city')?.value || '',
+                        postal: document.getElementById('exporter_postal')?.value || '',
+                        full_address: document.getElementById('exporter_full_address')?.value || ''
+                    }
+                };
+            } else if (step === 3) {
+                // Consignment Information
+                data.consignment = {
+                    consignment_number: document.getElementById('consignment_number')?.value?.trim() || '',
+                    manifest_number: document.getElementById('manifest_number')?.value?.trim() || '',
+                    bill_of_lading: document.getElementById('bill_of_lading')?.value?.trim() || '',
+                    customs_office: document.getElementById('consignment_customs_office')?.value || '',
+                    port_of_entry: document.getElementById('port_of_entry')?.value || '',
+                    port_of_exit: document.getElementById('port_of_exit')?.value?.trim() || '',
+                    country_of_export: document.getElementById('country_of_export')?.value?.trim() || '',
+                    country_of_destination: document.getElementById('country_of_destination')?.value || '',
+                    country_of_origin: document.getElementById('country_of_origin')?.value || '',
+                    transport_mode: document.getElementById('transport_mode')?.value || '',
+                    container_numbers: document.getElementById('container_numbers')?.value?.trim() || '',
+                    num_packages: parseInt(document.getElementById('num_packages')?.value) || 0,
+                    package_type: document.getElementById('package_type')?.value || '',
+                    gross_weight: parseFloat(document.getElementById('gross_weight')?.value) || 0,
+                    net_weight: parseFloat(document.getElementById('net_weight')?.value) || 0,
+                    invoice_value: parseFloat(document.getElementById('invoice_value')?.value) || 0,
+                    currency: document.getElementById('currency')?.value || '',
+                    freight_charges: parseFloat(document.getElementById('freight_charges')?.value) || 0,
+                    insurance_charges: parseFloat(document.getElementById('insurance_charges')?.value) || 0,
+                    other_charges: parseFloat(document.getElementById('other_charges')?.value) || 0,
+                    customs_value: parseFloat(document.getElementById('customs_value')?.value) || 0
+                };
+            } else if (step === 4) {
+                // Goods are stored in application_goods table, not in applications JSONB
+                // Just mark that goods step is complete
+                data.goods = { items_count: goodsItems.length };
+            } else if (step === 5) {
+                data.documents = documents;
+            }
+            return data;
+        }
+
+        // Expose module implementations to global script
+        window._saveDraftStepModule = async function(step) {
+            const stepData = getStepData(step);
+
+            if (!window.applicationId) {
+                const result = await createNewDeclaration('cvet');
+                if (!result.success) { showToast('Error creating application: ' + result.error, 'error'); return; }
+                window.applicationId = result.data.id;
+                document.getElementById('appNumberDisplay').textContent = result.data.application_number;
+            }
+
+            const result = await saveDraft(step, stepData);
+            if (result.success) {
+                document.getElementById(`tab-${step}`).classList.add('done');
+                showToast('✓ Draft saved', 'success');
+            } else {
+                showToast('Error saving draft: ' + result.error, 'error');
+            }
+        };
+
+        window._submitDeclarationModule = async function() {
+            try {
+                if (!window.applicationId) {
+                    throw new Error('No active application to submit. Please save the declaration first.');
+                }
+
+                // Validate that goods items exist
+                if (goodsItems.length === 0) {
+                    throw new Error('Please add at least one goods item before submitting.');
+                }
+
+                // Collect all step data for final submission
+                const finalData = {
+                    step1: getStepData(1),
+                    step2: getStepData(2),
+                    step3: getStepData(3),
+                    step4: getStepData(4),
+                    step5: getStepData(5)
+                };
+
+                // Update status to submitted
+                const { data: updatedApp, error } = await supabase
+                    .from('applications')
+                    .update({
+                        status: 'submitted',
+                        submitted_at: new Date().toISOString(),
+                        declaration_data: finalData
+                    })
+                    .eq('id', window.applicationId)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+
+                // Log workflow transition
+                await supabase.from('workflow_logs').insert({
+                    application_id: window.applicationId,
+                    from_status: 'draft',
+                    to_status: 'submitted',
+                    action: 'declaration_submitted',
+                    notes: 'Declaration submitted by agent',
+                    performed_by: profile?.id
+                });
+
+                // Mark all tabs as done
+                for (let i = 1; i <= 6; i++) {
+                    document.getElementById(`tab-${i}`).classList.add('done');
+                }
+
+                window.showToast('Declaration submitted successfully!', 'success');
+                
+                // Trigger AI validation in background (non-blocking)
+                runAIValidation(window.applicationId).catch(err => {
+                    console.error('AI validation trigger failed:', err);
+                });
+                
+                // Redirect immediately without waiting for AI
+                setTimeout(() => {
+                    window.location.href = 'dashboard-agent.html';
+                }, 1500);
+
+                return { success: true, data: updatedApp };
+            } catch (error) {
+                console.error('Error submitting declaration:', error);
+                window.showToast('Error submitting declaration: ' + error.message, 'error');
+                return { success: false, error: error.message };
+            }
+        };
+
+        window.handleFileUpload = async function(event) {
+            const files = Array.from(event.target.files);
+            if (!window.applicationId) {
+                showToast('Please save draft first to upload documents', 'error');
+                return;
+            }
+
+            const docType = document.getElementById('doc_type').value;
+            const container = document.getElementById('uploadedFiles');
+
+            for (const file of files) {
+                try {
+                    const fileExt = file.name.split('.').pop().toLowerCase();
+                    const filePath = `declarations/${window.applicationId}/${Date.now()}_${file.name}`;
+
+                    showToast(`Uploading ${file.name}...`);
+
+                    const { error: uploadError } = await supabase.storage
+                        .from('documents')
+                        .upload(filePath, file, { upsert: false });
+
+                    if (uploadError) throw uploadError;
+
+                    // Insert document record
+                    const { data: docRecord, error: docError } = await supabase
+                        .from('documents')
+                        .insert({
+                            application_id: window.applicationId,
+                            user_id: profile?.id,
+                            document_name: file.name,
+                            document_type: fileExt === 'pdf' ? 'pdf' : fileExt === 'docx' ? 'docx' : ['jpg','jpeg'].includes(fileExt) ? 'jpg' : 'pdf',
+                            file_path: filePath,
+                            file_size: file.size,
+                            mime_type: file.type,
+                            storage_bucket: 'documents',
+                            storage_path: filePath
+                        })
+                        .select()
+                        .single();
+
+                    if (docError) console.warn('Document record error:', docError);
+
+                    uploadedDocuments.push({ name: file.name, type: docType, path: filePath, id: docRecord?.id });
+                    showToast(`✓ ${file.name} uploaded`, 'success');
+                } catch (err) {
+                    console.error('Upload error:', err);
+                    showToast(`Error uploading ${file.name}: ${err.message}`, 'error');
                 }
             }
 
-            // 4. Bind Logout Button Listeners
-            const handleLogout = async (e) => {
-                e.preventDefault();
-                console.log('Signing out...');
-                const result = await signOut();
-                if (result.success) {
-                    window.location.href = '../../auth/login.html';
-                }
-            };
+            // Render uploaded files
+            container.innerHTML = uploadedDocuments.map((doc, i) => `
+                <div class="flex items-center gap-3 bg-green-50 border border-green-100 rounded-lg p-3">
+                    <i class="ri-file-check-line text-green-600 text-xl"></i>
+                    <div class="flex-1">
+                        <div class="text-sm font-medium text-green-800">${doc.name}</div>
+                        <div class="text-xs text-green-600 capitalize">${doc.type.replace('_', ' ')}</div>
+                    </div>
+                    <button onclick="removeDoc(${i})" class="text-red-400 hover:text-red-600"><i class="ri-delete-bin-line"></i></button>
+                </div>
+            `).join('');
 
-            const signOutBtn = document.getElementById('signOutBtn');
-            if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
+            event.target.value = '';
+        };
 
-            const dropdownSignOut = document.getElementById('dropdownSignOut');
-            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+        window.removeDoc = function(index) {
+            uploadedDocuments.splice(index, 1);
+            document.getElementById('uploadedFiles').innerHTML = uploadedDocuments.map((doc, i) => `
+                <div class="flex items-center gap-3 bg-green-50 border border-green-100 rounded-lg p-3">
+                    <i class="ri-file-check-line text-green-600 text-xl"></i>
+                    <div class="flex-1">
+                        <div class="text-sm font-medium text-green-800">${doc.name}</div>
+                        <div class="text-xs text-green-600 capitalize">${doc.type.replace('_', ' ')}</div>
+                    </div>
+                    <button onclick="removeDoc(${i})" class="text-red-400 hover:text-red-600"><i class="ri-delete-bin-line"></i></button>
+                </div>
+            `).join('');
+        };
+
+        function handleDocumentUpload(docType) {
+            window.triggerFileUpload(docType);
         }
 
-        document.addEventListener('DOMContentLoaded', initPage);
-        if (document.readyState === 'interactive' || document.readyState === 'complete') {
-            initPage();
+        // Initialize document upload listeners
+        function initDocumentUploadListeners() {
+            document.querySelectorAll('.doc-upload-box').forEach(box => {
+                box.removeEventListener('click', handleDocumentUploadClick);
+                box.addEventListener('click', handleDocumentUploadClick);
+            });
+        }
+
+        function handleDocumentUploadClick(e) {
+            const docType = this.getAttribute('data-doc-type');
+            handleDocumentUpload(docType);
+        }
+
+        // Call initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDocumentUploadListeners);
+        } else {
+            initDocumentUploadListeners();
+        }
+
+        function renderDeclarationSummary() {
+            // Summary page removed - function kept for compatibility but does nothing
+        }
+
+        window.submitDeclaration = async function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i>Submitting...';
+
+            try {
+                // Save final step
+                await saveDraftStep(5);
+
+                if (!window.applicationId) {
+                    showToast('No application to submit', 'error');
+                    return;
+                }
+
+                const result = await doSubmit(window.applicationId);
+                if (result.success) {
+                    showToast('🎉 Declaration submitted! AI validation starting...', 'success');
+                    setTimeout(() => { window.location.href = `submitted.html`; }, 2000);
+                } else {
+                    showToast('Submission failed: ' + result.error, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ri-paper-plane-line mr-1"></i>Submit Declaration';
+                }
+            } catch (err) {
+                showToast('Submission error: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-paper-plane-line mr-1"></i>Submit Declaration';
+            }
+        };
+
+        async function init() {
+            const user = await getCurrentUser();
+            if (!user) { window.location.href = '/auth/login.html'; return; }
+
+            profile = await getUserProfile(user.id);
+            if (!profile || profile.role !== 'agent') { window.location.href = '/auth/login.html'; return; }
+
+            // Set auto-filled fields in Step 1
+            document.getElementById('declaration_date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('declarant_name').value = profile.full_name || profile.email || '';
+            document.getElementById('agent_license').value = profile.license_number || 'AG-' + (profile.id?.substring(0, 8).toUpperCase() || 'PENDING');
+
+            // Set declarant role from profile
+            document.getElementById('declarant_role').value = 'Clearing Agent';
+
+            // Setup Realtime subscriptions
+            setupRealtimeSubscriptions();
+
+            // Pre-load traders, exporters, currencies, and countries
+            const [tradersResult, exportersResult, currenciesResult, countriesResult] = await Promise.all([
+                fetchTraders(),
+                fetchExporters(),
+                fetchCurrencies(),
+                fetchCountries()
+            ]);
+            if (tradersResult.success) {
+                tradersList = tradersResult.data;
+            }
+            if (exportersResult.success) {
+                exportersList = exportersResult.data;
+            }
+            if (currenciesResult.success) {
+                currenciesList = currenciesResult.data;
+            }
+            if (countriesResult.success) {
+                countriesList = countriesResult.data;
+                populateCountryDropdowns();
+            }
+
+            // Setup auto-calculation for customs value
+            setupCustomsValueCalculation();
+
+            // Initialize accordion styles
+            initAccordionStyles();
+
+            // Setup Step 2 real-time validation
+            setupStep2Validation();
+
+            // Check if editing existing draft
+            const params = new URLSearchParams(window.location.search);
+            const draftId = params.get('id');
+            if (draftId) {
+                const result = await loadDraft(draftId);
+                if (result.success) {
+                    window.applicationId = draftId;
+                    document.getElementById('appNumberDisplay').textContent = result.data.application_number;
+                    // Pre-fill fields from draft data
+                    const decl = result.data.declaration_data || {};
+                    const goods = result.data.goods_data || {};
+                    if (decl.importer_exporter) {
+                        // Pre-fill importer fields
+                        if (decl.importer_exporter.importer) {
+                            const imp = decl.importer_exporter.importer;
+                            if (imp.type) document.getElementById('importer_type').value = imp.type;
+                            if (imp.name) document.getElementById('importer_name').value = imp.name;
+                            if (imp.tin) document.getElementById('importer_tin').value = imp.tin;
+                            if (imp.business_reg) document.getElementById('importer_business_reg').value = imp.business_reg;
+                            if (imp.customs_reg) document.getElementById('importer_customs_reg').value = imp.customs_reg;
+                            if (imp.contact_person) document.getElementById('importer_contact_person').value = imp.contact_person;
+                            if (imp.phone) document.getElementById('importer_phone').value = imp.phone;
+                            if (imp.email) document.getElementById('importer_email').value = imp.email;
+                            if (imp.country) document.getElementById('importer_country').value = imp.country;
+                            if (imp.state) document.getElementById('importer_state').value = imp.state;
+                            if (imp.city) document.getElementById('importer_city').value = imp.city;
+                            if (imp.postal) document.getElementById('importer_postal').value = imp.postal;
+                            if (imp.full_address) document.getElementById('importer_full_address').value = imp.full_address;
+                        }
+                        // Pre-fill exporter fields
+                        if (decl.importer_exporter.exporter) {
+                            const exp = decl.importer_exporter.exporter;
+                            if (exp.type) document.getElementById('exporter_type').value = exp.type;
+                            if (exp.name) document.getElementById('exporter_name').value = exp.name;
+                            if (exp.reg_number) document.getElementById('exporter_reg_number').value = exp.reg_number;
+                            if (exp.country) document.getElementById('exporter_country').value = exp.country;
+                            if (exp.contact_person) document.getElementById('exporter_contact_person').value = exp.contact_person;
+                            if (exp.phone) document.getElementById('exporter_phone').value = exp.phone;
+                            if (exp.email) document.getElementById('exporter_email').value = exp.email;
+                            if (exp.address_country) document.getElementById('exporter_address_country').value = exp.address_country;
+                            if (exp.state) document.getElementById('exporter_state').value = exp.state;
+                            if (exp.city) document.getElementById('exporter_city').value = exp.city;
+                            if (exp.postal) document.getElementById('exporter_postal').value = exp.postal;
+                            if (exp.full_address) document.getElementById('exporter_full_address').value = exp.full_address;
+                        }
+                    }
+                    if (goods.description) document.getElementById('goods_description').value = goods.description;
+                    if (goods.hs_code) document.getElementById('hs_code').value = goods.hs_code;
+                    if (goods.declared_value) {
+                        document.getElementById('fob_value').value = goods.fob_value || goods.declared_value;
+                        document.getElementById('declared_value').value = goods.declared_value;
+                    }
+                    if (goods.currency) document.getElementById('currency').value = goods.currency;
+                }
+            } else {
+                // Create new declaration immediately to get applicationId
+                console.log('Creating new declaration...');
+                try {
+                    const result = await createNewDeclaration('cvet');
+                    console.log('createNewDeclaration result:', result);
+                    if (result.success) {
+                        window.applicationId = result.data.id;
+                        const appNumber = result.data.application_number;
+                        document.getElementById('appNumberDisplay').textContent = appNumber;
+                        document.getElementById('declaration_number').value = appNumber;
+                        console.log('Created new declaration with ID:', window.applicationId, 'Number:', appNumber);
+                    } else {
+                        console.error('Failed to create new declaration:', result.error);
+                        // Fallback: generate number locally
+                        const fallbackNumber = 'CVET-' + Date.now().toString().slice(-6);
+                        document.getElementById('appNumberDisplay').textContent = fallbackNumber;
+                        document.getElementById('declaration_number').value = fallbackNumber;
+                        console.log('Using fallback number:', fallbackNumber);
+                    }
+                } catch (error) {
+                    console.error('Error creating declaration:', error);
+                    // Fallback: generate number locally
+                    const fallbackNumber = 'CVET-' + Date.now().toString().slice(-6);
+                    document.getElementById('appNumberDisplay').textContent = fallbackNumber;
+                    document.getElementById('declaration_number').value = fallbackNumber;
+                    console.log('Using fallback number after error:', fallbackNumber);
+                }
+            }
+
+            // Drag and drop
+            const dropZone = document.getElementById('fileDropZone');
+            if (dropZone) {
+                dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = '#1e3a5f'; });
+                dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = '#cbd5e1'; });
+                dropZone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = '#cbd5e1';
+                    const dt = e.dataTransfer;
+                    if (dt.files.length) {
+                        document.getElementById('fileInput').files = dt.files;
+                        handleFileUpload({ target: { files: dt.files, value: '' } });
+                    }
+                });
+            }
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            cleanupRealtimeSubscriptions();
+        });
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
         }
     </script>
-</body></html>
+</body>
+</html>
 

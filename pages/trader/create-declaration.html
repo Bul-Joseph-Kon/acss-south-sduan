@@ -68,11 +68,11 @@
                     <!-- Progress -->
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span id="progressText">Step 1 of 9</span>
-                            <span id="progressPercent">11% Complete</span>
+                            <span id="progressText">Step 1 of 4</span>
+                            <span id="progressPercent">25% Complete</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:11%"></div>
+                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:25%"></div>
                         </div>
                     </div>
 
@@ -146,15 +146,10 @@
                 const statusText = stepStatus === 'current' ? 'In Progress' : 
                                   stepStatus === 'done' ? 'Done' : 'Locked';
                 const iconMap = {
-                    1: 'ri-file-list-3-line',
-                    2: 'ri-user-2-line',
-                    3: 'ri-building-line',
-                    4: 'ri-ship-2-line',
-                    5: 'ri-package-line',
-                    6: 'ri-truck-line',
-                    7: 'ri-attachment-line',
-                    8: 'ri-robot-line',
-                    9: 'ri-fileText-line'
+                    1: 'ri-user-2-line',
+                    2: 'ri-ship-2-line',
+                    3: 'ri-package-line',
+                    4: 'ri-attachment-line'
                 };
 
                 return `
@@ -173,8 +168,8 @@
         }
 
         function updateProgress(state) {
-            const progress = state.progress || Math.round((state.currentStep / 9) * 100);
-            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 9`;
+            const progress = state.progress || Math.round((state.currentStep / 4) * 100);
+            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 4`;
             document.getElementById('progressPercent').textContent = `${progress}% Complete`;
             document.getElementById('progressBar').style.width = `${progress}%`;
         }
@@ -187,8 +182,10 @@
             const result = await getUnreadCount();
             if (result.success && result.count > 0) {
                 const badge = document.getElementById('notificationBadge');
-                badge.textContent = result.count;
-                badge.classList.remove('hidden');
+                if (badge) {
+                    badge.textContent = result.count;
+                    badge.classList.remove('hidden');
+                }
             }
         }
         updateNotificationBadge();

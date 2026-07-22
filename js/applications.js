@@ -69,7 +69,8 @@ export async function createApplication(applicationData) {
     
     const newApplication = {
         ...applicationData,
-        user_id: profile?.id,
+        user_id: applicationData.user_id || profile?.id,
+        agent_id: applicationData.agent_id || profile?.id,
         status: 'draft'
     };
 
@@ -616,17 +617,17 @@ export async function fetchApplicationsForRole(role, options = {}) {
     let filters = options.filters || {};
 
     // Filter based on role and workflow if status is not already filtered
-    if (!filters.status) {
+    if (!filters.status && !options.includeAll) {
         switch (role) {
             case 'trader':
                 // See their own applications
-                if (profile && !options.includeAll) {
+                if (profile) {
                     filters.user_id = profile.id;
                 }
                 break;
             case 'agent':
                 // See applications where they are the agent
-                if (profile && !options.includeAll) {
+                if (profile) {
                     filters.agent_id = profile.id;
                 }
                 break;
@@ -642,8 +643,8 @@ export async function fetchApplicationsForRole(role, options = {}) {
                 }
                 break;
             case 'supervisor':
-                // See applications pending final approval
-                filters.status = 'pending_review';
+                // See applications pending supervisor approval or escalated
+                filters.status = ['pending_supervisor', 'escalated'];
                 break;
             case 'revenue':
                 // See approved applications awaiting payment

@@ -212,18 +212,11 @@
                 if (!queueEl) return;
 
                 if (result.success && result.data && result.data.length > 0) {
-                    const applications = result.data;
+                    const applications = result.data.filter(app => app.status === 'under_inspection');
                     let html = '';
                     applications.forEach(app => {
-                        let badgeClass = 'status-pending';
-                        let badgeText = 'Pending';
-                        if (app.status === 'in_progress') {
-                            badgeClass = 'status-in-progress';
-                            badgeText = 'In Progress';
-                        } else if (app.status === 'completed' || app.status === 'cleared') {
-                            badgeClass = 'status-approved';
-                            badgeText = 'Completed';
-                        }
+                        const badgeClass = 'status-in-progress';
+                        const badgeText = 'Inspection Required';
 
                         const desc = app.goods_data?.item_description || app.declaration_data?.product_description || 'General Cargo';
                         const location = app.declaration_data?.port_of_entry || 'Juba Port';
@@ -237,7 +230,7 @@
                                         <p class="text-sm text-gray-500">${(type || '').replace('_', ' ').toUpperCase()} · ${location} · ${desc}</p>
                                         <div class="flex items-center gap-4 mt-2">
                                             <span class="status-badge ${badgeClass}">${badgeText}</span>
-                                            <span class="text-xs text-gray-400">Assigned: ${new Date(app.created_at).toLocaleDateString()}</span>
+                                            <span class="text-xs text-gray-400">Assigned: ${new Date(app.assigned_at || app.created_at).toLocaleDateString()}</span>
                                         </div>
                                     </div>
                                     <div class="flex gap-2">

@@ -98,72 +98,10 @@
                     <!-- OVERVIEW TAB -->
                     <div id="tab-overview" class="space-y-4">
                         <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-5">
-                                <div>
-                                    <h3 class="font-bold text-lg">Inspector Review Workflow</h3>
-                                    <p class="text-sm text-gray-600 mt-1">This application was assigned automatically because physical inspection is required.</p>
-                                </div>
-                                <span class="status-badge-large status-inspecting">Inspector Review</span>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
-                                <div class="workflow-step">
-                                    <div class="workflow-step-icon bg-blue-100 text-blue-700"><i class="ri-route-line"></i></div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900 text-sm">Automatic assignment</p>
-                                        <p class="text-xs text-gray-600 mt-1">The workflow engine sends inspection-required applications to an Inspector queue.</p>
-                                    </div>
-                                </div>
-                                <div class="workflow-step">
-                                    <div class="workflow-step-icon bg-amber-100 text-amber-700"><i class="ri-search-eye-line"></i></div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900 text-sm">Physical inspection</p>
-                                        <p class="text-xs text-gray-600 mt-1">Inspect the goods, verify the declaration, and record field observations.</p>
-                                    </div>
-                                </div>
-                                <div class="workflow-step">
-                                    <div class="workflow-step-icon bg-purple-100 text-purple-700"><i class="ri-camera-line"></i></div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900 text-sm">Evidence and report</p>
-                                        <p class="text-xs text-gray-600 mt-1">Attach photographs if required, enter findings, and upload the inspection report.</p>
-                                    </div>
-                                </div>
-                                <div class="workflow-step">
-                                    <div class="workflow-step-icon bg-emerald-100 text-emerald-700"><i class="ri-brain-line"></i></div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900 text-sm">AI validation</p>
-                                        <p class="text-xs text-gray-600 mt-1">AI checks the report against declared goods, findings, and supporting evidence.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-[#0f2b44] text-white rounded-xl p-5">
-                                <div class="flex items-center justify-between gap-3 mb-4">
-                                    <h4 class="font-bold">Automatic routing after submission</h4>
-                                    <i class="ri-git-branch-line text-2xl text-emerald-300"></i>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div class="routing-card">
-                                        <p class="text-sm font-semibold text-amber-200">Inconsistencies detected</p>
-                                        <p class="text-xs text-white/80 mt-1">Application is returned for correction with AI validation issues and inspection findings attached.</p>
-                                    </div>
-                                    <div class="routing-card">
-                                        <p class="text-sm font-semibold text-emerald-200">Report validated</p>
-                                        <p class="text-xs text-white/80 mt-1">Application proceeds to the Supervisor for the next review stage.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">Application Details</h3>
+                            <h3 class="font-bold text-gray-900 mb-4">Application Details</h3>
                             <div class="info-row">
                                 <span class="text-gray-600">Application Number</span>
-                                <span class="font-semibold text-blue-600" id="applicationNumber">Loading...</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">Trader</span>
-                                <span class="font-semibold" id="traderName">Loading...</span>
+                                <span class="font-semibold" id="applicationNumber">Loading...</span>
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">Application Type</span>
@@ -171,40 +109,24 @@
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">Declared Value</span>
-                                <span class="font-semibold text-green-600" id="declaredValue">Loading...</span>
+                                <span class="font-semibold" id="declaredValue">Loading...</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="text-gray-600">Trader Name</span>
+                                <span class="font-semibold" id="traderName">Loading...</span>
                             </div>
                             <div class="info-row">
                                 <span class="text-gray-600">Port of Entry</span>
                                 <span class="font-semibold" id="portOfEntry">Loading...</span>
                             </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">Goods Information</h3>
                             <div class="info-row">
-                                <span class="text-gray-600">Product Description</span>
-                                <span class="font-semibold" id="productDescription">Loading...</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">HS Code</span>
-                                <span class="font-semibold" id="hsCode">Loading...</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">Quantity</span>
-                                <span class="font-semibold" id="quantity">Loading...</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">Origin Country</span>
-                                <span class="font-semibold" id="originCountry">Loading...</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">Condition</span>
-                                <span class="font-semibold" id="condition">Loading...</span>
+                                <span class="text-gray-600">Submitted Date</span>
+                                <span class="font-semibold" id="submittedDate">Loading...</span>
                             </div>
                         </div>
 
                         <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">📁 Supporting Documents</h3>
+                            <h3 class="font-bold text-gray-900 mb-4">Documents</h3>
                             <div id="documentsContainer">
                                 <div class="text-sm text-gray-500 text-center py-4">Loading documents...</div>
                             </div>
@@ -212,148 +134,95 @@
                     </div>
 
                     <!-- INSPECTION TAB -->
-                    <div id="tab-inspection" class="space-y-4" style="display: none;">
+                    <div id="tab-inspection" class="space-y-4 hidden">
                         <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">📋 Inspection Checklist</h3>
+                            <h3 class="font-bold text-gray-900 mb-4">Inspection Details</h3>
                             
-                            <div class="space-y-3 mb-6">
-                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
-                                    <span class="text-sm font-medium text-gray-700">Physical goods match declared description</span>
-                                </label>
-
-                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
-                                    <span class="text-sm font-medium text-gray-700">Quantity verified and matches declaration</span>
-                                </label>
-
-                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
-                                    <span class="text-sm font-medium text-gray-700">Goods condition acceptable (no damage)</span>
-                                </label>
-
-                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
-                                    <span class="text-sm font-medium text-gray-700">Serial numbers/marks verified</span>
-                                </label>
-
-                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
-                                    <span class="text-sm font-medium text-gray-700">Packaging intact and secure</span>
-                                </label>
-
-                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
-                                    <span class="text-sm font-medium text-gray-700">No prohibited or restricted items detected</span>
-                                </label>
-
-                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
-                                    <span class="text-sm font-medium text-gray-700">Weight/volume measurements recorded</span>
-                                </label>
-
-                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
-                                    <input type="checkbox" class="w-5 h-5 text-purple-600" />
-                                    <span class="text-sm font-medium text-gray-700">All markings and labels verified</span>
-                                </label>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Inspection Location</label>
+                                <input type="text" id="inspectionLocation" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Enter inspection location">
                             </div>
 
-                            <div class="border-t pt-6">
-                                <h4 class="font-semibold mb-3">Inspection Notes</h4>
-                                <textarea placeholder="Record your detailed inspection findings here..." rows="5"></textarea>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Container Number</label>
+                                <input type="text" id="containerNumber" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="Enter container number">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Findings Summary</label>
+                                <textarea id="findingsSummary" rows="3" placeholder="Enter findings summary"></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Discrepancies</label>
+                                <textarea id="discrepancies" rows="3" placeholder="Enter any discrepancies found"></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Violations</label>
+                                <textarea id="violations" rows="3" placeholder="Enter any violations found"></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Recommendation</label>
+                                <select id="recommendations" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                                    <option value="approve">Approve</option>
+                                    <option value="return">Return for Correction</option>
+                                    <option value="reject">Reject</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Recommendation Reason</label>
+                                <textarea id="recommendationReason" rows="2" placeholder="Enter reason for recommendation"></textarea>
                             </div>
                         </div>
                     </div>
 
                     <!-- PHOTOGRAPHS TAB -->
-                    <div id="tab-photographs" class="space-y-4" style="display: none;">
+                    <div id="tab-photographs" class="space-y-4 hidden">
                         <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">📸 Inspection Photographs</h3>
-                            
-                            <button class="action-btn btn-camera mb-6" id="cameraBtn">
-                                <i class="ri-camera-line"></i> Take Photo
-                            </button>
-
-                            <div class="bg-gray-50 p-6 rounded-lg border-2 border-dashed border-gray-300 text-center mb-6">
-                                <p class="text-sm text-gray-600 mb-3">Or drag photos here to upload</p>
-                                <input type="file" id="photoInput" multiple accept="image/*" style="display: none;" />
-                                <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition" id="selectPhotosBtn">
-                                    Select Photos
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-gray-900">Inspection Photographs</h3>
+                                <button id="cameraBtn" class="action-btn btn-camera">
+                                    <i class="ri-camera-line"></i> Take Photo
                                 </button>
-                                <p class="text-xs text-gray-500 mt-2">JPG, PNG up to 10MB each</p>
                             </div>
-
-                            <div id="photoGallery" class="flex flex-wrap gap-2 min-h-[120px] bg-gray-50 p-4 rounded-lg">
-                                <p class="text-sm text-gray-500 w-full">Photos will appear here</p>
+                            <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
+                            <div id="photoGallery" class="flex flex-wrap gap-2">
+                                <p class="text-sm text-gray-500">No photos uploaded yet</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- FINDINGS TAB -->
-                    <div id="tab-findings" class="space-y-4" style="display: none;">
+                    <div id="tab-findings" class="space-y-4 hidden">
                         <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">🎯 Inspection Findings</h3>
-
-                            <div class="mb-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-3">Overall Inspection Result</label>
-                                <div class="space-y-2">
-                                    <label class="flex items-center gap-3 cursor-pointer">
-                                        <input type="radio" name="result" value="passed" class="w-4 h-4 text-green-600" />
-                                        <span class="text-sm text-gray-700"><strong>✓ Passed</strong> - Goods verified, no discrepancies</span>
-                                    </label>
-                                    <label class="flex items-center gap-3 cursor-pointer">
-                                        <input type="radio" name="result" value="failed" class="w-4 h-4 text-red-600" />
-                                        <span class="text-sm text-gray-700"><strong>✗ Failed</strong> - Discrepancies detected, requires further action</span>
-                                    </label>
-                                    <label class="flex items-center gap-3 cursor-pointer">
-                                        <input type="radio" name="result" value="conditional" class="w-4 h-4 text-amber-600" />
-                                        <span class="text-sm text-gray-700"><strong>⚠ Conditional Pass</strong> - Minor issues requiring correction</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="mb-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Discrepancies Found (if any)</label>
-                                <textarea id="discrepancies" placeholder="Describe any discrepancies between declared and actual goods..." rows="4"></textarea>
-                            </div>
-
-                            <div class="mb-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Recommendations</label>
-                                <textarea id="recommendations" placeholder="Provide your recommendation. Valid reports proceed to Supervisor; inconsistent reports are returned for correction." rows="4"></textarea>
-                            </div>
-
-                            <div class="mb-6">
-                                <label class="flex items-center gap-3 cursor-pointer">
-                                    <input type="checkbox" id="samplesRequired" class="w-5 h-5 text-purple-600" />
-                                    <span class="text-sm font-semibold text-gray-700">Physical samples required for laboratory analysis</span>
+                            <h3 class="font-bold text-gray-900 mb-4">Inspection Result</h3>
+                            
+                            <div class="space-y-3 mb-6">
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="result" value="compliant" class="w-4 h-4 text-green-600">
+                                    <span class="font-medium">Compliant - No issues found</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="result" value="minor_issues" class="w-4 h-4 text-yellow-600">
+                                    <span class="font-medium">Minor Issues - Can be corrected</span>
+                                </label>
+                                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="result" value="major_violations" class="w-4 h-4 text-red-600">
+                                    <span class="font-medium">Major Violations - Requires escalation</span>
                                 </label>
                             </div>
 
-                            <div class="mb-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Laboratory Test Required</label>
-                                <select id="labTest" class="w-full p-2 border border-gray-300 rounded-lg">
-                                    <option value="none">None</option>
-                                    <option value="quality">Quality Analysis</option>
-                                    <option value="composition">Material Composition</option>
-                                    <option value="hazmat">Hazardous Material Test</option>
-                                    <option value="other">Other</option>
-                                </select>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition" id="saveDraftBtn">
+                                    Save as Draft
+                                </button>
+                                <button class="flex-1 action-btn btn-submit" id="submitBtn">
+                                    <i class="ri-check-line"></i> Submit Inspection Report
+                                </button>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- SUBMIT BUTTON -->
-                    <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                        <div class="mb-4 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-900">
-                            <strong>Submit workflow:</strong> Uploads the inspection report, starts AI validation, then automatically returns the application for correction if inconsistencies are found or routes it to the Supervisor if validated.
-                        </div>
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition" id="saveDraftBtn">
-                                Save as Draft
-                            </button>
-                            <button class="flex-1 action-btn btn-submit" id="submitBtn">
-                                <i class="ri-check-line"></i> Submit Inspection Report
-                            </button>
                         </div>
                     </div>
                 </main>
@@ -378,20 +247,11 @@
         import supabase from '../../js/supabase.js';
         import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { checkPageAuth } from '../../js/auth-check.js';
-        
-        import { fetchApplicationById, updateApplication, logInspectionActivity, logAuditAction } from '../../js/applications.js';
-        
-        import { validateInspectionReport, updateApplicationStatusAfterInspection } from '../../js/ai-validation.js';
-        
-        import { sendInspectionCompletedNotification, sendInspectionEscalatedNotification } from '../../js/notifications.js';
-
-        import { createEscalationCase } from '../../js/escalation-service.js';
-        
+        import { fetchApplicationById } from '../../js/applications.js';
+        import { recordInspection } from '../../js/inspector-service.js';
         import { signOut as authSignOut } from '../../js/auth.js';
-        
         import { realtimeManager } from '../../js/realtime.js';
 
-        
         const urlParams = new URLSearchParams(window.location.search);
         let appId = urlParams.get('id');
         let application = null;
@@ -401,13 +261,10 @@
 
         async function init() {
             const hasAuth = await checkPageAuth('inspector');
-
-        // Load user profile
-        await loadCurrentUserProfile();
+            await loadCurrentUserProfile();
             if (!hasAuth) return;
 
             if (!appId) {
-                // Fetch the first under_inspection application if no id is provided
                 const { data: apps } = await supabase
                     .from('applications')
                     .select('id')
@@ -432,7 +289,6 @@
 
             await initializeRealtime();
 
-            // Set up event listeners
             document.getElementById('signOutBtn')?.addEventListener('click', handleSignOut);
             document.getElementById('tabNavigation')?.addEventListener('click', (e) => {
                 if (e.target.classList.contains('tab-btn')) {
@@ -477,7 +333,7 @@
                 .from('documents')
                 .select('*')
                 .eq('application_id', applicationId)
-                .order('created_at', { ascending: false });
+                .order('uploaded_at', { ascending: false });
 
             if (error) {
                 container.innerHTML = '<div class="text-sm text-gray-500 text-center py-4">Error loading documents</div>';
@@ -525,8 +381,6 @@
 
         async function initializeRealtime() {
             await realtimeManager.initialize();
-            
-            
             const profile = user ? await supabase.from('profiles').select('*').eq('user_id', user.id).single() : null;
             const userId = profile?.data?.id;
             const role = profile?.data?.role;
@@ -554,18 +408,15 @@
         });
 
         function populateDetails(app) {
-            // Update Title/Header
             document.querySelectorAll('.text-3xl.font-bold').forEach(el => {
                 el.innerHTML = `🔍 Physical Inspection`;
             });
             const headerAppNumber = document.getElementById('headerAppNumber');
             if (headerAppNumber) headerAppNumber.textContent = `Application ${app.application_number || 'Loading...'}`;
 
-            // Date
             const dateEl = document.getElementById('startDateDisplay');
             if (dateEl) dateEl.textContent = `Started: ${new Date(app.created_at).toLocaleString()}`;
 
-            // Populate inspector name and trader name in parallel (N+1 fix)
             Promise.all([
                 app.inspector_id ? supabase.from('profiles').select('full_name').eq('id', app.inspector_id).single() : Promise.resolve({ data: null }),
                 app.user_id ? supabase.from('profiles').select('full_name').eq('id', app.user_id).single() : Promise.resolve({ data: null })
@@ -587,7 +438,6 @@
                 }
             });
 
-            // Overview Details using IDs
             const appNumberEl = document.getElementById('applicationNumber');
             if (appNumberEl) appNumberEl.textContent = app.application_number || 'N/A';
 
@@ -598,39 +448,18 @@
             if (declaredValueEl) declaredValueEl.textContent = `$${(app.declared_value || 0).toLocaleString()} USD`;
 
             const portOfEntryEl = document.getElementById('portOfEntry');
-            if (portOfEntryEl) portOfEntryEl.textContent = app.declaration_data?.port_of_entry || app.goods_data?.location || 'N/A';
+            if (portOfEntryEl) portOfEntryEl.textContent = app.declaration_data?.port_of_entry || 'N/A';
 
-            // Goods Info using IDs
-            const productDescEl = document.getElementById('productDescription');
-            if (productDescEl) productDescEl.textContent = app.goods_data?.item_description || app.declaration_data?.product_description || 'N/A';
-
-            const hsCodeEl = document.getElementById('hsCode');
-            if (hsCodeEl) hsCodeEl.textContent = app.goods_data?.hs_code || app.declaration_data?.hs_code || 'N/A';
-
-            const quantityEl = document.getElementById('quantity');
-            if (quantityEl) quantityEl.textContent = app.goods_data?.quantity || app.declaration_data?.quantity || 'N/A';
-
-            const originCountryEl = document.getElementById('originCountry');
-            if (originCountryEl) originCountryEl.textContent = app.goods_data?.origin_country || app.declaration_data?.origin_country || 'N/A';
-
-            const conditionEl = document.getElementById('condition');
-            if (conditionEl) {
-                const condition = app.goods_data?.condition || 'New';
-                conditionEl.textContent = condition;
-                conditionEl.className = 'font-semibold ' + (condition.toLowerCase() === 'used' ? 'text-amber-600' : 'text-green-600');
-            }
+            const submittedDateEl = document.getElementById('submittedDate');
+            if (submittedDateEl) submittedDateEl.textContent = new Date(app.created_at).toLocaleDateString();
         }
 
         function switchTab(tabName) {
-            const tabs = document.querySelectorAll('[id^="tab-"]');
-            tabs.forEach(tab => tab.style.display = 'none');
-
-            const buttons = document.querySelectorAll('.tab-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-
-            document.getElementById('tab-' + tabName).style.display = 'block';
-            const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
-            if (activeBtn) activeBtn.classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            document.querySelectorAll('[id^="tab-"]').forEach(tab => tab.classList.add('hidden'));
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
         }
 
         function openCameraModal() {
@@ -645,56 +474,57 @@
 
         async function startCamera() {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                document.getElementById('videoStream').srcObject = stream;
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('videoStream');
+                video.srcObject = stream;
+                video.play();
             } catch (err) {
-                console.error('Unable to access camera:', err.message);
+                console.error('Error accessing camera:', err);
+                alert('Unable to access camera');
             }
         }
 
         function stopCamera() {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
+                stream = null;
             }
         }
 
         function capturePhoto() {
             const video = document.getElementById('videoStream');
             const canvas = document.getElementById('photoCanvas');
-            const ctx = canvas.getContext('2d');
-            
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);
-            
-            canvas.toBlob(blob => {
-                const url = URL.createObjectURL(blob);
-                photos.push(url);
-                displayPhotos();
-                closeCameraModal();
-            });
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            photos.push(dataUrl);
+            displayPhotos();
+            closeCameraModal();
         }
 
-        function handlePhotoUpload(event) {
-            const files = event.target.files;
-            for (let file of files) {
-                const url = URL.createObjectURL(file);
-                photos.push(url);
-            }
-            displayPhotos();
+        function handlePhotoUpload(e) {
+            const files = e.target.files;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    photos.push(event.target.result);
+                    displayPhotos();
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
         function displayPhotos() {
             const gallery = document.getElementById('photoGallery');
             if (photos.length === 0) {
-                gallery.innerHTML = '<p class="text-sm text-gray-500 w-full">Photos will appear here</p>';
+                gallery.innerHTML = '<p class="text-sm text-gray-500">No photos uploaded yet</p>';
                 return;
             }
-
-            gallery.innerHTML = photos.map((url, index) => `
+            gallery.innerHTML = photos.map((photo, index) => `
                 <div class="photo-item">
-                    <img src="${url}" alt="Inspection photo ${index + 1}">
-                    <button class="remove-btn" data-photo-index="${index}"><i class="ri-close-line"></i></button>
+                    <img src="${photo}" alt="Inspection photo ${index + 1}">
+                    <button class="remove-btn" data-photo-index="${index}">×</button>
                 </div>
             `).join('');
         }
@@ -705,133 +535,57 @@
         }
 
         async function submitInspectionReport() {
-            console.log("STEP 1: Submit Inspection Report button clicked");
+            console.log('Submit Inspection Report button clicked');
             if (!appId) return;
 
             const result = document.querySelector('input[name="result"]:checked');
             if (!result) {
-                console.error('Please select an inspection result');
+                alert('Please select an inspection result');
                 return;
             }
 
-            const checklistItems = document.querySelectorAll('#tab-inspection input[type="checkbox"]');
-            const checklist = {
-                descriptionMatch: checklistItems[0]?.checked || false,
-                quantityVerified: checklistItems[1]?.checked || false,
-                conditionAcceptable: checklistItems[2]?.checked || false,
-                serialsVerified: checklistItems[3]?.checked || false,
-                packagingSecure: checklistItems[4]?.checked || false,
-                noProhibited: checklistItems[5]?.checked || false,
-                measurementsRecorded: checklistItems[6]?.checked || false,
-                labelsVerified: checklistItems[7]?.checked || false
-            };
+            const location = document.getElementById('inspectionLocation')?.value || 'Customs Warehouse';
+            const containerNumber = document.getElementById('containerNumber')?.value || '';
+            const findingsSummary = document.getElementById('findingsSummary')?.value || '';
+            const discrepancies = document.getElementById('discrepancies')?.value || '';
+            const violations = document.getElementById('violations')?.value || '';
+            const recommendation = document.getElementById('recommendations')?.value || result.value;
+            const recommendationReason = document.getElementById('recommendationReason')?.value || '';
 
-            const discrepancies = document.getElementById('discrepancies').value.trim();
-            const recommendations = document.getElementById('recommendations').value.trim();
-            const samplesRequired = document.getElementById('samplesRequired')?.checked || false;
-            const labTest = document.getElementById('labTest')?.value || 'none';
-
-            const inspectionReport = {
-                overall_result: result.value,
-                checklist: checklist,
+            const inspectionData = {
+                location: location,
+                container_number: containerNumber,
+                findings_summary: findingsSummary,
                 discrepancies: discrepancies,
-                recommendations: recommendations,
-                samples_required: samplesRequired,
-                lab_test: labTest,
-                photos: photos
+                violations: violations,
+                recommendation: recommendation,
+                recommendation_reason: recommendationReason,
+                supporting_documents: photos
             };
 
-            // Toggle submit button loading state
             const submitBtn = document.querySelector('.btn-submit');
             const oldHtml = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = `<i class="ri-loader-4-line animate-spin"></i> Validating...`;
+            submitBtn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Submitting...';
 
             try {
-                console.log("STEP 2: Starting validation process");
-                const oldStatus = application?.status || 'unknown';
-
-                // AI validate the inspection report
-                console.log("STEP 3: Calling validateInspectionReport");
-                const validationResults = await validateInspectionReport(appId, inspectionReport);
-                console.log("STEP 3.1: Validation results received", validationResults);
-
-                // Update application status & route based on validation results
-                console.log("STEP 4: Calling updateApplicationStatusAfterInspection");
-                const statusUpdate = await updateApplicationStatusAfterInspection(appId, validationResults, inspectionReport);
-                console.log("STEP 4.1: Status update received", statusUpdate);
-
-                // Log inspection activity
-                await logInspectionActivity(
-                    'inspection_completed',
-                    appId,
-                    'Physical inspection report submitted with AI validation',
-                    { validation_score: validationResults.validation_score, validation_passed: validationResults.validation_passed }
-                );
-
-                // Log audit action
-                await logAuditAction(
-                    'UPDATE',
-                    'applications',
-                    appId,
-                    { status: oldStatus },
-                    { status: statusUpdate.newStatus, inspection_report: inspectionReport }
-                );
-
-                // Send notification based on routing decision
-                console.log("STEP 5: Checking if escalation needed, newStatus:", statusUpdate.newStatus);
-                if (application?.user_id) {
-                    if (statusUpdate.newStatus === 'escalated') {
-                        console.log("STEP 6: ESCALATION TRIGGERED - Calling createEscalationCase");
-                        console.log("STEP 6.1: Escalation payload", {
-                            applicationId: appId,
-                            reason: statusUpdate.message,
-                            priority: 'high',
-                            applicationStatus: 'pending_review',
-                            notes: 'Escalated from inspection due to AI validation failure'
-                        });
-                        // Create escalation case in escalated_cases table
-                        const escalationResult = await createEscalationCase(appId, {
-                            reason: statusUpdate.message,
-                            priority: 'high',
-                            applicationStatus: 'pending_review',
-                            notes: 'Escalated from inspection due to AI validation failure'
-                        });
-                        console.log("STEP 7: createEscalationCase result", escalationResult);
-                        await sendInspectionEscalatedNotification(application.user_id, appId, statusUpdate.message);
-                    } else {
-                        console.log("STEP 6: No escalation - sending completion notification");
-                        await sendInspectionCompletedNotification(application.user_id, appId);
-                    }
+                const recordResult = await recordInspection(appId, inspectionData);
+                if (recordResult.success) {
+                    alert('Inspection report submitted successfully');
+                    window.location.href = 'inspection-queue.html';
+                } else {
+                    alert('Error submitting inspection report: ' + recordResult.error);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = oldHtml;
                 }
-
-                // Prepare result notification details
-                let detailsMsg = `=== AI Report Validation Result ===\n`;
-                detailsMsg += `Validation Score: ${validationResults.validation_score}/100\n`;
-                detailsMsg += `Validation Status: ${validationResults.validation_passed ? 'PASSED ✓' : 'FAILED ✗'}\n\n`;
-
-                if (validationResults.errors.length > 0) {
-                    detailsMsg += `Inconsistencies Detected:\n` + validationResults.errors.map(e => `- ${e}`).join('\n') + `\n\n`;
-                }
-
-                if (validationResults.warnings.length > 0) {
-                    detailsMsg += `Warnings:\n` + validationResults.warnings.map(w => `- ${w}`).join('\n') + `\n\n`;
-                }
-
-                detailsMsg += `Routing Decision:\n${statusUpdate.message}`;
-
-                console.log('Inspection report submitted:', detailsMsg);
-
-                // Redirect to Queue
-                window.location.href = 'inspection-queue.html';
             } catch (err) {
                 console.error('Submission failed:', err.message);
+                alert('Error submitting inspection report: ' + err.message);
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = oldHtml;
             }
         }
 
-        // Bind functions to window context for inline HTML attributes
         window.switchTab = switchTab;
         window.openCameraModal = openCameraModal;
         window.closeCameraModal = closeCameraModal;
@@ -851,7 +605,3 @@
     </script>
 </body>
 </html>
-
-
-
-

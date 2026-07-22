@@ -30,20 +30,28 @@ export const SUPABASE_CONFIG = {
         certificates: ['application/pdf']
     },
     
-    // Application status mapping
+    // Canonical application status mapping
     applicationStatus: {
         draft: 'Draft',
         submitted: 'Submitted',
-        pending_review: 'Pending Review',
-        under_inspection: 'Under Inspection',
-        returned: 'Returned',
+        under_review: 'Under Review',
+        inspection_required: 'Inspection Required',
+        inspection_completed: 'Inspection Completed',
+        escalated: 'Escalated',
         approved: 'Approved',
-        rejected: 'Rejected',
-        awaiting_payment: 'Awaiting Payment',
+        payment_required: 'Payment Required',
         paid: 'Paid',
-        cleared: 'Cleared',
+        payment_verified: 'Payment Verified',
         completed: 'Completed',
-        cancelled: 'Cancelled'
+        returned: 'Returned for Correction',
+        rejected: 'Rejected'
+    },
+
+    // AI Risk level metadata (stored separately from status)
+    riskLevels: {
+        low: 'Low',
+        medium: 'Medium',
+        high: 'High'
     },
 
     // Application workflow transitions by role
@@ -51,34 +59,41 @@ export const SUPABASE_CONFIG = {
         trader: {
             draft: ['submitted'],
             returned: ['submitted'],
-            awaiting_payment: ['paid']
+            payment_required: ['paid']
         },
         agent: {
             draft: ['submitted'],
             returned: ['submitted'],
-            awaiting_payment: ['paid']
+            payment_required: ['paid']
         },
         officer: {
-            submitted: ['pending_review', 'returned'],
-            pending_review: ['under_inspection', 'returned']
+            under_review: ['approved', 'returned', 'rejected', 'under_inspection', 'escalated'],
+            inspection_completed: ['approved', 'returned', 'rejected', 'escalated']
         },
         inspector: {
-            under_inspection: ['pending_review']
+            under_inspection: ['inspection_completed']
         },
         supervisor: {
-            pending_review: ['approved', 'rejected', 'returned']
+            escalated: ['approved', 'rejected', 'returned']
         },
         revenue: {
-            approved: ['awaiting_payment'],
-            awaiting_payment: ['paid'],
-            paid: ['cleared', 'completed']
+            approved: ['payment_required'],
+            paid: ['payment_verified'],
+            payment_verified: ['completed']
         }
     },
 
     // AI-driven automatic routing rules
     aiRoutingRules: {
-        // After AI validation passes at submission
+        // After submission, trigger AI validation
         submitted: {
+            autoRoute: true,
+            nextStatus: 'ai_validation',
+            assignTo: 'system',
+            condition: 'status === "submitted"'
+        },
+        // After AI validation passes
+        ai_validation: {
             autoRoute: true,
             nextStatus: 'pending_review',
             assignTo: 'officer',
@@ -89,17 +104,38 @@ export const SUPABASE_CONFIG = {
             autoRoute: true,
             nextStatus: 'under_inspection',
             assignTo: 'inspector',
-            condition: 'officer_review_passed === true'
+            condition: 'inspection_required === true'
+        },
+        // After officer review passes without inspection
+        pending_review: {
+            autoRoute: true,
+            nextStatus: 'pending_supervisor',
+            assignTo: 'supervisor',
+            condition: 'requires_supervisor_review === true'
+        },
+        // After officer review passes without escalation
+        pending_review: {
+            autoRoute: true,
+            nextStatus: 'awaiting_payment',
+            assignTo: 'revenue',
+            condition: 'officer_review_passed === true && requires_supervisor_review === false'
         },
         // After inspection passes
         under_inspection: {
             autoRoute: true,
-            nextStatus: 'pending_review',
+            nextStatus: 'pending_supervisor',
             assignTo: 'supervisor',
-            condition: 'inspection_passed === true'
+            condition: 'inspection_passed === true && requires_supervisor_review === true'
+        },
+        // After inspection passes without escalation
+        under_inspection: {
+            autoRoute: true,
+            nextStatus: 'awaiting_payment',
+            assignTo: 'revenue',
+            condition: 'inspection_passed === true && requires_supervisor_review === false'
         },
         // After supervisor approval
-        approved: {
+        pending_supervisor: {
             autoRoute: true,
             nextStatus: 'awaiting_payment',
             assignTo: 'revenue',
@@ -108,9 +144,16 @@ export const SUPABASE_CONFIG = {
         // After payment verification
         paid: {
             autoRoute: true,
-            nextStatus: 'cleared',
-            assignTo: null,
+            nextStatus: 'clearance_approved',
+            assignTo: 'revenue',
             condition: 'payment_verified === true'
+        },
+        // After clearance approval
+        clearance_approved: {
+            autoRoute: true,
+            nextStatus: 'completed',
+            assignTo: null,
+            condition: 'documents_generated === true'
         }
     },
 

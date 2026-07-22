@@ -82,24 +82,24 @@
                         <h2 class="text-2xl font-bold text-gray-800 mt-2">CVET Certificate</h2>
                         <p class="text-gray-500">Certificate of Valuation and Export Tax</p>
                         
-                        <div class="mt-4 p-4 bg-gray-50 rounded-lg text-left">
+                        <div class="mt-4 p-4 bg-gray-50 rounded-lg text-left" id="certificateDetails">
                             <div class="grid grid-cols-2 gap-2 text-sm">
                                 <div><span class="text-gray-500">Certificate Number:</span></div>
-                                <div class="font-semibold">CV-CERT-2026-0042</div>
+                                <div class="font-semibold" id="certNumber">Loading...</div>
                                 <div><span class="text-gray-500">Declaration Reference:</span></div>
-                                <div class="font-semibold">CV-2026-0042</div>
+                                <div class="font-semibold" id="declarationRef">Loading...</div>
                                 <div><span class="text-gray-500">Importer:</span></div>
-                                <div class="font-semibold">John Trading Co.</div>
+                                <div class="font-semibold" id="importerName">Loading...</div>
                                 <div><span class="text-gray-500">Goods:</span></div>
-                                <div class="font-semibold">Electronic Components</div>
+                                <div class="font-semibold" id="goodsDescription">Loading...</div>
                                 <div><span class="text-gray-500">HS Code:</span></div>
-                                <div class="font-semibold">8471.30</div>
+                                <div class="font-semibold" id="hsCode">Loading...</div>
                                 <div><span class="text-gray-500">Total Value:</span></div>
-                                <div class="font-semibold">$27,500.00</div>
+                                <div class="font-semibold" id="totalValue">Loading...</div>
                                 <div><span class="text-gray-500">Total Duty Paid:</span></div>
-                                <div class="font-semibold">$7,850.00</div>
+                                <div class="font-semibold" id="totalDuty">Loading...</div>
                                 <div><span class="text-gray-500">Issue Date:</span></div>
-                                <div class="font-semibold">June 23, 2026</div>
+                                <div class="font-semibold" id="issueDate">Loading...</div>
                                 <div><span class="text-gray-500">Status:</span></div>
                                 <div><span class="status-badge status-approved">✓ Approved</span></div>
                             </div>
@@ -114,7 +114,7 @@
                                 <div class="text-left">
                                     <p class="text-xs font-semibold text-gray-700">SCAN TO VERIFY</p>
                                     <p class="text-xs text-gray-500">Scan this QR code to verify the authenticity of this certificate</p>
-                                    <p class="text-xs text-gray-400 mt-1">Certificate ID: CV-CERT-2026-0042</p>
+                                    <p class="text-xs text-gray-400 mt-1">Certificate ID: <span id="qrCertId">Loading...</span></p>
                                 </div>
                             </div>
                             <div class="text-right">
@@ -159,12 +159,92 @@
         
         import toastManager from '../../js/toast.js';
 
+        import supabase from '../../js/supabase.js';
         
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
                 document.getElementById('profileDropdown').classList.remove('open');
             }
         });
+
+        // Get application ID from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const applicationId = urlParams.get('id');
+        
+        let certificateData = {
+            certNumber: 'CV-CERT-2026-0042',
+            declarationRef: 'CV-2026-0042',
+            importer: 'John Trading Co.',
+            goods: 'Electronic Components',
+            hsCode: '8471.30',
+            value: '$27,500.00',
+            duty: '$7,850.00',
+            date: 'June 23, 2026'
+        };
+
+        // Fetch real application data if ID is provided
+        async function loadCertificateData() {
+            if (applicationId) {
+                try {
+                    const { data: app, error } = await supabase
+                        .from('applications')
+                        .select('*')
+                        .eq('id', applicationId)
+                        .single();
+                    
+                    if (app && !error) {
+                        const certNum = `CV-CERT-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`;
+                        certificateData = {
+                            certNumber: certNum,
+                            declarationRef: app.application_number || 'N/A',
+                            importer: app.applicant_name || app.company_name || 'N/A',
+                            goods: app.goods_description || app.vehicle_description || 'N/A',
+                            hsCode: app.hs_code || 'N/A',
+                            value: app.declared_value ? `$${app.declared_value.toLocaleString()}` : 'N/A',
+                            duty: app.total_duty ? `$${app.total_duty.toLocaleString()}` : 'N/A',
+                            date: app.approved_at ? new Date(app.approved_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                        };
+                    }
+                } catch (err) {
+                    console.error('Error fetching application data:', err);
+                }
+            }
+
+            // Update certificate details
+            document.getElementById('certNumber').textContent = certificateData.certNumber;
+            document.getElementById('declarationRef').textContent = certificateData.declarationRef;
+            document.getElementById('importerName').textContent = certificateData.importer;
+            document.getElementById('goodsDescription').textContent = certificateData.goods;
+            document.getElementById('hsCode').textContent = certificateData.hsCode;
+            document.getElementById('totalValue').textContent = certificateData.value;
+            document.getElementById('totalDuty').textContent = certificateData.duty;
+            document.getElementById('issueDate').textContent = certificateData.date;
+            document.getElementById('qrCertId').textContent = certificateData.certNumber;
+
+            // Generate QR Code with real data
+            var qrData = JSON.stringify({
+                certificate: certificateData.certNumber,
+                declaration: certificateData.declarationRef,
+                importer: certificateData.importer,
+                goods: certificateData.goods,
+                value: certificateData.value,
+                date: certificateData.date,
+                issuer: 'SSRA Customs'
+            });
+            
+            var qrContainer = document.getElementById('qrcode');
+            var qr = new QRCode(qrContainer, {
+                text: qrData,
+                width: 120,
+                height: 120,
+                colorDark: '#0a4d3e',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', loadCertificateData);
 
         // Sign out handler
         const signOutBtn = document.getElementById('signOutBtn');
@@ -178,42 +258,19 @@
             });
         }
 
-        // Generate QR Code
-        document.addEventListener('DOMContentLoaded', function() {
-            var qrData = JSON.stringify({
-                certificate: 'CV-CERT-2026-0042',
-                declaration: 'CV-2026-0042',
-                importer: 'John Trading Co.',
-                goods: 'Electronic Components',
-                value: '$27,500.00',
-                date: '2026-06-23',
-                issuer: 'SSRA Customs'
-            });
-            
-            var qrContainer = document.getElementById('qrcode');
-            var qr = new QRCode(qrContainer, {
-                text: qrData,
-                width: 120,
-                height: 120,
-                colorDark: '#0a4d3e',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            });
-        });
-
         function downloadCertificate() {
-            toastManager.info('Downloading CVET Certificate CV-CERT-2026-0042.pdf');
+            toastManager.info('Downloading CVET Certificate ' + certificateData.certNumber + '.pdf');
         }
 
         function downloadReceipt() {
-            toastManager.info('Downloading Payment Receipt for CV-2026-0042.pdf');
+            toastManager.info('Downloading Payment Receipt for ' + certificateData.declarationRef + '.pdf');
         }
 
         function shareCertificate() {
             if (navigator.share) {
                 navigator.share({
                     title: 'CVET Certificate',
-                    text: 'CVET Certificate CV-CERT-2026-0042 for John Trading Co.',
+                    text: 'CVET Certificate ' + certificateData.certNumber + ' for ' + certificateData.importer + '.',
                     url: window.location.href
                 }).catch(() => {});
             } else {
@@ -231,8 +288,10 @@
             const result = await getUnreadCount();
             if (result.success && result.count > 0) {
                 const badge = document.getElementById('notificationBadge');
-                badge.textContent = result.count;
-                badge.classList.remove('hidden');
+                if (badge) {
+                    badge.textContent = result.count;
+                    badge.classList.remove('hidden');
+                }
             }
         }
         updateNotificationBadge();

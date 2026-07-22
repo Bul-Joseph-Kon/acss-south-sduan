@@ -211,9 +211,24 @@ CREATE INDEX IF NOT EXISTS idx_cargo_release_documents_application_id ON cargo_r
 CREATE INDEX IF NOT EXISTS idx_cargo_release_documents_release_number ON cargo_release_documents(release_number);
 CREATE INDEX IF NOT EXISTS idx_cargo_release_documents_status ON cargo_release_documents(status);
 
--- ================================================================
--- INVOICES TABLE
--- ================================================================
+-- Ensure columns exist in case table was created manually or by a different flow
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'invoices') THEN
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'invoices'::regclass AND attname = 'due_date') THEN
+            ALTER TABLE invoices ADD COLUMN due_date DATE;
+        END IF;
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'invoices'::regclass AND attname = 'items') THEN
+            ALTER TABLE invoices ADD COLUMN items JSONB DEFAULT '[]';
+        END IF;
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'invoices'::regclass AND attname = 'generated_by') THEN
+            ALTER TABLE invoices ADD COLUMN generated_by UUID REFERENCES profiles(id) ON DELETE SET NULL;
+        END IF;
+        IF NOT EXISTS (SELECT FROM pg_attribute WHERE attrelid = 'invoices'::regclass AND attname = 'generated_at') THEN
+            ALTER TABLE invoices ADD COLUMN generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+        END IF;
+    END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS invoices (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

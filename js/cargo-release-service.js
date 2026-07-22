@@ -1,275 +1,345 @@
 // ================================================================
 // CARGO RELEASE SERVICE
 // ================================================================
-// Handles cargo release document generation and CVET generation
+// Auto-generates all cargo release documents after payment:
+//   - CVET Certificate
+//   - Cargo Release Order
+//   - Clearance Certificate
+//   - QR Code
+// Updates application status to 'completed'
 // ================================================================
 
 import supabase from './supabase.js';
 import { getUserProfile } from './auth.js';
-import { createActivityLog, createAuditLog, createNotification } from './logging-service.js';
 
 // ================================================================
-// CARGO RELEASE OPERATIONS
+// MAIN: GENERATE ALL CARGO DOCUMENTS
 // ================================================================
 
-/**
- * Generate cargo release document for a paid application
- */
-export async function generateCargoReleaseDocument(applicationId) {
+async function generateCargoDocuments(applicationId, generatedByProfileId) {
     try {
-        const profile = await getUserProfile();
-        if (!profile) {
-            return { success: false, error: 'User profile not found' };
-        }
+        console.log('=== GENERATING CARGO DOCUMENTS FOR:', applicationId, '===');
 
-        // Get application details
-        const { data: application, error: fetchError } = await supabase
+        // Fetch application with all related data
+        const { data: application, error: appError } = await supabase
             .from('applications')
-            .select('*')
+            .select('*, payments(id, receipt_number, amount, paid_at), invoices(id, invoice_number, total_amount)')
             .eq('id', applicationId)
             .single();
 
-        if (fetchError) throw fetchError;
+        if (appError) throw appError;
         if (!application) throw new Error('Application not found');
 
-        if (application.status !== 'paid') {
-            return { success: false, error: 'Application must be paid before generating cargo release' };
-        }
+        const releaseDate = new Date().toISOString();
+        const releaseNumber = generateReleaseNumber();
+        const cvetNumber = generateCVETNumber();
+        const clearanceNumber = generateClearanceNumber();
 
-        // Generate release number
-        const releaseNumber = `CR-${Date.now().toString().slice(-8)}`;
-        
-        // Generate QR code (simplified - in production use a QR code library)
-        const qrCode = `QR-${application.application_number}-${Date.now()}`;
+        // 1. Generate CVET Certificate
+        const cvetResult = await generateCVETCertificate(application, cvetNumber, generatedByProfileId);
 
-        // Create cargo release document record
-        const cargoReleaseData = {
-            release_number: releaseNumber,
-            qr_code: qrCode,
-            release_date: new Date().toISOString(),
-            application_number: application.application_number,
-            trader_name: application.trader_name,
-            agent_id: application.agent_id,
-            goods_description: application.goods_data?.goods_description || 'N/A',
-            declared_value: application.goods_data?.declared_value || 0,
-            port_of_entry: application.declaration_data?.port_of_entry || 'N/A',
-            vessel_name: application.goods_data?.vessel_name || 'N/A',
-            status: 'released'
-        };
+        // 2. Generate Cargo Release Order
+        const cargoReleaseResult = await generateCargoReleaseOrder(application, releaseNumber, releaseDate, generatedByProfileId);
 
-        // Store cargo release data in application
+        // 3. Generate Clearance Certificate
+        const clearanceResult = await generateClearanceCertificate(application, clearanceNumber, generatedByProfileId);
+
+        // 4. Update application with release info and set to completed
         const { error: updateError } = await supabase
             .from('applications')
             .update({
                 status: 'completed',
-                completed_at: new Date().toISOString(),
-                inspection_report: {
-                    ...application.inspection_report,
-                    cargo_release: cargoReleaseData
-                }
+                release_number: releaseNumber,
+                release_date: releaseDate,
+                cvet_generated_at: releaseDate,
+                cargo_release_generated_at: releaseDate,
+                clearance_certificate_generated_at: releaseDate,
+                completed_at: releaseDate,
+                updated_at: releaseDate
             })
             .eq('id', applicationId);
 
         if (updateError) throw updateError;
 
-        // Log the cargo release
-        await createActivityLog({
-            user_id: profile.id,
-            action: 'generate_cargo_release',
-            entity_type: 'application',
-            entity_id: applicationId,
-            details: { release_number: releaseNumber, qr_code: qrCode }
+        // 5. Create activity log
+        await createActivityLog(generatedByProfileId, 'cargo_documents_generated',
+            `Cargo release documents generated for ${application.application_number}`,
+            {
+                application_id: applicationId,
+                release_number: releaseNumber,
+                cvet_number: cvetNumber,
+                clearance_number: clearanceNumber
+            });
+
+        // 6. Create audit log
+        await createAuditLog(generatedByProfileId, 'UPDATE', 'applications', applicationId,
+            { status: 'paid' }, { status: 'completed', release_number: releaseNumber });
+
+        // 7. Notify agent
+        await notifyAgent(applicationId, application.agent_id,
+            '🎉 Cargo Release Approved',
+            `Your cargo has been cleared! Release No: ${releaseNumber}. Download your CVET, Cargo Release Order, and Clearance Certificate from the Completed section.`,
+            'success');
+
+        console.log('=== CARGO DOCUMENTS GENERATED SUCCESSFULLY ===', {
+            releaseNumber, cvetNumber, clearanceNumber
         });
 
-        await createAuditLog({
-            user_id: profile.id,
-            action: 'generate_cargo_release',
-            entity_type: 'application',
-            entity_id: applicationId,
-            old_values: { status: 'paid' },
-            new_values: { status: 'completed' },
-            reason: 'Payment confirmed, cargo released'
-        });
-
-        // Notify the agent
-        await createNotification({
-            user_id: application.agent_id || application.user_id,
-            type: 'cargo_released',
-            title: 'Cargo Release Document Generated',
-            message: `Cargo release document has been generated for application ${application.application_number}. Release Number: ${releaseNumber}`,
-            entity_type: 'application',
-            entity_id: applicationId,
-            action_url: `/pages/agent/application-details.html?id=${applicationId}`,
-            priority: 'high'
-        });
-
-        return { 
-            success: true, 
-            message: 'Cargo release document generated successfully',
-            data: cargoReleaseData 
+        return {
+            success: true,
+            release_number: releaseNumber,
+            cvet_number: cvetNumber,
+            clearance_number: clearanceNumber,
+            cvet: cvetResult,
+            cargo_release: cargoReleaseResult,
+            clearance: clearanceResult
         };
     } catch (error) {
-        console.error('Error generating cargo release document:', error);
+        console.error('Error generating cargo documents:', error);
         return { success: false, error: error.message };
     }
 }
 
-/**
- * Generate CVET document
- */
-export async function generateCVET(applicationId) {
-    try {
-        const profile = await getUserProfile();
-        if (!profile) {
-            return { success: false, error: 'User profile not found' };
-        }
+// ================================================================
+// CVET CERTIFICATE GENERATION
+// ================================================================
 
-        // Get application details
-        const { data: application, error: fetchError } = await supabase
-            .from('applications')
-            .select('*')
-            .eq('id', applicationId)
+async function generateCVETCertificate(application, cvetNumber, generatedById) {
+    try {
+        const declarationData = application.declaration_data || {};
+        const goodsData = application.goods_data || {};
+
+        const certificateData = {
+            certificate_number: cvetNumber,
+            application_number: application.application_number,
+            importer: declarationData.importer_exporter?.importer_name || 'N/A',
+            exporter: declarationData.importer_exporter?.exporter_name || 'N/A',
+            goods_description: goodsData.description || 'General Merchandise',
+            hs_code: goodsData.hs_code || 'N/A',
+            declared_value: application.declared_value || 0,
+            port_of_entry: declarationData.customs?.port_of_entry || declarationData.port_of_entry || 'N/A',
+            country_of_origin: goodsData.country_of_origin || declarationData.consignment?.country_of_origin || 'N/A',
+            country_of_destination: goodsData.country_of_destination || 'South Sudan',
+            issued_date: new Date().toISOString(),
+            qr_code: generateQRCode(cvetNumber),
+            currency: 'SSP'
+        };
+
+        // Store in cvet_certificates table
+        const { data, error } = await supabase
+            .from('cvet_certificates')
+            .insert({
+                application_id: application.id,
+                certificate_number: cvetNumber,
+                qr_code: certificateData.qr_code,
+                issued_by: generatedById,
+                issued_at: new Date().toISOString(),
+                valid_from: new Date().toISOString().split('T')[0],
+                valid_until: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                certificate_data: certificateData,
+                status: 'active'
+            })
+            .select()
             .single();
 
-        if (fetchError) throw fetchError;
-        if (!application) throw new Error('Application not found');
+        if (error && !error.message.includes('duplicate')) throw error;
 
-        if (application.status !== 'completed' && application.status !== 'paid') {
-            return { success: false, error: 'Application must be paid or completed to generate CVET' };
-        }
-
-        // CVET data structure
-        const cvetData = {
-            cvet_number: application.application_number,
-            issue_date: new Date().toISOString(),
-            expiry_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days validity
-            declarant: application.trader_name,
-            agent_id: application.agent_id,
-            declaration_type: application.declaration_data?.declaration_type,
-            customs_office: application.declaration_data?.customs_office,
-            goods: application.goods_data,
-            transport: application.vehicle_data,
-            total_value: application.goods_data?.declared_value || 0,
-            status: 'valid'
-        };
-
-        // Store CVET data in application
-        const { error: updateError } = await supabase
-            .from('applications')
-            .update({
-                inspection_report: {
-                    ...application.inspection_report,
-                    cvet: cvetData
-                }
-            })
-            .eq('id', applicationId);
-
-        if (updateError) throw updateError;
-
-        // Log CVET generation
-        await createActivityLog({
-            user_id: profile.id,
-            action: 'generate_cvet',
-            entity_type: 'application',
-            entity_id: applicationId,
-            details: { cvet_number: cvetData.cvet_number }
+        // Record in documents_generated
+        await supabase.from('documents_generated').insert({
+            application_id: application.id,
+            document_type: 'cvet',
+            document_number: cvetNumber,
+            generated_by: generatedById,
+            generated_at: new Date().toISOString(),
+            metadata: certificateData
         });
 
-        return { 
-            success: true, 
-            message: 'CVET generated successfully',
-            data: cvetData 
-        };
+        return { success: true, certificate_number: cvetNumber, data: certificateData };
     } catch (error) {
         console.error('Error generating CVET:', error);
         return { success: false, error: error.message };
     }
 }
 
-/**
- * Download cargo release document (returns data for download)
- */
-export async function downloadCargoReleaseDocument(applicationId) {
+// ================================================================
+// CARGO RELEASE ORDER GENERATION
+// ================================================================
+
+async function generateCargoReleaseOrder(application, releaseNumber, releaseDate, generatedById) {
     try {
-        const { data: application, error } = await supabase
-            .from('applications')
-            .select('*')
-            .eq('id', applicationId)
+        const declarationData = application.declaration_data || {};
+        const goodsData = application.goods_data || {};
+
+        const releaseData = {
+            release_number: releaseNumber,
+            application_number: application.application_number,
+            port_of_release: declarationData.customs?.port_of_entry || 'N/A',
+            cargo_description: goodsData.description || 'General Merchandise',
+            quantity: goodsData.quantity || 0,
+            unit: goodsData.unit || 'units',
+            importer: declarationData.importer_exporter?.importer_name || 'N/A',
+            release_conditions: 'Released after full payment of duties and taxes',
+            release_date: releaseDate,
+            authorized_by: 'SSRA Customs Authority'
+        };
+
+        // Store in cargo_release_documents
+        const { data, error } = await supabase
+            .from('cargo_release_documents')
+            .insert({
+                application_id: application.id,
+                release_number: releaseNumber,
+                release_order_number: `CRO-${releaseNumber.split('-')[1]}`,
+                port_of_release: releaseData.port_of_release,
+                release_date: releaseDate,
+                released_by: generatedById,
+                cargo_description: releaseData.cargo_description,
+                quantity: releaseData.quantity,
+                unit: releaseData.unit,
+                release_conditions: { notes: releaseData.release_conditions },
+                status: 'released'
+            })
+            .select()
             .single();
 
-        if (error) throw error;
-        if (!application) throw new Error('Application not found');
+        if (error && !error.message.includes('duplicate')) throw error;
 
-        const cargoRelease = application.inspection_report?.cargo_release;
-        if (!cargoRelease) {
-            return { success: false, error: 'Cargo release document not found' };
-        }
+        // Record in documents_generated
+        await supabase.from('documents_generated').insert({
+            application_id: application.id,
+            document_type: 'cargo_release',
+            document_number: releaseNumber,
+            generated_by: generatedById,
+            generated_at: releaseDate,
+            metadata: releaseData
+        });
 
-        return { 
-            success: true, 
-            data: cargoRelease 
-        };
+        return { success: true, release_number: releaseNumber, data: releaseData };
     } catch (error) {
-        console.error('Error downloading cargo release document:', error);
+        console.error('Error generating cargo release order:', error);
         return { success: false, error: error.message };
     }
 }
 
-/**
- * Download CVET document (returns data for download)
- */
-export async function downloadCVET(applicationId) {
+// ================================================================
+// CLEARANCE CERTIFICATE GENERATION
+// ================================================================
+
+async function generateClearanceCertificate(application, clearanceNumber, generatedById) {
     try {
-        const { data: application, error } = await supabase
-            .from('applications')
-            .select('*')
-            .eq('id', applicationId)
-            .single();
-
-        if (error) throw error;
-        if (!application) throw new Error('Application not found');
-
-        const cvet = application.inspection_report?.cvet;
-        if (!cvet) {
-            // Generate CVET if not exists
-            const result = await generateCVET(applicationId);
-            if (!result.success) {
-                return result;
-            }
-            return { success: true, data: result.data };
-        }
-
-        return { 
-            success: true, 
-            data: cvet 
+        const clearanceData = {
+            clearance_number: clearanceNumber,
+            application_number: application.application_number,
+            issued_date: new Date().toISOString(),
+            status: 'cleared',
+            authority: 'South Sudan Revenue Authority - Customs Division'
         };
+
+        await supabase.from('documents_generated').insert({
+            application_id: application.id,
+            document_type: 'clearance_certificate',
+            document_number: clearanceNumber,
+            generated_by: generatedById,
+            generated_at: new Date().toISOString(),
+            metadata: clearanceData
+        });
+
+        return { success: true, clearance_number: clearanceNumber, data: clearanceData };
     } catch (error) {
-        console.error('Error downloading CVET:', error);
+        console.error('Error generating clearance certificate:', error);
         return { success: false, error: error.message };
     }
 }
 
-/**
- * Download receipt (returns data for download)
- */
-export async function downloadReceipt(applicationId) {
+// ================================================================
+// DOCUMENT RETRIEVAL
+// ================================================================
+
+async function getCargoDocuments(applicationId) {
     try {
-        const { data: payment, error } = await supabase
-            .from('payments')
-            .select('*')
-            .eq('application_id', applicationId)
-            .eq('status', 'paid')
-            .single();
+        const [cvetRes, cargoRes, docsRes] = await Promise.all([
+            supabase.from('cvet_certificates').select('*').eq('application_id', applicationId).maybeSingle(),
+            supabase.from('cargo_release_documents').select('*').eq('application_id', applicationId).maybeSingle(),
+            supabase.from('documents_generated').select('*').eq('application_id', applicationId).order('created_at', { ascending: false })
+        ]);
 
-        if (error) throw error;
-        if (!payment) throw new Error('Payment receipt not found');
-
-        return { 
-            success: true, 
-            data: payment 
+        return {
+            success: true,
+            cvet: cvetRes.data,
+            cargo_release: cargoRes.data,
+            all_documents: docsRes.data || []
         };
     } catch (error) {
-        console.error('Error downloading receipt:', error);
+        console.error('Error fetching cargo documents:', error);
         return { success: false, error: error.message };
     }
 }
+
+// ================================================================
+// NUMBER GENERATORS
+// ================================================================
+
+function generateReleaseNumber() {
+    const ts = Date.now().toString().slice(-8);
+    return `CRO-${ts}`;
+}
+
+function generateCVETNumber() {
+    const ts = Date.now().toString().slice(-8);
+    return `CVET-${ts}`;
+}
+
+function generateClearanceNumber() {
+    const ts = Date.now().toString().slice(-8);
+    return `CLR-${ts}`;
+}
+
+function generateQRCode(data) {
+    // Returns a data URL string that encodes the certificate number
+    // In production this would use a QR library; here we store the reference string
+    return `QR:${data}:${Date.now()}`;
+}
+
+// ================================================================
+// UTILITY FUNCTIONS
+// ================================================================
+
+async function notifyAgent(applicationId, agentId, title, message, type = 'info') {
+    try {
+        await supabase.from('notifications').insert({
+            user_id: agentId, title, message, type,
+            reference_id: applicationId, reference_type: 'application'
+        });
+    } catch (err) {
+        console.error('Error notifying agent:', err);
+    }
+}
+
+async function createActivityLog(userId, activityType, description, metadata = {}) {
+    try {
+        await supabase.from('activity_logs').insert({
+            user_id: userId, activity_type: activityType, description, metadata
+        });
+    } catch (error) {
+        console.error('Error creating activity log:', error);
+    }
+}
+
+async function createAuditLog(userId, action, tableName, recordId, oldValues, newValues) {
+    try {
+        await supabase.from('audit_logs').insert({
+            user_id: userId, action, table_name: tableName,
+            record_id: recordId, old_values: oldValues, new_values: newValues
+        });
+    } catch (error) {
+        console.error('Error creating audit log:', error);
+    }
+}
+
+export {
+    generateCargoDocuments,
+    generateCVETCertificate,
+    generateCargoReleaseOrder,
+    generateClearanceCertificate,
+    getCargoDocuments
+};

@@ -27,41 +27,48 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 2. Fix the infinite recursion on admin_users select policy
 DROP POLICY IF EXISTS "Administrators can view admin_users" ON public.admin_users;
-CREATE POLICY "Administrators can view admin_users"
-    ON public.admin_users FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view admin_users" ON public;
+DROP POLICY IF EXISTS "Administrators can view admin_users" ON public.admin_users;
+CREATE POLICY "Administrators can view admin_users" ON public.admin_users FOR SELECT
     USING (user_id = auth.uid());
 
 -- 3. Add missing administrator RLS policies for notifications
 DROP POLICY IF EXISTS "Administrators can view all notifications" ON public.notifications;
-CREATE POLICY "Administrators can view all notifications"
-    ON public.notifications FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all notifications" ON public;
+DROP POLICY IF EXISTS "Administrators can view all notifications" ON public.notifications;
+CREATE POLICY "Administrators can view all notifications" ON public.notifications FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can update all notifications" ON public.notifications;
-CREATE POLICY "Administrators can update all notifications"
-    ON public.notifications FOR UPDATE
+DROP POLICY IF EXISTS "Administrators can update all notifications" ON public;
+DROP POLICY IF EXISTS "Administrators can update all notifications" ON public.notifications;
+CREATE POLICY "Administrators can update all notifications" ON public.notifications FOR UPDATE
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()))
     WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can delete all notifications" ON public.notifications;
-CREATE POLICY "Administrators can delete all notifications"
-    ON public.notifications FOR DELETE
+DROP POLICY IF EXISTS "Administrators can delete all notifications" ON public;
+DROP POLICY IF EXISTS "Administrators can delete all notifications" ON public.notifications;
+CREATE POLICY "Administrators can delete all notifications" ON public.notifications FOR DELETE
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- 4. Ensure admin has UPDATE and DELETE access to applications
 DROP POLICY IF EXISTS "Administrators can update all applications" ON public.applications;
-CREATE POLICY "Administrators can update all applications"
-    ON public.applications FOR UPDATE
+DROP POLICY IF EXISTS "Administrators can update all applications" ON public;
+DROP POLICY IF EXISTS "Administrators can update all applications" ON public.applications;
+CREATE POLICY "Administrators can update all applications" ON public.applications FOR UPDATE
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()))
     WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can delete all applications" ON public.applications;
-CREATE POLICY "Administrators can delete all applications"
-    ON public.applications FOR DELETE
+DROP POLICY IF EXISTS "Administrators can delete all applications" ON public;
+DROP POLICY IF EXISTS "Administrators can delete all applications" ON public.applications;
+CREATE POLICY "Administrators can delete all applications" ON public.applications FOR DELETE
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- 5. Ensure admin has delete access to profiles
 DROP POLICY IF EXISTS "Administrators can delete all profiles" ON public.profiles;
-CREATE POLICY "Administrators can delete all profiles"
-    ON public.profiles FOR DELETE
+DROP POLICY IF EXISTS "Administrators can delete all profiles" ON public;
+DROP POLICY IF EXISTS "Administrators can delete all profiles" ON public.profiles;
+CREATE POLICY "Administrators can delete all profiles" ON public.profiles FOR DELETE
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));

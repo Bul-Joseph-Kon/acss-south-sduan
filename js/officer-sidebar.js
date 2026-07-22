@@ -75,12 +75,12 @@ let sidebarState = {
 
 async function fetchCounts() {
     try {
-        // 1. Pending CVET Reviews (submitted/pending_review applications where service_type is cvet or null)
+        // 1. Pending CVET Reviews (submitted/pending_review applications where service_type is cvet, CVET Declaration, or null)
         const { count: cvetCount, error: cvetError } = await supabase
             .from('applications')
             .select('*', { count: 'exact', head: true })
             .in('status', ['submitted', 'pending_review'])
-            .or('service_type.eq.cvet,service_type.is.null');
+            .or('service_type.eq.cvet,service_type.eq.CVET Declaration,service_type.is.null');
 
         // 2. Pending Direct Assessment Reviews
         const { count: daCount, error: daError } = await supabase

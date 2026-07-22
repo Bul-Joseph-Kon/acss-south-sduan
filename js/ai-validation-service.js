@@ -6,6 +6,15 @@
 
 import supabase from './supabase.js';
 import { getCurrentUser, getUserProfile } from './auth.js';
+import {
+    logAIValidationStarted,
+    logAIValidationCompleted,
+    logOCRProcessing,
+    logHSCodeVerification,
+    logTaxCalculation,
+    logFraudDetection,
+    logRiskAssessment
+} from './logging-service.js';
 
 // ================================================================
 // AI VALIDATION FUNCTIONS
@@ -27,13 +36,17 @@ async function performAIValidation(applicationId) {
 
         const startTime = Date.now();
 
+        // Log AI validation started
+        await logAIValidationStarted(applicationId, application.agent_id || application.user_id, application.application_number);
+
         // Perform all validations in parallel
-        const [ocrResult, docVerifyResult, hsCodeResult, fraudResult, complianceResult] = await Promise.all([
+        const [ocrResult, docVerifyResult, hsCodeResult, fraudResult, complianceResult, taxResult] = await Promise.all([
             performOCRValidation(applicationId, application),
             performDocumentVerification(applicationId, application),
             performHSCodeValidation(applicationId, application),
             performFraudDetection(applicationId, application),
-            performComplianceCheck(applicationId, application)
+            performComplianceCheck(applicationId, application),
+            performTaxCalculation(applicationId, application)
         ]);
 
         const processingTime = Date.now() - startTime;
@@ -44,7 +57,8 @@ async function performAIValidation(applicationId) {
             document_verification: docVerifyResult,
             hs_code_validation: hsCodeResult,
             fraud_detection: fraudResult,
-            compliance_check: complianceResult
+            compliance_check: complianceResult,
+            tax_calculation: taxResult
         });
 
         // Update application with AI validation results
@@ -58,6 +72,7 @@ async function performAIValidation(applicationId) {
                     hs_code_validation: hsCodeResult,
                     fraud_detection: fraudResult,
                     compliance_check: complianceResult,
+                    tax_calculation: taxResult,
                     risk_assessment: riskAssessment,
                     processing_time_ms: processingTime
                 },
@@ -67,19 +82,13 @@ async function performAIValidation(applicationId) {
 
         if (updateError) throw updateError;
 
-        // Create AI audit log
-        await createAIAuditLog(applicationId, 'ai_validation_complete', {
-            processing_time_ms: processingTime,
-            overall_score: riskAssessment.overall_score,
-            risk_level: riskAssessment.risk_level,
-            validations: {
-                ocr: ocrResult.status,
-                document_verification: docVerifyResult.status,
-                hs_code_validation: hsCodeResult.status,
-                fraud_detection: fraudResult.status,
-                compliance_check: complianceResult.status
-            }
-        });
+        // Log AI validation completed
+        await logAIValidationCompleted(applicationId, application.agent_id || application.user_id, application.application_number, riskAssessment);
+
+        // Log individual AI processes
+        await logOCRProcessing(applicationId, application.agent_id || application.user_id, ocrResult.results?.pages_processed || 0, ocrResult.results?.fields_detected || []);
+        await logFraudDetection(applicationId, application.agent_id || application.user_id, fraudResult.confidence_score, fraudResult.results?.risk_factors || []);
+        await logRiskAssessment(applicationId, application.agent_id || application.user_id, riskAssessment.overall_score, riskAssessment.risk_level, riskAssessment.recommendations);
 
         // Determine if validation passed
         const validationPassed = riskAssessment.overall_score >= 70 && 
@@ -89,11 +98,14 @@ async function performAIValidation(applicationId) {
 
         // Update application status based on validation result
         if (validationPassed) {
-            await updateApplicationStatus(applicationId, 'pending_review', 'AI validation passed');
+            await updateApplicationStatus(applicationId, 'under_review', 'AI validation passed');
+            // Notify Customs Officers
+            await notifyCustomsOfficers(applicationId, 'New Declaration for Review', 
+                `Declaration ${application.application_number} has passed AI validation and is ready for review.`, 'info');
         } else {
             await updateApplicationStatus(applicationId, 'returned', 'AI validation failed');
             await notifyAgent(applicationId, application.agent_id, 'AI Validation Failed', 
-                'Your declaration failed AI validation. Please review and resubmit.', 'error');
+                `Your declaration ${application.application_number} failed AI validation. Please review and resubmit.`, 'error');
         }
 
         console.log('=== AI VALIDATION COMPLETE ===', { 
@@ -311,6 +323,126 @@ async function performComplianceCheck(applicationId, application) {
     }
 }
 
+async function performTaxCalculation(applicationId, application) {
+    try {
+        // Fetch goods items for this application
+        const { data: goodsItems, error: goodsError } = await supabase
+            .from('application_goods')
+            .select('*')
+            .eq('application_id', applicationId);
+
+        if (goodsError) throw goodsError;
+
+        let totalCustomsDuty = 0;
+        let totalVAT = 0;
+        let totalExciseDuty = 0;
+        let totalPayable = 0;
+        const taxDetails = [];
+
+        // South Sudan tax rates (simplified - should be from tariff_codes table)
+        const VAT_RATE = 0.15; // 15%
+        const EXCISE_RATES = {
+            'alcohol': 0.35,
+            'tobacco': 0.30,
+            'fuel': 0.20,
+            'luxury': 0.25
+        };
+
+        for (const item of goodsItems || []) {
+            const customsValue = item.customs_value || 0;
+            const quantity = item.quantity || 0;
+            const unitValue = item.unit_value || 0;
+            const totalValue = customsValue || (quantity * unitValue);
+
+            // Get duty rate from HS code
+            const { data: tariffCode } = await supabase
+                .from('hs_codes')
+                .select('duty_rate')
+                .eq('code', item.hs_code)
+                .single();
+
+            const dutyRate = tariffCode?.duty_rate || 0.10; // Default 10%
+            const customsDuty = totalValue * dutyRate;
+            const vat = totalValue * VAT_RATE;
+            
+            // Check if excise duty applies (based on HS code or commodity description)
+            let exciseDuty = 0;
+            const description = (item.commodity_description || '').toLowerCase();
+            if (description.includes('alcohol') || description.includes('beer') || description.includes('wine')) {
+                exciseDuty = totalValue * EXCISE_RATES.alcohol;
+            } else if (description.includes('tobacco') || description.includes('cigarette')) {
+                exciseDuty = totalValue * EXCISE_RATES.tobacco;
+            } else if (description.includes('fuel') || description.includes('petrol') || description.includes('diesel')) {
+                exciseDuty = totalValue * EXCISE_RATES.fuel;
+            }
+
+            const itemTotal = totalValue + customsDuty + vat + exciseDuty;
+
+            totalCustomsDuty += customsDuty;
+            totalVAT += vat;
+            totalExciseDuty += exciseDuty;
+            totalPayable += itemTotal;
+
+            taxDetails.push({
+                item_number: item.item_number,
+                hs_code: item.hs_code,
+                description: item.commodity_description,
+                customs_value: totalValue,
+                duty_rate: dutyRate,
+                customs_duty: customsDuty,
+                vat: vat,
+                excise_duty: exciseDuty,
+                total: itemTotal
+            });
+        }
+
+        // Compare with declared values if available
+        const declaredDuty = application.declared_duty || 0;
+        const declaredVAT = application.declared_vat || 0;
+        const declaredTotal = application.declared_total || 0;
+
+        const discrepancies = [];
+        if (Math.abs(totalCustomsDuty - declaredDuty) > 100) {
+            discrepancies.push(`Customs duty discrepancy: Declared ${declaredDuty}, Calculated ${totalCustomsDuty}`);
+        }
+        if (Math.abs(totalVAT - declaredVAT) > 100) {
+            discrepancies.push(`VAT discrepancy: Declared ${declaredVAT}, Calculated ${totalVAT}`);
+        }
+        if (Math.abs(totalPayable - declaredTotal) > 500) {
+            discrepancies.push(`Total payable discrepancy: Declared ${declaredTotal}, Calculated ${totalPayable}`);
+        }
+
+        const status = discrepancies.length === 0 ? 'passed' : 'warning';
+        const confidenceScore = discrepancies.length === 0 ? 1.0 : 0.7;
+
+        const result = {
+            validation_type: 'tax_calculation',
+            status,
+            confidence_score: confidenceScore,
+            results: {
+                customs_duty: totalCustomsDuty,
+                vat: totalVAT,
+                excise_duty: totalExciseDuty,
+                total_payable: totalPayable,
+                tax_details: taxDetails,
+                declared_values: {
+                    customs_duty: declaredDuty,
+                    vat: declaredVAT,
+                    total: declaredTotal
+                },
+                discrepancies
+            },
+            errors: [],
+            warnings: discrepancies
+        };
+
+        await storeValidationResult(applicationId, result);
+        return result;
+    } catch (error) {
+        return { validation_type: 'tax_calculation', status: 'failed', errors: [error.message] };
+    }
+}
+
 async function calculateRiskAssessment(applicationId, validationResults) {
     try {
         const scores = {
@@ -318,10 +450,11 @@ async function calculateRiskAssessment(applicationId, validationResults) {
             document_verification: validationResults.document_verification.confidence_score || 0,
             hs_code_validation: validationResults.hs_code_validation.confidence_score || 0,
             fraud_detection: validationResults.fraud_detection.confidence_score || 0,
-            compliance_check: validationResults.compliance_check.confidence_score || 0
+            compliance_check: validationResults.compliance_check.confidence_score || 0,
+            tax_calculation: validationResults.tax_calculation?.confidence_score || 0
         };
 
-        const overallScore = Object.values(scores).reduce((sum, score) => sum + score, 0) / 5;
+        const overallScore = Object.values(scores).reduce((sum, score) => sum + score, 0) / 6;
         
         let riskLevel = 'low';
         if (overallScore < 0.5) riskLevel = 'critical';
@@ -334,6 +467,7 @@ async function calculateRiskAssessment(applicationId, validationResults) {
             fraud_score: scores.fraud_detection,
             compliance_score: scores.compliance_check,
             valuation_score: scores.hs_code_validation,
+            tax_score: scores.tax_calculation,
             risk_factors: [],
             recommendations: generateRecommendations(validationResults, riskLevel)
         };
@@ -438,6 +572,34 @@ async function notifyAgent(applicationId, agentId, title, message, type) {
     }
 }
 
+async function notifyCustomsOfficers(applicationId, title, message, type) {
+    try {
+        // Get all customs officers
+        const { data: officers, error } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('role', 'officer');
+
+        if (error) throw error;
+
+        // Create notification for each officer
+        if (officers && officers.length > 0) {
+            const notifications = officers.map(officer => ({
+                user_id: officer.id,
+                title,
+                message,
+                type,
+                reference_id: applicationId,
+                reference_type: 'application'
+            }));
+
+            await supabase.from('notifications').insert(notifications);
+        }
+    } catch (error) {
+        console.error('Error creating customs officer notifications:', error);
+    }
+}
+
 async function createAIAuditLog(applicationId, actionType, details) {
     try {
         await supabase.from('ai_audit_logs').insert({
@@ -479,6 +641,173 @@ async function createAuditLog(userId, action, tableName, recordId, oldValues, ne
 }
 
 // ================================================================
+// IMPORTER/EXPORTER LLM VALIDATION
+// ================================================================
+
+async function validateImporterTIN(tin) {
+    try {
+        if (!tin || tin.trim().length === 0) {
+            return { success: false, error: 'TIN is required' };
+        }
+
+        // Validate TIN format (alphanumeric, 8-15 characters)
+        const tinPattern = /^[A-Z0-9]{8,15}$/i;
+        if (!tinPattern.test(tin)) {
+            return { 
+                success: false, 
+                error: 'Invalid TIN format. Must be 8-15 alphanumeric characters.',
+                suggestions: ['Ensure TIN follows the standard format', 'Check for typos or extra characters']
+            };
+        }
+
+        // Search database for existing importer with this TIN
+        const { data: existingImporter, error } = await supabase
+            .from('traders')
+            .select('*')
+            .eq('tin', tin.toUpperCase())
+            .single();
+
+        if (error && error.code !== 'PGRST116') {
+            throw error;
+        }
+
+        if (existingImporter) {
+            // Check if importer is active
+            if (existingImporter.status !== 'active') {
+                return {
+                    success: false,
+                    error: 'This TIN belongs to an inactive registration',
+                    importer: existingImporter,
+                    suggestions: ['Contact customs to reactivate registration', 'Use a different TIN']
+                };
+            }
+
+            // Return importer data for auto-population
+            return {
+                success: true,
+                found: true,
+                importer: existingImporter,
+                message: 'Importer found in database',
+                autoPopulate: {
+                    name: existingImporter.full_name,
+                    company: existingImporter.company,
+                    address: existingImporter.address,
+                    phone: existingImporter.phone,
+                    email: existingImporter.email
+                }
+            };
+        }
+
+        // TIN not found but format is valid
+        return {
+            success: true,
+            found: false,
+            message: 'TIN format is valid but not found in database',
+            suggestions: ['This appears to be a new registration', 'Verify TIN with customs authority']
+        };
+    } catch (error) {
+        console.error('TIN validation error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function validateExporterInfo(exporterData) {
+    try {
+        const issues = [];
+        const warnings = [];
+
+        // Validate registration number format
+        if (exporterData.reg_number) {
+            const regPattern = /^[A-Z0-9]{8,20}$/i;
+            if (!regPattern.test(exporterData.reg_number)) {
+                issues.push('Invalid registration number format');
+            }
+        }
+
+        // Validate country selection
+        if (exporterData.country) {
+            const { data: country } = await supabase
+                .from('countries')
+                .select('*')
+                .eq('name', exporterData.country)
+                .single();
+
+            if (!country) {
+                issues.push('Invalid country selected');
+            }
+        }
+
+        // Check for incomplete information
+        const requiredFields = ['name', 'reg_number', 'country', 'phone', 'email'];
+        const missingFields = requiredFields.filter(field => !exporterData[field]);
+        
+        if (missingFields.length > 0) {
+            warnings.push(`Missing fields: ${missingFields.join(', ')}`);
+        }
+
+        // Validate email format
+        if (exporterData.email) {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(exporterData.email)) {
+                issues.push('Invalid email format');
+            }
+        }
+
+        // Check for duplicate registrations
+        if (exporterData.reg_number) {
+            const { data: existingExporter } = await supabase
+                .from('exporters')
+                .select('*')
+                .eq('registration_number', exporterData.reg_number)
+                .single();
+
+            if (existingExporter) {
+                warnings.push('Registration number already exists in database');
+            }
+        }
+
+        const status = issues.length === 0 ? 'passed' : (issues.length <= 2 ? 'warning' : 'failed');
+
+        return {
+            success: true,
+            status,
+            issues,
+            warnings,
+            suggestions: generateExporterSuggestions(issues, warnings)
+        };
+    } catch (error) {
+        console.error('Exporter validation error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+function generateExporterSuggestions(issues, warnings) {
+    const suggestions = [];
+    
+    if (issues.includes('Invalid registration number format')) {
+        suggestions.push('Registration number should be 8-20 alphanumeric characters');
+    }
+    
+    if (issues.includes('Invalid country selected')) {
+        suggestions.push('Select a valid country from the dropdown');
+    }
+    
+    if (issues.includes('Invalid email format')) {
+        suggestions.push('Enter a valid email address (e.g., user@domain.com)');
+    }
+    
+    if (warnings.some(w => w.includes('Missing fields'))) {
+        suggestions.push('Complete all required fields before submission');
+    }
+    
+    if (warnings.some(w => w.includes('already exists'))) {
+        suggestions.push('Verify registration number or use existing exporter record');
+    }
+    
+    return suggestions;
+}
+
+// ================================================================
 // EXPORTS
 // ================================================================
 
@@ -489,5 +818,8 @@ export {
     performHSCodeValidation,
     performFraudDetection,
     performComplianceCheck,
-    calculateRiskAssessment
+    performTaxCalculation,
+    calculateRiskAssessment,
+    validateImporterTIN,
+    validateExporterInfo
 };

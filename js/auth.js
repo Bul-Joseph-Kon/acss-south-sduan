@@ -773,20 +773,12 @@ export async function updateUserStatus(userId, status) {
 
 export async function deleteUser(userId) {
     try {
-        // Delete profile first
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .delete()
-            .eq('user_id', userId);
+        // Call secure admin RPC to delete auth user (cascades to profiles table)
+        const { data, error } = await supabase.rpc('delete_user_by_id', { target_user_id: userId });
 
-        if (profileError) throw profileError;
+        if (error) throw error;
 
-        // Delete auth user
-        const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-
-        if (authError) throw authError;
-
-        return { success: true };
+        return { success: true, data };
     } catch (error) {
         console.error('Delete user error:', error);
         return { success: false, error: error.message };

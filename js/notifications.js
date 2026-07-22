@@ -7,7 +7,7 @@ export async function fetchNotifications(options = {}) {
     const profile = user ? await getUserProfile(user.id) : null;
     const filters = options.filters || {};
     if (profile) filters.user_id = profile.id;
-    return fetchTable('notifications', { filters, orderBy: options.orderBy || { column: 'created_at', ascending: false }, limit: options.limit });
+    return fetchTable('notifications', { filters, orderBy: options.orderBy || { column: 'created_at', ascending: false }, limit: options.limit, range: options.range });
 }
 
 export async function fetchUnreadNotifications() {

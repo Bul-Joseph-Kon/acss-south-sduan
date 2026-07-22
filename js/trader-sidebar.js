@@ -21,14 +21,16 @@ const SIDEBAR_CONFIG = {
     sections: [
         {
             id: 'dashboard',
-            title: 'Dashboard',
-            items: [
-                { id: 'overview', label: 'Overview', icon: 'ri-dashboard-line', path: '/pages/trader/overview.html' }
-            ]
+            label: 'Dashboard',
+            icon: 'ri-dashboard-line',
+            path: '/pages/trader/overview.html',
+            type: 'link'
         },
         {
             id: 'services',
-            title: 'SERVICES',
+            label: 'Services',
+            icon: 'ri-service-line',
+            type: 'menu',
             items: [
                 { id: 'cvet-dashboard', label: 'CVET Dashboard', icon: 'ri-file-list-3-line', path: '/pages/trader/declaration-details.html' },
                 { id: 'direct-assessment', label: 'Direct Assessment', icon: 'ri-calculator-line', path: '/pages/trader/create-assessment.html' },
@@ -37,35 +39,25 @@ const SIDEBAR_CONFIG = {
         },
         {
             id: 'applications',
-            title: 'APPLICATIONS',
+            label: 'Applications',
+            icon: 'ri-folder-line',
+            type: 'menu',
             items: [
-                { id: 'drafts', label: 'Drafts', icon: 'ri-file-draft-line', path: '/pages/trader/draft.html', countKey: 'draft' },
-                { id: 'submitted', label: 'Submitted', icon: 'ri-send-plane-fill', path: '/pages/trader/submitted.html', countKey: 'submitted' },
+                { id: 'drafts', label: 'Drafts', icon: 'ri-draft-line', path: '/pages/trader/draft.html', countKey: 'draft' },
+                { id: 'submitted', label: 'Submitted', icon: 'ri-paper-plane-line', path: '/pages/trader/submitted.html', countKey: 'submitted' },
                 { id: 'under-review', label: 'Under Review', icon: 'ri-time-line', path: '/pages/trader/under-review.html', countKey: 'under_review' },
                 { id: 'approved', label: 'Approved', icon: 'ri-checkbox-circle-line', path: '/pages/trader/approved.html', countKey: 'approved' },
-                { id: 'rejected', label: 'Rejected', icon: 'ri-close-circle-line', path: '/pages/trader/rejected.html', countKey: 'rejected' },
-                { id: 'completed', label: 'Completed', icon: 'ri-task-line', path: '/pages/trader/completed.html', countKey: 'completed' }
+                { id: 'rejected', label: 'Rejected', icon: 'ri-arrow-go-back-line', path: '/pages/trader/rejected.html', countKey: 'rejected' },
+                { id: 'completed', label: 'Completed', icon: 'ri-flag-2-line', path: '/pages/trader/completed.html', countKey: 'completed' }
             ]
         },
         {
             id: 'notifications',
-            title: 'NOTIFICATIONS',
-            items: [
-                { id: 'application-updates', label: 'Application Updates', icon: 'ri-notification-3-line', path: '/pages/trader/application-updates.html', countKey: 'application_updates' },
-                { id: 'payment-alerts', label: 'Payment Alerts', icon: 'ri-money-dollar-circle-line', path: '/pages/trader/payment-alerts.html', countKey: 'payment_alerts' },
-                { id: 'approval-alerts', label: 'Approval Alerts', icon: 'ri-shield-check-line', path: '/pages/trader/approval-alerts.html', countKey: 'approval_alerts' },
-                { id: 'system-alerts', label: 'System Alerts', icon: 'ri-alarm-warning-line', path: '/pages/trader/system-alerts.html', countKey: 'system_alerts' }
-            ]
-        },
-        {
-            id: 'account',
-            title: 'ACCOUNT',
-            items: [
-                { id: 'profile', label: 'Profile', icon: 'ri-user-line', path: '/pages/trader/profile.html' },
-                { id: 'settings', label: 'Settings', icon: 'ri-settings-3-line', path: '/pages/trader/settings.html' },
-                { id: 'help', label: 'Help Center', icon: 'ri-question-line', path: '/pages/trader/help.html' },
-                { id: 'logout', label: 'Logout', icon: 'ri-logout-box-line', action: 'logout' }
-            ]
+            label: 'Notifications',
+            icon: 'ri-notification-3-line',
+            path: '/pages/trader/recent-notifications.html',
+            type: 'link',
+            countKey: 'unread_notifications'
         }
     ]
 };
@@ -76,102 +68,52 @@ const SIDEBAR_CONFIG = {
 
 let sidebarState = {
     profile: null,
-    counts: {},
+    counts: {
+        draft: 0,
+        submitted: 0,
+        under_review: 0,
+        approved: 0,
+        rejected: 0,
+        completed: 0,
+        unread_notifications: 0
+    },
     subscriptions: [],
-    currentPage: null
+    currentPage: null,
+    observer: null,
+    expandedMenus: new Set()
 };
 
 // ================================================================
 // SUPABASE QUERIES FOR LIVE COUNTS
 // ================================================================
 
-async function fetchApplicationCounts(profileId) {
-    try {
-        const { data, error } = await supabase
-            .from('applications')
-            .select('status')
-            .eq('user_id', profileId);
-
-        if (error) throw error;
-
-        const counts = {
-            draft: 0,
-            submitted: 0,
-            under_review: 0,
-            approved: 0,
-            rejected: 0,
-            completed: 0
-        };
-
-        data.forEach(app => {
-            if (counts.hasOwnProperty(app.status)) {
-                counts[app.status]++;
-            }
-        });
-
-        return counts;
-    } catch (error) {
-        console.error('Error fetching application counts:', error);
-        return {};
-    }
-}
-
-async function fetchNotificationCounts(profileId) {
-    try {
-        const { data, error } = await supabase
-            .from('notifications')
-            .select('title, message, type, read')
-            .eq('user_id', profileId);
-
-        if (error) throw error;
-
-        const counts = {
-            application_updates: 0,
-            payment_alerts: 0,
-            approval_alerts: 0,
-            system_alerts: 0
-        };
-
-        data.forEach(notif => {
-            if (!notif.read) {
-                const title = (notif.title || '').toLowerCase();
-                const msg = (notif.message || '').toLowerCase();
-                const type = (notif.type || '').toLowerCase();
-
-                if (title.includes('payment') || title.includes('invoice') || title.includes('fee') ||
-                    msg.includes('payment') || msg.includes('invoice') || msg.includes('fee') ||
-                    type === 'payment_required' || type === 'payment_confirmed') {
-                    counts.payment_alerts++;
-                } else if (title.includes('approve') || title.includes('reject') || title.includes('clearance') ||
-                           title.includes('release') || title.includes('inspect') || title.includes('verified') ||
-                           msg.includes('approve') || msg.includes('reject') || msg.includes('clearance') ||
-                           msg.includes('release') || msg.includes('inspect') || msg.includes('verified') ||
-                           type === 'approval' || type === 'inspection') {
-                    counts.approval_alerts++;
-                } else if (title.includes('application') || title.includes('status') || title.includes('validation') ||
-                           title.includes('submitted') || msg.includes('application') ||
-                           type === 'ai_validation_error' || type === 'application_status_update') {
-                    counts.application_updates++;
-                } else {
-                    counts.system_alerts++;
-                }
-            }
-        });
-
-        return counts;
-    } catch (error) {
-        console.error('Error fetching notification counts:', error);
-        return {};
-    }
-}
-
 async function fetchAllCounts(profileId) {
-    const [appCounts, notifCounts] = await Promise.all([
-        fetchApplicationCounts(profileId),
-        fetchNotificationCounts(profileId)
-    ]);
+    try {
+        const [
+            draftsRes, submittedRes, underReviewRes, approvedRes, rejectedRes, completedRes, notifRes
+        ] = await Promise.all([
+            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('user_id', profileId).eq('status', 'draft'),
+            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('user_id', profileId).eq('status', 'submitted'),
+            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('user_id', profileId).eq('status', 'under_review'),
+            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('user_id', profileId).eq('status', 'approved'),
+            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('user_id', profileId).eq('status', 'rejected'),
+            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('user_id', profileId).eq('status', 'completed'),
+            supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', profileId).eq('read', false),
+        ]);
 
-    return { ...appCounts, ...notifCounts };
+        return {
+            draft: draftsRes.count || 0,
+            submitted: submittedRes.count || 0,
+            under_review: underReviewRes.count || 0,
+            approved: approvedRes.count || 0,
+            rejected: rejectedRes.count || 0,
+            completed: completedRes.count || 0,
+            unread_notifications: notifRes.count || 0
+        };
+    } catch (error) {
+        console.error('Error fetching trader sidebar counts:', error);
+        return sidebarState.counts;
+    }
 }
 
 // ================================================================
@@ -179,47 +121,20 @@ async function fetchAllCounts(profileId) {
 // ================================================================
 
 function setupRealtimeSubscriptions(profileId) {
-    // Subscribe to applications changes
-    const appSubscription = supabase
-        .channel('applications-sidebar')
-        .on(
-            'postgres_changes',
-            {
-                event: '*',
-                schema: 'public',
-                table: 'applications',
-                filter: `user_id=eq.${profileId}`
-            },
-            async () => {
-                const appCounts = await fetchApplicationCounts(profileId);
-                sidebarState.counts = { ...sidebarState.counts, ...appCounts };
+    const tables = ['applications', 'notifications', 'payments', 'documents', 'invoices', 'cvet_certificates', 'cargo_release_documents'];
+
+    tables.forEach(table => {
+        const channel = supabase
+            .channel(`trader-sidebar-${table}`)
+            .on('postgres_changes', { event: '*', schema: 'public', table }, async () => {
+                const freshCounts = await fetchAllCounts(profileId);
+                sidebarState.counts = freshCounts;
                 updateCountBadges();
-            }
-        )
-        .subscribe();
+            })
+            .subscribe();
 
-    sidebarState.subscriptions.push(appSubscription);
-
-    // Subscribe to notifications changes
-    const notifSubscription = supabase
-        .channel('notifications-sidebar')
-        .on(
-            'postgres_changes',
-            {
-                event: '*',
-                schema: 'public',
-                table: 'notifications',
-                filter: `user_id=eq.${profileId}`
-            },
-            async () => {
-                const notifCounts = await fetchNotificationCounts(profileId);
-                sidebarState.counts = { ...sidebarState.counts, ...notifCounts };
-                updateCountBadges();
-            }
-        )
-        .subscribe();
-
-    sidebarState.subscriptions.push(notifSubscription);
+        sidebarState.subscriptions.push(channel);
+    });
 }
 
 function cleanupSubscriptions() {
@@ -237,87 +152,111 @@ function renderSidebarHTML() {
     const currentPath = window.location.pathname;
     sidebarState.currentPage = currentPath;
 
-    let html = `
-        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-full">
-            <!-- Profile Section -->
-            <div class="p-4 border-b border-gray-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-semibold">
-                        ${sidebarState.profile?.full_name?.charAt(0).toUpperCase() || 'U'}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate">${sidebarState.profile?.full_name || 'Loading...'}</p>
-                        <p class="text-xs text-gray-500 capitalize">${sidebarState.profile?.role || 'Trader'}</p>
+    const profile = sidebarState.profile;
+    const counts = sidebarState.counts;
+
+    // Determine which menu should be expanded based on current path
+    determineActiveMenu(currentPath);
+
+    const navItems = SIDEBAR_CONFIG.sections.map(section => {
+        if (section.type === 'link') {
+            // Direct link (Dashboard)
+            const isActive = currentPath.includes(section.id) || currentPath.endsWith(section.path.split('/').pop());
+            const activeClass = isActive ? 'bg-blue-50 text-blue-800 font-semibold' : 'text-gray-600 hover:bg-gray-50';
+            const count = section.countKey ? (counts[section.countKey] || 0) : 0;
+            const badge = section.countKey && count > 0
+                ? `<span class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold min-w-[18px] h-4 flex items-center justify-center" data-count-key="${section.countKey}">${count > 99 ? '99+' : count}</span>`
+                : '';
+            
+            return `
+                <a href="${section.path}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 ${activeClass}">
+                    <i class="${section.icon} text-base w-5 text-center flex-shrink-0"></i>
+                    <span class="flex-1">${section.label}</span>
+                    ${badge}
+                </a>
+            `;
+        } else if (section.type === 'menu') {
+            // Expandable menu
+            const isExpanded = sidebarState.expandedMenus.has(section.id);
+            const hasActiveSubmenu = section.items.some(item => 
+                currentPath.includes(item.id) || currentPath.endsWith(item.path?.split('/').pop())
+            );
+            const parentActiveClass = hasActiveSubmenu ? 'bg-blue-50 text-blue-800 font-semibold' : 'text-gray-600 hover:bg-gray-50';
+            const chevronClass = isExpanded ? 'rotate-180' : '';
+
+            const submenuItems = section.items.map(item => {
+                const isActive = currentPath.includes(item.id) || currentPath.endsWith(item.path?.split('/').pop());
+                const activeClass = isActive ? 'bg-blue-100 text-blue-900 font-semibold' : 'text-gray-600 hover:bg-gray-50';
+                const count = item.countKey ? (counts[item.countKey] || 0) : 0;
+                const badge = item.countKey && count > 0
+                    ? `<span class="mr-2 flex-shrink-0 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold min-w-[18px] h-4 flex items-center justify-center" data-count-key="${item.countKey}">${count > 99 ? '99+' : count}</span>`
+                    : (item.countKey ? `<span class="mr-2 flex-shrink-0 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold min-w-[18px] h-4 flex items-center justify-center hidden" data-count-key="${item.countKey}">0</span>` : '');
+
+                return `
+                    <a href="${item.path}" class="flex items-center gap-2 px-3 py-2.5 pl-8 rounded-xl text-sm transition-all duration-200 ${activeClass} min-w-0">
+                        <i class="${item.icon} text-base w-5 text-center flex-shrink-0"></i>
+                        ${badge}
+                        <span class="flex-1 min-w-0 truncate">${item.label}</span>
+                    </a>
+                `;
+            }).join('');
+
+            return `
+                <div class="menu-section">
+                    <button 
+                        data-menu-toggle="${section.id}"
+                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 ${parentActiveClass}"
+                    >
+                        <i class="${section.icon} text-base w-5 text-center flex-shrink-0"></i>
+                        <span class="flex-1 text-left">${section.label}</span>
+                        <i class="ri-arrow-down-s-line transition-transform duration-200 ${chevronClass}"></i>
+                    </button>
+                    <div class="submenu overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}">
+                        <div class="space-y-1 mt-1">
+                            ${submenuItems}
+                        </div>
                     </div>
                 </div>
+            `;
+        }
+    }).join('');
+
+    return `
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200/70 p-4 sticky top-6 flex flex-col max-h-[calc(100vh-2rem)]">
+            <!-- Profile Section -->
+            <div class="text-center mb-5 pb-4 border-b border-gray-100 flex-shrink-0">
+                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md" style="background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%);">
+                    <i class="ri-user-line text-white text-2xl"></i>
+                </div>
+                <h3 class="text-sm font-bold text-gray-800 truncate">${profile?.full_name || 'Loading...'}</h3>
+                <p class="text-gray-400 text-xs mt-0.5">Trader</p>
+                <span class="inline-block mt-1.5 text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">● Active</span>
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 overflow-y-auto p-4 space-y-6">
-    `;
-
-    SIDEBAR_CONFIG.sections.forEach(section => {
-        html += `
-            <div class="sidebar-section">
-                <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">${section.title}</h3>
-                <ul class="space-y-1">
-        `;
-
-        section.items.forEach(item => {
-            const isActive = item.path === currentPath;
-            const count = item.countKey ? (sidebarState.counts[item.countKey] || 0) : 0;
-            const countBadge = count > 0 ? `<span class="ml-auto bg-emerald-100 text-emerald-700 text-xs font-medium px-2 py-0.5 rounded-full">${count}</span>` : '';
-            const activeClass = isActive ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700 hover:bg-gray-50';
-
-            if (item.action === 'logout') {
-                html += `
-                    <li>
-                        <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                            <i class="${item.icon} text-lg"></i>
-                            ${item.label}
-                        </button>
-                    </li>
-                `;
-            } else {
-                html += `
-                    <li>
-                        <a href="${item.path}" class="flex items-center gap-3 px-3 py-2 text-sm font-medium ${activeClass} rounded-lg transition-colors">
-                            <i class="${item.icon} text-lg"></i>
-                            ${item.label}
-                            ${countBadge}
-                        </a>
-                    </li>
-                `;
-            }
-        });
-
-        html += `
-                </ul>
-            </div>
-        `;
-    });
-
-    html += `
+            <nav class="space-y-1 flex-1 overflow-y-auto" id="sidebar-nav">
+                ${navItems}
             </nav>
-        </aside>
-    `;
 
-    return html;
+            <!-- Logout Button -->
+            <div class="mt-auto pt-4 border-t border-gray-100 flex-shrink-0">
+                <button onclick="handleLogout()" class="w-full bg-red-50 text-red-600 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-100 transition flex items-center justify-center gap-2">
+                    <i class="ri-logout-box-line"></i> Logout
+                </button>
+            </div>
+        </div>
+    `;
 }
 
 function updateCountBadges() {
-    // Update count badges without re-rendering entire sidebar
-    SIDEBAR_CONFIG.sections.forEach(section => {
-        section.items.forEach(item => {
-            if (item.countKey) {
-                const count = sidebarState.counts[item.countKey] || 0;
-                const badgeElement = document.querySelector(`[data-count-key="${item.countKey}"]`);
-                if (badgeElement) {
-                    badgeElement.textContent = count;
-                    badgeElement.style.display = count > 0 ? 'inline' : 'none';
-                }
-            }
-        });
+    const counts = sidebarState.counts;
+    Object.keys(counts).forEach(key => {
+        const badge = document.querySelector(`[data-count-key="${key}"]`);
+        if (badge) {
+            const count = counts[key] || 0;
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.classList.toggle('hidden', count === 0);
+        }
     });
 }
 
@@ -329,45 +268,104 @@ async function initializeTraderSidebar() {
     try {
         console.log('=== INITIALIZING TRADER SIDEBAR ===');
 
-        // Render sidebar immediately with placeholder data
-        const sidebarContainer = document.getElementById('trader-sidebar');
-        if (sidebarContainer) {
-            sidebarContainer.innerHTML = renderSidebarHTML();
+        const container = document.getElementById('trader-sidebar');
+        if (!container) {
+            console.error('Sidebar container not found');
+            return;
         }
 
-        // Verify authentication
+        console.log('Sidebar container found, rendering...');
+        
+        // Render skeleton immediately
+        container.innerHTML = renderSidebarHTML();
+        console.log('Sidebar HTML rendered');
+
+        // Load real data
         const user = await getCurrentUser();
         if (!user) {
-            console.error('User not authenticated');
             window.location.href = '/auth/login.html';
             return;
         }
 
-        // Load profile
         const profile = await getProfile();
         if (!profile || profile.role !== 'trader') {
-            console.error('Invalid role or profile not found');
+            console.error('Invalid role:', profile?.role);
             window.location.href = '/auth/login.html';
             return;
         }
 
         sidebarState.profile = profile;
-
-        // Fetch initial counts
         sidebarState.counts = await fetchAllCounts(profile.id);
+        console.log('Counts loaded:', sidebarState.counts);
 
-        // Update sidebar with real data
-        if (sidebarContainer) {
-            sidebarContainer.innerHTML = renderSidebarHTML();
-        }
+        // Re-render with real data
+        container.innerHTML = renderSidebarHTML();
+        console.log('Sidebar re-rendered with real data');
 
-        // Setup realtime subscriptions
+        // Setup event delegation for menu toggles
+        setupEventListeners();
+        console.log('Event listeners setup');
+
+        // Setup realtime
         setupRealtimeSubscriptions(profile.id);
 
         console.log('Trader sidebar initialized successfully');
     } catch (error) {
         console.error('Error initializing trader sidebar:', error);
     }
+}
+
+function determineActiveMenu(currentPath) {
+    // Reset expanded menus
+    sidebarState.expandedMenus.clear();
+
+    // Check if current path matches any submenu item
+    SIDEBAR_CONFIG.sections.forEach(section => {
+        if (section.type === 'menu') {
+            const hasActiveSubmenu = section.items.some(item => 
+                currentPath.includes(item.id) || currentPath.endsWith(item.path?.split('/').pop())
+            );
+            if (hasActiveSubmenu) {
+                sidebarState.expandedMenus.add(section.id);
+            }
+        }
+    });
+
+    // Don't expand any menu by default - user must click to expand
+}
+
+function toggleMenu(menuId) {
+    const menuSection = document.querySelector(`[data-menu-toggle="${menuId}"]`)?.closest('.menu-section');
+    if (!menuSection) return;
+
+    const button = menuSection.querySelector('[data-menu-toggle]');
+    const submenu = menuSection.querySelector('.submenu');
+    const chevron = button.querySelector('.ri-arrow-down-s-line');
+
+    if (sidebarState.expandedMenus.has(menuId)) {
+        sidebarState.expandedMenus.delete(menuId);
+        submenu.classList.remove('max-h-96', 'opacity-100');
+        submenu.classList.add('max-h-0', 'opacity-0');
+        chevron.classList.remove('rotate-180');
+    } else {
+        sidebarState.expandedMenus.add(menuId);
+        submenu.classList.remove('max-h-0', 'opacity-0');
+        submenu.classList.add('max-h-96', 'opacity-100');
+        chevron.classList.add('rotate-180');
+    }
+}
+
+function setupEventListeners() {
+    const nav = document.getElementById('sidebar-nav');
+    if (!nav) return;
+
+    nav.addEventListener('click', (e) => {
+        const button = e.target.closest('[data-menu-toggle]');
+        if (button) {
+            const menuId = button.getAttribute('data-menu-toggle');
+            toggleMenu(menuId);
+        }
+    });
 }
 
 // ================================================================
@@ -378,9 +376,11 @@ function cleanupTraderSidebar() {
     cleanupSubscriptions();
     sidebarState = {
         profile: null,
-        counts: {},
+        counts: { draft: 0, submitted: 0, under_review: 0, approved: 0, rejected: 0, completed: 0, unread_notifications: 0 },
         subscriptions: [],
-        currentPage: null
+        currentPage: null,
+        observer: null,
+        expandedMenus: new Set()
     };
 }
 
@@ -402,16 +402,15 @@ async function handleLogout() {
 // EXPORTS
 // ================================================================
 
-export { initializeTraderSidebar, cleanupTraderSidebar, handleLogout };
-
-// Auto-initialize if script is loaded directly
+// Auto-initialize
 if (typeof window !== 'undefined') {
     window.handleLogout = handleLogout;
-    
-    // Initialize when DOM is ready
+    window.toggleMenu = toggleMenu;
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeTraderSidebar);
     } else {
         initializeTraderSidebar();
     }
 }
+
+export { initializeTraderSidebar, handleLogout, cleanupTraderSidebar, toggleMenu };

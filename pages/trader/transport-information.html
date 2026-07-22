@@ -260,8 +260,10 @@
             const result = await getUnreadCount();
             if (result.success && result.count > 0) {
                 const badge = document.getElementById('notificationBadge');
-                badge.textContent = result.count;
-                badge.classList.remove('hidden');
+                if (badge) {
+                    badge.textContent = result.count;
+                    badge.classList.remove('hidden');
+                }
             }
         }
         updateNotificationBadge();

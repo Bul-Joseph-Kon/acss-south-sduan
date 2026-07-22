@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Review · SSRA Customs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="../assets/icons/remixicon.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        .queue-item:hover { background-color: #f8fafc; }
+        .risk-badge { font-size: 0.7rem; font-weight: 700; padding: 0.1rem 0.5rem; border-radius: 9999px; }
+        .risk-low { background: #dcfce7; color: #166534; }
+        .risk-medium { background: #fef08a; color: #854d0e; }
+        .risk-high { background: #ffedd5; color: #9a3412; }
+        .risk-critical { background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div class="min-h-screen flex flex-col lg:flex-row">
+        <!-- Sidebar placeholder -->
+        <aside class="w-full lg:w-72 bg-white border-r border-slate-200 flex-shrink-0" id="sidebar-container">
+            <div class="p-6 text-center text-slate-400">Loading sidebar...</div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+            
+            <div class="flex items-center gap-3 mb-6">
+                <a href="dashboard-officer.html" class="text-slate-500 hover:text-blue-600 transition"><i class="ri-arrow-left-line text-xl"></i></a>
+                <h1 class="text-2xl font-bold text-slate-900">Pending Review Queue</h1>
+            </div>
+
+            <!-- Queue List -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                    <div class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Declarations Awaiting Action</div>
+                    <div class="text-sm font-medium text-slate-500">Total: <span id="queueTotal">0</span></div>
+                </div>
+                
+                <div id="queueList" class="divide-y divide-slate-100">
+                    <div class="p-8 text-center text-slate-400">
+                        <i class="ri-loader-4-line text-3xl animate-spin block mb-2"></i>
+                        Loading queue...
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import supabase from '../../js/supabase.js';
+        import { getCurrentUser, getUserProfile } from '../../js/auth.js';
+
+        function formatRisk(level) {
+            if (!level) return '<span class="risk-badge bg-slate-100 text-slate-600">UNASSESSED</span>';
+            const classes = { low: 'risk-low', medium: 'risk-medium', high: 'risk-high', critical: 'risk-critical' };
+            return `<span class="risk-badge ${classes[level] || 'bg-slate-100 text-slate-600'}">${level.toUpperCase()} RISK</span>`;
+        }
+
+        function timeAgo(date) {
+            if (!date) return '';
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + "y ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + "m ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + "d ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + "h ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + "m ago";
+            return "just now";
+        }
+
+        async function loadQueue() {
+            try {
+                const { data: queue, error } = await supabase
+                    .from('applications')
+                    .select('id, application_number, status, submitted_at, declaration_data, goods_data, risk_assessments(risk_level, overall_score)')
+                    .eq('status', 'pending_review')
+                    .order('submitted_at', { ascending: false });
+
+                if (error) throw error;
+
+                document.getElementById('queueTotal').textContent = queue ? queue.length : 0;
+                const qList = document.getElementById('queueList');
+                
+                if (!queue || queue.length === 0) {
+                    qList.innerHTML = '<div class="p-8 text-center text-slate-500">No applications pending review! 🎉</div>';
+                    return;
+                }
+
+                qList.innerHTML = queue.map(app => {
+                    const risk = app.risk_assessments?.[0]?.risk_level || 'low';
+                    const importer = app.declaration_data?.importer_exporter?.importer_name || 'Unknown Importer';
+                    const goods = app.goods_data?.description || 'General Goods';
+                    
+                    return `
+                        <div class="queue-item p-4 flex flex-col sm:flex-row sm:items-center justify-between cursor-pointer transition" onclick="location.href='review-application.html?id=${app.id}'">
+                            <div class="mb-3 sm:mb-0">
+                                <div class="flex items-center gap-3 mb-1">
+                                    <span class="font-bold text-slate-800">${app.application_number}</span>
+                                    ${formatRisk(risk)}
+                                </div>
+                                <div class="text-sm text-slate-600 truncate max-w-md">${importer} — ${goods}</div>
+                                <div class="text-xs text-slate-400 mt-1"><i class="ri-time-line mr-1"></i>Submitted ${timeAgo(app.submitted_at)}</div>
+                            </div>
+                            <div>
+                                <button class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100 transition whitespace-nowrap">
+                                    Review <i class="ri-arrow-right-line ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error("Load error:", error);
+            }
+        }
+
+        async function init() {
+            const user = await getCurrentUser();
+            if (!user) { window.location.href = '/auth/login.html'; return; }
+            
+            const profile = await getUserProfile(user.id);
+            if (!profile || profile.role !== 'officer') { window.location.href = '/auth/login.html'; return; }
+
+            await loadQueue();
+
+            supabase.channel('officer-queue')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, loadQueue)
+                .subscribe();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

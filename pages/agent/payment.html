@@ -3,216 +3,287 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SSRA Customs · Agent Payment</title>
+    <title>Payment · SSRA Customs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="../assets/icons/remixicon.css" rel="stylesheet" />
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
         .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
-        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
-        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
-        .payment-method { border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 0.75rem 1rem; transition: all 0.2s ease; cursor: pointer; text-align: center; }
-        .payment-method:hover { border-color: #1e3a5f; background: #e8f0fe; }
-        .payment-method.selected { border-color: #1e3a5f; background: #e8f0fe; }
-        .payment-method .method-icon { font-size: 1.5rem; color: #1e3a5f; }
-        .payment-summary { background: #f8fafc; border-radius: 0.75rem; padding: 1.25rem; border: 1px solid #e5e7eb; }
-        .payment-summary .pay-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e5e7eb; }
-        .payment-summary .pay-row:last-child { border-bottom: none; }
-        .payment-summary .pay-total { font-size: 1.1rem; font-weight: 700; color: #1e3a5f; padding-top: 0.5rem; border-top: 2px solid #1e3a5f; }
-        .profile-dropdown { position: absolute; right: 0; top: calc(100% + 0.5rem); background: white; border-radius: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 200px; z-index: 50; overflow: hidden; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease; }
-        .profile-dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .profile-dropdown a { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; font-size: 0.85rem; color: #374151; transition: background 0.15s; cursor: pointer; text-decoration: none; }
-        .profile-dropdown a:hover { background: #e8f0fe; color: #1e3a5f; }
-        .profile-dropdown .divider { height: 1px; background: #e5e7eb; margin: 0.25rem 0; }
-        .profile-dropdown .danger { color: #dc2626; }
-        .profile-dropdown .danger:hover { background: #fef2f2; color: #dc2626; }
-        .header-profile-btn { cursor: pointer; display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0.75rem 0.3rem 0.5rem; border-radius: 9999px; background: rgba(255,255,255,0.2); transition: background 0.2s; border: 1px solid rgba(255,255,255,0.3); }
-        .header-profile-btn:hover { background: rgba(255,255,255,0.3); }
-        .header-profile-btn .avatar-sm { width: 2rem; height: 2rem; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: #1e3a5f; }
-        .status-badge { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
-        .status-pending-payment { background: #fef3c7; color: #92400e; }
+        .invoice-card { border: 2px solid #e5e7eb; border-radius: 1rem; overflow: hidden; }
+        .invoice-header { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); color: white; padding: 1.5rem; }
+        .btn-pay { background: linear-gradient(135deg, #059669, #047857); color: white; padding: 0.85rem 2rem; border-radius: 0.75rem; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.2s; width: 100%; }
+        .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(5,150,105,0.3); }
+        .btn-pay:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1e3a5f; color: white; padding: 0.75rem 1.25rem; border-radius: 0.75rem; font-size: 0.875rem; z-index: 100; transform: translateY(100px); opacity: 0; transition: all 0.3s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.2); max-width: 350px; }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .method-card { border: 2px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem; cursor: pointer; transition: all 0.2s; }
+        .method-card.selected { border-color: #1e3a5f; background: #f0f4ff; }
+        .method-card:hover { border-color: #93c5fd; }
     </style>
 </head>
-<body>
-    <div class="min-h-screen bg-gray-100">
+<body class="bg-gray-50">
+    <div id="toast" class="toast"></div>
+    <div class="min-h-screen">
         <div class="max-w-7xl mx-auto px-4 py-5">
             <div class="flex flex-col lg:flex-row gap-6">
-                <aside class="lg:w-72 flex-shrink-0">
-                    <div id="agent-sidebar"></div>
-                </aside>
-
+                <aside class="lg:w-72 flex-shrink-0"><div id="agent-sidebar"></div></aside>
                 <main class="flex-1 space-y-5">
-                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
-                        <div>
-                            <h2 class="text-2xl font-bold tracking-tight">💳 Step 7: Payment Processing</h2>
-                            <p class="opacity-90 text-sm">Duty payment and receipt generation</p>
-                        </div>
-                        <div class="relative">
-                            <button onclick="document.getElementById('profileDropdown').classList.toggle('open')" class="header-profile-btn">
-                                <span class="avatar-sm"><i class="ri-user-line"></i></span>
-                                <span class="text-sm font-medium hidden sm:inline">Agent</span>
-                                <i class="ri-arrow-down-s-line text-sm"></i>
-                            </button>
-                            <div class="profile-dropdown" id="profileDropdown">
-                                <a href="#"><i class="ri-user-settings-line"></i> My Profile</a>
-                                <a href="#"><i class="ri-edit-line"></i> Edit Profile</a>
-                                <div class="divider"></div>
-                                <a href="#" id="dropdownSignOut" class="danger"><i class="ri-logout-box-line"></i> Sign Out</a>
+                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg">
+                        <h1 class="text-2xl font-bold">💳 Payment</h1>
+                        <p class="opacity-80 text-sm mt-1">Pay customs duties and fees to release your cargo</p>
+                    </div>
+
+                    <!-- Applications Awaiting Payment -->
+                    <div id="awaitingPaymentSection">
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                            <div class="p-5 border-b border-gray-100">
+                                <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                                    <i class="ri-bank-card-line text-orange-500"></i> Awaiting Payment
+                                    <span class="ml-2 bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full font-semibold" id="awaitingCount">–</span>
+                                </h3>
+                            </div>
+                            <div id="awaitingList">
+                                <div class="p-8 text-center text-gray-400"><i class="ri-loader-4-line text-3xl animate-spin block mb-2"></i>Loading...</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
-                        <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span>Step 7 of 8</span>
-                            <span>87% Complete</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-600 h-2 rounded-full" style="width:87%"></div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-                        <h3 class="font-bold text-lg mb-4">Payment Details</h3>
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <div class="payment-summary">
-                                    <div class="pay-row">
-                                        <span class="text-gray-600">Assessment Reference</span>
-                                        <span class="font-semibold">DA-2026-0018</span>
+                    <!-- Payment Modal / Inline Form -->
+                    <div id="paymentForm" class="hidden">
+                        <div class="invoice-card bg-white shadow-lg">
+                            <div class="invoice-header">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-xs opacity-70">INVOICE</div>
+                                        <div class="text-2xl font-bold" id="invoiceNumber">–</div>
                                     </div>
-                                    <div class="pay-row">
-                                        <span class="text-gray-600">Total Payable</span>
-                                        <span class="font-semibold">$15,650.00</span>
-                                    </div>
-                                    <div class="pay-row">
-                                        <span class="text-gray-600">Payment Status</span>
-                                        <span class="status-badge status-pending-payment">Pending</span>
-                                    </div>
-                                    <div class="pay-row pay-total">
-                                        <span>Amount Due</span>
-                                        <span>$15,650.00</span>
+                                    <div class="text-right">
+                                        <div class="text-xs opacity-70">APPLICATION</div>
+                                        <div class="font-semibold" id="appNumber">–</div>
                                     </div>
                                 </div>
                             </div>
-                            <div>
-                                <h4 class="font-semibold text-sm mb-3">Select Payment Method</h4>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div class="payment-method selected" onclick="selectPayment(this)">
-                                        <i class="ri-smartphone-line method-icon"></i>
-                                        <p class="text-sm font-medium mt-1">Mobile Money</p>
+                            <div class="p-6">
+                                <!-- Invoice line items -->
+                                <div class="space-y-3 mb-5">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Customs Duty</span>
+                                        <span id="dutyAmount" class="font-semibold">–</span>
                                     </div>
-                                    <div class="payment-method" onclick="selectPayment(this)">
-                                        <i class="ri-bank-line method-icon"></i>
-                                        <p class="text-sm font-medium mt-1">Bank Transfer</p>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">VAT / Tax</span>
+                                        <span id="taxAmount" class="font-semibold">–</span>
                                     </div>
-                                    <div class="payment-method" onclick="selectPayment(this)">
-                                        <i class="ri-wallet-3-line method-icon"></i>
-                                        <p class="text-sm font-medium mt-1">Online Banking</p>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">Processing Fees</span>
+                                        <span id="feesAmount" class="font-semibold">–</span>
                                     </div>
-                                    <div class="payment-method" onclick="selectPayment(this)">
-                                        <i class="ri-cash-line method-icon"></i>
-                                        <p class="text-sm font-medium mt-1">Cash Payment</p>
+                                    <div class="border-t pt-3 flex justify-between">
+                                        <span class="font-bold text-gray-800">Total Amount Due</span>
+                                        <span id="totalAmount" class="font-bold text-2xl text-green-700">–</span>
                                     </div>
                                 </div>
-                                <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                    <p class="text-sm text-blue-700">📱 Mobile Money: *182# or pay via approved mobile money providers</p>
+
+                                <!-- Due Date -->
+                                <div class="bg-amber-50 border border-amber-100 rounded-lg p-3 mb-5 flex items-center gap-2">
+                                    <i class="ri-calendar-line text-amber-600"></i>
+                                    <div class="text-sm">
+                                        <span class="font-semibold text-amber-800">Due Date: </span>
+                                        <span class="text-amber-700" id="dueDate">–</span>
+                                    </div>
                                 </div>
-                                <button onclick="alert('✅ Payment processed successfully!')" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-sm font-semibold transition flex items-center justify-center gap-2">
-                                    <i class="ri-check-line"></i> Pay Now
+
+                                <!-- Payment Method Selection -->
+                                <h4 class="font-semibold text-sm text-gray-700 mb-3">Select Payment Method</h4>
+                                <div class="grid grid-cols-2 gap-3 mb-5">
+                                    <div class="method-card selected" onclick="selectMethod(this, 'bank_transfer')" id="method-bank">
+                                        <i class="ri-bank-line text-xl text-blue-600 block mb-1"></i>
+                                        <div class="text-sm font-semibold">Bank Transfer</div>
+                                        <div class="text-xs text-gray-500">Direct bank transfer</div>
+                                    </div>
+                                    <div class="method-card" onclick="selectMethod(this, 'mobile_money')" id="method-mobile">
+                                        <i class="ri-smartphone-line text-xl text-green-600 block mb-1"></i>
+                                        <div class="text-sm font-semibold">Mobile Money</div>
+                                        <div class="text-xs text-gray-500">M-Pesa, MTN, etc.</div>
+                                    </div>
+                                    <div class="method-card" onclick="selectMethod(this, 'cash')" id="method-cash">
+                                        <i class="ri-money-dollar-circle-line text-xl text-amber-600 block mb-1"></i>
+                                        <div class="text-sm font-semibold">Cash at Office</div>
+                                        <div class="text-xs text-gray-500">Pay at customs office</div>
+                                    </div>
+                                    <div class="method-card" onclick="selectMethod(this, 'card')" id="method-card">
+                                        <i class="ri-bank-card-2-line text-xl text-purple-600 block mb-1"></i>
+                                        <div class="text-sm font-semibold">Card Payment</div>
+                                        <div class="text-xs text-gray-500">Visa, Mastercard</div>
+                                    </div>
+                                </div>
+
+                                <!-- Transaction Reference -->
+                                <div class="mb-5">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-1">Transaction Reference (optional)</label>
+                                    <input type="text" id="transactionRef" class="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-blue-500" placeholder="Enter your bank/mobile money reference..." />
+                                </div>
+
+                                <button class="btn-pay" onclick="processPayment()" id="payBtn">
+                                    <i class="ri-lock-line mr-2"></i>Confirm Payment
                                 </button>
+                                <button class="mt-3 w-full text-center text-sm text-gray-500 hover:text-gray-700 transition" onclick="showAwaitingList()">← Back to list</button>
                             </div>
-                        </div>
-
-                        <div class="flex justify-between mt-4 pt-4 border-t border-gray-200">
-                            <a href="duty-calculation.html" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
-                                <i class="ri-arrow-left-line"></i> Previous
-                            </a>
-                            <a href="cargo-release.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1">
-                                Continue to Cargo Release <i class="ri-arrow-right-line"></i>
-                            </a>
                         </div>
                     </div>
                 </main>
             </div>
         </div>
     </div>
-    <script>
-        function selectPayment(el) {
-            document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
-            el.classList.add('selected');
-        }
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
-            }
-        });
-    </script>
 
-        <script type="module" src="../../js/agent-sidebar.js"></script>
-<!-- Supabase & Shared Authentication Guards -->
+    <script type="module" src="../../js/agent-sidebar.js"></script>
     <script type="module">
         import supabase from '../../js/supabase.js';
-        import { checkPageAuth } from '../../js/auth-check.js';
-        import { signOut } from '../../js/auth.js';
-        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
+        import { getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { processPayment as doPayment, getInvoiceForApplication } from '../../js/payment-service.js';
 
-        async function initPage() {
-            console.log('=== INITIALIZING AUTH GUARD ON MOCK PAGE ===');
-            const role = 'agent';
-            
-            // 1. Run auth check
-            const hasAccess = await checkPageAuth(role);
-            if (!hasAccess) {
-                console.log('Access denied, redirecting...');
+        let profileId = null;
+        let selectedMethod = 'bank_transfer';
+        let currentApplicationId = null;
+        let currentInvoice = null;
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.background = type === 'success' ? '#059669' : type === 'error' ? '#dc2626' : '#1e3a5f';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        window.selectMethod = function(el, method) {
+            document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedMethod = method;
+        };
+
+        window.showAwaitingList = function() {
+            document.getElementById('paymentForm').classList.add('hidden');
+            document.getElementById('awaitingPaymentSection').classList.remove('hidden');
+        };
+
+        window.openPayment = async function(appId) {
+            currentApplicationId = appId;
+            const result = await getInvoiceForApplication(appId);
+            if (!result.success || !result.data) {
+                showToast('Invoice not found for this application', 'error');
                 return;
             }
 
-            // 2. Load profile data from Supabase
-            const { user, profile } = await loadCurrentUserProfile();
-            
-            // 3. Update sidebar and profile UI
-            if (profile) {
-                const displayName = profile.full_name || user?.email || 'User';
-                const displayRole = role === 'agent' ? 'Clearing Agent' : 'Trader';
-                
-                const nameEl = document.getElementById(role + 'ProfileName') || document.querySelector('[data-user-name]');
-                if (nameEl) nameEl.textContent = displayName;
-                
-                const roleEl = document.getElementById(role + 'ProfileRole') || document.querySelector('[data-user-role]');
-                if (roleEl) roleEl.textContent = displayRole;
-                
-                const statusEl = document.getElementById(role + 'ProfileStatus');
-                if (statusEl) statusEl.textContent = '● ' + (profile.status || 'Active');
-                
-                const tinEl = document.getElementById(role + 'ProfileTIN');
-                if (tinEl && profile.organization) {
-                    tinEl.textContent = 'Org: ' + profile.organization;
+            currentInvoice = result.data;
+            const inv = currentInvoice;
+
+            // Get app number
+            const { data: app } = await supabase.from('applications').select('application_number').eq('id', appId).single();
+
+            document.getElementById('invoiceNumber').textContent = inv.invoice_number || 'N/A';
+            document.getElementById('appNumber').textContent = app?.application_number || 'N/A';
+            document.getElementById('dutyAmount').textContent = `${(inv.duty_amount || 0).toLocaleString()} SSP`;
+            document.getElementById('taxAmount').textContent = `${(inv.tax_amount || 0).toLocaleString()} SSP`;
+            document.getElementById('feesAmount').textContent = `${(inv.fees_amount || 0).toLocaleString()} SSP`;
+            document.getElementById('totalAmount').textContent = `${(inv.total_amount || 0).toLocaleString()} SSP`;
+            document.getElementById('dueDate').textContent = inv.due_at ? new Date(inv.due_at).toLocaleDateString() : 'Immediate';
+
+            document.getElementById('awaitingPaymentSection').classList.add('hidden');
+            document.getElementById('paymentForm').classList.remove('hidden');
+        };
+
+        window.processPayment = async function() {
+            const btn = document.getElementById('payBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-2"></i>Processing Payment...';
+
+            try {
+                const result = await doPayment(currentApplicationId, {
+                    payment_method: selectedMethod,
+                    transaction_id: document.getElementById('transactionRef').value.trim() || null,
+                    amount: currentInvoice.total_amount
+                });
+
+                if (result.success) {
+                    showToast('🎉 Payment confirmed! Cargo documents are being generated...', 'success');
+                    setTimeout(() => { window.location.href = `completed.html`; }, 3000);
+                } else {
+                    showToast('Payment failed: ' + result.error, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ri-lock-line mr-2"></i>Confirm Payment';
                 }
+            } catch (err) {
+                showToast('Payment error: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ri-lock-line mr-2"></i>Confirm Payment';
+            }
+        };
+
+        async function loadAwaitingPayment() {
+            if (!profileId) return;
+
+            const { data, error } = await supabase
+                .from('applications')
+                .select(`id, application_number, status, declared_value, goods_data, invoices(id, invoice_number, total_amount, duty_amount, tax_amount, status, due_at)`)
+                .eq('agent_id', profileId)
+                .eq('status', 'payment_required')
+                .order('updated_at', { ascending: false });
+
+            const count = data?.length || 0;
+            document.getElementById('awaitingCount').textContent = count;
+
+            const container = document.getElementById('awaitingList');
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="p-8 text-center text-gray-400">No applications awaiting payment</div>';
+                return;
             }
 
-            // 4. Bind Logout Button Listeners
-            const handleLogout = async (e) => {
-                e.preventDefault();
-                console.log('Signing out...');
-                const result = await signOut();
-                if (result.success) {
-                    window.location.href = '../../auth/login.html';
-                }
-            };
-
-            const signOutBtn = document.getElementById('signOutBtn');
-            if (signOutBtn) signOutBtn.addEventListener('click', handleLogout);
-
-            const dropdownSignOut = document.getElementById('dropdownSignOut');
-            if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+            container.innerHTML = `<div class="divide-y divide-gray-50">
+                ${data.map(app => {
+                    const inv = Array.isArray(app.invoices) ? app.invoices[0] : app.invoices;
+                    return `
+                        <div class="flex items-center justify-between p-5 hover:bg-gray-50 transition">
+                            <div>
+                                <div class="font-semibold text-gray-800">${app.application_number}</div>
+                                <div class="text-xs text-gray-500 mt-0.5">${app.goods_data?.description || 'Customs Declaration'}</div>
+                                ${inv ? `<div class="text-xs text-amber-600 mt-1 font-medium">Invoice: ${inv.invoice_number} · Due: ${inv.due_at ? new Date(inv.due_at).toLocaleDateString() : 'Immediate'}</div>` : ''}
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-green-700">${inv ? inv.total_amount.toLocaleString() : (app.declared_value || 0).toLocaleString()} SSP</div>
+                                <button onclick="openPayment('${app.id}')" class="mt-2 bg-blue-600 text-white text-sm px-4 py-1.5 rounded-lg font-semibold hover:bg-blue-700 transition">
+                                    Pay Now <i class="ri-arrow-right-line"></i>
+                                </button>
+                            </div>
+                        </div>`;
+                }).join('')}
+            </div>`;
         }
 
-        document.addEventListener('DOMContentLoaded', initPage);
-        if (document.readyState === 'interactive' || document.readyState === 'complete') {
-            initPage();
+        async function init() {
+            const user = await getCurrentUser();
+            if (!user) { window.location.href = '/auth/login.html'; return; }
+            const profile = await getUserProfile(user.id);
+            if (!profile || profile.role !== 'agent') { window.location.href = '/auth/login.html'; return; }
+            profileId = profile.id;
+            await loadAwaitingPayment();
+
+            // Check if specific app from URL
+            const params = new URLSearchParams(window.location.search);
+            const appId = params.get('id');
+            if (appId) openPayment(appId);
+
+            // Realtime disabled to avoid channel conflicts
+            // Users can manually refresh to see updates
+            console.log('Realtime subscription disabled for payment page');
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
         }
     </script>
-</body></html>
-
+</body>
+</html>

@@ -177,6 +177,7 @@ export async function createTraderApplication(applicationData) {
     const newApplication = {
         ...applicationData,
         user_id: profile.id,
+        agent_id: applicationData.agent_id || profile.id,
         status: 'draft',
         created_at: new Date().toISOString()
     };
@@ -513,6 +514,104 @@ export async function deleteDocument(documentId) {
 }
 
 // ================================================================
+// TRADER (IMPORTER) LOOKUP FOR CLEARING AGENTS
+// ================================================================
+
+/**
+ * Fetch all traders (importers) from profiles table
+ * Used by clearing agents to select importers for declarations
+ */
+export async function fetchTraders() {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'trader')
+            .eq('status', 'active')
+            .order('full_name', { ascending: true });
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        console.error('Error fetching traders:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Search traders by name, company, or TIN
+ */
+export async function searchTraders(query) {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('role', 'trader')
+            .eq('status', 'active')
+            .or(`full_name.ilike.%${query}%,company.ilike.%${query}%,tin.ilike.%${query}%`)
+            .order('full_name', { ascending: true })
+            .limit(50);
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        console.error('Error searching traders:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Get trader by ID
+ */
+export async function getTraderById(id) {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (error) {
+        console.error('Error fetching trader:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
+ * Subscribe to profiles table changes (Realtime)
+ * Used to refresh trader dropdown when new traders are added
+ */
+export function subscribeToTraders(callback) {
+    const channelName = `traders-profiles-changes-${Date.now()}`;
+    const channel = supabase.channel(channelName);
+
+    // Add callback before subscribing
+    channel.on(
+        'postgres_changes',
+        {
+            event: '*',
+            schema: 'public',
+            table: 'profiles'
+        },
+        (payload) => {
+            // Only notify for trader role changes
+            if (payload.new && payload.new.role === 'trader') {
+                callback(payload);
+            }
+        }
+    );
+
+    // Subscribe after adding callbacks
+    channel.subscribe((status) => {
+        console.log('Trader subscription status:', status);
+    });
+
+    return channel;
+}
+
+// ================================================================
 // TRACKING
 // ================================================================
 
@@ -661,15 +760,26 @@ export async function fetchTraderStatistics() {
 // REALTIME SUBSCRIPTIONS
 // ================================================================
 
-export function subscribeToTraderDashboard(callbacks, pageKey = 'trader-dashboard') {
-    const userId = localStorage.getItem('userIdentifier') || localStorage.getItem('userId');
+export async function subscribeToTraderDashboard(callbacks, pageKey = 'trader-dashboard', userId = null) {
+    let currentUserId = userId || localStorage.getItem('userIdentifier') || localStorage.getItem('userId');
 
-    if (!userId) {
+    if (!currentUserId) {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                currentUserId = user.id;
+            }
+        } catch (error) {
+            console.error('Error resolving user ID for realtime subscription:', error);
+        }
+    }
+
+    if (!currentUserId) {
         console.error('Cannot subscribe: No authenticated user');
         return null;
     }
 
-    return realtimeManager.registerPage(pageKey, 'trader', userId, callbacks);
+    return realtimeManager.registerPage(pageKey, 'trader', currentUserId, callbacks);
 }
 
 export function unsubscribeFromTraderDashboard(pageKey) {
@@ -733,7 +843,7 @@ export async function fetchPaginatedApplications(options = {}) {
         let query = supabase
             .from('applications')
             .select('*', { count: 'exact' })
-            .eq('user_id', profile.id);
+            .or(`user_id.eq.${profile.id},agent_id.eq.${profile.id}`);
 
         Object.keys(filters).forEach(key => {
             if (Array.isArray(filters[key])) {

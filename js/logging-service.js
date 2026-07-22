@@ -392,3 +392,243 @@ export async function logEscalationResolution(applicationId, userId, resolutionN
         }
     });
 }
+
+/**
+ * Log goods item creation
+ */
+export async function logGoodsItemCreated(goodsItemId, userId, applicationId, itemNumber, hsCode) {
+    return await logAction({
+        userId,
+        action: 'create_goods_item',
+        entityType: 'application_goods',
+        entityId: goodsItemId,
+        details: { application_id: applicationId, item_number: itemNumber, hs_code: hsCode },
+        newValues: { item_number: itemNumber, hs_code: hsCode },
+        reason: 'Goods item added to declaration',
+        notificationRecipients: [userId],
+        notificationData: {
+            type: 'goods_item_added',
+            title: 'Goods Item Added',
+            message: `Goods item #${itemNumber} (HS Code: ${hsCode}) has been added to your declaration.`,
+            entity_type: 'application_goods',
+            entity_id: goodsItemId,
+            action_url: `/pages/agent/create-declaration.html?id=${applicationId}`,
+            priority: 'normal'
+        }
+    });
+}
+
+/**
+ * Log goods item update
+ */
+export async function logGoodsItemUpdated(goodsItemId, userId, applicationId, itemNumber, hsCode) {
+    return await logAction({
+        userId,
+        action: 'update_goods_item',
+        entityType: 'application_goods',
+        entityId: goodsItemId,
+        details: { application_id: applicationId, item_number: itemNumber, hs_code: hsCode },
+        reason: 'Goods item details updated',
+        notificationRecipients: [userId],
+        notificationData: {
+            type: 'goods_item_updated',
+            title: 'Goods Item Updated',
+            message: `Goods item #${itemNumber} (HS Code: ${hsCode}) has been updated.`,
+            entity_type: 'application_goods',
+            entity_id: goodsItemId,
+            action_url: `/pages/agent/create-declaration.html?id=${applicationId}`,
+            priority: 'normal'
+        }
+    });
+}
+
+/**
+ * Log goods item deletion
+ */
+export async function logGoodsItemDeleted(goodsItemId, userId, applicationId, itemNumber, hsCode) {
+    return await logAction({
+        userId,
+        action: 'delete_goods_item',
+        entityType: 'application_goods',
+        entityId: goodsItemId,
+        details: { application_id: applicationId, item_number: itemNumber, hs_code: hsCode },
+        oldValues: { item_number: itemNumber, hs_code: hsCode },
+        reason: 'Goods item removed from declaration',
+        notificationRecipients: [userId],
+        notificationData: {
+            type: 'goods_item_deleted',
+            title: 'Goods Item Deleted',
+            message: `Goods item #${itemNumber} (HS Code: ${hsCode}) has been removed from your declaration.`,
+            entity_type: 'application_goods',
+            entity_id: goodsItemId,
+            action_url: `/pages/agent/create-declaration.html?id=${applicationId}`,
+            priority: 'normal'
+        }
+    });
+}
+
+// ================================================================
+// AI VALIDATION LOGGING
+// ================================================================
+
+/**
+ * Log AI validation started
+ */
+export async function logAIValidationStarted(applicationId, userId, applicationNumber) {
+    return await createActivityLog({
+        user_id: userId,
+        action: 'ai_validation_started',
+        entity_type: 'application',
+        entity_id: applicationId,
+        details: { application_number: applicationNumber }
+    });
+}
+
+/**
+ * Log AI validation completed
+ */
+export async function logAIValidationCompleted(applicationId, userId, applicationNumber, validationResults) {
+    return await createActivityLog({
+        user_id: userId,
+        action: 'ai_validation_completed',
+        entity_type: 'application',
+        entity_id: applicationId,
+        details: {
+            application_number: applicationNumber,
+            overall_score: validationResults.overall_score,
+            risk_level: validationResults.risk_level,
+            processing_time_ms: validationResults.processing_time_ms
+        }
+    });
+}
+
+/**
+ * Log OCR processing
+ */
+export async function logOCRProcessing(applicationId, userId, documentCount, extractedFields) {
+    return await createActivityLog({
+        user_id: userId,
+        action: 'ocr_processing',
+        entity_type: 'application',
+        entity_id: applicationId,
+        details: {
+            documents_processed: documentCount,
+            fields_extracted: extractedFields
+        }
+    });
+}
+
+/**
+ * Log HS code verification
+ */
+export async function logHSCodeVerification(applicationId, userId, hsCode, suggestedCode, confidence) {
+    return await createActivityLog({
+        user_id: userId,
+        action: 'hs_code_verification',
+        entity_type: 'application',
+        entity_id: applicationId,
+        details: {
+            declared_hs_code: hsCode,
+            suggested_hs_code: suggestedCode,
+            confidence_score: confidence
+        }
+    });
+}
+
+/**
+ * Log tax calculation
+ */
+export async function logTaxCalculation(applicationId, userId, taxDetails) {
+    return await createActivityLog({
+        user_id: userId,
+        action: 'tax_calculation',
+        entity_type: 'application',
+        entity_id: applicationId,
+        details: {
+            customs_duty: taxDetails.customs_duty,
+            vat: taxDetails.vat,
+            excise_duty: taxDetails.excise_duty,
+            total_payable: taxDetails.total_payable
+        }
+    });
+}
+
+/**
+ * Log fraud detection
+ */
+export async function logFraudDetection(applicationId, userId, fraudScore, riskFactors) {
+    return await createActivityLog({
+        user_id: userId,
+        action: 'fraud_detection',
+        entity_type: 'application',
+        entity_id: applicationId,
+        details: {
+            fraud_score: fraudScore,
+            risk_factors: riskFactors
+        }
+    });
+}
+
+/**
+ * Log risk assessment
+ */
+export async function logRiskAssessment(applicationId, userId, riskScore, riskLevel, recommendations) {
+    return await createActivityLog({
+        user_id: userId,
+        action: 'risk_assessment',
+        entity_type: 'application',
+        entity_id: applicationId,
+        details: {
+            risk_score: riskScore,
+            risk_level: riskLevel,
+            recommendations: recommendations
+        }
+    });
+}
+
+/**
+ * Log invoice generation
+ */
+export async function logInvoiceGenerated(applicationId, userId, invoiceNumber, amount) {
+    return await createActivityLog({
+        user_id: userId,
+        action: 'invoice_generated',
+        entity_type: 'invoice',
+        entity_id: applicationId,
+        details: {
+            invoice_number: invoiceNumber,
+            amount: amount
+        }
+    });
+}
+
+/**
+ * Log document generation (CVET, Cargo Release, etc.)
+ */
+export async function logDocumentGenerated(applicationId, userId, documentType, documentNumber) {
+    return await createActivityLog({
+        user_id: userId,
+        action: 'document_generated',
+        entity_type: documentType,
+        entity_id: applicationId,
+        details: {
+            document_type: documentType,
+            document_number: documentNumber
+        }
+    });
+}
+
+/**
+ * Log cargo release
+ */
+export async function logCargoRelease(applicationId, userId, releaseNumber) {
+    return await createActivityLog({
+        user_id: userId,
+        action: 'cargo_released',
+        entity_type: 'application',
+        entity_id: applicationId,
+        details: {
+            release_number: releaseNumber
+        }
+    });
+}

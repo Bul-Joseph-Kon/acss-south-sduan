@@ -59,127 +59,24 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Notification Filters -->
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm flex flex-wrap gap-3 items-center justify-between">
                         <div class="flex flex-wrap gap-2">
                             <button id="filterAll" class="px-4 py-1.5 rounded-full text-sm bg-emerald-600 text-white" onclick="filterNotifications('all')">All</button>
                             <button id="filterUnread" class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50" onclick="filterNotifications('unread')">Unread</button>
                             <button id="filterRead" class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50" onclick="filterNotifications('read')">Read</button>
-                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Application Updates</button>
-                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Payment Alerts</button>
-                            <button class="px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50">Approval Alerts</button>
                         </div>
                         <button id="markAllReadBtn" class="text-sm text-emerald-600 hover:underline">Mark all as read</button>
                     </div>
 
                     <!-- Notifications List -->
-                    <div class="space-y-3">
-                        <div class="notification-item unread">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-check-line text-emerald-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-start">
-                                        <h4 class="font-semibold text-sm">Application Submitted</h4>
-                                        <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">New</span>
-                                    </div>
-                                    <p class="text-sm text-gray-600 mt-1">Your CVET declaration CV-2026-0042 has been submitted and is now under review.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>2 hours ago</span>
-                                        <a href="tracking.html" class="text-emerald-600 text-sm hover:underline">Track Application</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notification-item unread">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-bank-card-line text-yellow-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-start">
-                                        <h4 class="font-semibold text-sm">Payment Required</h4>
-                                        <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">New</span>
-                                    </div>
-                                    <p class="text-sm text-gray-600 mt-1">Duty payment of $2,500 is due for Direct Assessment DA-2026-0018.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>5 hours ago</span>
-                                        <a href="payment.html" class="text-emerald-600 text-sm hover:underline">Pay Now</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notification-item">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-file-pdf-line text-green-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-sm">Certificate Ready for Download</h4>
-                                    <p class="text-sm text-gray-600 mt-1">CVET Certificate for CV-2026-0035 is now available for download.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>1 day ago</span>
-                                        <a href="certificate.html" class="text-emerald-600 text-sm hover:underline">Download</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notification-item">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-check-double-line text-blue-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-sm">Vehicle Query Completed</h4>
-                                    <p class="text-sm text-gray-600 mt-1">Vehicle Query VQ-2026-0012 has been completed. Verification results are available.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>2 days ago</span>
-                                        <a href="verification-result.html" class="text-emerald-600 text-sm hover:underline">View Results</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notification-item">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-close-line text-red-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-sm">Application Rejected</h4>
-                                    <p class="text-sm text-gray-600 mt-1">CVET Declaration CV-2026-0030 has been rejected. Please review the feedback.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>3 days ago</span>
-                                        <a href="#" class="text-emerald-600 text-sm hover:underline">View Details</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="notification-item">
-                            <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                                    <i class="ri-information-line text-purple-600 text-xl"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="font-semibold text-sm">System Maintenance</h4>
-                                    <p class="text-sm text-gray-600 mt-1">System maintenance scheduled for June 25, 2026 at 2:00 AM. Service may be unavailable.</p>
-                                    <div class="flex items-center gap-4 mt-2">
-                                        <span class="notif-time"><i class="ri-time-line mr-1"></i>3 days ago</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="space-y-3" id="notificationsList">
+                        <div class="text-sm text-gray-500 text-center py-8">Loading notifications...</div>
                     </div>
 
                     <!-- Load More -->
                     <div class="text-center py-4">
-                        <button class="border border-gray-300 px-6 py-2 rounded-lg text-sm hover:bg-gray-50 transition">Load More</button>
+                        <button id="loadMoreBtn" class="border border-gray-300 px-6 py-2 rounded-lg text-sm hover:bg-gray-50 transition min-w-[140px] inline-flex items-center justify-center gap-2">Load More</button>
                     </div>
                 </main>
             </div>
@@ -187,15 +84,160 @@
     </div>
     <script type="module">
         import { signOut } from '../../js/auth.js';
-        
-        import { getUnreadCount } from '../../js/notifications.js';
-        
+        import { fetchNotifications, markAllNotificationsAsRead, markNotificationAsRead } from '../../js/notifications.js';
         import toastManager from '../../js/toast.js';
 
-        
+        let currentPage = 0;
+        const pageSize = 5;
+        let currentFilter = 'all';
+
+        function timeAgo(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} mins ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            return `${Math.floor(seconds / 86400)} days ago`;
+        }
+
+        function renderNotificationHTML(notif) {
+            const isUnread = !notif.read;
+            const typeIcons = {
+                'submission': { icon: 'ri-check-line', bg: 'bg-emerald-100', text: 'text-emerald-600' },
+                'payment': { icon: 'ri-bank-card-line', bg: 'bg-yellow-100', text: 'text-yellow-600' },
+                'certificate': { icon: 'ri-file-pdf-line', bg: 'bg-green-100', text: 'text-green-600' },
+                'approval': { icon: 'ri-check-double-line', bg: 'bg-blue-100', text: 'text-blue-600' },
+                'rejection': { icon: 'ri-close-line', bg: 'bg-red-100', text: 'text-red-600' },
+                'system': { icon: 'ri-information-line', bg: 'bg-purple-100', text: 'text-purple-600' }
+            };
+            const style = typeIcons[notif.type] || { icon: 'ri-notification-3-line', bg: 'bg-emerald-100', text: 'text-emerald-600' };
+
+            return `
+                <div class="notification-item ${isUnread ? 'unread' : ''}" data-id="${notif.id}">
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-full ${style.bg} flex items-center justify-center flex-shrink-0">
+                            <i class="${style.icon} ${style.text} text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-semibold text-sm">${notif.title || 'Notification'}</h4>
+                                ${isUnread ? '<span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">New</span>' : ''}
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">${notif.message || ''}</p>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="notif-time"><i class="ri-time-line mr-1"></i>${timeAgo(notif.created_at)}</span>
+                                ${isUnread ? `<button onclick="markAsRead('${notif.id}', this)" class="text-emerald-600 text-sm hover:underline">Mark as read</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadNotifications(append = false) {
+            const listContainer = document.getElementById('notificationsList');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if (!listContainer) return;
+
+            if (!append) {
+                listContainer.innerHTML = '<div class="text-sm text-gray-500 text-center py-8"><i class="ri-loader-4-line animate-spin text-2xl mb-2 block"></i>Loading notifications...</div>';
+            }
+
+            if (loadMoreBtn) {
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i> Loading...';
+            }
+
+            const start = currentPage * pageSize;
+            const end = start + pageSize - 1;
+
+            const filters = {};
+            if (currentFilter === 'unread') filters.read = false;
+            if (currentFilter === 'read') filters.read = true;
+
+            const res = await fetchNotifications({
+                filters,
+                range: { start, end },
+                orderBy: { column: 'created_at', ascending: false }
+            });
+
+            const notifications = (res.success && res.data) ? res.data : [];
+
+            if (!append) {
+                if (notifications.length === 0) {
+                    listContainer.innerHTML = '<div class="text-sm text-gray-500 text-center py-8"><i class="ri-notification-off-line text-3xl mb-2 text-gray-300 block"></i>No notifications found</div>';
+                } else {
+                    listContainer.innerHTML = notifications.map(renderNotificationHTML).join('');
+                }
+            } else {
+                if (notifications.length > 0) {
+                    listContainer.insertAdjacentHTML('beforeend', notifications.map(renderNotificationHTML).join(''));
+                }
+            }
+
+            if (loadMoreBtn) {
+                if (notifications.length < pageSize) {
+                    loadMoreBtn.style.display = 'none';
+                } else {
+                    loadMoreBtn.style.display = 'inline-flex';
+                    loadMoreBtn.disabled = false;
+                    loadMoreBtn.innerHTML = 'Load More';
+                }
+            }
+        }
+
+        window.filterNotifications = function(filterType) {
+            currentFilter = filterType;
+            currentPage = 0;
+            
+            ['filterAll', 'filterUnread', 'filterRead'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.className = 'px-4 py-1.5 rounded-full text-sm border hover:bg-gray-50';
+                }
+            });
+            const activeBtn = document.getElementById('filter' + filterType.charAt(0).toUpperCase() + filterType.slice(1));
+            if (activeBtn) {
+                activeBtn.className = 'px-4 py-1.5 rounded-full text-sm bg-emerald-600 text-white';
+            }
+
+            loadNotifications(false);
+        };
+
+        window.markAsRead = async function(id, btn) {
+            const res = await markNotificationAsRead(id);
+            if (res.success) {
+                const item = btn.closest('.notification-item');
+                if (item) {
+                    item.classList.remove('unread');
+                    btn.remove();
+                }
+                toastManager.success('Notification marked as read');
+            }
+        };
+
+        document.getElementById('loadMoreBtn')?.addEventListener('click', () => {
+            currentPage++;
+            loadNotifications(true);
+        });
+
+        document.getElementById('markAllReadBtn')?.addEventListener('click', async () => {
+            const res = await markAllNotificationsAsRead();
+            if (res.success) {
+                toastManager.success('All notifications marked as read');
+                currentPage = 0;
+                loadNotifications(false);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadNotifications(false);
+        });
+
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.header-profile-btn') && !e.target.closest('.profile-dropdown')) {
-                document.getElementById('profileDropdown').classList.remove('open');
+                document.getElementById('profileDropdown')?.classList.remove('open');
             }
         });
 
@@ -210,69 +252,6 @@
                 }
             });
         }
-
-        // Mark all as read handler
-        const markAllReadBtn = document.getElementById('markAllReadBtn');
-        if (markAllReadBtn) {
-            markAllReadBtn.addEventListener('click', () => {
-                document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
-                toastManager.success('All notifications marked as read');
-            });
-        }
-
-        function filterNotifications(filter) {
-            const notifications = document.querySelectorAll('.notification-item');
-            const filterAll = document.getElementById('filterAll');
-            const filterUnread = document.getElementById('filterUnread');
-            const filterRead = document.getElementById('filterRead');
-
-            // Reset button styles
-            [filterAll, filterUnread, filterRead].forEach(btn => {
-                btn.classList.remove('bg-emerald-600', 'text-white');
-                btn.classList.add('border', 'hover:bg-gray-50');
-            });
-
-            // Set active button style
-            if (filter === 'all') {
-                filterAll.classList.add('bg-emerald-600', 'text-white');
-                filterAll.classList.remove('border', 'hover:bg-gray-50');
-                notifications.forEach(notif => notif.style.display = 'flex');
-            } else if (filter === 'unread') {
-                filterUnread.classList.add('bg-emerald-600', 'text-white');
-                filterUnread.classList.remove('border', 'hover:bg-gray-50');
-                notifications.forEach(notif => {
-                    if (notif.classList.contains('unread')) {
-                        notif.style.display = 'flex';
-                    } else {
-                        notif.style.display = 'none';
-                    }
-                });
-            } else if (filter === 'read') {
-                filterRead.classList.add('bg-emerald-600', 'text-white');
-                filterRead.classList.remove('border', 'hover:bg-gray-50');
-                notifications.forEach(notif => {
-                    if (!notif.classList.contains('unread')) {
-                        notif.style.display = 'flex';
-                    } else {
-                        notif.style.display = 'none';
-                    }
-                });
-            }
-        }
-
-        // Expose filterNotifications for inline handlers
-        window.filterNotifications = filterNotifications;
-
-        // Update notification badge
-        async function updateNotificationBadge() {
-            const result = await getUnreadCount();
-            if (result.success && result.count > 0) {
-                const badge = document.getElementById('notificationBadge');
-                badge.textContent = result.count;
-                badge.classList.remove('hidden');
-            }
-        }
-        updateNotificationBadge();
     </script>
 
     <!-- Supabase & Shared Authentication Guards -->

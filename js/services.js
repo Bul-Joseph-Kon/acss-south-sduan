@@ -91,3 +91,119 @@ export async function searchServices(searchTerm) {
         return { success: false, error: error.message };
     }
 }
+
+// ================================================================
+// UPDATE SERVICE
+// ================================================================
+
+export async function updateService(id, updates) {
+    try {
+        const { data, error } = await supabase
+            .from('services')
+            .update({
+                ...updates,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        return { success: true, data };
+    } catch (error) {
+        console.error('Update service error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ================================================================
+// TOGGLE SERVICE STATUS
+// ================================================================
+
+export async function toggleServiceStatus(id) {
+    try {
+        // First fetch current service
+        const { data: service, error: fetchError } = await supabase
+            .from('services')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (fetchError) {
+            console.error('Fetch error:', fetchError);
+            throw fetchError;
+        }
+
+        if (!service) {
+            throw new Error('Service not found');
+        }
+
+        // Toggle is_active status only (status column doesn't exist in schema)
+        const { data, error } = await supabase
+            .from('services')
+            .update({
+                is_active: !service.is_active,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Update error:', error);
+            throw error;
+        }
+
+        return { success: true, data };
+    } catch (error) {
+        console.error('Toggle service status error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ================================================================
+// CREATE SERVICE
+// ================================================================
+
+export async function createService(serviceData) {
+    try {
+        const { data, error } = await supabase
+            .from('services')
+            .insert({
+                ...serviceData,
+                is_active: true,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        return { success: true, data };
+    } catch (error) {
+        console.error('Create service error:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// ================================================================
+// DELETE SERVICE
+// ================================================================
+
+export async function deleteService(id) {
+    try {
+        const { error } = await supabase
+            .from('services')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        return { success: true };
+    } catch (error) {
+        console.error('Delete service error:', error);
+        return { success: false, error: error.message };
+    }
+}

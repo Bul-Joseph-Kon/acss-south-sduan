@@ -62,11 +62,11 @@
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex items-center justify-between text-sm text-gray-500 mb-2">
-                            <span id="progressText">Step 1 of 9</span>
-                            <span id="progressPercent">11% Complete</span>
+                            <span id="progressText">Step 1 of 6</span>
+                            <span id="progressPercent">17% Complete</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:11%"></div>
+                            <div id="progressBar" class="bg-emerald-600 h-2 rounded-full" style="width:17%"></div>
                         </div>
                     </div>
 
@@ -144,7 +144,7 @@
     </div>
     <script type="module">import { loadCurrentUserProfile } from '../../js/profile-loader.js';
 
-        import { getWorkflow, initializeWorkflowFromURL } from '../../js/cvet-workflow-manager.js';
+        import { getTraderWorkflow, initializeWorkflowFromURL } from '../../js/cvet-workflow-manager.js';
         
         import { signOut } from '../../js/auth.js';
         
@@ -183,13 +183,13 @@
         }
 
         // Initialize workflow
-        const workflow = getWorkflow();
+        const workflow = getTraderWorkflow();
         const state = await initializeWorkflowFromURL();
 
         // Update progress
         function updateProgress() {
-            const progress = Math.round((state.currentStep / 9) * 100);
-            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 9`;
+            const progress = Math.round((state.currentStep / 6) * 100);
+            document.getElementById('progressText').textContent = `Step ${state.currentStep} of 6`;
             document.getElementById('progressPercent').textContent = `${progress}% Complete`;
             document.getElementById('progressBar').style.width = `${progress}%`;
         }
@@ -248,8 +248,10 @@
             const result = await getUnreadCount();
             if (result.success && result.count > 0) {
                 const badge = document.getElementById('notificationBadge');
-                badge.textContent = result.count;
-                badge.classList.remove('hidden');
+                if (badge) {
+                    badge.textContent = result.count;
+                    badge.classList.remove('hidden');
+                }
             }
         }
         updateNotificationBadge();

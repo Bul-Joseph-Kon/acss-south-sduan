@@ -179,7 +179,7 @@
             try {
                 const { data, error } = await supabase
                     .from('payments')
-                    .select(`*, applications(application_number), profiles!payments_user_id_fkey(full_name, email)`)
+                    .select(`*, applications!payments_application_id_fkey(application_number), profiles!payments_user_id_fkey(full_name, email)`)
                     .order('created_at', { ascending: false })
                     .limit(100);
 

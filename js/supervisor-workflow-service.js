@@ -64,7 +64,7 @@ export async function resolveEscalation(applicationId, resolutionNotes, action =
         }
 
         // Perform the requested action
-        let newStatus = 'approved';
+        let newStatus = 'awaiting_payment';
         if (action === 'reject') {
             newStatus = 'rejected';
         } else if (action === 'return') {

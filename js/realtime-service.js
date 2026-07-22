@@ -124,6 +124,80 @@ function subscribeToNotifications(userId, callback) {
 }
 
 /**
+ * Subscribe to AI validation results for a specific application
+ * @param {string} applicationId - The application ID
+ * @param {Function} callback - Callback function to handle updates
+ * @returns {Object} Subscription object
+ */
+function subscribeToAIValidationResults(applicationId, callback) {
+    const channelName = `ai_validation_${applicationId}`;
+    
+    if (subscriptions.has(channelName)) {
+        console.log('Subscription already exists:', channelName);
+        return subscriptions.get(channelName);
+    }
+
+    const channel = supabase
+        .channel(channelName)
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'ai_validation_results',
+                filter: `application_id=eq.${applicationId}`
+            },
+            (payload) => {
+                console.log('AI validation result update received:', payload);
+                if (callback) callback(payload);
+            }
+        )
+        .subscribe((status) => {
+            console.log('Subscription status:', channelName, status);
+        });
+
+    subscriptions.set(channelName, channel);
+    return channel;
+}
+
+/**
+ * Subscribe to risk assessments for a specific application
+ * @param {string} applicationId - The application ID
+ * @param {Function} callback - Callback function to handle updates
+ * @returns {Object} Subscription object
+ */
+function subscribeToRiskAssessments(applicationId, callback) {
+    const channelName = `risk_assessment_${applicationId}`;
+    
+    if (subscriptions.has(channelName)) {
+        console.log('Subscription already exists:', channelName);
+        return subscriptions.get(channelName);
+    }
+
+    const channel = supabase
+        .channel(channelName)
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'risk_assessments',
+                filter: `application_id=eq.${applicationId}`
+            },
+            (payload) => {
+                console.log('Risk assessment update received:', payload);
+                if (callback) callback(payload);
+            }
+        )
+        .subscribe((status) => {
+            console.log('Subscription status:', channelName, status);
+        });
+
+    subscriptions.set(channelName, channel);
+    return channel;
+}
+
+/**
  * Subscribe to payments for an application
  * @param {string} applicationId - The application ID
  * @param {Function} callback - Callback function to handle updates
@@ -312,19 +386,23 @@ function setupRealtimeForRole(role, userId, callbacks = {}) {
             // Agent subscribes to their applications
             subscribeToAgentApplications(userId, callbacks.onApplicationUpdate);
             subscribeToActivityLogs(userId, callbacks.onActivityLog);
+            // Subscribe to AI validation results for agent's applications
+            subscribeToAIValidationResults(userId, callbacks.onAIValidationResult);
             break;
 
         case 'officer':
             // Officer subscribes to pending review applications
-            subscribeToApplicationsByStatus('pending_review', callbacks.onApplicationUpdate);
-            subscribeToActivityLogs(null, callbacks.onActivityLog);
+            subscribeToApplicationsByStatus('under_review', callbacks.onApplicationUpdate);
+            subscribeToActivityLogs(userId, callbacks.onActivityLog);
+            // Subscribe to AI validation results for all applications
+            subscribeToAIValidationResults(null, callbacks.onAIValidationResult);
             break;
 
         case 'inspector':
             // Inspector subscribes to under inspection applications
             subscribeToApplicationsByStatus('under_inspection', callbacks.onApplicationUpdate);
             subscribeToEscalatedCases(callbacks.onEscalatedCase);
-            subscribeToActivityLogs(null, callbacks.onActivityLog);
+            subscribeToActivityLogs(userId, callbacks.onActivityLog);
             break;
 
         case 'supervisor':
@@ -426,9 +504,11 @@ export {
     subscribeToAgentApplications,
     subscribeToApplicationsByStatus,
     subscribeToNotifications,
+    subscribeToAIValidationResults,
+    subscribeToRiskAssessments,
+    subscribeToActivityLogs,
     subscribeToApplicationPayments,
     subscribeToEscalatedCases,
-    subscribeToActivityLogs,
     subscribeToApplicationDocuments,
     unsubscribe,
     unsubscribeAll,

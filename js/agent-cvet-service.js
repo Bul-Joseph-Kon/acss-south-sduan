@@ -41,8 +41,7 @@ export async function fetchAgentCVETApplications(options = {}) {
                     email
                 )
             `)
-            .eq('agent_id', agentId)
-            .eq('application_type', 'CVET');
+            .or(`agent_id.eq.${agentId},user_id.eq.${agentId}`);
 
         // Apply status filter if provided
         if (options.status) {
@@ -122,45 +121,35 @@ export async function fetchAgentCVETStatistics() {
 
         const agentId = profile.id;
 
-        // Count applications by status
-        const [
-            totalResult,
-            draftResult,
-            submittedResult,
-            pendingReviewResult,
-            underInspectionResult,
-            approvedResult,
-            paidResult,
-            completedResult,
-            rejectedResult,
-            returnedResult
-        ] = await Promise.all([
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', agentId).eq('application_type', 'CVET'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', agentId).eq('application_type', 'CVET').eq('status', 'draft'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', agentId).eq('application_type', 'CVET').eq('status', 'submitted'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', agentId).eq('application_type', 'CVET').eq('status', 'pending_review'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', agentId).eq('application_type', 'CVET').eq('status', 'under_inspection'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', agentId).eq('application_type', 'CVET').eq('status', 'approved'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', agentId).eq('application_type', 'CVET').eq('status', 'paid'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', agentId).eq('application_type', 'CVET').eq('status', 'completed'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', agentId).eq('application_type', 'CVET').eq('status', 'rejected'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('agent_id', agentId).eq('application_type', 'CVET').eq('status', 'returned')
-        ]);
+        // Fetch all applications where user is agent or creator
+        const { data: apps, error } = await supabase
+            .from('applications')
+            .select('id, status, application_type, created_at')
+            .or(`agent_id.eq.${agentId},user_id.eq.${agentId}`);
+
+        if (error) {
+            console.error('=== CVET STATISTICS QUERY ERROR ===', error);
+            return { success: false, error: error.message };
+        }
+
+        const list = apps || [];
+
+        const statistics = {
+            total: list.length,
+            draft: list.filter(a => a.status === 'draft').length,
+            submitted: list.filter(a => a.status === 'submitted').length,
+            pending_review: list.filter(a => ['under_review', 'pending_review', 'ai_validated', 'high_risk_review'].includes(a.status)).length,
+            under_inspection: list.filter(a => ['under_inspection', 'inspection_required', 'inspection_completed'].includes(a.status)).length,
+            approved: list.filter(a => ['approved', 'payment_required'].includes(a.status)).length,
+            paid: list.filter(a => ['paid', 'payment_verified'].includes(a.status)).length,
+            completed: list.filter(a => a.status === 'completed').length,
+            rejected: list.filter(a => a.status === 'rejected').length,
+            returned: list.filter(a => a.status === 'returned').length
+        };
 
         return {
             success: true,
-            statistics: {
-                total: totalResult.count || 0,
-                draft: draftResult.count || 0,
-                submitted: submittedResult.count || 0,
-                pending_review: pendingReviewResult.count || 0,
-                under_inspection: underInspectionResult.count || 0,
-                approved: approvedResult.count || 0,
-                paid: paidResult.count || 0,
-                completed: completedResult.count || 0,
-                rejected: rejectedResult.count || 0,
-                returned: returnedResult.count || 0
-            }
+            statistics
         };
     } catch (error) {
         console.error('=== CVET STATISTICS ERROR ===');

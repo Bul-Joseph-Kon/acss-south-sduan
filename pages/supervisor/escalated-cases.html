@@ -99,7 +99,7 @@
         import supabase from '../../js/supabase.js';
         import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
-        import { subscribeToEscalatedCases, unsubscribeFromEscalatedCases } from '../../js/escalation-service.js';
+        import { getEscalatedCases, resolveEscalation } from '../../js/supervisor-service.js';
 
 
         const PAGE_KEY = 'escalated-cases';
@@ -156,17 +156,20 @@
             await loadEscalatedCases();
 
             // Subscribe to Realtime updates for escalated cases
-            escalationChannel = subscribeToEscalatedCases((payload) => {
-                console.log('Realtime escalation update:', payload);
-                // Reload the list when changes occur
-                loadEscalatedCases();
-            });
+            escalationChannel = supabase
+                .channel('escalated-cases')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, async (payload) => {
+                    console.log('Realtime escalation update:', payload);
+                    // Reload the list when changes occur
+                    await loadEscalatedCases();
+                })
+                .subscribe();
         }
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
             if (escalationChannel) {
-                unsubscribeFromEscalatedCases(escalationChannel);
+                supabase.removeChannel(escalationChannel);
             }
         });
 
@@ -174,113 +177,85 @@
             console.log('=== LOADING ESCALATED CASES ===');
 
             try {
-                const { data: escalatedCases, error } = await supabase
-                    .from('escalated_cases')
-                    .select(`
-                        *,
-                        applications (*)
-                    `)
-                    .in('status', ['open', 'in_progress'])
-                    .order('created_at', { ascending: false })
-                    .limit(50);
+                const result = await getEscalatedCases();
+                
+                if (!result.success) {
+                    throw new Error(result.error);
+                }
 
-                if (error) throw error;
+                const escalatedCases = result.data;
 
-                const applications = escalatedCases.map(ec => ({
-                    ...ec.applications,
-                    escalated_case_id: ec.id,
-                    escalation_reason: ec.reason,
-                    priority: ec.priority,
-                    escalated_at: ec.created_at,
-                    escalation_status: ec.status,
-                    resolution: ec.resolution,
-                    resolved_at: ec.resolved_at,
-                    notes: ec.notes
-                }));
+                if (!escalatedCases || escalatedCases.length === 0) {
+                    document.getElementById('escalatedList').innerHTML = '<div class="text-sm text-gray-500 text-center py-8">No escalated cases</div>';
+                    document.getElementById('escalationSummary').innerHTML = '<div class="flex items-center justify-between"><span class="text-sm text-gray-500">0 escalated cases</span></div>';
+                    return;
+                }
 
-                console.log('Escalated cases loaded:', applications);
-                renderEscalatedList(applications);
-            } catch (error) {
-                console.error('Failed to load escalated cases:', error);
-                document.getElementById('escalatedList').innerHTML = `
-                    <div class="text-sm text-red-500 text-center py-8">
-                        Failed to load escalated cases: ${error.message}
+                // Update summary
+                document.getElementById('escalationSummary').innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-500">${escalatedCases.length} escalated case${escalatedCases.length !== 1 ? 's' : ''}</span>
+                        <span class="text-xs text-red-600 font-semibold">Requires attention</span>
                     </div>
                 `;
-            }
-        }
 
-        function renderEscalatedList(applications) {
-            const container = document.getElementById('escalatedList');
-            const summaryContainer = document.getElementById('escalationSummary');
-
-            if (!applications || applications.length === 0) {
-                container.innerHTML = `
-                    <div class="text-sm text-gray-500 text-center py-8">
-                        No escalated cases
-                    </div>
-                `;
-                summaryContainer.innerHTML = '<span class="text-sm text-gray-500">0 escalated cases</span>';
-                return;
-            }
-
-            const highPriority = applications.filter(app => app.priority === 'high').length;
-            const mediumPriority = applications.filter(app => app.priority === 'medium').length;
-
-            summaryContainer.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <span class="text-sm text-gray-500">${applications.length} escalated cases requiring attention</span>
-                    ${highPriority > 0 ? '<span class="text-sm text-red-600">⚠️ Action required</span>' : ''}
-                </div>
-            `;
-
-            container.innerHTML = applications.map(app => {
-                const priority = app.priority || 'medium';
-                const priorityClass = priority === 'high' ? 'high' : 'medium';
-                const priorityColor = priority === 'high' ? 'red' : 'yellow';
-                const escalationReason = app.escalation_reason || 'No escalation reason provided';
-
-                return `
-                    <div class="escalated-card ${priorityClass}">
-                        <div class="flex flex-wrap justify-between items-start gap-2">
-                            <div>
-                                <h4 class="font-bold text-${priorityColor}-600">${app.application_number || 'N/A'}</h4>
-                                <p class="text-sm text-gray-500">${app.applicant_name || app.company_name || 'Unknown'} · ${app.goods_description || app.vehicle_description || 'N/A'} · ${formatCurrency(app.declared_value)}</p>
-                                <div class="flex items-center gap-4 mt-2">
-                                    <span class="status-badge status-review">Escalated</span>
-                                    <span class="text-xs text-gray-400">Escalated: ${formatDate(app.escalated_at || app.updated_at)}</span>
-                                    <span class="text-xs text-gray-400">Priority: ${priority.charAt(0).toUpperCase() + priority.slice(1)}</span>
+                // Render escalated cases
+                document.getElementById('escalatedList').innerHTML = escalatedCases.map(app => {
+                    const priorityClass = app.ai_validation_results?.risk_level === 'high' ? 'high' : 'medium';
+                    const riskScore = app.ai_validation_results?.risk_score || 0;
+                    
+                    return `
+                        <div class="escalated-card ${priorityClass} bg-white">
+                            <div class="flex flex-wrap justify-between items-start gap-3">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-bold text-blue-600">${app.application_number || 'N/A'}</h4>
+                                        <span class="status-badge status-review">Escalated</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600">${app.agent_profile?.full_name || 'Unknown Agent'}</p>
+                                    <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                                        <span>Risk Score: ${riskScore}/100</span>
+                                        <span>Escalated: ${new Date(app.created_at).toLocaleDateString()}</span>
+                                    </div>
                                 </div>
-                                <div class="mt-2 p-2 bg-${priority === 'high' ? 'red' : 'yellow'}-50 rounded-lg text-sm">
-                                    <p class="text-${priority === 'high' ? 'red' : 'yellow'}-700">⚠️ ${escalationReason}</p>
+                                <div class="flex gap-2">
+                                    <button onclick="resolveEscalationAction('${app.id}', 'approve')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-green-700 transition">Approve</button>
+                                    <button onclick="resolveEscalationAction('${app.id}', 'return')" class="bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-yellow-700 transition">Return</button>
+                                    <button onclick="resolveEscalationAction('${app.id}', 'reject')" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition">Reject</button>
                                 </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <a href="../officer/review-application.html?id=${app.id}" class="bg-${priority === 'high' ? 'red' : 'yellow'}-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-${priority === 'high' ? 'red' : 'yellow'}-700 transition">Review Case</a>
                             </div>
                         </div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading escalated cases:', error);
+                document.getElementById('escalatedList').innerHTML = '<div class="text-sm text-red-500 text-center py-8">Error loading escalated cases</div>';
+            }
         }
 
-        function formatCurrency(value) {
-            if (!value) return '$0';
-            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+        async function resolveEscalationAction(applicationId, action) {
+            const notes = prompt(`Enter notes for ${action} action:`);
+            if (notes === null) return; // User cancelled
+
+            try {
+                const result = await resolveEscalation(applicationId, action, notes);
+                if (result.success) {
+                    alert(`Escalation ${action}ed successfully`);
+                    await loadEscalatedCases();
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                console.error('Error resolving escalation:', error);
+                alert('Error resolving escalation');
+            }
         }
 
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            return new Date(dateString).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            });
-        }
-
-        init();
+        window.resolveEscalationAction = resolveEscalationAction;
+        document.addEventListener('DOMContentLoaded', init);
     </script>
-</body></html>
+</body>
+</html>
 
 
 

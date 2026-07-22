@@ -11,7 +11,6 @@ RETURNS TRIGGER AS $$
 DECLARE
     validation_id UUID;
     risk_id UUID;
-    validation_passed BOOLEAN;
     validation_score NUMERIC;
     risk_level TEXT;
     fraud_detected BOOLEAN;
@@ -100,8 +99,8 @@ BEGIN
         reviewed_at = NOW(),
         status = CASE 
             WHEN (SELECT validation_passed FROM public.ai_validation_results WHERE application_id = NEW.id) = false 
-            THEN 'returned'
-            ELSE 'pending_review'
+            THEN 'returned'::application_status
+            ELSE 'pending_review'::application_status
         END
     WHERE id = NEW.id;
 

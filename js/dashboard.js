@@ -57,8 +57,8 @@ export async function fetchInspectorDashboardData() {
         const [pendingResult, inProgressResult, completedResult, failedResult] = await Promise.all([
             supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'under_inspection'),
             supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'inspection_in_progress'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'inspection_completed'),
-            supabase.from('applications').select('*', { count: 'exact', head: true }).eq('status', 'inspection_failed')
+            supabase.from('applications').select('*', { count: 'exact', head: true }).not('inspected_at', 'is', null).neq('status', 'rejected'),
+            supabase.from('applications').select('*', { count: 'exact', head: true }).not('inspected_at', 'is', null).eq('status', 'rejected')
         ]);
 
         const stats = {

@@ -108,7 +108,7 @@
     <script type="module">
         import { checkAuth, verifyRoleAccess, signOut, getCurrentUser, getUserProfile } from '../../js/auth.js';
         import { loadCurrentUserProfile } from '../../js/profile-loader.js';
-        import { fetchServices } from '../../js/services.js';
+        import { fetchServices, toggleServiceStatus, updateService, createService, deleteService } from '../../js/services.js';
 
         let currentPage = 1;
         let servicesPerPage = 10;
@@ -163,9 +163,9 @@
 
             let html = '';
             allServices.forEach(service => {
-                const statusClass = service.is_active ? 'status-active' : (service.status === 'maintenance' ? 'status-maintenance' : 'status-inactive');
-                const statusIcon = service.is_active ? '✓' : (service.status === 'maintenance' ? '🔧' : '✗');
-                const statusText = service.is_active ? 'Active' : (service.status || 'Inactive');
+                const statusClass = service.is_active ? 'status-active' : 'status-inactive';
+                const statusIcon = service.is_active ? '✓' : '✗';
+                const statusText = service.is_active ? 'Active' : 'Inactive';
 
                 html += `
                     <div class="service-card">
@@ -198,12 +198,90 @@
             container.innerHTML = html;
         }
 
-        window.toggleServiceStatus = function(id, currentStatus) {
-            alert('Toggle service status - ID: ' + id + ', Current: ' + currentStatus);
+        window.toggleServiceStatus = async function(id, currentStatus) {
+            try {
+                const result = await toggleServiceStatus(id);
+                if (result.success) {
+                    alert(`Service status toggled successfully`);
+                    await loadServices(); // Reload the list
+                } else {
+                    alert('Error toggling service status: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error toggling service status:', error);
+                alert('Error toggling service status');
+            }
         };
 
-        window.editService = function(id) {
-            alert('Edit service functionality - ID: ' + id);
+        window.editService = async function(id) {
+            try {
+                const service = allServices.find(s => s.id === id);
+                if (!service) {
+                    alert('Service not found');
+                    return;
+                }
+
+                // Create edit modal
+                const modalHtml = `
+                    <div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-bold">Edit Service</h3>
+                                <button onclick="document.getElementById('editModal').remove()" class="text-gray-500 hover:text-gray-700">
+                                    <i class="ri-close-line text-2xl"></i>
+                                </button>
+                            </div>
+                            <form id="editServiceForm" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Service Name</label>
+                                    <input type="text" id="editName" value="${service.name || ''}" class="w-full p-2 border rounded-lg" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Service Code</label>
+                                    <input type="text" id="editCode" value="${service.code || ''}" class="w-full p-2 border rounded-lg" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    <textarea id="editDescription" class="w-full p-2 border rounded-lg" rows="3">${service.description || ''}</textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                                    <input type="text" id="editCategory" value="${service.category || ''}" class="w-full p-2 border rounded-lg">
+                                </div>
+                                <div class="flex gap-2 pt-2">
+                                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700">Save Changes</button>
+                                    <button type="button" onclick="document.getElementById('editModal').remove()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+                // Handle form submission
+                document.getElementById('editServiceForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const updates = {
+                        name: document.getElementById('editName').value,
+                        code: document.getElementById('editCode').value,
+                        description: document.getElementById('editDescription').value,
+                        category: document.getElementById('editCategory').value
+                    };
+
+                    const result = await updateService(id, updates);
+                    if (result.success) {
+                        alert('Service updated successfully');
+                        document.getElementById('editModal').remove();
+                        await loadServices();
+                    } else {
+                        alert('Error updating service: ' + result.error);
+                    }
+                });
+            } catch (error) {
+                console.error('Error editing service:', error);
+                alert('Error editing service');
+            }
         };
 
         document.addEventListener('DOMContentLoaded', loadPage);

@@ -31,10 +31,15 @@ export async function requireRole(allowedRoles) {
     
     const profile = await getUserProfile(user.id);
     const userRole = profile?.role || 'trader';
-    
-    if (!allowedRoles.includes(userRole)) {
-        // Redirect to appropriate dashboard based on role
-        redirectToDashboard(userRole);
+    const normalizedRole = userRole === 'admin' ? 'administrator' : userRole === 'revenue_officer' ? 'revenue' : userRole;
+    const normalizedAllowed = allowedRoles.map(r => r === 'admin' ? 'administrator' : r === 'revenue_officer' ? 'revenue' : r);
+
+    if (!normalizedAllowed.includes(normalizedRole)) {
+        console.warn(`Access denied for role '${userRole}' to path '${window.location.pathname}'. Redirecting to dashboard.`);
+        const dashboardUrl = redirectToDashboard(userRole);
+        if (dashboardUrl && window.location.pathname !== dashboardUrl) {
+            window.location.href = dashboardUrl;
+        }
         return false;
     }
     
@@ -42,19 +47,52 @@ export async function requireRole(allowedRoles) {
 }
 
 export async function initAuthGuard() {
-    // Check authentication on page load
+    const path = window.location.pathname.toLowerCase();
+    const isPublicPage = path.includes('/auth/') || path.includes('/index.html') || path.endsWith('/') || path.includes('/setup-admin.html');
+
+    if (isPublicPage) {
+        return true;
+    }
+
+    // Check authentication on protected page load
     const isAuthenticated = await checkAuth();
     
     if (!isAuthenticated) {
-        // Show login prompt or redirect
-        window.location.href = '/auth/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+        sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+        window.location.href = '/auth/login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
         return false;
     }
     
-    // Get user info and update UI
     const user = await getCurrentUser();
-    const profile = await getUserProfile(user.id);
-    
+    const profile = await getUserProfile(user?.id);
+    const userRole = profile?.role || 'trader';
+    const normalizedRole = userRole === 'admin' ? 'administrator' : userRole === 'revenue_officer' ? 'revenue' : userRole;
+
+    // Route path authorization mapping
+    let allowedRoles = null;
+    if (path.includes('/pages/agent/') || path.includes('/pages/trader/')) {
+        allowedRoles = ['agent', 'trader'];
+    } else if (path.includes('/pages/officer/')) {
+        allowedRoles = ['officer'];
+    } else if (path.includes('/pages/inspector/')) {
+        allowedRoles = ['inspector'];
+    } else if (path.includes('/pages/supervisor/')) {
+        allowedRoles = ['supervisor'];
+    } else if (path.includes('/pages/revenue/')) {
+        allowedRoles = ['revenue', 'revenue_officer'];
+    } else if (path.includes('/pages/admin/')) {
+        allowedRoles = ['administrator', 'admin'];
+    }
+
+    if (allowedRoles && !allowedRoles.includes(normalizedRole)) {
+        console.warn(`User role '${userRole}' is not allowed on '${window.location.pathname}'. Redirecting.`);
+        const dashboardUrl = redirectToDashboard(userRole);
+        if (dashboardUrl && window.location.pathname !== dashboardUrl) {
+            window.location.href = dashboardUrl;
+        }
+        return false;
+    }
+
     // Update UI with user info
     updateAuthUI(profile);
     
@@ -93,7 +131,12 @@ function updateAuthUI(profile) {
     });
 }
 
-// Auto-initialize on import if page has data-auth-guard attribute
-if (document.currentScript && document.currentScript.hasAttribute('data-auto-init')) {
-    document.addEventListener('DOMContentLoaded', initAuthGuard);
+// Auto-initialize on DOMContentLoaded if not explicitly disabled
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        initAuthGuard();
+    });
+} else {
+    initAuthGuard();
 }
+

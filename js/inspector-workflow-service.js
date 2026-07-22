@@ -7,6 +7,7 @@
 import supabase from './supabase.js';
 import { getUserProfile } from './auth.js';
 import { logInspectionCompletion, logEscalationCreation } from './logging-service.js';
+import { generateInvoice } from './payment-service.js';
 
 // ================================================================
 // INSPECTOR OPERATIONS
@@ -68,6 +69,19 @@ export async function completeInspection(applicationId, inspectionReport, eviden
             application.agent_id || application.user_id,
             application.application_number,
             profile.id
+        );
+
+        // Generate invoice automatically
+        await generateInvoice(applicationId);
+
+        // Notify agent
+        await createNotification(
+            application.agent_id || application.user_id,
+            'Inspection Completed',
+            `Inspection for declaration ${application.application_number} has been completed and approved. Invoice has been generated.`,
+            'success',
+            applicationId,
+            'application'
         );
 
         return { success: true, message: 'Inspection completed and application approved' };
@@ -237,3 +251,30 @@ export async function fetchEscalatedCases() {
         return { success: false, error: error.message };
     }
 }
+
+async function createNotification(userId, title, message, type = 'info', referenceId = null, referenceType = null) {
+    try {
+        await supabase.from('notifications').insert({
+            user_id: userId,
+            title,
+            message,
+            type,
+            reference_id: referenceId,
+            reference_type: referenceType
+        });
+    } catch (error) {
+        console.error('Error creating notification:', error);
+    }
+}
+
+// ================================================================
+// EXPORTS
+// ================================================================
+
+export {
+    completeInspection,
+    escalateCase,
+    recordInspectionNotes,
+    fetchUnderInspectionApplications,
+    fetchEscalatedCases
+};

@@ -71,8 +71,8 @@
 
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                         <div class="flex flex-wrap gap-3">
-                            <input type="text" class="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Enter declaration reference number..." />
-                            <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition">Track</button>
+                            <input type="text" id="trackingInput" class="flex-1 p-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-400 outline-none" placeholder="Enter declaration reference number..." />
+                            <button onclick="window.trackDeclaration()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition">Track</button>
                         </div>
                     </div>
 
@@ -152,7 +152,128 @@
 
             const dropdownSignOut = document.getElementById('dropdownSignOut');
             if (dropdownSignOut) dropdownSignOut.addEventListener('click', handleLogout);
+
+            // Check if there's an ID in URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const appId = urlParams.get('id');
+            if (appId) {
+                document.getElementById('trackingInput').value = appId;
+                await trackDeclaration(appId);
+            }
         }
+
+        async function trackDeclaration(referenceNumber) {
+            const input = referenceNumber || document.getElementById('trackingInput').value.trim();
+            if (!input) {
+                alert('Please enter a declaration reference number');
+                return;
+            }
+
+            try {
+                const { data: application, error } = await supabase
+                    .from('applications')
+                    .select('*')
+                    .or(`application_number.eq.${input},id.eq.${input}`)
+                    .single();
+
+                if (error) throw error;
+
+                if (!application) {
+                    document.getElementById('trackingResult').innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="ri-error-warning-line text-4xl text-red-400 mb-3"></i>
+                            <p class="text-gray-500">No declaration found with reference number: ${input}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Render tracking result
+                const statusClass = getStatusClass(application.status);
+                const timeline = generateTimeline(application);
+
+                document.getElementById('trackingResult').innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-xl font-bold text-blue-600">${application.application_number || 'N/A'}</h3>
+                                <p class="text-sm text-gray-500">Application Type: ${application.application_type || 'N/A'}</p>
+                            </div>
+                            <span class="status-badge ${statusClass}">${application.status || 'Unknown'}</span>
+                        </div>
+                        <hr>
+                        <div class="track-timeline">
+                            ${timeline}
+                        </div>
+                        <div class="track-footer">
+                            <div class="text-xs text-gray-500">
+                                <p>Created: ${new Date(application.created_at).toLocaleString()}</p>
+                                <p>Last Updated: ${new Date(application.updated_at).toLocaleString()}</p>
+                            </div>
+                            <div class="qr-container">
+                                <div id="qrcode"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Generate QR code
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(document.getElementById('qrcode'), {
+                        text: application.application_number || application.id,
+                        width: 80,
+                        height: 80
+                    });
+                }
+            } catch (error) {
+                console.error('Error tracking declaration:', error);
+                document.getElementById('trackingResult').innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="ri-error-warning-line text-4xl text-red-400 mb-3"></i>
+                        <p class="text-gray-500">Error tracking declaration: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'draft': 'bg-gray-100 text-gray-700',
+                'submitted': 'bg-blue-100 text-blue-700',
+                'pending_review': 'bg-yellow-100 text-yellow-700',
+                'under_inspection': 'bg-purple-100 text-purple-700',
+                'returned': 'bg-red-100 text-red-700',
+                'approved': 'bg-green-100 text-green-700',
+                'rejected': 'bg-red-100 text-red-700',
+                'payment_required': 'bg-orange-100 text-orange-700',
+                'payment_verified': 'bg-green-100 text-green-700',
+                'completed': 'bg-green-100 text-green-700'
+            };
+            return statusMap[status] || 'bg-gray-100 text-gray-700';
+        }
+
+        function generateTimeline(application) {
+            const status = application.status || 'draft';
+            const timeline = [
+                { step: 'Draft Created', status: 'completed', date: application.created_at },
+                { step: 'Submitted', status: status !== 'draft' ? 'completed' : 'pending', date: application.submitted_at },
+                { step: 'AI Validation', status: ['submitted', 'pending_review'].includes(status) ? 'current' : (['under_inspection', 'returned', 'approved', 'rejected', 'payment_required', 'payment_verified', 'completed'].includes(status) ? 'completed' : 'pending'), date: null },
+                { step: 'Manual Review', status: ['pending_review', 'under_inspection'].includes(status) ? 'current' : (['returned', 'approved', 'rejected', 'payment_required', 'payment_verified', 'completed'].includes(status) ? 'completed' : 'pending'), date: null },
+                { step: 'Payment', status: ['payment_required'].includes(status) ? 'current' : (['payment_verified', 'completed'].includes(status) ? 'completed' : 'pending'), date: null },
+                { step: 'Completed', status: status === 'completed' ? 'completed' : 'pending', date: application.completed_at }
+            ];
+
+            return timeline.map(item => `
+                <div class="track-item ${item.status}">
+                    <div class="track-title">${item.step}</div>
+                    <div class="track-status">${item.status.toUpperCase()}</div>
+                    ${item.date ? `<div class="track-date">${new Date(item.date).toLocaleString()}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Expose function to window
+        window.trackDeclaration = trackDeclaration;
 
         document.addEventListener('DOMContentLoaded', initPage);
         if (document.readyState === 'interactive' || document.readyState === 'complete') {

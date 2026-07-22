@@ -1,661 +1,531 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SSRA Customs · Officer Review</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Application · SSRA Customs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="../assets/icons/remixicon.css" rel="stylesheet" />
-    
-    <script type="module" src="../../js/officer-sidebar.js"></script>
+    <link href="../assets/icons/remixicon.css" rel="stylesheet">
     <style>
-        .gradient-bg { background: linear-gradient(135deg, #1e3a5f 0%, #2a5f8f 100%); }
-        .tab-btn { padding: 0.75rem 1.5rem; border-bottom: 3px solid transparent; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #6b7280; }
-        .tab-btn.active { border-bottom-color: #1e3a5f; color: #1e3a5f; }
-        .section-card { border-left: 4px solid #1e3a5f; background: #f8fafc; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
-        .info-row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid #e5e7eb; }
-        .info-row:last-child { border-bottom: none; }
-        .badge { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; }
-        .badge-pending { background: #fef3c7; color: #92400e; }
-        .badge-review { background: #dbeafe; color: #1e40af; }
-        .badge-approved { background: #d1fae5; color: #065f46; }
-        .badge-returned { background: #fee2e2; color: #991b1b; }
-        .doc-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; margin-bottom: 0.5rem; }
-        .doc-icon { width: 2.5rem; height: 2.5rem; background: #e0e7ff; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: #1e3a5f; }
-        .validation-item { padding: 0.75rem; border-left: 3px solid #10b981; background: #f0fdf4; margin-bottom: 0.5rem; border-radius: 0.3rem; }
-        .validation-item.warning { border-left-color: #f59e0b; background: #fffbeb; }
-        .validation-item.error { border-left-color: #ef4444; background: #fef2f2; }
-        .action-btn { padding: 0.6rem 1.5rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; font-size: 0.9rem; }
-        .btn-approve { background: #10b981; color: white; }
-        .btn-approve:hover { background: #059669; }
-        .btn-return { background: #ef4444; color: white; }
-        .btn-return:hover { background: #dc2626; }
-        .btn-forward { background: #3b82f6; color: white; }
-        .btn-forward:hover { background: #2563eb; }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 50; }
-        .modal-overlay.open { display: flex; align-items: center; justify-content: center; }
-        .modal-content { background: white; border-radius: 1rem; padding: 2rem; max-width: 600px; width: 90%; box-shadow: 0 20px 25px rgba(0,0,0,0.15); }
-        .modal-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 1rem; color: #1f2937; }
-        textarea { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-family: inherit; resize: vertical; }
-        .status-timeline { position: relative; padding-left: 2rem; }
-        .status-timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #e5e7eb; }
-        .status-step { position: relative; margin-bottom: 1rem; }
-        .status-step::before { content: ''; position: absolute; left: -1.75rem; top: 0.25rem; width: 1rem; height: 1rem; background: #d1d5db; border-radius: 50%; border: 3px solid white; }
-        .status-step.completed::before { background: #10b981; }
-        .status-step.current::before { background: #3b82f6; }
-        .sidebar-link { transition: all 0.3s ease; cursor: pointer; display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; color: #4b5563; }
-        .sidebar-link:hover, .sidebar-link.active { background-color: #e8f0fe; color: #1e3a5f; }
-        .sidebar-link i { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        .data-label { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
+        .data-value { font-size: 0.95rem; color: #1e293b; font-weight: 500; }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #1e3a8a; color: white; padding: 0.75rem 1.25rem; border-radius: 0.75rem; font-size: 0.85rem; z-index: 100; transform: translateY(100px); opacity: 0; transition: all 0.3s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .risk-badge { font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 9999px; display: inline-block; }
+        .risk-low { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .risk-medium { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+        .risk-high { background: #ffedd5; color: #9a3412; border: 1px solid #fdba74; }
+        .risk-critical { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 50; display: none; align-items: center; justify-content: center; }
+        .modal-content { background: white; border-radius: 1rem; width: 100%; max-width: 32rem; padding: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); transform: scale(0.95); opacity: 0; transition: all 0.2s ease-out; }
+        .modal-overlay.show { display: flex; }
+        .modal-overlay.show .modal-content { transform: scale(1); opacity: 1; }
     </style>
 </head>
-<body>
-    <div class="min-h-screen bg-gray-100">
-        <div class="max-w-7xl mx-auto px-4 py-5">
-            <div class="flex flex-col lg:flex-row gap-6">
-                <!-- Sidebar -->
-                <aside class="lg:w-72 flex-shrink-0">
-                    <div id="officer-sidebar"></div>
-                </aside>
+<body class="bg-slate-50">
+    <div id="toast" class="toast"></div>
 
-                <main class="flex-1 space-y-5">
-                    <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg">
-                        <div class="flex items-start justify-between gap-4 mb-4">
+    <div class="min-h-screen flex flex-col lg:flex-row">
+        <!-- Sidebar placeholder -->
+        <aside class="w-full lg:w-72 bg-white border-r border-slate-200 flex-shrink-0" id="sidebar-container">
+            <div class="p-6 text-center text-slate-400">Loading sidebar...</div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+            
+            <!-- Top Nav & Actions -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <a href="dashboard-officer.html" class="text-sm font-medium text-slate-500 hover:text-blue-600 mb-2 inline-flex items-center transition">
+                        <i class="ri-arrow-left-line mr-1"></i> Back to Dashboard
+                    </a>
+                    <h1 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                        <span id="appNumber">Loading...</span>
+                        <span id="appStatus" class="text-sm font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full border border-slate-200">...</span>
+                    </h1>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button onclick="openModal('return')" class="bg-white text-orange-600 border-2 border-orange-200 hover:bg-orange-50 px-4 py-2 rounded-lg font-semibold text-sm transition">
+                        <i class="ri-arrow-go-back-line mr-1"></i> Return for Correction
+                    </button>
+                    <button onclick="openModal('reject')" class="bg-white text-red-600 border-2 border-red-200 hover:bg-red-50 px-4 py-2 rounded-lg font-semibold text-sm transition">
+                        <i class="ri-close-circle-line mr-1"></i> Reject
+                    </button>
+                    <button onclick="openModal('assign_inspector')" class="bg-white text-amber-600 border-2 border-amber-200 hover:bg-amber-50 px-4 py-2 rounded-lg font-semibold text-sm transition">
+                        <i class="ri-user-search-line mr-1"></i> Assign Inspector
+                    </button>
+                    <button onclick="openModal('approve')" class="bg-blue-600 text-white hover:bg-blue-700 px-5 py-2 rounded-lg font-semibold text-sm transition shadow-sm">
+                        <i class="ri-check-line mr-1"></i> Approve
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Left Column (Main Data) -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <!-- Alert for AI Validation -->
+                    <div id="aiAlert" class="hidden rounded-xl p-4 border border-l-4 shadow-sm">
+                        <div class="flex gap-3">
+                            <i id="aiAlertIcon" class="text-xl mt-0.5"></i>
                             <div>
-                                <h2 class="text-3xl font-bold tracking-tight">📋 Application Review</h2>
-                                <p class="opacity-90 text-sm mt-1">CVET Declaration CV-2026-0042</p>
-                            </div>
-                            <a href="cvet-review-queue.html" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
-                                <i class="ri-arrow-left-line"></i> Back
-                            </a>
-                        </div>
-                        <div class="flex flex-wrap gap-3">
-                            <span class="badge badge-review">Under Review</span>
-                            <span class="text-sm opacity-90">Submitted: Jun 22, 2026</span>
-                            <span class="text-sm opacity-90">Trader: John Trading Co.</span>
-                        </div>
-                    </div>
-
-                    <!-- Tab Navigation -->
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm flex overflow-x-auto">
-                        <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
-                        <button class="tab-btn" onclick="switchTab('documents')">Documents</button>
-                        <button class="tab-btn" onclick="switchTab('validation')">AI Validation</button>
-                        <button class="tab-btn" onclick="switchTab('compliance')">Compliance</button>
-                        <button class="tab-btn" onclick="switchTab('history')">History</button>
-                    </div>
-
-                    <!-- OVERVIEW TAB -->
-                    <div id="tab-overview" class="space-y-4">
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">Trader Information</h3>
-                            <div class="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <p class="text-sm text-gray-500 mb-1">Trader Name</p>
-                                    <p class="font-semibold text-lg">John Trading Co.</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500 mb-1">Registration Number</p>
-                                    <p class="font-semibold text-lg">SSTD-2023-0156</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500 mb-1">Email</p>
-                                    <p class="font-semibold">john@tradingco.ss</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500 mb-1">Phone</p>
-                                    <p class="font-semibold">+211-123-456-789</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">Shipment Details</h3>
-                            <div class="info-row">
-                                <span class="text-gray-600">Application Number</span>
-                                <span class="font-semibold text-blue-600">CV-2026-0042</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">Application Type</span>
-                                <span class="font-semibold">CVET Declaration</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">Product Description</span>
-                                <span class="font-semibold">Electronics & Computer Equipment</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">HS Code</span>
-                                <span class="font-semibold">8471.30.00</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">Quantity</span>
-                                <span class="font-semibold">150 units</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">Declared Value</span>
-                                <span class="font-semibold text-green-600">$25,000 USD</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">Port of Entry</span>
-                                <span class="font-semibold">Juba International Airport</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="text-gray-600">Clearing Agent</span>
-                                <span class="font-semibold">SSRA Customs Agency</span>
+                                <h4 class="font-bold text-sm" id="aiAlertTitle">AI Validation Results</h4>
+                                <p class="text-sm mt-1" id="aiAlertMsg">Loading...</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- DOCUMENTS TAB -->
-                    <div id="tab-documents" class="space-y-4" style="display: none;">
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">📁 Supporting Documents</h3>
-                            <p class="text-sm text-gray-600 mb-4">Review and verify submitted supporting documents</p>
-                            
-                            <div class="doc-item">
-                                <div class="doc-icon">
-                                    <i class="ri-file-pdf-2-line"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-sm">packing_list_cv2026_0042.pdf</p>
-                                    <p class="text-xs text-gray-500">Packing List · 1.2 MB · Uploaded Jun 22</p>
-                                </div>
-                                <button class="text-blue-600 hover:text-blue-700 text-sm font-semibold">View</button>
+                    <!-- Declaration Details -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                        <h2 class="section-title"><i class="ri-file-list-3-line text-blue-500"></i> Declaration Summary</h2>
+                        
+                        <div class="grid grid-cols-2 gap-y-5 gap-x-8 mb-6">
+                            <div>
+                                <div class="data-label">Importer Name</div>
+                                <div class="data-value" id="valImporter">–</div>
                             </div>
-
-                            <div class="doc-item">
-                                <div class="doc-icon">
-                                    <i class="ri-file-pdf-2-line"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-sm">bol_cv2026_0042.pdf</p>
-                                    <p class="text-xs text-gray-500">Bill of Lading · 0.8 MB · Uploaded Jun 22</p>
-                                </div>
-                                <button class="text-blue-600 hover:text-blue-700 text-sm font-semibold">View</button>
+                            <div>
+                                <div class="data-label">Exporter Name</div>
+                                <div class="data-value" id="valExporter">–</div>
                             </div>
-
-                            <div class="doc-item">
-                                <div class="doc-icon">
-                                    <i class="ri-file-pdf-2-line"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-sm">coo_cv2026_0042.pdf</p>
-                                    <p class="text-xs text-gray-500">Certificate of Origin · 0.6 MB · Uploaded Jun 22</p>
-                                </div>
-                                <button class="text-blue-600 hover:text-blue-700 text-sm font-semibold">View</button>
+                            <div>
+                                <div class="data-label">Agent Name</div>
+                                <div class="data-value" id="valAgent">–</div>
                             </div>
-
-                            <div class="doc-item">
-                                <div class="doc-icon">
-                                    <i class="ri-file-pdf-2-line"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-semibold text-sm">import_permit_cv2026_0042.pdf</p>
-                                    <p class="text-xs text-gray-500">Import Permit · 0.9 MB · Uploaded Jun 22</p>
-                                </div>
-                                <button class="text-blue-600 hover:text-blue-700 text-sm font-semibold">View</button>
+                            <div>
+                                <div class="data-label">Port of Entry</div>
+                                <div class="data-value" id="valPort">–</div>
                             </div>
+                        </div>
 
-                            <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                                <p class="text-sm text-green-800"><i class="ri-check-line"></i> All required documents verified ✓</p>
+                        <h2 class="section-title mt-8"><i class="ri-box-3-line text-blue-500"></i> Goods Information</h2>
+                        
+                        <div class="grid grid-cols-2 gap-y-5 gap-x-8">
+                            <div class="col-span-2">
+                                <div class="data-label">Goods Description</div>
+                                <div class="data-value" id="valGoodsDesc">–</div>
+                            </div>
+                            <div>
+                                <div class="data-label">HS Code</div>
+                                <div class="data-value"><span id="valHsCode" class="font-mono bg-slate-100 px-2 py-0.5 rounded">–</span></div>
+                            </div>
+                            <div>
+                                <div class="data-label">Quantity</div>
+                                <div class="data-value" id="valQuantity">–</div>
+                            </div>
+                            <div>
+                                <div class="data-label">Declared Value (CIF)</div>
+                                <div class="data-value font-bold text-green-700" id="valValue">–</div>
+                            </div>
+                            <div>
+                                <div class="data-label">Origin</div>
+                                <div class="data-value" id="valOrigin">–</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- VALIDATION TAB -->
-                    <div id="tab-validation" class="space-y-4" style="display: none;">
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">🤖 AI Validation Results</h3>
-                            <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4">
-                                <p class="text-sm text-blue-800"><strong>Status:</strong> Validation Passed ✓</p>
-                                <p class="text-xs text-blue-600 mt-1">All 10 validation checks completed successfully</p>
-                            </div>
-
-                            <div class="space-y-2">
-                                <div class="validation-item">
-                                    <div class="flex items-center gap-2">
-                                        <i class="ri-check-line text-green-600"></i>
-                                        <span class="font-semibold text-sm">Data Validation</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 ml-7">All required fields filled and properly formatted</p>
-                                </div>
-
-                                <div class="validation-item">
-                                    <div class="flex items-center gap-2">
-                                        <i class="ri-check-line text-green-600"></i>
-                                        <span class="font-semibold text-sm">Document Verification</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 ml-7">All 4 required documents verified and readable</p>
-                                </div>
-
-                                <div class="validation-item">
-                                    <div class="flex items-center gap-2">
-                                        <i class="ri-check-line text-green-600"></i>
-                                        <span class="font-semibold text-sm">Mandatory Fields Check</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 ml-7">No missing mandatory fields detected</p>
-                                </div>
-
-                                <div class="validation-item">
-                                    <div class="flex items-center gap-2">
-                                        <i class="ri-check-line text-green-600"></i>
-                                        <span class="font-semibold text-sm">Duplicate Detection</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 ml-7">No duplicate applications found in system</p>
-                                </div>
-
-                                <div class="validation-item">
-                                    <div class="flex items-center gap-2">
-                                        <i class="ri-check-line text-green-600"></i>
-                                        <span class="font-semibold text-sm">HS Code Validation</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 ml-7">HS Code 8471.30.00 is valid and compliant</p>
-                                </div>
-
-                                <div class="validation-item warning">
-                                    <div class="flex items-center gap-2">
-                                        <i class="ri-alert-line text-yellow-600"></i>
-                                        <span class="font-semibold text-sm">Customs Value Verification</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 ml-7">Declared value $25,000 within acceptable range but recommend verification</p>
-                                </div>
-
-                                <div class="validation-item">
-                                    <div class="flex items-center gap-2">
-                                        <i class="ri-check-line text-green-600"></i>
-                                        <span class="font-semibold text-sm">Compliance Checking</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 ml-7">No compliance issues detected - trader has clean record</p>
-                                </div>
-
-                                <div class="validation-item">
-                                    <div class="flex items-center gap-2">
-                                        <i class="ri-check-line text-green-600"></i>
-                                        <span class="font-semibold text-sm">Fraud Detection</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 ml-7">No suspicious patterns detected - low fraud risk</p>
-                                </div>
-
-                                <div class="validation-item">
-                                    <div class="flex items-center gap-2">
-                                        <i class="ri-check-line text-green-600"></i>
-                                        <span class="font-semibold text-sm">Risk Assessment</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 ml-7">Risk Score: 15/100 (LOW RISK)</p>
-                                </div>
-
-                                <div class="validation-item">
-                                    <div class="flex items-center gap-2">
-                                        <i class="ri-check-line text-green-600"></i>
-                                        <span class="font-semibold text-sm">Business Rule Validation</span>
-                                    </div>
-                                    <p class="text-xs text-gray-600 ml-7">All business rules satisfied</p>
-                                </div>
-                            </div>
+                    <!-- Documents -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                        <h2 class="section-title"><i class="ri-folder-zip-line text-blue-500"></i> Supporting Documents</h2>
+                        <div id="documentsList" class="space-y-3">
+                            <div class="text-center text-slate-400 py-4">Loading documents...</div>
                         </div>
                     </div>
 
-                    <!-- COMPLIANCE TAB -->
-                    <div id="tab-compliance" class="space-y-4" style="display: none;">
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">✓ Customs Compliance Review</h3>
-                            
-                            <div class="section-card">
-                                <h4 class="font-semibold mb-2">Trader Compliance Status</h4>
-                                <p class="text-sm">Status: <span class="badge badge-approved">Compliant</span></p>
-                                <p class="text-xs text-gray-600 mt-2">Last 12 months: 0 violations, 0 penalties</p>
-                            </div>
+                </div>
 
-                            <div class="section-card">
-                                <h4 class="font-semibold mb-2">Product Category Restrictions</h4>
-                                <p class="text-sm mb-2">Electronics & Computer Equipment</p>
-                                <div class="text-sm bg-white p-2 rounded border border-gray-200">
-                                    <p>✓ No import restrictions</p>
-                                    <p>✓ Standard duty rate applies (15%)</p>
-                                    <p>✓ No prohibited items detected</p>
-                                </div>
+                <!-- Right Column (Sidebar info) -->
+                <div class="space-y-6">
+                    
+                    <!-- Risk Assessment -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                        <h2 class="section-title text-sm"><i class="ri-shield-check-line text-blue-500"></i> AI Risk Assessment</h2>
+                        
+                        <div class="text-center mb-5 pb-5 border-b border-slate-100">
+                            <div class="text-xs text-slate-500 font-semibold mb-2 uppercase tracking-wider">Overall Risk Level</div>
+                            <div id="riskLevelBadge">
+                                <span class="risk-badge bg-slate-100 text-slate-500">LOADING</span>
                             </div>
+                        </div>
 
-                            <div class="section-card">
-                                <h4 class="font-semibold mb-2">Valuation Compliance</h4>
-                                <div class="info-row" style="border: none; padding: 0.5rem 0;">
-                                    <span>Declared Value</span>
-                                    <span>$25,000 USD</span>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold mb-1">
+                                    <span class="text-slate-600">Fraud Risk</span>
+                                    <span id="riskFraudVal" class="text-slate-800">0%</span>
                                 </div>
-                                <div class="info-row" style="border: none; padding: 0.5rem 0;">
-                                    <span>Market Reference Value</span>
-                                    <span>$24,500 - $26,000</span>
-                                </div>
-                                <div class="text-sm text-green-600 mt-2">✓ Valuation within acceptable range</div>
+                                <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="riskFraudBar" class="bg-blue-500 h-1.5 rounded-full" style="width: 0%"></div></div>
                             </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold mb-1">
+                                    <span class="text-slate-600">Compliance Risk</span>
+                                    <span id="riskCompVal" class="text-slate-800">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="riskCompBar" class="bg-blue-500 h-1.5 rounded-full" style="width: 0%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-semibold mb-1">
+                                    <span class="text-slate-600">Valuation Risk</span>
+                                    <span id="riskValueVal" class="text-slate-800">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="riskValueBar" class="bg-blue-500 h-1.5 rounded-full" style="width: 0%"></div></div>
+                            </div>
+                        </div>
 
-                            <div class="section-card">
-                                <h4 class="font-semibold mb-2">Additional Notes</h4>
-                                <div class="bg-white p-3 rounded border border-gray-200">
-                                    <p class="text-sm text-gray-700">Documents are complete and properly formatted. Trader has excellent compliance history. Recommend approval for further processing.</p>
-                                </div>
-                            </div>
+                        <div id="aiRecommendations" class="mt-5 pt-4 border-t border-slate-100">
+                            <div class="text-xs font-bold text-slate-700 mb-2">AI Recommendations:</div>
+                            <ul class="text-xs text-slate-600 space-y-1 pl-4 list-disc" id="recList">
+                                <li>Loading...</li>
+                            </ul>
                         </div>
                     </div>
 
-                    <!-- HISTORY TAB -->
-                    <div id="tab-history" class="space-y-4" style="display: none;">
-                        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                            <h3 class="font-bold text-lg mb-4">📅 Application Timeline</h3>
-                            
-                            <div class="status-timeline">
-                                <div class="status-step completed">
-                                    <p class="font-semibold text-sm">Application Submitted</p>
-                                    <p class="text-xs text-gray-600">Jun 22, 2026 at 10:30 AM</p>
-                                    <p class="text-xs text-gray-500 mt-1">Submitted by: John Trading Co.</p>
-                                </div>
-
-                                <div class="status-step completed">
-                                    <p class="font-semibold text-sm">AI Validation Completed</p>
-                                    <p class="text-xs text-gray-600">Jun 22, 2026 at 10:32 AM</p>
-                                    <p class="text-xs text-gray-500 mt-1">Status: PASSED - All 10 checks completed successfully</p>
-                                </div>
-
-                                <div class="status-step completed">
-                                    <p class="font-semibold text-sm">Queued for Officer Review</p>
-                                    <p class="text-xs text-gray-600">Jun 22, 2026 at 10:32 AM</p>
-                                    <p class="text-xs text-gray-500 mt-1">Application added to review queue</p>
-                                </div>
-
-                                <div class="status-step current">
-                                    <p class="font-semibold text-sm">Officer Review In Progress</p>
-                                    <p class="text-xs text-gray-600">Jun 22, 2026 at 02:15 PM</p>
-                                    <p class="text-xs text-gray-500 mt-1">Currently reviewing - awaiting officer decision</p>
-                                </div>
+                    <!-- Calculated Duties Preview -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+                        <h2 class="section-title text-sm"><i class="ri-money-dollar-circle-line text-blue-500"></i> Estimated Duties</h2>
+                        <p class="text-xs text-slate-500 mb-4">Calculated by AI based on HS code and declared value. Final verification pending.</p>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">Import Duty</span>
+                                <span id="estDuty" class="font-semibold text-slate-800">–</span>
                             </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-600">VAT / Tax</span>
+                                <span id="estTax" class="font-semibold text-slate-800">–</span>
+                            </div>
+                        </div>
+                        <div class="pt-3 border-t border-slate-200 flex justify-between">
+                            <span class="font-bold text-slate-800">Total Est. Payable</span>
+                            <span id="estTotal" class="font-bold text-lg text-green-700">–</span>
                         </div>
                     </div>
 
-                    <!-- ACTION BUTTONS -->
-                    <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm flex flex-wrap gap-3">
-                        <button class="action-btn btn-approve" onclick="openModal('approve')">
-                            <i class="ri-check-line"></i> Approve
-                        </button>
-                        <button class="action-btn btn-forward" onclick="openModal('forward')">
-                            <i class="ri-arrow-right-line"></i> Forward for Inspection
-                        </button>
-                        <button class="action-btn btn-return" onclick="openModal('return')">
-                            <i class="ri-send-back-line"></i> Return for Correction
-                        </button>
-                    </div>
-                </main>
+                </div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <!-- MODALS -->
-    <!-- Approve Modal -->
-    <div id="approveModal" class="modal-overlay" onclick="if(event.target === this) closeModal('approve')">
-        <div class="modal-content">
-            <h2 class="modal-title">Approve Application</h2>
-            <p class="text-gray-600 mb-4">Are you sure you want to approve this application for CV-2026-0042?</p>
-            <textarea placeholder="Add approval comments (optional)" rows="4"></textarea>
-            <div class="flex gap-3 mt-6">
-                <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition" onclick="closeModal('approve')">Cancel</button>
-                <button class="flex-1 btn-approve py-2 rounded-lg transition" onclick="submitApproval()">Confirm Approval</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Forward for Inspection Modal -->
-    <div id="forwardModal" class="modal-overlay" onclick="if(event.target === this) closeModal('forward')">
-        <div class="modal-content">
-            <h2 class="modal-title">Forward for Inspection</h2>
-            <p class="text-gray-600 mb-4">Forward this application to the Inspector for physical inspection?</p>
-            <label class="block mb-3">
-                <span class="text-sm font-semibold text-gray-700">Inspection Type</span>
-                <select class="w-full mt-1 p-2 border rounded-lg">
-                    <option>Random Inspection</option>
-                    <option>Physical Inspection</option>
-                    <option>Document Review Only</option>
+    <!-- Modals -->
+    <!-- Return Modal -->
+    <div id="modal-return" class="modal-overlay">
+        <div class="modal-content w-full max-w-lg p-6 bg-white rounded-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Return to Agent</h3>
+            <p class="text-sm text-slate-500 mb-4">The declaration will be returned to the agent for corrections.</p>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Reason for Return <span class="text-red-500">*</span></label>
+                <select id="returnReason" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm">
+                    <option value="">Select reason...</option>
+                    <option value="Missing Documents">Missing Documents</option>
+                    <option value="Incorrect HS Code">Incorrect HS Code</option>
+                    <option value="Valuation Discrepancy">Valuation Discrepancy</option>
+                    <option value="Invalid Permit">Invalid Permit</option>
+                    <option value="Other">Other</option>
                 </select>
-            </label>
-            <textarea placeholder="Add inspection instructions or notes" rows="4"></textarea>
-            <div class="flex gap-3 mt-6">
-                <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition" onclick="closeModal('forward')">Cancel</button>
-                <button class="flex-1 btn-forward py-2 rounded-lg transition" onclick="submitForward()">Forward Application</button>
+            </div>
+            
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Detailed Notes <span class="text-red-500">*</span></label>
+                <textarea id="returnNotes" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm" placeholder="Explain what the agent needs to fix..."></textarea>
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal('return')" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition text-sm">Cancel</button>
+                <button onclick="submitAction('return')" id="btnReturn" class="px-4 py-2 bg-orange-600 text-white font-medium hover:bg-orange-700 rounded-lg transition text-sm">Confirm Return</button>
             </div>
         </div>
     </div>
 
-    <!-- Return for Correction Modal -->
-    <div id="returnModal" class="modal-overlay" onclick="if(event.target === this) closeModal('return')">
-        <div class="modal-content">
-            <h2 class="modal-title">Return for Correction</h2>
-            <p class="text-gray-600 mb-4">Return this application for correction. Trader will be notified to resubmit.</p>
-            <label class="block mb-3">
-                <span class="text-sm font-semibold text-gray-700">Reason for Return *</span>
-                <textarea placeholder="Explain what needs to be corrected" rows="4" required></textarea>
-            </label>
-            <div class="flex gap-3 mt-6">
-                <button class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition" onclick="closeModal('return')">Cancel</button>
-                <button class="flex-1 btn-return py-2 rounded-lg transition" onclick="submitReturn()">Return Application</button>
+    <!-- Approve Modal -->
+    <div id="modal-approve" class="modal-overlay">
+        <div class="modal-content w-full max-w-lg p-6 bg-white rounded-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Approve for Inspection</h3>
+            <p class="text-sm text-slate-500 mb-4">This will forward the declaration to the inspection queue.</p>
+            
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Notes for Inspector (Optional)</label>
+                <textarea id="approveNotes" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm" placeholder="Any specific instructions for the physical inspection..."></textarea>
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal('approve')" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition text-sm">Cancel</button>
+                <button onclick="submitAction('approve')" id="btnApprove" class="px-4 py-2 bg-blue-600 text-white font-medium hover:bg-blue-700 rounded-lg transition text-sm">Confirm Approval</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reject Modal -->
+    <div id="modal-reject" class="modal-overlay">
+        <div class="modal-content w-full max-w-lg p-6 bg-white rounded-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Reject Declaration</h3>
+            <p class="text-sm text-red-500 mb-4 font-medium"><i class="ri-error-warning-line"></i> This action is final and cannot be undone.</p>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Rejection Reason <span class="text-red-500">*</span></label>
+                <select id="rejectReason" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm">
+                    <option value="">Select reason...</option>
+                    <option value="Prohibited Goods">Prohibited Goods</option>
+                    <option value="Fraud Suspected">Fraud Suspected</option>
+                    <option value="Fake Documents">Fake/Forged Documents</option>
+                    <option value="Severe Compliance Violation">Severe Compliance Violation</option>
+                </select>
+            </div>
+            
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Detailed Justification <span class="text-red-500">*</span></label>
+                <textarea id="rejectNotes" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm" placeholder="Provide complete justification for rejection..."></textarea>
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal('reject')" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition text-sm">Cancel</button>
+                <button onclick="submitAction('reject')" id="btnReject" class="px-4 py-2 bg-red-600 text-white font-medium hover:bg-red-700 rounded-lg transition text-sm">Confirm Rejection</button>
             </div>
         </div>
     </div>
 
+    <!-- Assign Inspector Modal -->
+    <div id="modal-assign_inspector" class="modal-overlay">
+        <div class="modal-content w-full max-w-lg p-6 bg-white rounded-xl">
+            <h3 class="text-lg font-bold text-slate-900 mb-1">Assign Inspector</h3>
+            <p class="text-sm text-slate-500 mb-4">This will assign the declaration to an inspector for physical inspection.</p>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Inspection Type <span class="text-red-500">*</span></label>
+                <select id="inspectionType" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm">
+                    <option value="">Select inspection type...</option>
+                    <option value="physical">Physical Inspection</option>
+                    <option value="document">Document Verification</option>
+                    <option value="xray">X-Ray Inspection</option>
+                    <option value="laboratory">Laboratory Testing</option>
+                </select>
+            </div>
+            
+            <div class="mb-5">
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Notes for Inspector (Optional)</label>
+                <textarea id="assignNotes" rows="3" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 text-sm" placeholder="Any specific instructions for the inspector..."></textarea>
+            </div>
+            
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal('assign_inspector')" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition text-sm">Cancel</button>
+                <button onclick="submitAction('assign_inspector')" id="btnAssign_inspector" class="px-4 py-2 bg-amber-600 text-white font-medium hover:bg-amber-700 rounded-lg transition text-sm">Assign Inspector</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Same auth script structure -->
     <script type="module">
         import supabase from '../../js/supabase.js';
-        import { loadCurrentUserProfile } from '../../js/profile-loader.js';
-        import { checkPageAuth } from '../../js/auth-check.js';
-        
-        import { fetchApplicationById } from '../../js/applications.js';
+        import { getCurrentUser, getUserProfile } from '../../js/auth.js';
+        import { approveApplication, returnApplication, rejectApplication, sendForInspection } from '../../js/officer-service.js';
 
-        
-        // Extract ID from URL
-        const urlParams = new URLSearchParams(window.location.search);
-        let appId = urlParams.get('id');
+        let applicationId = null;
 
-        async function init() {
-            // Check auth
-            const hasAuth = await checkPageAuth('officer');
-
-        // Load user profile
-        await loadCurrentUserProfile();
-            if (!hasAuth) return;
-
-            if (!appId) {
-                // Find the first submitted application to display
-                const { data: apps } = await supabase
-                    .from('applications')
-                    .select('id')
-                    .in('status', ['submitted', 'pending_review'])
-                    .limit(1);
-                if (apps && apps.length > 0) {
-                    appId = apps[0].id;
-                    // Update URL without reloading
-                    window.history.replaceState({}, '', `?id=${appId}`);
-                }
-            }
-
-            if (appId) {
-                const result = await fetchApplicationById(appId);
-                if (result.success && result.data) {
-                    populateApplicationDetails(result.data);
-                } else {
-                    console.error('Failed to load application:', result.error);
-                }
-            }
+        function showToast(msg, type = 'info') {
+            const t = document.getElementById('toast'); 
+            t.textContent = msg; 
+            t.style.background = type === 'success' ? '#059669' : type === 'error' ? '#dc2626' : '#1e3a8a';
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3500);
         }
 
-        function populateApplicationDetails(app) {
-            document.querySelectorAll('.opacity-90.text-sm.mt-1').forEach(el => {
-                el.textContent = `Application ${app.application_number}`;
-            });
+        window.openModal = function(type) {
+            document.getElementById(`modal-${type}`).classList.add('show');
+        };
 
-            // Trader info
-            supabase.from('profiles').select('*').eq('id', app.user_id).single().then(({ data: profile }) => {
-                if (profile) {
-                    const traderNameEl = document.querySelector('.text-semibold.text-lg');
-                    if (traderNameEl) traderNameEl.textContent = profile.full_name || 'Trader';
+        window.closeModal = function(type) {
+            document.getElementById(`modal-${type}`).classList.remove('show');
+        };
+
+        function formatRisk(level) {
+            const classes = { low: 'risk-low', medium: 'risk-medium', high: 'risk-high', critical: 'risk-critical' };
+            return `<span class="risk-badge ${classes[level] || 'bg-slate-100 text-slate-600'}">${level ? level.toUpperCase() : 'UNASSESSED'}</span>`;
+        }
+        
+        function formatStatus(status) {
+            const labels = { pending_review: 'Pending Review', under_inspection: 'Under Inspection', returned: 'Returned', rejected: 'Rejected' };
+            return labels[status] || status;
+        }
+
+        window.submitAction = async function(action) {
+            const btn = document.getElementById(`btn${action.charAt(0).toUpperCase() + action.slice(1)}`);
+            btn.disabled = true;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-1"></i>Processing...';
+
+            try {
+                let result;
+                
+                if (action === 'approve') {
+                    const notes = document.getElementById('approveNotes').value;
+                    result = await approveApplication(applicationId, notes);
+                } else if (action === 'return') {
+                    const reason = document.getElementById('returnReason').value;
+                    const notes = document.getElementById('returnNotes').value;
+                    if (!reason || !notes) throw new Error('Reason and notes are required');
+                    result = await returnApplication(applicationId, reason, notes);
+                } else if (action === 'reject') {
+                    const reason = document.getElementById('rejectReason').value;
+                    const notes = document.getElementById('rejectNotes').value;
+                    if (!reason || !notes) throw new Error('Reason and notes are required');
+                    result = await rejectApplication(applicationId, reason, notes);
+                } else if (action === 'assign_inspector') {
+                    const inspectionType = document.getElementById('inspectionType').value;
+                    const notes = document.getElementById('assignNotes').value;
+                    if (!inspectionType) throw new Error('Inspection type is required');
+                    result = await sendForInspection(applicationId, inspectionType, notes);
+                }
+
+                if (result.success) {
+                    showToast(`Application ${action.replace('_', ' ')} successfully`, 'success');
+                    closeModal(action);
+                    setTimeout(() => window.location.href = 'dashboard-officer.html', 1500);
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (err) {
+                showToast(err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        };
+
+        async function loadApplicationDetails() {
+            try {
+                const { data: app, error } = await supabase
+                    .from('applications')
+                    .select(`
+                        *,
+                        profiles:agent_id(full_name, phone, email),
+                        risk_assessments(*),
+                        ai_validation_results!ai_validation_results_application_id_fkey(*),
+                        documents(*)
+                    `)
+                    .eq('id', applicationId)
+                    .single();
+
+                if (error) throw error;
+                if (!app) throw new Error("Application not found");
+
+                // Populate Header
+                document.getElementById('appNumber').textContent = app.application_number;
+                document.getElementById('appStatus').textContent = formatStatus(app.status);
+
+                const decl = app.declaration_data || {};
+                const goods = app.goods_data || {};
+
+                // Populate summary
+                document.getElementById('valImporter').textContent = decl.importer_exporter?.importer_name || 'N/A';
+                document.getElementById('valExporter').textContent = decl.importer_exporter?.exporter_name || 'N/A';
+                document.getElementById('valAgent').textContent = app.profiles?.full_name || 'N/A';
+                document.getElementById('valPort').textContent = decl.customs?.port_of_entry || 'N/A';
+                
+                document.getElementById('valGoodsDesc').textContent = goods.description || 'N/A';
+                document.getElementById('valHsCode').textContent = goods.hs_code || 'N/A';
+                document.getElementById('valQuantity').textContent = `${goods.quantity || 0} ${goods.unit || 'units'}`;
+                document.getElementById('valValue').textContent = app.declared_value ? `${app.declared_value.toLocaleString()} ${goods.currency || 'SSP'}` : 'N/A';
+                document.getElementById('valOrigin').textContent = decl.consignment?.country_of_origin || goods.country_of_origin || 'N/A';
+
+                // Populate Risk
+                const risk = app.risk_assessments?.[0];
+                if (risk) {
+                    document.getElementById('riskLevelBadge').innerHTML = formatRisk(risk.risk_level);
                     
-                    const detailTexts = document.querySelectorAll('.font-semibold');
-                    if (detailTexts.length >= 4) {
-                        detailTexts[0].textContent = profile.full_name || 'Trader';
-                        detailTexts[1].textContent = profile.organization || profile.company || 'N/A';
-                        detailTexts[2].textContent = profile.email || 'N/A';
-                        detailTexts[3].textContent = profile.phone || 'N/A';
+                    document.getElementById('riskFraudVal').textContent = `${risk.fraud_risk || 0}%`;
+                    document.getElementById('riskFraudBar').style.width = `${risk.fraud_risk || 0}%`;
+                    
+                    document.getElementById('riskCompVal').textContent = `${risk.compliance_risk || 0}%`;
+                    document.getElementById('riskCompBar').style.width = `${risk.compliance_risk || 0}%`;
+                    
+                    document.getElementById('riskValueVal').textContent = `${risk.value_risk || 0}%`;
+                    document.getElementById('riskValueBar').style.width = `${risk.value_risk || 0}%`;
+
+                    const recs = risk.recommendations || [];
+                    document.getElementById('recList').innerHTML = recs.length 
+                        ? recs.map(r => `<li>${r}</li>`).join('') 
+                        : '<li>Standard processing recommended.</li>';
+                }
+
+                // Estimated Duties (mock for now if not in risk assessment)
+                const estTotal = app.declared_value ? app.declared_value * 0.15 : 0;
+                document.getElementById('estDuty').textContent = `${(estTotal * 0.4).toLocaleString()} SSP`;
+                document.getElementById('estTax').textContent = `${(estTotal * 0.6).toLocaleString()} SSP`;
+                document.getElementById('estTotal').textContent = `${estTotal.toLocaleString()} SSP`;
+
+                // Documents
+                const docs = app.documents || [];
+                const docsList = document.getElementById('documentsList');
+                if (docs.length === 0) {
+                    docsList.innerHTML = '<div class="text-sm text-slate-500">No documents attached</div>';
+                } else {
+                    docsList.innerHTML = docs.map(d => `
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <i class="ri-file-pdf-2-line text-2xl text-red-500"></i>
+                                <div>
+                                    <div class="text-sm font-medium text-slate-800 truncate max-w-[200px]">${d.document_name}</div>
+                                    <div class="text-xs text-slate-500 uppercase">${(d.document_type || 'doc').replace('_', ' ')}</div>
+                                </div>
+                            </div>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium"><i class="ri-eye-line mr-1"></i>View</button>
+                        </div>
+                    `).join('');
+                }
+
+                // AI Validation Alert
+                const ai = app.ai_validation_results?.[0];
+                const aiAlert = document.getElementById('aiAlert');
+                if (ai) {
+                    aiAlert.classList.remove('hidden');
+                    const icon = document.getElementById('aiAlertIcon');
+                    if (ai.status === 'passed') {
+                        aiAlert.classList.add('bg-green-50', 'border-green-500', 'text-green-800');
+                        icon.className = 'ri-check-circle-line text-xl mt-0.5 text-green-600';
+                        document.getElementById('aiAlertMsg').textContent = 'All automated checks passed successfully.';
+                    } else if (ai.status === 'warning') {
+                        aiAlert.classList.add('bg-amber-50', 'border-amber-500', 'text-amber-800');
+                        icon.className = 'ri-alert-line text-xl mt-0.5 text-amber-600';
+                        document.getElementById('aiAlertMsg').textContent = 'Warnings found during automated checks. Review carefully.';
+                    } else {
+                        aiAlert.classList.add('bg-red-50', 'border-red-500', 'text-red-800');
+                        icon.className = 'ri-error-warning-line text-xl mt-0.5 text-red-600';
+                        document.getElementById('aiAlertMsg').textContent = 'Critical failures during AI validation.';
                     }
                 }
-            });
 
-            // Shipment details
-            const rows = document.querySelectorAll('.info-row span.font-semibold');
-            if (rows.length >= 8) {
-                rows[0].textContent = app.application_number;
-                rows[1].textContent = (app.application_type || '').replace('_', ' ').toUpperCase();
-                rows[2].textContent = app.goods_data?.item_description || app.declaration_data?.product_description || app.notes || 'N/A';
-                rows[3].textContent = app.goods_data?.hs_code || app.declaration_data?.hs_code || 'N/A';
-                rows[4].textContent = app.goods_data?.quantity || app.declaration_data?.quantity || 'N/A';
-                rows[5].textContent = `$${(app.declared_value || 0).toLocaleString()} USD`;
-                rows[6].textContent = app.declaration_data?.port_of_entry || app.declaration_data?.port_of_exit || 'N/A';
-                rows[7].textContent = app.declaration_data?.clearing_agent || 'N/A';
-            }
-
-            // Update badge
-            const statusBadges = {
-                submitted: 'badge-pending',
-                pending_review: 'badge-review',
-                approved: 'badge-approved',
-                returned: 'badge-returned',
-                under_inspection: 'badge-review'
-            };
-            const badge = document.querySelector('.badge');
-            if (badge) {
-                badge.className = 'badge ' + (statusBadges[app.status] || 'badge-pending');
-                badge.textContent = (app.status || '').replace('_', ' ').toUpperCase();
+            } catch (err) {
+                console.error("Load error:", err);
+                showToast("Failed to load application details", "error");
             }
         }
 
-        function switchTab(tabName) {
-            const tabs = document.querySelectorAll('[id^="tab-"]');
-            tabs.forEach(tab => tab.style.display = 'none');
+        async function init() {
+            const user = await getCurrentUser();
+            if (!user) { window.location.href = '/auth/login.html'; return; }
             
-            const buttons = document.querySelectorAll('.tab-btn');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            
-            document.getElementById('tab-' + tabName).style.display = 'block';
-            if (event && event.target) {
-                event.target.classList.add('active');
-            }
-        }
+            const profile = await getUserProfile(user.id);
+            if (!profile || profile.role !== 'officer') { window.location.href = '/auth/login.html'; return; }
 
-        function openModal(modalType) {
-            document.getElementById(modalType + 'Modal').classList.add('open');
-        }
+            const urlParams = new URLSearchParams(window.location.search);
+            applicationId = urlParams.get('id');
 
-        function closeModal(modalType) {
-            document.getElementById(modalType + 'Modal').classList.remove('open');
-        }
-
-        async function submitApproval() {
-            if (!appId) return;
-            const comments = document.querySelector('#approveModal textarea').value;
-            const { error } = await supabase
-                .from('applications')
-                .update({
-                    status: 'approved',
-                    notes: comments,
-                    reviewed_at: new Date().toISOString()
-                })
-                .eq('id', appId);
-
-            if (error) {
-                alert('Failed to approve application: ' + error.message);
-            } else {
-                alert('Application approved successfully!');
-                closeModal('approve');
-                window.location.href = 'cvet-review-queue.html';
-            }
-        }
-
-        async function submitForward() {
-            if (!appId) return;
-            const insType = document.querySelector('#forwardModal select').value;
-            const insNotes = document.querySelector('#forwardModal textarea').value;
-
-            // Fetch an inspector profile
-            const { data: inspectors } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('role', 'inspector')
-                .limit(1);
-
-            const inspectorId = inspectors && inspectors.length > 0 ? inspectors[0].id : null;
-
-            if (!inspectorId) {
-                alert('No registered Inspectors found. Please make sure an Inspector account exists.');
+            if (!applicationId) {
+                window.location.href = 'dashboard-officer.html';
                 return;
             }
 
-            const { error } = await supabase
-                .from('applications')
-                .update({
-                    status: 'under_inspection',
-                    inspector_id: inspectorId,
-                    notes: `Type: ${insType}. Notes: ${insNotes}`,
-                    reviewed_at: new Date().toISOString()
-                })
-                .eq('id', appId);
-
-            if (error) {
-                alert('Failed to forward for inspection: ' + error.message);
-            } else {
-                alert('Application forwarded to Inspector successfully!');
-                closeModal('forward');
-                window.location.href = 'cvet-review-queue.html';
-            }
+            await loadApplicationDetails();
         }
-
-        async function submitReturn() {
-            if (!appId) return;
-            const reason = document.querySelector('#returnModal textarea').value;
-            if (!reason) {
-                alert('Please provide a reason for return');
-                return;
-            }
-
-            const { error } = await supabase
-                .from('applications')
-                .update({
-                    status: 'returned',
-                    return_reason: reason,
-                    reviewed_at: new Date().toISOString()
-                })
-                .eq('id', appId);
-
-            if (error) {
-                alert('Failed to return application: ' + error.message);
-            } else {
-                alert('Application returned for correction successfully!');
-                closeModal('return');
-                window.location.href = 'cvet-review-queue.html';
-            }
-        }
-
-        // Bind to window for inline HTML onclick handlers
-        window.switchTab = switchTab;
-        window.openModal = openModal;
-        window.closeModal = closeModal;
-        window.submitApproval = submitApproval;
-        window.submitForward = submitForward;
-        window.submitReturn = submitReturn;
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-            }
-        });
 
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
-
-
-

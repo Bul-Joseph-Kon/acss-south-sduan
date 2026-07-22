@@ -48,7 +48,7 @@
                                     <div class="text-sm font-medium">${app.application_number || 'N/A'}</div>
                                     <div class="text-xs text-gray-500">${app.profiles?.full_name || 'Unknown Agent'}</div>
                                 </div>
-                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">Inspection</span>
+                                <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">Inspection Required</span>
                             </div>
                         `).join('');
                     }
@@ -381,7 +381,7 @@
         import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
 
-        import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
+        import { fetchDashboardData, fetchRecentApplications, fetchInspectorDashboardData } from '../../js/dashboard.js';
 
         import { fetchApplicationsForRole } from '../../js/applications.js';
 
@@ -480,44 +480,20 @@
         async function loadWorkflowApplications() {
             console.log('=== LOADING WORKFLOW APPLICATIONS FOR INSPECTOR ===');
 
-            const result = await fetchApplicationsForRole('inspector', { limit: 10 });
+            const result = await fetchInspectorDashboardData();
 
-            if (result.success && result.data) {
-                const applications = result.data;
-                console.log('Applications loaded:', applications);
-
+            if (result.success && result.stats) {
                 // Update stats
-                updateWorkflowStats(applications);
+                document.getElementById('statPendingInspections').textContent = result.stats.pending;
+                document.getElementById('statInProgress').textContent = result.stats.inProgress;
+                document.getElementById('statCompleted').textContent = result.stats.completed;
+                document.getElementById('statFailed').textContent = result.stats.failed;
 
                 // Update inspection queues
-                updateInspectionQueues(applications);
+                updateInspectionQueues(result.queue);
             } else {
                 console.error('Failed to load applications:', result.error);
             }
-        }
-
-        function updateWorkflowStats(applications) {
-            const stats = {
-                under_inspection: 0,
-                in_progress: 0,
-                completed: 0,
-                failed: 0,
-                pending_review: 0
-            };
-
-            applications.forEach(app => {
-                if (app.status === 'under_inspection') stats.under_inspection++;
-                else if (app.status === 'in_progress') stats.in_progress++;
-                else if (app.status === 'completed' || app.status === 'cleared') stats.completed++;
-                else if (app.status === 'rejected') stats.failed++;
-                else if (app.status === 'pending_review') stats.pending_review++;
-            });
-
-            // Update stat cards by ID
-            document.getElementById('statPendingInspections').textContent = stats.under_inspection + stats.pending_review;
-            document.getElementById('statInProgress').textContent = stats.in_progress;
-            document.getElementById('statCompleted').textContent = stats.completed;
-            document.getElementById('statFailed').textContent = stats.failed;
         }
 
         function updateInspectionQueues(applications) {
@@ -528,9 +504,10 @@
             };
 
             applications.forEach(app => {
-                if (app.inspection_type === 'cargo') queues.cargo++;
-                else if (app.inspection_type === 'vehicle') queues.vehicle++;
-                else if (app.inspection_type === 'warehouse') queues.warehouse++;
+                const type = app.inspection_type || 'cargo';
+                if (type === 'vehicle') queues.vehicle++;
+                else if (type === 'warehouse') queues.warehouse++;
+                else queues.cargo++;
             });
 
             const queueContainer = document.getElementById('inspectionQueue');

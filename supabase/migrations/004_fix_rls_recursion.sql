@@ -42,34 +42,40 @@ DROP POLICY IF EXISTS "Service role can insert profiles" ON public.profiles;
 -- ================================================================
 
 -- Users can view their own profile
-CREATE POLICY "Users can view own profile"
-    ON public.profiles FOR SELECT
+DROP POLICY IF EXISTS "Users can view own profile" ON public;
+DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
+CREATE POLICY "Users can view own profile" ON public.profiles FOR SELECT
     USING (user_id = auth.uid());
 
 -- Users can update their own profile
-CREATE POLICY "Users can update own profile"
-    ON public.profiles FOR UPDATE
+DROP POLICY IF EXISTS "Users can update own profile" ON public;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+CREATE POLICY "Users can update own profile" ON public.profiles FOR UPDATE
     USING (user_id = auth.uid());
 
 -- Users can insert their own profile (for self-registration)
-CREATE POLICY "Users can insert own profile"
-    ON public.profiles FOR INSERT
+DROP POLICY IF EXISTS "Users can insert own profile" ON public;
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
+CREATE POLICY "Users can insert own profile" ON public.profiles FOR INSERT
     WITH CHECK (user_id = auth.uid());
 
 -- Service role can insert profiles (for Edge Functions)
-CREATE POLICY "Service role can insert profiles"
-    ON public.profiles FOR INSERT
+DROP POLICY IF EXISTS "Service role can insert profiles" ON public;
+DROP POLICY IF EXISTS "Service role can insert profiles" ON public.profiles;
+CREATE POLICY "Service role can insert profiles" ON public.profiles FOR INSERT
     TO service_role
     WITH CHECK (true);
 
 -- Administrators can view all profiles (uses admin_users, no recursion)
-CREATE POLICY "Administrators can view all profiles"
-    ON public.profiles FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all profiles" ON public;
+DROP POLICY IF EXISTS "Administrators can view all profiles" ON public.profiles;
+CREATE POLICY "Administrators can view all profiles" ON public.profiles FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Administrators can update all profiles (uses admin_users, no recursion)
-CREATE POLICY "Administrators can update all profiles"
-    ON public.profiles FOR UPDATE
+DROP POLICY IF EXISTS "Administrators can update all profiles" ON public;
+DROP POLICY IF EXISTS "Administrators can update all profiles" ON public.profiles;
+CREATE POLICY "Administrators can update all profiles" ON public.profiles FOR UPDATE
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()))
     WITH CHECK (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
@@ -101,14 +107,16 @@ END $$;
 
 -- Only administrators can view admin_users
 DROP POLICY IF EXISTS "Administrators can view admin_users" ON public.admin_users;
-CREATE POLICY "Administrators can view admin_users"
-    ON public.admin_users FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view admin_users" ON public;
+DROP POLICY IF EXISTS "Administrators can view admin_users" ON public.admin_users;
+CREATE POLICY "Administrators can view admin_users" ON public.admin_users FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Only service_role can insert admin_users (for Edge Functions)
 DROP POLICY IF EXISTS "Service role can insert admin_users" ON public.admin_users;
-CREATE POLICY "Service role can insert admin_users"
-    ON public.admin_users FOR INSERT
+DROP POLICY IF EXISTS "Service role can insert admin_users" ON public;
+DROP POLICY IF EXISTS "Service role can insert admin_users" ON public.admin_users;
+CREATE POLICY "Service role can insert admin_users" ON public.admin_users FOR INSERT
     TO service_role
     WITH CHECK (true);
 
@@ -118,151 +126,178 @@ CREATE POLICY "Service role can insert admin_users"
 
 -- Applications
 DROP POLICY IF EXISTS "Officers can view assigned applications" ON public.applications;
-CREATE POLICY "Officers can view assigned applications"
-    ON public.applications FOR SELECT
+DROP POLICY IF EXISTS "Officers can view assigned applications" ON public;
+DROP POLICY IF EXISTS "Officers can view assigned applications" ON public.applications;
+CREATE POLICY "Officers can view assigned applications" ON public.applications FOR SELECT
     USING (officer_id = get_current_profile_id() OR EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Supervisors can view departmental applications" ON public.applications;
-CREATE POLICY "Supervisors can view departmental applications"
-    ON public.applications FOR SELECT
+DROP POLICY IF EXISTS "Supervisors can view departmental applications" ON public;
+DROP POLICY IF EXISTS "Supervisors can view departmental applications" ON public.applications;
+CREATE POLICY "Supervisors can view departmental applications" ON public.applications FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can view all applications" ON public.applications;
-CREATE POLICY "Administrators can view all applications"
-    ON public.applications FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all applications" ON public;
+DROP POLICY IF EXISTS "Administrators can view all applications" ON public.applications;
+CREATE POLICY "Administrators can view all applications" ON public.applications FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Officers can update assigned applications" ON public.applications;
-CREATE POLICY "Officers can update assigned applications"
-    ON public.applications FOR UPDATE
+DROP POLICY IF EXISTS "Officers can update assigned applications" ON public;
+DROP POLICY IF EXISTS "Officers can update assigned applications" ON public.applications;
+CREATE POLICY "Officers can update assigned applications" ON public.applications FOR UPDATE
     USING (officer_id = get_current_profile_id() OR EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Documents
 DROP POLICY IF EXISTS "Administrators can view all documents" ON public.documents;
-CREATE POLICY "Administrators can view all documents"
-    ON public.documents FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all documents" ON public;
+DROP POLICY IF EXISTS "Administrators can view all documents" ON public.documents;
+CREATE POLICY "Administrators can view all documents" ON public.documents FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Payments
 DROP POLICY IF EXISTS "Administrators can view all payments" ON public.payments;
-CREATE POLICY "Administrators can view all payments"
-    ON public.payments FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all payments" ON public;
+DROP POLICY IF EXISTS "Administrators can view all payments" ON public.payments;
+CREATE POLICY "Administrators can view all payments" ON public.payments FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Audit logs
 DROP POLICY IF EXISTS "Administrators can view all audit logs" ON public.audit_logs;
-CREATE POLICY "Administrators can view all audit logs"
-    ON public.audit_logs FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all audit logs" ON public;
+DROP POLICY IF EXISTS "Administrators can view all audit logs" ON public.audit_logs;
+CREATE POLICY "Administrators can view all audit logs" ON public.audit_logs FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Activity logs
 DROP POLICY IF EXISTS "Administrators can view all activity logs" ON public.activity_logs;
-CREATE POLICY "Administrators can view all activity logs"
-    ON public.activity_logs FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all activity logs" ON public;
+DROP POLICY IF EXISTS "Administrators can view all activity logs" ON public.activity_logs;
+CREATE POLICY "Administrators can view all activity logs" ON public.activity_logs FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- System settings
 DROP POLICY IF EXISTS "Administrators can update system settings" ON public.system_settings;
-CREATE POLICY "Administrators can update system settings"
-    ON public.system_settings FOR UPDATE
+DROP POLICY IF EXISTS "Administrators can update system settings" ON public;
+DROP POLICY IF EXISTS "Administrators can update system settings" ON public.system_settings;
+CREATE POLICY "Administrators can update system settings" ON public.system_settings FOR UPDATE
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can insert system settings" ON public.system_settings;
-CREATE POLICY "Administrators can insert system settings"
-    ON public.system_settings FOR INSERT
+DROP POLICY IF EXISTS "Administrators can insert system settings" ON public;
+DROP POLICY IF EXISTS "Administrators can insert system settings" ON public.system_settings;
+CREATE POLICY "Administrators can insert system settings" ON public.system_settings FOR INSERT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Services
 DROP POLICY IF EXISTS "Administrators can view all services" ON public.services;
-CREATE POLICY "Administrators can view all services"
-    ON public.services FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all services" ON public;
+DROP POLICY IF EXISTS "Administrators can view all services" ON public.services;
+CREATE POLICY "Administrators can view all services" ON public.services FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can insert services" ON public.services;
-CREATE POLICY "Administrators can insert services"
-    ON public.services FOR INSERT
+DROP POLICY IF EXISTS "Administrators can insert services" ON public;
+DROP POLICY IF EXISTS "Administrators can insert services" ON public.services;
+CREATE POLICY "Administrators can insert services" ON public.services FOR INSERT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can update services" ON public.services;
-CREATE POLICY "Administrators can update services"
-    ON public.services FOR UPDATE
+DROP POLICY IF EXISTS "Administrators can update services" ON public;
+DROP POLICY IF EXISTS "Administrators can update services" ON public.services;
+CREATE POLICY "Administrators can update services" ON public.services FOR UPDATE
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Departments
 DROP POLICY IF EXISTS "Administrators can modify departments" ON public.departments;
-CREATE POLICY "Administrators can modify departments"
-    ON public.departments FOR ALL
+DROP POLICY IF EXISTS "Administrators can modify departments" ON public;
+DROP POLICY IF EXISTS "Administrators can modify departments" ON public.departments;
+CREATE POLICY "Administrators can modify departments" ON public.departments FOR ALL
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Offices
 DROP POLICY IF EXISTS "Administrators can view all offices" ON public.offices;
-CREATE POLICY "Administrators can view all offices"
-    ON public.offices FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all offices" ON public;
+DROP POLICY IF EXISTS "Administrators can view all offices" ON public.offices;
+CREATE POLICY "Administrators can view all offices" ON public.offices FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can modify offices" ON public.offices;
-CREATE POLICY "Administrators can modify offices"
-    ON public.offices FOR ALL
+DROP POLICY IF EXISTS "Administrators can modify offices" ON public;
+DROP POLICY IF EXISTS "Administrators can modify offices" ON public.offices;
+CREATE POLICY "Administrators can modify offices" ON public.offices FOR ALL
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Countries
 DROP POLICY IF EXISTS "Administrators can view all countries" ON public.countries;
-CREATE POLICY "Administrators can view all countries"
-    ON public.countries FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all countries" ON public;
+DROP POLICY IF EXISTS "Administrators can view all countries" ON public.countries;
+CREATE POLICY "Administrators can view all countries" ON public.countries FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can modify countries" ON public.countries;
-CREATE POLICY "Administrators can modify countries"
-    ON public.countries FOR ALL
+DROP POLICY IF EXISTS "Administrators can modify countries" ON public;
+DROP POLICY IF EXISTS "Administrators can modify countries" ON public.countries;
+CREATE POLICY "Administrators can modify countries" ON public.countries FOR ALL
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Ports
 DROP POLICY IF EXISTS "Administrators can view all ports" ON public.ports;
-CREATE POLICY "Administrators can view all ports"
-    ON public.ports FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all ports" ON public;
+DROP POLICY IF EXISTS "Administrators can view all ports" ON public.ports;
+CREATE POLICY "Administrators can view all ports" ON public.ports FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can modify ports" ON public.ports;
-CREATE POLICY "Administrators can modify ports"
-    ON public.ports FOR ALL
+DROP POLICY IF EXISTS "Administrators can modify ports" ON public;
+DROP POLICY IF EXISTS "Administrators can modify ports" ON public.ports;
+CREATE POLICY "Administrators can modify ports" ON public.ports FOR ALL
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Tariff codes
 DROP POLICY IF EXISTS "Administrators can view all tariff codes" ON public.tariff_codes;
-CREATE POLICY "Administrators can view all tariff codes"
-    ON public.tariff_codes FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all tariff codes" ON public;
+DROP POLICY IF EXISTS "Administrators can view all tariff codes" ON public.tariff_codes;
+CREATE POLICY "Administrators can view all tariff codes" ON public.tariff_codes FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can modify tariff codes" ON public.tariff_codes;
-CREATE POLICY "Administrators can modify tariff codes"
-    ON public.tariff_codes FOR ALL
+DROP POLICY IF EXISTS "Administrators can modify tariff codes" ON public;
+DROP POLICY IF EXISTS "Administrators can modify tariff codes" ON public.tariff_codes;
+CREATE POLICY "Administrators can modify tariff codes" ON public.tariff_codes FOR ALL
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Currencies
 DROP POLICY IF EXISTS "Administrators can view all currencies" ON public.currencies;
-CREATE POLICY "Administrators can view all currencies"
-    ON public.currencies FOR SELECT
+DROP POLICY IF EXISTS "Administrators can view all currencies" ON public;
+DROP POLICY IF EXISTS "Administrators can view all currencies" ON public.currencies;
+CREATE POLICY "Administrators can view all currencies" ON public.currencies FOR SELECT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can modify currencies" ON public.currencies;
-CREATE POLICY "Administrators can modify currencies"
-    ON public.currencies FOR ALL
+DROP POLICY IF EXISTS "Administrators can modify currencies" ON public;
+DROP POLICY IF EXISTS "Administrators can modify currencies" ON public.currencies;
+CREATE POLICY "Administrators can modify currencies" ON public.currencies FOR ALL
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- Roles
 DROP POLICY IF EXISTS "Administrators can insert roles" ON public.roles;
-CREATE POLICY "Administrators can insert roles"
-    ON public.roles FOR INSERT
+DROP POLICY IF EXISTS "Administrators can insert roles" ON public;
+DROP POLICY IF EXISTS "Administrators can insert roles" ON public.roles;
+CREATE POLICY "Administrators can insert roles" ON public.roles FOR INSERT
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can update roles" ON public.roles;
-CREATE POLICY "Administrators can update roles"
-    ON public.roles FOR UPDATE
+DROP POLICY IF EXISTS "Administrators can update roles" ON public;
+DROP POLICY IF EXISTS "Administrators can update roles" ON public.roles;
+CREATE POLICY "Administrators can update roles" ON public.roles FOR UPDATE
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 DROP POLICY IF EXISTS "Administrators can delete roles" ON public.roles;
-CREATE POLICY "Administrators can delete roles"
-    ON public.roles FOR DELETE
+DROP POLICY IF EXISTS "Administrators can delete roles" ON public;
+DROP POLICY IF EXISTS "Administrators can delete roles" ON public.roles;
+CREATE POLICY "Administrators can delete roles" ON public.roles FOR DELETE
     USING (EXISTS (SELECT 1 FROM public.admin_users WHERE user_id = auth.uid()));
 
 -- ================================================================

@@ -109,7 +109,7 @@ ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 -- Users can view their own applications
 CREATE POLICY "Users can view own applications"
     ON applications FOR SELECT
-    USING (user_id = get_current_profile_id());
+    USING (user_id = get_current_profile_id() OR agent_id = get_current_profile_id());
 
 -- Agents can view applications assigned to them
 CREATE POLICY "Agents can view assigned applications"
@@ -119,11 +119,10 @@ CREATE POLICY "Agents can view assigned applications"
         user_id = get_current_profile_id()
     );
 
--- Officers can view applications assigned to them
+-- Officers can view all applications for review (not just assigned ones)
 CREATE POLICY "Officers can view assigned applications"
     ON applications FOR SELECT
     USING (
-        officer_id = get_current_profile_id() OR
         EXISTS (
             SELECT 1 FROM profiles 
             WHERE user_id = auth.uid() AND role IN ('officer', 'supervisor', 'administrator')
@@ -427,6 +426,16 @@ CREATE POLICY "Administrators can view all activity logs"
 CREATE POLICY "System can insert activity logs"
     ON activity_logs FOR INSERT
     WITH CHECK (true);
+
+-- Supervisors and officers can insert activity logs
+CREATE POLICY "Staff can insert activity logs"
+    ON activity_logs FOR INSERT
+    USING (
+        EXISTS (
+            SELECT 1 FROM profiles 
+            WHERE user_id = auth.uid() AND role IN ('officer', 'supervisor', 'administrator')
+        )
+    );
 
 -- ================================================================
 -- SYSTEM SETTINGS TABLE RLS

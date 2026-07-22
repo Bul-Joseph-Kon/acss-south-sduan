@@ -84,10 +84,11 @@
         import { getApprovedApplicationsForRevenue, calculateTaxesForApplication, getTaxCalculation, verifyTaxCalculation, generatePaymentInvoice } from '../../js/tax-calculation.js';
 
         let user = null;
+        let profile = null;
 
         async function initPage() {
             await checkPageAuth('revenue');
-            await loadCurrentUserProfile();
+            profile = await loadCurrentUserProfile();
             user = await getCurrentUser();
             await loadApprovedApplications();
         }
@@ -185,7 +186,7 @@
         window.generateInvoice = async function(applicationId) {
             if (confirm('Generate payment invoice for this application?')) {
                 const result = await generatePaymentInvoice(applicationId, {
-                    officerId: user?.id
+                    officerId: profile?.id
                 });
 
                 if (result.success) {

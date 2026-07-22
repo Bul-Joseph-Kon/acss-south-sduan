@@ -38,7 +38,7 @@
                 <main class="flex-1 space-y-5">
                     <div class="gradient-bg rounded-2xl p-5 text-white shadow-lg flex items-center justify-between">
                         <div>
-                            <h2 class="text-2xl font-bold tracking-tight">✅ Approved Applications</h2>
+                            <h2 class="text-2xl font-bold tracking-tight">💰 Payment & Completed Applications</h2>
                             <p class="opacity-90 text-sm">Applications that have been approved</p>
                         </div>
                         <div class="relative">
@@ -66,7 +66,7 @@
                     <div class="space-y-3" id="approvedList">
                         <div class="text-center py-8 text-gray-500">
                             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-2"></div>
-                            Loading approved applications...
+                            Loading payment & completed applications...
                         </div>
                     </div>
                 </main>
@@ -81,6 +81,11 @@
         import { getUnreadCount } from '../../js/notifications.js';
         
         import toastManager from '../../js/toast.js';
+
+        import supabase from '../../js/supabase.js';
+
+        // Make toastManager available globally for inline onclick handlers
+        window.toastManager = toastManager;
 
         
         document.addEventListener('click', function(e) {
@@ -120,10 +125,8 @@
         listManager.renderApprovedCard = function(app) {
             const refColor = app.application_type === 'CVET' ? 'text-emerald-600' : 
                             app.application_type === 'Direct Assessment' ? 'text-blue-600' : 'text-purple-600';
-            const actionUrl = app.application_type === 'CVET' ? 'certificate.html' : 
-                             app.application_type === 'Direct Assessment' ? 'cargo-release.html' : 
-                             'verification-result.html';
-            const actionLabel = app.application_type === 'CVET' ? 'Certificate' : 'View';
+            const actionUrl = 'payment.html';
+            const actionLabel = 'Pay Now';
 
             return `
                 <div class="bg-white rounded-xl border border-green-200 p-5 shadow-sm">
@@ -138,8 +141,9 @@
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <a href="${actionUrl}?ref=${app.application_number}" class="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">${actionLabel}</a>
-                            <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="toastManager.info('Downloading approval letter')">Download Letter</button>
+                            <a href="${actionUrl}?ref=${app.application_number}&id=${app.id}" class="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition">${actionLabel}</a>
+                            <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="downloadApprovalLetter('${app.id}', '${app.application_number}')">Download Letter</button>
+                            <button class="border border-gray-300 px-4 py-1.5 rounded-lg text-sm hover:bg-gray-50 transition" onclick="viewCertificate('${app.id}', '${app.application_number}')">View Certificate</button>
                         </div>
                     </div>
                 </div>
@@ -155,6 +159,158 @@
             if (!dateString) return 'N/A';
             return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
+
+        // Download approval letter function
+        async function downloadApprovalLetter(applicationId, applicationNumber) {
+            try {
+                toastManager.info('Generating approval letter...');
+                
+                // Fetch application details
+                const { data: app, error } = await supabase
+                    .from('applications')
+                    .select('*')
+                    .eq('id', applicationId)
+                    .single();
+                
+                if (error) throw error;
+                
+                // Generate letter content
+                const letterContent = generateApprovalLetterContent(app);
+                
+                // Create and download PDF
+                const blob = new Blob([letterContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Approval_Letter_${applicationNumber}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                toastManager.success('Approval letter downloaded successfully');
+            } catch (error) {
+                console.error('Download error:', error);
+                toastManager.error('Failed to download approval letter');
+            }
+        }
+
+        function generateApprovalLetterContent(app) {
+            const currentDate = new Date().toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+            
+            return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Approval Letter - ${app.application_number}</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        .header { text-align: center; border-bottom: 3px solid #0a4d3e; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: bold; color: #0a4d3e; }
+        .title { font-size: 18px; color: #666; margin-top: 10px; }
+        .content { margin: 30px 0; }
+        .recipient { margin-bottom: 20px; }
+        .recipient strong { display: block; margin-bottom: 5px; }
+        .details { background: #f5f5f5; padding: 20px; margin: 20px 0; border-left: 4px solid #0a4d3e; }
+        .details table { width: 100%; border-collapse: collapse; }
+        .details td { padding: 8px 0; border-bottom: 1px solid #ddd; }
+        .details td:first-child { font-weight: bold; width: 200px; }
+        .footer { margin-top: 40px; border-top: 1px solid #ddd; padding-top: 20px; }
+        .signature { margin-top: 60px; }
+        .signature-line { border-top: 1px solid #000; width: 200px; margin-top: 80px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">SOUTH SUDAN REVENUE AUTHORITY</div>
+        <div class="title">Customs & Excise Department</div>
+    </div>
+    
+    <div class="content">
+        <div class="recipient">
+            <strong>To:</strong>
+            ${app.applicant_name || app.company_name || 'Applicant'}
+            <br>
+            ${app.applicant_address || 'Address not provided'}
+        </div>
+        
+        <p><strong>Date:</strong> ${currentDate}</p>
+        <p><strong>Reference:</strong> ${app.application_number}</p>
+        
+        <h2 style="color: #0a4d3e;">CERTIFICATE OF APPROVAL</h2>
+        
+        <p>This is to certify that the customs application referenced above has been reviewed and approved by the South Sudan Revenue Authority.</p>
+        
+        <div class="details">
+            <table>
+                <tr>
+                    <td>Application Number:</td>
+                    <td>${app.application_number}</td>
+                </tr>
+                <tr>
+                    <td>Application Type:</td>
+                    <td>${app.application_type || 'Customs Declaration'}</td>
+                </tr>
+                <tr>
+                    <td>Service Type:</td>
+                    <td>${app.service_type || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <td>Goods Description:</td>
+                    <td>${app.goods_description || app.vehicle_description || 'N/A'}</td>
+                </tr>
+                <tr>
+                    <td>Declared Value:</td>
+                    <td>${formatCurrency(app.declared_value)}</td>
+                </tr>
+                <tr>
+                    <td>Approval Date:</td>
+                    <td>${formatDate(app.approved_at)}</td>
+                </tr>
+                <tr>
+                    <td>Status:</td>
+                    <td><strong>APPROVED</strong></td>
+                </tr>
+            </table>
+        </div>
+        
+        <p>This approval is valid subject to payment of applicable customs duties and taxes. Please proceed to the payment section to complete the process.</p>
+        
+        <p>Should you have any questions, please contact the Customs & Excise Department.</p>
+    </div>
+    
+    <div class="footer">
+        <div class="signature">
+            <strong>Authorized Signature:</strong>
+            <div class="signature-line"></div>
+            <p>For: South Sudan Revenue Authority</p>
+            <p>Customs & Excise Department</p>
+        </div>
+        
+        <p style="margin-top: 30px; font-size: 12px; color: #666;">
+            This is an electronically generated document. No physical signature is required.
+        </p>
+    </div>
+</body>
+</html>
+            `;
+        }
+
+        // Make functions available globally
+        window.downloadApprovalLetter = downloadApprovalLetter;
+
+        // View certificate function
+        function viewCertificate(applicationId, applicationNumber) {
+            window.location.href = `certificate.html?id=${applicationId}`;
+        }
+
+        // Make certificate function available globally
+        window.viewCertificate = viewCertificate;
 
         // Initialize
         await listManager.initialize();
@@ -181,8 +337,10 @@
             const result = await getUnreadCount();
             if (result.success && result.count > 0) {
                 const badge = document.getElementById('notificationBadge');
-                badge.textContent = result.count;
-                badge.classList.remove('hidden');
+                if (badge) {
+                    badge.textContent = result.count;
+                    badge.classList.remove('hidden');
+                }
             }
         }
         updateNotificationBadge();
