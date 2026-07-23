@@ -332,6 +332,30 @@
 
                 if (appError) throw appError;
 
+                // Notify revenue officers about payment
+                const { data: revenueOfficers } = await supabase
+                    .from('profiles')
+                    .select('id')
+                    .eq('role', 'revenue');
+
+                console.log('Revenue officers found:', revenueOfficers);
+
+                if (revenueOfficers && revenueOfficers.length > 0) {
+                    const notificationResults = await Promise.all(revenueOfficers.map(officer =>
+                        supabase.from('notifications').insert({
+                            user_id: officer.id,
+                            title: 'Payment Received',
+                            message: `Payment of ${currentPayment.total_amount} received for application ${currentPayment.application_id}. Transaction ID: ${payment.transaction_id}`,
+                            type: 'success',
+                            reference_id: currentPayment.application_id,
+                            reference_type: 'application'
+                        }).select()
+                    ));
+                    console.log('Notification results:', notificationResults);
+                } else {
+                    console.log('No revenue officers found to notify');
+                }
+
                 toastManager.success('Payment processed successfully! Transaction ID: ' + payment.transaction_id);
                 window.location.href = 'dashboard-trader.html';
             } catch (error) {

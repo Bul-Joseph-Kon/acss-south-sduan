@@ -106,6 +106,7 @@
         </div>
     </div>
     <script type="module">
+        import supabase from '../../js/supabase.js';
         import { loadCurrentUserProfile } from '../../js/profile-loader.js';
         import { checkAuth, getUserProfile, signOut, getCurrentUser, verifyRoleAccess, redirectToDashboard } from '../../js/auth.js';
         import { fetchDashboardData, fetchRecentApplications } from '../../js/dashboard.js';
@@ -189,61 +190,44 @@
         });
 
         async function loadWorkflowApplications() {
-            console.log('=== LOADING WORKFLOW APPLICATIONS FOR REVENUE ===');
+            console.log('=== LOADING REVENUE DATA ===');
             
-            const result = await fetchApplicationsForRole('revenue', { limit: 10 });
+            // Load payment data for revenue statistics
+            const { data: payments, error: paymentError } = await supabase
+                .from('payments')
+                .select('amount, status, paid_at')
+                .in('status', ['completed', 'paid']);
             
-            if (result.success && result.data) {
-                const applications = result.data;
-                console.log('Applications loaded:', applications);
-                
-                // Update stats
-                updateWorkflowStats(applications);
-                
-                // Update revenue overview
-                updateRevenueOverview(applications);
+            // Load invoice data for pending collection
+            const { data: invoices, error: invoiceError } = await supabase
+                .from('invoices')
+                .select('total_amount, status')
+                .eq('status', 'pending');
+            
+            // Load applications for transaction count
+            const appResult = await fetchApplicationsForRole('revenue', { limit: 10 });
+            
+            if (!paymentError && payments) {
+                updateRevenueStats(payments, invoices, appResult.success ? appResult.data : []);
             } else {
-                console.error('Failed to load applications:', result.error);
+                console.error('Failed to load revenue data:', paymentError || invoiceError);
+            }
+            
+            if (appResult.success && appResult.data) {
+                updateRevenueOverview(appResult.data);
             }
         }
 
-        function updateWorkflowStats(applications) {
-            const stats = {
-                approved: 0,
-                awaiting_payment: 0,
-                paid: 0,
-                cleared: 0,
-                totalRevenue: 0,
-                pendingRevenue: 0
-            };
-
-            applications.forEach(app => {
-                if (app.status === 'approved') {
-                    stats.approved++;
-                    stats.pendingRevenue += app.total_amount || 0;
-                }
-                else if (app.status === 'awaiting_payment') {
-                    stats.awaiting_payment++;
-                    stats.pendingRevenue += app.total_amount || 0;
-                }
-                else if (app.status === 'paid') {
-                    stats.paid++;
-                    stats.totalRevenue += app.total_amount || 0;
-                }
-                else if (app.status === 'cleared' || app.status === 'completed') {
-                    stats.cleared++;
-                    stats.totalRevenue += app.total_amount || 0;
-                }
-            });
-
-            // Update stat cards by ID
-            document.getElementById('statTotalRevenue').textContent = `SSP ${stats.totalRevenue.toLocaleString()}`;
-            document.getElementById('statPendingCollection').textContent = `SSP ${stats.pendingRevenue.toLocaleString()}`;
+        function updateRevenueStats(payments, invoices, applications) {
+            const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+            const pendingCollection = invoices ? invoices.reduce((sum, i) => sum + (i.total_amount || 0), 0) : 0;
+            const total = totalRevenue + pendingCollection;
+            const rate = total > 0 ? Math.round((totalRevenue / total) * 100) : 0;
             
-            const total = stats.totalRevenue + stats.pendingRevenue;
-            const rate = total > 0 ? Math.round((stats.totalRevenue / total) * 100) : 0;
+            document.getElementById('statTotalRevenue').textContent = `SSP ${totalRevenue.toLocaleString()}`;
+            document.getElementById('statPendingCollection').textContent = `SSP ${pendingCollection.toLocaleString()}`;
             document.getElementById('statCollectionRate').textContent = `${rate}%`;
-            document.getElementById('statTransactions').textContent = applications.length;
+            document.getElementById('statTransactions').textContent = payments.length;
         }
 
         function updateRevenueOverview(applications) {
