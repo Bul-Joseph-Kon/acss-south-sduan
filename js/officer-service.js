@@ -27,7 +27,7 @@ async function getPendingReviewApplications() {
                 agent_profile:profiles!agent_id(full_name, email),
                 ai_validation_results!ai_validation_results_application_id_fkey(*)
             `)
-            .in('status', ['under_review', 'under_inspection'])
+            .in('status', ['under_review', 'under_inspection', 'inspection_completed'])
             .order('created_at', { ascending: false });
 
         if (error) throw error;

@@ -6,7 +6,7 @@
     <title>SSRA Customs · Inspection Requests</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="../assets/icons/remixicon.css" rel="stylesheet" />
+    <link href="/assets/icons/remixicon.css" rel="stylesheet" />
     
     <script type="module" src="../../js/officer-sidebar.js"></script>
     <style>
@@ -143,7 +143,7 @@
             console.log('=== LOADING INSPECTION REQUESTS ===');
 
             const result = await fetchApplicationsForRole('officer', {
-                filters: { status: ['under_inspection', 'awaiting_payment', 'paid'] },
+                filters: { status: ['under_inspection', 'inspection_completed', 'awaiting_payment', 'paid'] },
                 limit: 50
             });
 
