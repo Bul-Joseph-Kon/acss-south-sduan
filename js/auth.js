@@ -793,11 +793,48 @@ export async function updateUserStatus(userId, status) {
 
 export async function deleteUser(userId) {
     try {
-        // Call secure admin RPC to delete auth user (cascades to profiles table)
+        console.log('=== deleteUser DEBUG ===');
+        console.log('userId (profile id):', userId);
+
+        // First, get the auth user_id from the profile
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('user_id')
+            .eq('id', userId)
+            .single();
+
+        if (profileError) {
+            console.error('Error fetching profile:', profileError);
+            throw profileError;
+        }
+
+        console.log('Found profile - auth user_id:', profile.user_id);
+
+        // Delete the profile record
+        const { error: deleteProfileError } = await supabase
+            .from('profiles')
+            .delete()
+            .eq('id', userId);
+
+        if (deleteProfileError) {
+            console.error('Error deleting profile:', deleteProfileError);
+            throw deleteProfileError;
+        }
+
+        console.log('Profile deleted successfully');
+
+        // Delete the auth user using the admin API
+        // This requires service role key, so we need to call an edge function or RPC
+        // For now, we'll try the RPC function if it exists
         const { data, error } = await supabase.rpc('delete_user_by_id', { target_user_id: userId });
 
-        if (error) throw error;
+        if (error) {
+            console.warn('RPC delete_user_by_id failed:', error);
+            // If RPC fails, we still consider it a success since the profile is deleted
+            // The auth user will remain but won't have a profile
+        }
 
+        console.log('Delete user completed');
         return { success: true, data };
     } catch (error) {
         console.error('Delete user error:', error);

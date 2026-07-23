@@ -694,9 +694,11 @@
         };
 
         window.deleteUserConfirm = async function(userId) {
+            console.log('=== deleteUserConfirm called with userId:', userId);
             if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
 
             const result = await deleteUser(userId);
+            console.log('=== deleteUser result:', result);
             if (result.success) {
                 alert('User deleted successfully');
                 loadUsers();
