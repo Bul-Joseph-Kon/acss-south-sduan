@@ -297,15 +297,15 @@
                 const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
                 
                 const payment = {
+                    payment_number: 'PAY-' + Date.now(),
                     invoice_id: currentPayment.id,
                     application_id: currentPayment.application_id,
                     amount: currentPayment.total_amount,
-                    currency: currentPayment.currency,
                     payment_method: selectedPaymentMethod,
+                    transaction_id: 'TXN-' + Date.now(),
                     status: 'completed',
-                    paid_by: profile.id,
-                    paid_at: new Date().toISOString(),
-                    transaction_id: 'TXN-' + Date.now()
+                    user_id: profile.id,
+                    paid_at: new Date().toISOString()
                 };
 
                 const { data: createdPayment, error: paymentError } = await supabase
